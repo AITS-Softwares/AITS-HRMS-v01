@@ -1,0 +1,865 @@
+﻿@* @model Erp_Aits.Models.LeaveApplication
+@{
+    ViewBag.Title = "New Leave Application";
+}
+
+<style>
+    :root {
+        --accent: #3b4b8c;
+        --accent-light: #eef0fa;
+    }
+
+    body {
+        background: linear-gradient(160deg, #eef1f8 0%, #e3e9f7 45%, #eef4f2 100%);
+        min-height: 100vh;
+    }
+
+    .leave-form-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-top: 4px;
+    }
+
+        /* Header bar */
+        .leave-form-wrapper .form-header {
+            background: linear-gradient(120deg, #1f2a44 0%, #34437a 55%, var(--accent) 100%);
+            padding: 1.1rem 1.6rem;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 8px 22px rgba(31, 42, 68, 0.28);
+        }
+
+        .leave-form-wrapper h4 {
+            font-weight: 650;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+            margin: 0;
+        }
+
+        .leave-form-wrapper .btn-dark {
+            background: linear-gradient(135deg, #f7b733 0%, #e8912a 100%);
+            color: #1f2a44;
+            border: none;
+            padding: 0.5rem 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(232, 145, 42, 0.45);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .leave-form-wrapper .btn-dark:hover {
+                background: linear-gradient(135deg, #ffc94d 0%, #f39d33 100%);
+                box-shadow: 0 5px 14px rgba(232, 145, 42, 0.6);
+                transform: translateY(-2px);
+                color: #16203a;
+            }
+
+        /* Single continuous surface — no gaps, single accent color throughout */
+        .leave-form-wrapper .form-body {
+            background: #ffffff;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 10px 28px rgba(31, 42, 68, 0.12);
+            overflow: hidden;
+        }
+
+        .leave-form-wrapper .section {
+            padding: 1.75rem 2rem;
+            border-left: 5px solid var(--accent);
+            border-right: 5px solid var(--accent);
+            border-bottom: 1px solid #eef0f6;
+        }
+
+            .leave-form-wrapper .section:last-child {
+                border-bottom: none;
+            }
+
+            .leave-form-wrapper .section h6 {
+                color: var(--accent);
+                font-weight: 650;
+                font-size: 1rem;
+                letter-spacing: 0.2px;
+                margin-bottom: 1.1rem;
+            }
+
+                .leave-form-wrapper .section h6::before {
+                    content: "";
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--accent);
+                    margin-right: 8px;
+                    vertical-align: middle;
+                }
+
+        .leave-form-wrapper .form-label {
+            color: var(--accent);
+            font-weight: 650;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+            display: inline-block;
+        }
+
+        .leave-form-wrapper .form-control,
+        .leave-form-wrapper .form-select {
+            border: 1.5px solid #dfe3f0;
+            border-radius: 9px;
+            background-color: var(--accent-light);
+            padding: 0.6rem 0.9rem;
+            font-size: 0.95rem;
+            color: #26314f;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+
+            .leave-form-wrapper .form-control:hover,
+            .leave-form-wrapper .form-select:hover {
+                border-color: #aab3dc;
+            }
+
+            .leave-form-wrapper .form-control:focus,
+            .leave-form-wrapper .form-select:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 0.22rem rgba(59, 75, 140, 0.16);
+                background-color: #ffffff;
+            }
+
+        .leave-form-wrapper .form-check-input {
+            border: 1.5px solid #aab3dc;
+        }
+
+            .leave-form-wrapper .form-check-input:checked {
+                background-color: var(--accent);
+                border-color: var(--accent);
+            }
+
+        .leave-form-wrapper .form-check-label {
+            font-weight: 600;
+            color: #445070;
+        }
+
+        .leave-form-wrapper .form-control-color {
+            border-radius: 9px;
+            border: 1.5px solid #dfe3f0;
+            height: 42px;
+        }
+</style>
+
+<div class="leave-form-wrapper">
+    <form asp-action="CreateLeave" method="post">
+        <div class="form-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">New Leave Application</h4>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+
+        <div class="form-body">
+            <div class="section">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Type *</label>
+                        <input asp-for="LeaveType" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee *</label>
+                        <input asp-for="Employee" class="form-control" required placeholder="Employee code" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee Name</label>
+                        <input asp-for="EmployeeName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Company *</label>
+                        <input asp-for="Company" class="form-control" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Dates &amp; Reason</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">From Date *</label>
+                        <input asp-for="FromDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Reason</label>
+                        <textarea asp-for="Reason" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">To Date *</label>
+                        <input asp-for="ToDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="HalfDay" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label">Half Day</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Approval</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Approver *</label>
+                        <input asp-for="LeaveApprover" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Posting Date *</label>
+                        <input asp-for="PostingDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="FollowViaEmail" class="form-check-input" type="checkbox" checked />
+                            <label class="form-check-label">Follow via Email</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Status *</label>
+                        <select asp-for="Status" class="form-select">
+                            <option>Open</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Other Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Salary Slip</label>
+                        <input asp-for="SalarySlip" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Letter Head</label>
+                        <input asp-for="LetterHead" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Color</label>
+                        <input asp-for="Color" type="color" class="form-control form-control-color" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div> *@
+
+
+
+
+
+
+
+
+
+
+
+@* @model Erp_Aits.Models.LeaveApplication
+@{
+    ViewBag.Title = "New Leave Application";
+}
+
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var emp in ViewBag.Employees)
+        {
+            <option value="@emp.name">@emp.employee_name</option>
+        }
+    }
+</datalist>
+
+<datalist id="leaveTypeList">
+    @if (ViewBag.LeaveTypes != null)
+    {
+        foreach (var lt in ViewBag.LeaveTypes)
+        {
+            <option value="@lt.name"></option>
+        }
+    }
+</datalist>
+
+<datalist id="companyList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.name"></option>
+        }
+    }
+</datalist>
+
+<style>
+    :root {
+        --accent: #3b4b8c;
+        --accent-light: #eef0fa;
+    }
+
+    body {
+        background: linear-gradient(160deg, #eef1f8 0%, #e3e9f7 45%, #eef4f2 100%);
+        min-height: 100vh;
+    }
+
+    .leave-form-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-top: 4px;
+    }
+
+        .leave-form-wrapper .form-header {
+            background: linear-gradient(120deg, #1f2a44 0%, #34437a 55%, var(--accent) 100%);
+            padding: 1.1rem 1.6rem;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 8px 22px rgba(31, 42, 68, 0.28);
+        }
+
+        .leave-form-wrapper h4 {
+            font-weight: 650;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+            margin: 0;
+        }
+
+        .leave-form-wrapper .btn-dark {
+            background: linear-gradient(135deg, #f7b733 0%, #e8912a 100%);
+            color: #1f2a44;
+            border: none;
+            padding: 0.5rem 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(232, 145, 42, 0.45);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .leave-form-wrapper .btn-dark:hover {
+                background: linear-gradient(135deg, #ffc94d 0%, #f39d33 100%);
+                box-shadow: 0 5px 14px rgba(232, 145, 42, 0.6);
+                transform: translateY(-2px);
+                color: #16203a;
+            }
+
+        .leave-form-wrapper .form-body {
+            background: #ffffff;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 10px 28px rgba(31, 42, 68, 0.12);
+            overflow: hidden;
+        }
+
+        .leave-form-wrapper .section {
+            padding: 1.75rem 2rem;
+            border-left: 5px solid var(--accent);
+            border-right: 5px solid var(--accent);
+            border-bottom: 1px solid #eef0f6;
+        }
+
+            .leave-form-wrapper .section:last-child {
+                border-bottom: none;
+            }
+
+            .leave-form-wrapper .section h6 {
+                color: var(--accent);
+                font-weight: 650;
+                font-size: 1rem;
+                letter-spacing: 0.2px;
+                margin-bottom: 1.1rem;
+            }
+
+        .leave-form-wrapper .form-label {
+            color: var(--accent);
+            font-weight: 650;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+            display: inline-block;
+        }
+
+        .leave-form-wrapper .form-control,
+        .leave-form-wrapper .form-select {
+            border: 1.5px solid #dfe3f0;
+            border-radius: 9px;
+            background-color: var(--accent-light);
+            padding: 0.6rem 0.9rem;
+            font-size: 0.95rem;
+            color: #26314f;
+        }
+
+        .leave-form-wrapper .form-control-color {
+            border-radius: 9px;
+            border: 1.5px solid #dfe3f0;
+            height: 42px;
+        }
+</style>
+
+<div class="leave-form-wrapper">
+    <form action="@Url.Action("CreateLeave", "HR")" method="post">
+        <div class="form-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">New Leave Application</h4>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+
+        <div class="form-body">
+            <div class="section">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Type *</label>
+                   
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee *</label>
+                        <input asp-for="Employee" list="employeeList" class="form-control" placeholder="Select or type employee code..." required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee Name</label>
+                        <input asp-for="EmployeeName" class="form-control" placeholder="Employee Name" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Company *</label>
+                        <input asp-for="Company" list="companyList" class="form-control" placeholder="Select or type company..." required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Dates &amp; Reason</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">From Date *</label>
+                        <input asp-for="FromDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Reason</label>
+                        <textarea asp-for="Reason" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">To Date *</label>
+                        <input asp-for="ToDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="HalfDay" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label">Half Day</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Approval</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Approver *</label>
+                        <input asp-for="LeaveApprover" class="form-control" placeholder="e.g. approver@company.com" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Posting Date *</label>
+                        <input asp-for="PostingDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="FollowViaEmail" class="form-check-input" type="checkbox" checked />
+                            <label class="form-check-label">Follow via Email</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Status *</label>
+                        <select asp-for="Status" class="form-select">
+                            <option>Open</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Other Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Salary Slip</label>
+                        <input asp-for="SalarySlip" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Letter Head</label>
+                        <input asp-for="LetterHead" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Color</label>
+                        <input asp-for="Color" type="color" class="form-control form-control-color" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form> *@
+@* </div> *@
+
+
+
+
+
+
+@* @model Erp_Aits.Models.LeaveApplication
+@{
+    ViewBag.Title = "New Leave Application";
+}
+
+<!-- Searchable Dropdowns (Allows picking existing OR typing new) -->
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var emp in ViewBag.Employees)
+        {
+            <option value="@emp.name">@emp.employee_name</option>
+        }
+    }
+</datalist>
+
+<datalist id="leaveTypeList">
+    @if (ViewBag.LeaveTypes != null)
+    {
+        foreach (var lt in ViewBag.LeaveTypes)
+        {
+            <option value="@lt.name"></option>
+        }
+    }
+</datalist>
+
+<datalist id="leaveApproverList">
+    @if (ViewBag.LeaveApprovers != null)
+    {
+        foreach (var app in ViewBag.LeaveApprovers)
+        {
+            <option value="@app.name"></option>
+        }
+    }
+</datalist>
+
+<datalist id="companyList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.name"></option>
+        }
+    }
+</datalist> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.LeaveApplication
+@{
+    ViewBag.Title = "New Leave Application";
+}
+
+<!-- Searchable Dropdowns with ERPNext Employee Master & Leave Types -->
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var emp in ViewBag.Employees)
+        {
+            <option value="@emp.name" data-name="@emp.employee_name">@emp.employee_name</option>
+        }
+    }
+</datalist>
+
+<datalist id="leaveTypeList">
+    <option value="+ Create New Leave Type" label="-- Click to Create New Leave Type --" style="color: blue; font-weight: bold;"></option>
+    @if (ViewBag.LeaveTypes != null)
+    {
+        foreach (var lt in ViewBag.LeaveTypes)
+        {
+            <option value="@lt">@lt</option>
+        }
+    }
+</datalist>
+
+<datalist id="leaveApproverList">
+    @if (ViewBag.LeaveApprovers != null)
+    {
+        foreach (var app in ViewBag.LeaveApprovers)
+        {
+            <option value="@app.name"></option>
+        }
+    }
+</datalist>
+
+<datalist id="companyList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.name"></option>
+        }
+    }
+</datalist>
+
+<style>
+    :root {
+        --accent: #3b4b8c;
+        --accent-light: #eef0fa;
+    }
+
+    body {
+        background: linear-gradient(160deg, #eef1f8 0%, #e3e9f7 45%, #eef4f2 100%);
+        min-height: 100vh;
+    }
+
+    .leave-form-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-top: 4px;
+    }
+
+        .leave-form-wrapper .form-header {
+            background: linear-gradient(120deg, #1f2a44 0%, #34437a 55%, var(--accent) 100%);
+            padding: 1.1rem 1.6rem;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 8px 22px rgba(31, 42, 68, 0.28);
+        }
+
+        .leave-form-wrapper h4 {
+            font-weight: 650;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+            margin: 0;
+        }
+
+        .leave-form-wrapper .btn-dark {
+            background: linear-gradient(135deg, #f7b733 0%, #e8912a 100%);
+            color: #1f2a44;
+            border: none;
+            padding: 0.5rem 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(232, 145, 42, 0.45);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .leave-form-wrapper .btn-dark:hover {
+                background: linear-gradient(135deg, #ffc94d 0%, #f39d33 100%);
+                box-shadow: 0 5px 14px rgba(232, 145, 42, 0.6);
+                transform: translateY(-2px);
+                color: #16203a;
+            }
+
+        .leave-form-wrapper .form-body {
+            background: #ffffff;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 10px 28px rgba(31, 42, 68, 0.12);
+            overflow: hidden;
+        }
+
+        .leave-form-wrapper .section {
+            padding: 1.75rem 2rem;
+            border-left: 5px solid var(--accent);
+            border-right: 5px solid var(--accent);
+            border-bottom: 1px solid #eef0f6;
+        }
+
+            .leave-form-wrapper .section:last-child {
+                border-bottom: none;
+            }
+
+            .leave-form-wrapper .section h6 {
+                color: var(--accent);
+                font-weight: 650;
+                font-size: 1rem;
+                letter-spacing: 0.2px;
+                margin-bottom: 1.1rem;
+            }
+
+        .leave-form-wrapper .form-label {
+            color: var(--accent);
+            font-weight: 650;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4px;
+            display: inline-block;
+        }
+
+        .leave-form-wrapper .form-control,
+        .leave-form-wrapper .form-select {
+            border: 1.5px solid #dfe3f0;
+            border-radius: 9px;
+            background-color: var(--accent-light);
+            padding: 0.6rem 0.9rem;
+            font-size: 0.95rem;
+            color: #26314f;
+        }
+
+        .leave-form-wrapper .form-control-color {
+            border-radius: 9px;
+            border: 1.5px solid #dfe3f0;
+            height: 42px;
+        }
+</style>
+
+<div class="leave-form-wrapper">
+    <form action="/HR/CreateLeave" method="post">
+        <div class="form-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">New Leave Application</h4>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("LeaveApplications", "HR")" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;">Back</a>
+                <button type="submit" class="btn btn-dark btn-sm">Save</button>
+            </div>
+        </div>
+
+        <div class="form-body">
+            @if (TempData["ErpNextError"] != null)
+            {
+                <div class="alert alert-danger m-3">@TempData["ErpNextError"]</div>
+            }
+
+            <div class="section">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Type *</label>
+                        <select asp-for="LeaveType" id="leaveTypeInput" class="form-control" required>
+                            <option value="">Select leave type...</option>
+                            @if (ViewBag.LeaveTypes != null)
+                            {
+                                foreach (var lt in ViewBag.LeaveTypes)
+                                {
+                                    <option value="@lt">@lt</option>
+                                }
+                            }
+                            <option value="__CREATE_NEW__">+ Create New Leave Type</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee *</label>
+                        <input asp-for="Employee" id="employeeInput" list="employeeList" class="form-control" placeholder="Select or type employee code..." required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee Name</label>
+                        <input asp-for="EmployeeName" id="employeeNameInput" class="form-control" placeholder="Employee Name" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Company *</label>
+                        <input asp-for="Company" list="companyList" class="form-control" placeholder="Select or type company..." required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Dates &amp; Reason</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">From Date *</label>
+                        <input asp-for="FromDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Reason</label>
+                        <textarea asp-for="Reason" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">To Date *</label>
+                        <input asp-for="ToDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="HalfDay" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label">Half Day</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Approval</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Approver *</label>
+                        <input asp-for="LeaveApprover" list="leaveApproverList" class="form-control" placeholder="Select or type approver email..." required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Posting Date *</label>
+                        <input asp-for="PostingDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="FollowViaEmail" class="form-check-input" type="checkbox" checked />
+                            <label class="form-check-label">Follow via Email</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Status *</label>
+                        <select asp-for="Status" class="form-select">
+                            <option>Open</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h6 class="mb-3">Other Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Salary Slip</label>
+                        <input asp-for="SalarySlip" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Letter Head</label>
+                        <input asp-for="LetterHead" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Color</label>
+                        <input asp-for="Color" type="color" class="form-control form-control-color" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-fill Employee Name when employee code is matched from datalist
+        document.getElementById('employeeInput').addEventListener('input', function() {
+            let val = this.value;
+            let options = document.querySelectorAll('#employeeList option');
+            let nameField = document.getElementById('employeeNameInput');
+
+            for (let opt of options) {
+                if (opt.value === val) {
+                    nameField.value = opt.getAttribute('data-name') || opt.innerText;
+                    break;
+                }
+            }
+        });
+
+              
+
+        
+        // Intercept selecting "+ Create New Leave Type" from dropdown list
+        document.getElementById('leaveTypeInput').addEventListener('change', function() {
+          if (this.value === "__CREATE_NEW__") {
+                this.value = "";
+                window.location.href = '@Url.Action("CreateLeaveType", "HR")';
+            }
+        });
+    </script>
+}

@@ -1,0 +1,325 @@
+﻿@model Erp_Aits.Models.Attendance
+
+@{
+    ViewBag.Title = "New Attendance";
+}
+
+<style>
+    .att-create-page {
+        padding: 8px 0 36px;
+    }
+
+    .att-create-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .att-create-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #111827;
+        margin: 0;
+    }
+
+    .att-create-subtitle {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .att-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(15,23,42,.07);
+        padding: 22px;
+        margin-bottom: 18px;
+    }
+
+    .att-card-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .att-card-title::before {
+            content: "";
+            width: 4px;
+            height: 18px;
+            border-radius: 999px;
+            background: #2563eb;
+            display: inline-block;
+        }
+
+    .form-label {
+        font-weight: 700;
+        color: #334155;
+        font-size: 13px;
+        margin-bottom: 7px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        min-height: 44px;
+        font-size: 14px;
+        color: #111827;
+        box-shadow: none;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.14);
+        }
+
+    .att-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .btn-att-save {
+        background: #111827;
+        border: 1px solid #111827;
+        color: #fff;
+        font-weight: 800;
+        border-radius: 10px;
+        padding: 9px 18px;
+    }
+
+        .btn-att-save:hover {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: #fff;
+        }
+
+    .btn-att-back {
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 9px 16px;
+    }
+
+    .att-check-panel {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        min-height: 100%;
+    }
+
+    .form-check-label {
+        font-weight: 700;
+        color: #334155;
+    }
+</style>
+
+<div class="att-create-page">
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="CreateAttendance" asp-controller="HR" method="post">
+        <div class="att-create-header">
+            <div>
+                <h4 class="att-create-title">New Attendance</h4>
+                <div class="att-create-subtitle">Create a draft attendance record and sync it with ERPNext.</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Attendance", "HR")" class="btn btn-outline-secondary btn-att-back">Back to List</a>
+                <button type="submit" class="btn btn-att-save">Save</button>
+            </div>
+        </div>
+
+        <div class="att-card">
+            <div class="att-card-title">General Information</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Series *</label>
+                    <select class="form-select" disabled>
+                        <option selected>HR-ATT-.YYYY.-</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Attendance Date *</label>
+                    <input name="AttendanceDate" type="date" class="form-control" required
+                           value="@(Model.AttendanceDate == DateTime.MinValue ? DateTime.Today.ToString("yyyy-MM-dd") : Model.AttendanceDate.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee *</label>
+                    <select name="Employee" id="employeeSelect" class="form-select" required>
+                        <option value="">-- Select Employee --</option>
+                        @if (ViewBag.Employees != null)
+                        {
+                            foreach (var emp in ViewBag.Employees)
+                            {
+                                string empCode = emp.name?.ToString();
+                                string empName = emp.employee_name?.ToString();
+                                <option value="@empCode" data-empname="@empName">@empCode - @empName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company *</label>
+                    <select name="Company" class="form-select" required>
+                        @if (ViewBag.Companies != null)
+                        {
+                            foreach (var comp in ViewBag.Companies)
+                            {
+                                string companyName = comp.name?.ToString();
+                                <option value="@companyName">@companyName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option value="Vinod Cookware India Private Limited">Vinod Cookware India Private Limited</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Name</label>
+                    <input name="EmployeeName" id="employeeNameInput" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Status *</label>
+                    <select name="Status" id="statusSelect" class="form-select" required>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                        <option value="On Leave">On Leave</option>
+                        <option value="Half Day">Half Day</option>
+                        <option value="Work From Home">Work From Home</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6" id="leaveTypeWrapper" style="display:none;">
+                    <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                    <select name="LeaveType" id="leaveTypeSelect" class="form-select">
+                        <option value="">-- Select Leave Type --</option>
+                        @if (ViewBag.LeaveTypes != null)
+                        {
+                            foreach (var lt in ViewBag.LeaveTypes)
+                            {
+                                string leaveType = lt.name?.ToString();
+                                <option value="@leaveType">@leaveType</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6" id="otherHalfWrapper" style="display:none;">
+                    <label class="form-label">Status for Other Half</label>
+                    <select name="StatusForOtherHalf" id="statusForOtherHalfSelect" class="form-select">
+                        <option value="">-- Select Status --</option>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="att-card">
+            <div class="att-card-title">Details</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Shift</label>
+                    <select name="Shift" class="form-select">
+                        <option value="">-- Select Shift --</option>
+                        @if (ViewBag.Shifts != null)
+                        {
+                            foreach (var shift in ViewBag.Shifts)
+                            {
+                                string shiftName = shift.name?.ToString();
+                                <option value="@shiftName">@shiftName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="att-check-panel">
+                        <div class="form-check mb-3">
+                            <input name="LateEntry" value="true" class="form-check-input" type="checkbox" id="lateEntry" />
+                            <input name="LateEntry" value="false" type="hidden" />
+                            <label class="form-check-label" for="lateEntry">Late Entry</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input name="EarlyExit" value="true" class="form-check-input" type="checkbox" id="earlyExit" />
+                            <input name="EarlyExit" value="false" type="hidden" />
+                            <label class="form-check-label" for="earlyExit">Early Exit</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="att-actions">
+                <a href="@Url.Action("Attendance", "HR")" class="btn btn-outline-secondary btn-att-back">Cancel</a>
+                <button type="submit" class="btn btn-att-save">Save</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const employeeSelect = document.getElementById("employeeSelect");
+    const employeeNameInput = document.getElementById("employeeNameInput");
+    const statusSelect = document.getElementById("statusSelect");
+    const leaveTypeWrapper = document.getElementById("leaveTypeWrapper");
+    const otherHalfWrapper = document.getElementById("otherHalfWrapper");
+    const leaveTypeSelect = document.getElementById("leaveTypeSelect");
+    const statusForOtherHalfSelect = document.getElementById("statusForOtherHalfSelect");
+
+    if (employeeSelect && employeeNameInput) {
+        employeeSelect.addEventListener("change", function () {
+            const selected = employeeSelect.options[employeeSelect.selectedIndex];
+            employeeNameInput.value = selected.getAttribute("data-empname") || "";
+        });
+    }
+
+    function toggleAttendanceExtraFields() {
+        const status = statusSelect ? statusSelect.value : "";
+
+        if (status === "Half Day") {
+            leaveTypeWrapper.style.display = "block";
+            otherHalfWrapper.style.display = "block";
+            leaveTypeSelect.required = true;
+        } else if (status === "On Leave") {
+            leaveTypeWrapper.style.display = "block";
+            otherHalfWrapper.style.display = "none";
+            leaveTypeSelect.required = true;
+            statusForOtherHalfSelect.value = "";
+        } else {
+            leaveTypeWrapper.style.display = "none";
+            otherHalfWrapper.style.display = "none";
+            leaveTypeSelect.required = false;
+            leaveTypeSelect.value = "";
+            statusForOtherHalfSelect.value = "";
+        }
+    }
+
+    if (statusSelect) {
+        statusSelect.addEventListener("change", toggleAttendanceExtraFields);
+        toggleAttendanceExtraFields();
+    }
+</script>

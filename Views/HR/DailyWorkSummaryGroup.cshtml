@@ -1,0 +1,27 @@
+﻿@model List<Erp_Aits.Models.DailyWorkSummaryGroup>
+@{
+    ViewBag.Title = "Daily Work Summary Group";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Daily Work Summary Group</h4>
+    <a href="@Url.Action("CreateDailyWorkSummaryGroup", "HR")" class="btn btn-dark btn-sm">+ Add Daily Work Summary Group</a>
+</div>
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>@g.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (!Model.Any())
+{
+    <p class="text-muted">No daily work summary groups found.</p>
+}

@@ -1,0 +1,200 @@
+﻿@model List<Erp_Aits.Models.DailyWorkSummaryReplyRow>
+@{
+    ViewBag.Title = "Daily Work Summary Replies";
+    var groups = ViewBag.Groups as List<Erp_Aits.Services.GroupOption>;
+    var selectedGroupId = ViewBag.GroupId as int?;
+    var fromDate = ViewBag.FromDate as DateTime?;
+    var toDate = ViewBag.ToDate as DateTime?;
+    bool filtersSet = selectedGroupId.HasValue && fromDate.HasValue && toDate.HasValue;
+}
+
+<div class="eas-wrap">
+
+    <div class="eas-header">
+        <h4 class="eas-title">Daily Work Summary Replies</h4>
+        <div class="eas-header-actions">
+            <button type="button" class="eas-btn eas-btn-light" onclick="location.reload();">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <form method="get" asp-action="DailyWorkSummaryReplies" class="eas-filter-bar">
+        <select name="groupId" class="eas-filter-input" required>
+            <option value="">Group</option>
+            @if (groups != null)
+            {
+                @foreach (var g in groups)
+                {
+                    <option value="@g.Id" selected="@(selectedGroupId == g.Id)">@g.Name</option>
+                }
+            }
+        </select>
+
+        <input type="date" name="fromDate" class="eas-filter-input"
+               value="@(fromDate?.ToString("yyyy-MM-dd"))" required />
+
+        <input type="date" name="toDate" class="eas-filter-input"
+               value="@(toDate?.ToString("yyyy-MM-dd"))" required />
+
+        <button type="submit" class="eas-btn eas-btn-primary">
+            <i class="fas fa-search"></i> Filter
+        </button>
+    </form>
+
+    <div class="eas-body">
+        @if (!filtersSet)
+        {
+            <div class="eas-empty">
+                <div class="eas-empty-text">Please set filters</div>
+            </div>
+        }
+        else if (Model != null && Model.Any())
+        {
+            <table class="table table-hover align-middle eas-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Name</th>
+                        <th>Group</th>
+                        <th>Date</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model)
+                    {
+                        <tr>
+                            <td>@row.Employee</td>
+                            <td>@row.EmployeeName</td>
+                            <td>@row.GroupName</td>
+                            <td>@row.ReplyDate.ToString("dd-MM-yyyy")</td>
+                            <td>@row.Summary</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="eas-empty">
+                <i class="fas fa-clipboard-list eas-empty-icon"></i>
+                <div class="eas-empty-text">Nothing to show</div>
+            </div>
+        }
+    </div>
+
+</div>
+
+<style>
+    .eas-wrap {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px 24px;
+    }
+
+    .eas-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .eas-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 20px;
+        color: #1a1a2e;
+    }
+
+    .eas-btn {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+    }
+
+        .eas-btn:hover {
+            background: #f3f4f6;
+        }
+
+    .eas-btn-primary {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        color: #fff;
+    }
+
+        .eas-btn-primary:hover {
+            background: #4338ca;
+        }
+
+    .eas-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #eef0f3;
+    }
+
+    .eas-filter-input {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #374151;
+        min-width: 150px;
+        background: #fff;
+    }
+
+        .eas-filter-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    .eas-table th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #64748b;
+        border-bottom: 2px solid #f0f2f5;
+        white-space: nowrap;
+    }
+
+    .eas-table td {
+        font-size: 13px;
+    }
+
+    .eas-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 90px 0;
+        color: #94a3b8;
+    }
+
+    .eas-empty-icon {
+        font-size: 34px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+    }
+
+    .eas-empty-text {
+        font-size: 14px;
+    }
+
+    @@media (max-width: 768px) {
+        .eas-filter-bar {
+            flex-direction: column;
+        }
+
+        .eas-filter-input {
+            width: 100%;
+        }
+    }
+</style>

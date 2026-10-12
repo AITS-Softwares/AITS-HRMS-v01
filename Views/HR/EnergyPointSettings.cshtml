@@ -1,0 +1,59 @@
+﻿@model Erp_Aits.Models.EnergyPointSettings
+@{
+    ViewBag.Title = "Energy Point Settings";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Energy Point Settings</h4>
+
+    <div class="d-flex gap-2">
+        <form method="post" asp-action="SyncEnergyPointSettingsFromErpNext" asp-controller="HR">
+            <button type="submit" class="btn btn-outline-primary btn-sm">Sync From ERPNext</button>
+        </form>
+
+        <a href="@Url.Action("CreateEnergyPointSettings", "HR")" class="btn btn-dark btn-sm">
+            Open Settings
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Enabled</th>
+            <th>Point Allocation Periodicity</th>
+            <th>Last Point Allocation Date</th>
+            <th>Review Levels</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Id > 0)
+        {
+            <tr style="cursor:pointer" onclick="window.location='@Url.Action("CreateEnergyPointSettings", "HR")'">
+                <td>@Model.Id</td>
+                <td>@(Model.Enabled ? "Yes" : "No")</td>
+                <td>@Model.PointAllocationPeriodicity</td>
+                <td>@(Model.LastPointAllocationDate?.ToString("dd-MM-yyyy") ?? "-")</td>
+                <td>@(Model.ReviewLevels?.Count ?? 0)</td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">No Energy Point Settings found.</td>
+            </tr>
+        }
+    </tbody>
+</table>

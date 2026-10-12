@@ -1,0 +1,430 @@
+﻿@model Erp_Aits.Models.Campaign
+@{
+    ViewData["Title"] = "Campaign Details";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "bullhorn";
+    var stats = ViewBag.Stats as Erp_Aits.Models.CampaignStats;
+    var logs = ViewBag.Logs as List<Erp_Aits.Models.EmailLog>;
+}
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-bullhorn text-primary"></i>
+            @Model.CampaignName
+            <span class="badge bg-@Model.StatusBadge ms-2">@Model.Status</span>
+        </h5>
+        <div class="d-flex gap-2 flex-wrap">
+            @if (Model.Status != "Sent" && Model.Status != "Failed")
+            {
+               
+                <a asp-action="SendNow" asp-route-id="@Model.Id" class="btn btn-warning btn-sm" id="sendImmediateBtn">
+                    <i class="fas fa-bolt"></i> Send Immediately
+                </a>
+            }
+           
+            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    <h6>Campaign Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Campaign Name</span>
+                        <span class="detail-value"><strong>@Model.CampaignName</strong></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Channel</span>
+                        <span class="detail-value">
+                            @if (Model.CampaignChannel == "email")
+                            {
+                                <span class="badge bg-info"><i class="fas fa-envelope"></i> Email</span>
+                            }
+                            else if (Model.CampaignChannel == "whatsapp")
+                            {
+                                <span class="badge bg-success"><i class="fab fa-whatsapp"></i> WhatsApp</span>
+                            }
+                            else if (Model.CampaignChannel == "both")
+                            {
+                                <span class="badge bg-primary"><i class="fas fa-envelope"></i> <i class="fab fa-whatsapp"></i> Both</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.CampaignChannel</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Scheduled Time</span>
+                        <span class="detail-value">
+                            @{
+                                var scheduledTime = Model.ScheduledTime.HasValue
+                                ? Model.ScheduledTime.Value.ToString("dd MMM yyyy HH:mm")
+                                : "N/A";
+                            }
+                            @scheduledTime
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value">
+                            <span class="badge bg-@Model.StatusBadge">@Model.Status</span>
+                        </span>
+                    </div>
+                    @if (Model.SentAt.HasValue)
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Sent At</span>
+                            <span class="detail-value">@Model.SentAt.Value.ToString("dd MMM yyyy HH:mm")</span>
+                        </div>
+                    }
+                    <div class="detail-row">
+                        <span class="detail-label">Sender</span>
+                        <span class="detail-value">@Model.Sender</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email Subject</span>
+                        <span class="detail-value">@(Model.EmailSubject ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">CTA Text</span>
+                        <span class="detail-value">@(Model.CtaText ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Recipient Source</span>
+                        <span class="detail-value">@Model.RecipientSource</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Created Date</span>
+                        <span class="detail-value">
+                            @{
+                                var createdDate = Model.CreatedDate.HasValue
+                                ? Model.CreatedDate.Value.ToString("dd MMM yyyy HH:mm")
+                                : "N/A";
+                            }
+                            @createdDate
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            @if (stats != null)
+            {
+                <div class="detail-section">
+                    <div class="detail-header">
+                        <i class="fas fa-chart-bar text-success"></i>
+                        <h6>Campaign Statistics</h6>
+                    </div>
+                    <div class="detail-body">
+                        <div class="detail-row">
+                            <span class="detail-label">Total Recipients</span>
+                            <span class="detail-value"><strong>@stats.Total</strong></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Opens</span>
+                            <span class="detail-value">@stats.Opens</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Open Rate</span>
+                            <span class="detail-value">@stats.OpenRate.ToString("0.00")%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Clicks</span>
+                            <span class="detail-value">@stats.Clicks</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Click Rate</span>
+                            <span class="detail-value">@stats.ClickRate.ToString("0.00")%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Attachment Opened</span>
+                            <span class="detail-value">@stats.Attachments</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Failed</span>
+                            <span class="detail-value">@stats.Failed</span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-file-alt text-warning"></i>
+                    <h6>Content Preview</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="content-preview">
+                        @Html.Raw(Model.Content)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Logs -->
+    @if (logs != null && logs.Any())
+    {
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="detail-section">
+                    <div class="detail-header">
+                        <i class="fas fa-history text-info"></i>
+                        <h6>Recent Logs</h6>
+                        <a asp-action="ExportReport" asp-route-id="@Model.Id" class="btn btn-success btn-sm ms-auto">
+                            <i class="fas fa-download"></i> Export CSV
+                        </a>
+                    </div>
+                    <div class="detail-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Opened</th>
+                                        <th>Link Clicked</th>
+                                        <th>Sent At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in logs.Take(10))
+                                    {
+                                        <tr>
+                                            <td>@log.To</td>
+                                            <td>
+                                                <span class="badge bg-@(log.Status == "sent" ? "success" : "danger")">
+                                                    @log.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (log.IsOpened)
+                                                {
+                                                    <span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (log.LinkClicked)
+                                                {
+                                                    <span class="badge bg-info"><i class="fas fa-check"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var sentAt = log.SentAt.HasValue
+                                                    ? log.SentAt.Value.ToString("dd MMM HH:mm")
+                                                    : "N/A";
+                                                }
+                                                @sentAt
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .detail-section {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid #f0f2f5;
+        overflow: hidden;
+    }
+
+    .detail-header {
+        padding: 12px 16px;
+        background: #fafbfc;
+        border-bottom: 1px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .detail-header h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+    .detail-body {
+        padding: 12px 16px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        font-size: 13px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-size: 13px;
+        color: #1a1a2e;
+        font-weight: 500;
+    }
+
+    .content-preview {
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+        .content-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+
+    .btn-purple {
+        background: #7c3aed;
+        color: white;
+        border: none;
+    }
+
+        .btn-purple:hover {
+            background: #6d28d9;
+            color: white;
+        }
+
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f0f2f5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #f0f2f5;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+    .text-primary {
+        color: #4f46e5 !important;
+    }
+
+    .table-sm td, .table-sm th {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 4px 10px;
+    }
+
+    /* Loading spinner for send button */
+    .btn-loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+        .btn-loading .spinner-border-sm {
+            display: inline-block !important;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        // Handle Send Now button click with loading state
+        document.getElementById('sendForm')?.addEventListener('submit', function(e) {
+            var btn = document.getElementById('sendNowBtn');
+            btn.classList.add('btn-loading');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+            btn.disabled = true;
+        });
+
+        // Handle Send Immediately button click
+        document.getElementById('sendImmediateBtn')?.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to send this campaign immediately?')) {
+                e.preventDefault();
+                return false;
+            }
+            var btn = this;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+            btn.classList.add('btn-loading');
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var closeButton = alert.querySelector('.btn-close');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            });
+        }, 5000);
+    </script>
+}

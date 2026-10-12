@@ -1,0 +1,46 @@
+﻿@model Erp_Aits.Models.TrainingResult
+@{
+    ViewBag.Title = "Training Result " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Training Result - @Model.Id</h4>
+</div>
+
+<div class="mb-4">
+    <label class="form-label">Training Event</label>
+    <input class="form-control" value="@Model.TrainingEvent" readonly />
+</div>
+
+<label class="form-label">Employees</label>
+<table class="table table-bordered align-middle">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>Employee</th>
+            <th>Hours</th>
+            <th>Grade</th>
+            <th>Comments</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Employees != null && Model.Employees.Any())
+        {
+            int i = 1;
+            foreach (var e in Model.Employees)
+            {
+                <tr>
+                    <td>@(i++)</td>
+                    <td>@e.Employee</td>
+                    <td>@e.Hours</td>
+                    <td>@e.Grade</td>
+                    <td>@e.Comments</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-muted text-center py-3">No Data</td></tr>
+        }
+    </tbody>
+</table>

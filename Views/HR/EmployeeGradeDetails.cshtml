@@ -1,0 +1,194 @@
+﻿@model Erp_Aits.Models.EmployeeGrade
+
+@{
+    ViewBag.Title = "Employee Grade Details";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (ViewBag.SyncWarning != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.SyncWarning
+    </div>
+}
+
+<form asp-action="UpdateEmployeeGrade"
+      asp-controller="HR"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="updateGradeForm">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ErpNextId" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h4 class="mb-0">
+            Employee Grade Details (@Model.GradeName)
+        </h4>
+
+        <div class="d-flex gap-2">
+
+            <a href="@Url.Action("EmployeeGrades", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Back
+            </a>
+
+            <button type="button"
+                    id="btnEditGrade"
+                    class="btn btn-primary btn-sm px-3">
+                Edit
+            </button>
+
+            <button type="submit"
+                    form="deleteGradeForm"
+                    class="btn btn-danger btn-sm px-3"
+                    onclick="return confirm('Delete this Employee Grade from both ERPNext and HRMS?');">
+                Delete
+            </button>
+
+            <button type="submit"
+                    id="btnUpdateGrade"
+                    class="btn btn-dark btn-sm px-4 fw-bold"
+                    style="display:none;">
+                Update Changes
+            </button>
+
+            <button type="button"
+                    id="btnCancelEdit"
+                    class="btn btn-outline-secondary btn-sm"
+                    style="display:none;">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="card p-4 shadow-sm bg-white border">
+
+        <div class="mb-3">
+            <label class="form-label text-muted small">
+                Name <span class="text-danger">*</span>
+            </label>
+
+            <input asp-for="GradeName"
+                   id="GradeName"
+                   class="form-control grade-editable"
+                   required
+                   readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted small">
+                Default Salary Structure
+            </label>
+
+            <input asp-for="DefaultSalaryStructure"
+                   id="DefaultSalaryStructure"
+                   class="form-control grade-editable"
+                   list="salaryStructureList"
+                   placeholder="Select or type salary structure"
+                   readonly />
+
+            <datalist id="salaryStructureList">
+                @if (ViewBag.SalaryStructures != null)
+                {
+                    foreach (var ss in ViewBag.SalaryStructures)
+                    {
+                        <option value="@ss.name">@ss.name</option>
+                    }
+                }
+            </datalist>
+        </div>
+
+        <div>
+            <label class="form-label text-muted small">
+                Default Base Pay
+            </label>
+
+            <input asp-for="DefaultBasePay"
+                   id="DefaultBasePay"
+                   class="form-control grade-editable"
+                   type="number"
+                   step="0.01"
+                   placeholder="Enter Default Base Pay"
+                   readonly />
+        </div>
+
+    </div>
+
+</form>
+
+<form asp-controller="HR"
+      asp-action="DeleteEmployeeGrade"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteGradeForm"
+      class="d-none">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const editButton =
+            document.getElementById("btnEditGrade");
+
+        const updateButton =
+            document.getElementById("btnUpdateGrade");
+
+        const cancelButton =
+            document.getElementById("btnCancelEdit");
+
+        const editableFields =
+            document.querySelectorAll(".grade-editable");
+
+        editButton.addEventListener("click", function () {
+
+            editableFields.forEach(function (field) {
+                field.readOnly = false;
+            });
+
+            editButton.style.display = "none";
+            updateButton.style.display = "inline-block";
+            cancelButton.style.display = "inline-block";
+
+            const gradeName =
+                document.getElementById("GradeName");
+
+            if (gradeName)
+                gradeName.focus();
+        });
+
+        cancelButton.addEventListener("click", function () {
+            window.location.reload();
+        });
+
+    });
+</script>

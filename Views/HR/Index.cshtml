@@ -1,0 +1,381 @@
+﻿@* @{
+    ViewBag.Title = "HR";
+}
+
+<div class="d-flex" style="min-height:100vh;">
+    <div class="border-end p-3" style="width:220px;">
+        <h6 class="text-uppercase text-muted small mb-3">HR</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="#">Recruitment</a></li>
+            <li class="nav-item"><a class="nav-link fw-bold" href="@Url.Action("Employee", "HR")">Employee Lifecycle</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Performance</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Shift &amp; Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Expense Claims</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Leaves</a></li>
+        </ul>
+    </div>
+
+    <div class="flex-grow-1 p-4">
+        <h4>Your Shortcuts</h4>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <a href="@Url.Action("Employee", "HR")" class="text-decoration-none text-dark">
+                    <div class="card p-3">Employee</div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Leaves", "HR")" class="text-decoration-none text-dark">
+                    <div class="card p-3">Leave Application</div>
+                </a>
+            </div>
+            <div class="col-md-3"><div class="card p-3">HR Dashboard</div></div>
+            <div class="col-md-3"><div class="card p-3">Recruitment Dashboard</div></div>
+        </div>
+
+        <h4>Reports &amp; Masters</h4>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h6>Setup</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#">Company</a></li>
+                    <li><a href="@Url.Action("Branches", "HR")">Branch</a></li>
+                    <li><a href="@Url.Action("Departments", "HR")">Department</a></li>
+                    <li><a href="@Url.Action("Designations", "HR")">Designation</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Employee</h6>
+                <ul class="list-unstyled">
+                    <li><a href="@Url.Action("Employee", "HR")">Employee</a></li>
+                    <li><a href="@Url.Action("EmployeeGroups", "HR")">Employee Group</a></li>
+                    <li><a href="@Url.Action("EmployeeGrades", "HR")">Employee Grade</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Leaves</h6>
+                <ul class="list-unstyled">
+                    <li><a href="@Url.Action("Leaves", "HR")">Leave Application</a></li>
+                    <li><a href="@Url.Action("CompensatoryLeaveRequests", "HR")">Compensatory Leave Request</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+
+@{
+    ViewBag.Title = "HR";
+}
+
+<div class="alert alert-light border d-flex justify-content-between align-items-start mb-4" id="setupBanner">
+    <div>
+        <strong>Let's Set Up the Human Resource Module.</strong>
+        <div class="text-muted small">Employee, Leaves, and more.</div>
+    </div>
+    <button type="button" class="btn-close" onclick="document.getElementById('setupBanner').style.display='none'"></button>
+</div>
+
+<div class="d-flex flex-column flex-md-row">
+
+    <!-- Sidebar: collapses above content on mobile, side-by-side on desktop -->
+    @*    <div class="border-end pe-md-3 mb-3 mb-md-0" style="min-width:220px;">
+        <h6 class="text-uppercase text-muted small mb-3">HR</h6>
+        <ul class="nav nav-pills flex-md-column flex-row flex-wrap gap-1">
+            <li class="nav-item"><a class="nav-link" href="@Url.Action("Recruitment", "HR")">Recruitment</a></li>
+            <li class="nav-item"><a class="nav-link fw-bold active" href="@Url.Action("Employee", "HR")">Employee Lifecycle</a></li>
+    <li class="nav-item"><a class="nav-link" href="@Url.Action("EmployeeLifecycle", "HR")">Employee Lifecycle</a></li>
+    <li class="nav-item"><a class="nav-link" href="@Url.Action("Performance", "HR")">Performance</a></li>
+    <li><a href="@Url.Action("ShiftAndAttendance", "HR")">Shift &amp; Attendance</a></li>
+   <li class="nav-item"><a class="nav-link" href="#">Expense Claims</a></li> 
+    <li class="nav-item"><a class="nav-link" href="@Url.Action("ExpenseClaims", "HR")">Expense Claims</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Leaves</a></li> 
+    <li class="nav-item"><a class="nav-link" href="@Url.Action("Leaves", "HR")">Leaves</a></li>
+    <li class="nav-item"><a class="nav-link" href="@Url.Action("SmartATS", "HR")">Smart ATS</a></li>
+    </ul>
+</div>*@
+
+    <!-- Main content -->
+    <div class="flex-grow-1 ps-md-4">
+
+        <div class="ea-dash-section-header">
+            <span class="ea-dash-icon">⭐</span>
+            <h5 class="mb-0">Your Shortcuts</h5>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <a href="@Url.Action("Employee", "HR")" class="ea-shortcut-card">
+                    <span class="ea-shortcut-icon">👥</span>
+                    <span class="ea-shortcut-label">Employee</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="@Url.Action("LeaveApplications", "HR")" class="ea-shortcut-card">
+                    <span class="ea-shortcut-icon">🌴</span>
+                    <span class="ea-shortcut-label">Leave Application</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="ea-shortcut-card ea-shortcut-disabled">
+                    <span class="ea-shortcut-icon">📊</span>
+                    <span class="ea-shortcut-label">HR Dashboard</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="ea-shortcut-card ea-shortcut-disabled">
+                    <span class="ea-shortcut-icon">🧑‍💼</span>
+                    <span class="ea-shortcut-label">Recruitment Dashboard</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ea-dash-section-header">
+            <span class="ea-dash-icon">📚</span>
+            <h5 class="mb-0">Reports &amp; Masters</h5>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-4">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">🏢</span> Setup
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("Companies", "HR")">Company</a></li>
+                        <li><a href="@Url.Action("Branches", "HR")">Branch</a></li>
+                        <li><a href="@Url.Action("Department", "HR")">Department</a></li>
+                        <li><a href="@Url.Action("Designations", "HR")">Designation</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">👤</span> Employee
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("Employee", "HR")">Employee</a></li>
+                        <li><a href="@Url.Action("EmployeeGroups", "HR")">Employee Group</a></li>
+                        <li><a href="@Url.Action("EmployeeGrades", "HR")">Employee Grade</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">🌴</span> Leaves
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("LeaveApplications", "HR")">Leave Application</a></li>
+                        <li><a href="/HR/CompensatoryLeaveRequest">Compensatory Leave Request</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-4">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">⚙️</span> Settings
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("HRSettings", "HR")">HR Settings</a></li>
+                        <li><a href="@Url.Action("DailyWorkSummaryGroup", "HR")">Daily Work Summary Group</a></li>
+                        <li><a href="@Url.Action("TeamUpdates", "HR")">Team Updates</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">🕒</span> Attendance
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("Attendance", "HR")">Attendance</a></li>
+                        <li><a href="@Url.Action("AttendanceRequest", "HR")">Attendance Request</a></li>
+                        <li><a href="@Url.Action("EmployeeCheckin", "HR")">Employee Checkin</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">💳</span> Expense Claim
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("CreateExpenseClaim", "HR")">Expense Claim</a></li>
+                        <li><a href="@Url.Action("EmployeeAdvance", "HR")">Employee Advance</a></li>
+                        <li><a href="@Url.Action("TravelRequest", "HR")">Travel Request</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">📈</span> Key Reports
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("MonthlyAttendanceSheet", "HR")">Monthly Attendance Sheet</a></li>
+                        <li><a href="@Url.Action("RecruitmentAnalytics", "HR")">Recruitment Analytics</a></li>
+                        <li><a href="@Url.Action("EmployeeAnalytics", "HR")">Employee Analytics</a></li>
+                        <li><a href="@Url.Action("EmployeeLeaveBalance", "HR")">Employee Leave Balance</a></li>
+                        <li><a href="@Url.Action("EmployeeLeaveBalanceSummary", "HR")">Employee Leave Balance Summary</a></li>
+                        <li><a href="@Url.Action("EmployeeAdvanceSummary", "HR")">Employee Advance Summary</a></li>
+                        <li><a href="@Url.Action("EmployeeExits", "HR")">Employee Exits</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="ea-link-card">
+                    <div class="ea-link-card-title">
+                        <span class="ea-link-card-icon">📋</span> Other Reports
+                    </div>
+                    <ul class="ea-link-list">
+                        <li><a href="@Url.Action("EmployeeInformation", "HR")">Employee Information</a></li>
+                        <li><a href="@Url.Action("EmployeeBirthday", "HR")">Employee Birthday</a></li>
+                        <li><a href="@Url.Action("EmployeesWorkingOnHoliday", "HR")">Employees working on a holiday</a></li>
+                        <li><a href="@Url.Action("DailyWorkSummaryReplies", "HR")">Daily Work Summary Replies</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        .ea-dash-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ea-dash-icon {
+            font-size: 1.15rem;
+        }
+
+        /* Shortcut cards */
+        .ea-shortcut-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 1rem;
+            height: 100%;
+            text-decoration: none;
+            color: #212529;
+            text-align: center;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+            .ea-shortcut-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+                color: #212529;
+            }
+
+        .ea-shortcut-disabled {
+            opacity: 0.55;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .ea-shortcut-icon {
+            font-size: 1.8rem;
+        }
+
+        .ea-shortcut-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        /* Link cards */
+        .ea-link-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem 1.4rem;
+            height: 100%;
+            transition: box-shadow 0.15s ease;
+        }
+
+            .ea-link-card:hover {
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            }
+
+        .ea-link-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #212529;
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid #f0f1f3;
+        }
+
+        .ea-link-card-icon {
+            font-size: 1rem;
+        }
+
+        .ea-link-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+            .ea-link-list li {
+                margin-bottom: 0.55rem;
+            }
+
+                .ea-link-list li:last-child {
+                    margin-bottom: 0;
+                }
+
+            .ea-link-list a {
+                color: #495057;
+                text-decoration: none;
+                font-size: 0.88rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                transition: color 0.15s ease;
+            }
+
+                .ea-link-list a::before {
+                    content: "›";
+                    color: #adb5bd;
+                    font-weight: 700;
+                }
+
+                .ea-link-list a:hover {
+                    color: #000;
+                    text-decoration: underline;
+                }
+
+        @@media (max-width: 576px) {
+            .ea-shortcut-card {
+                padding: 1.1rem 0.75rem;
+            }
+
+            .ea-shortcut-icon {
+                font-size: 1.5rem;
+            }
+
+            .ea-shortcut-label {
+                font-size: 0.8rem;
+            }
+
+            .ea-link-card {
+                padding: 1rem 1.1rem;
+            }
+        }
+    </style>

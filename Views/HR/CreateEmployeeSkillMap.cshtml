@@ -1,0 +1,415 @@
+﻿@model Erp_Aits.Models.EmployeeSkillMap
+
+@{
+    ViewBag.Title = "New Employee Skill Map";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">
+        <strong>ERPNext Validation:</strong> @TempData["ErpNextError"]
+    </div>
+}
+
+<style>
+    .rating-stars {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 38px;
+    }
+
+    .rating-star {
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        color: #d1d5db;
+        user-select: none;
+    }
+
+        .rating-star.active {
+            color: #f4b400;
+        }
+
+        .rating-star:hover {
+            transform: scale(1.05);
+        }
+
+    .skill-row-no,
+    .training-row-no {
+        vertical-align: middle !important;
+    }
+</style>
+
+<form asp-action="CreateEmployeeSkillMap"
+      asp-controller="HR"
+      method="post">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">New Employee Skill Map</h4>
+            <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+    </div>
+
+    <!-- Employee Section -->
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Employee</label>
+                <select asp-for="Employee"
+                        id="Employee"
+                        class="form-select"
+                        required>
+                    <option value="">-- Select Employee --</option>
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            <option value="@emp.name">
+                                @emp.name - @emp.employee_name
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee Name</label>
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly />
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="mb-1">Skills</h6>
+                <small class="text-muted">Employee Skills</small>
+            </div>
+
+            <button type="button"
+                    id="btnAddSkill"
+                    class="btn btn-sm btn-outline-secondary">
+                + Add Row
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle" id="skillsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Skill *</th>
+                        <th style="width:320px;">Proficiency *</th>
+                        <th>Evaluation Date</th>
+                        <th style="width:70px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="skillsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Trainings Section -->
+    <div class="card border rounded-3 p-4 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="mb-1">Trainings</h6>
+                <small class="text-muted">Trainings</small>
+            </div>
+
+            <button type="button"
+                    id="btnAddTraining"
+                    class="btn btn-sm btn-outline-secondary">
+                + Add Row
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle" id="trainingsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Training</th>
+                        <th>Training Date</th>
+                        <th style="width:70px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="trainingsBody"></tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<!-- Hidden master dropdowns -->
+<select id="skillMaster" style="display:none;">
+    <option value="">-- Select Skill --</option>
+    @if (ViewBag.Skills != null)
+    {
+        foreach (var skill in ViewBag.Skills)
+        {
+            <option value="@skill.name">@skill.name</option>
+        }
+    }
+</select>
+
+<select id="trainingMaster" style="display:none;">
+    <option value="" data-date="">-- Select Training --</option>
+    @if (ViewBag.Trainings != null)
+    {
+        foreach (var training in ViewBag.Trainings)
+        {
+            <option value="@training.name" data-date="@training.end_time">
+                @training.name
+            </option>
+        }
+    }
+</select>
+
+@section Scripts
+{
+    <script>
+        let skillIndex = 0;
+        let trainingIndex = 0;
+
+        function getSkillOptions() {
+            const source = document.getElementById("skillMaster");
+            return source ? source.innerHTML : "";
+        }
+
+        function getTrainingOptions() {
+            const source = document.getElementById("trainingMaster");
+            return source ? source.innerHTML : "";
+        }
+
+        async function loadEmployeeDetails() {
+            const employee = document.getElementById("Employee").value;
+
+            document.getElementById("EmployeeName").value = "";
+
+            if (!employee) return;
+
+            try {
+                const response = await fetch(
+                    '@Url.Action("GetEmployeeSkillMapEmployeeDetails", "HR")' +
+                    '?employee=' + encodeURIComponent(employee)
+                );
+
+                const data = await response.json();
+
+                if (data && data.success) {
+                    document.getElementById("EmployeeName").value = data.employeeName || "";
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function buildStarsHtml(index) {
+            return `
+                <div class="rating-stars" data-index="${index}">
+                    <input type="hidden"
+                           name="Skills[${index}].Proficiency"
+                           class="proficiency-input"
+                           value="0" />
+                    <span class="rating-star" data-value="1">&#9734;</span>
+                    <span class="rating-star" data-value="2">&#9734;</span>
+                    <span class="rating-star" data-value="3">&#9734;</span>
+                    <span class="rating-star" data-value="4">&#9734;</span>
+                    <span class="rating-star" data-value="5">&#9734;</span>
+                </div>
+            `;
+        }
+
+        function setStars(container, rating) {
+            const hidden = container.querySelector(".proficiency-input");
+            hidden.value = rating;
+
+            const stars = container.querySelectorAll(".rating-star");
+            stars.forEach(function (star) {
+                const val = parseInt(star.getAttribute("data-value"));
+                if (val <= rating) {
+                    star.classList.add("active");
+                    star.innerHTML = "&#9733;";
+                } else {
+                    star.classList.remove("active");
+                    star.innerHTML = "&#9734;";
+                }
+            });
+        }
+
+        function addSkillRow() {
+            const tbody = document.getElementById("skillsBody");
+            const index = skillIndex++;
+
+            const row = document.createElement("tr");
+            const today = new Date().toISOString().substring(0, 10);
+
+            row.innerHTML = `
+                <td class="skill-row-no text-center">${index + 1}</td>
+                <td>
+                    <select name="Skills[${index}].Skill"
+                            class="form-select form-select-sm"
+                            required>
+                        ${getSkillOptions()}
+                    </select>
+                </td>
+                <td>
+                    ${buildStarsHtml(index)}
+                </td>
+                <td>
+                    <input type="date"
+                           name="Skills[${index}].EvaluationDate"
+                           class="form-control form-control-sm"
+                           value="${today}" />
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-skill">×</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+
+            const ratingContainer = row.querySelector(".rating-stars");
+            setStars(ratingContainer, 0);
+
+            reindexSkillRows();
+        }
+
+        function reindexSkillRows() {
+            const rows = document.querySelectorAll("#skillsBody tr");
+
+            rows.forEach(function (row, index) {
+                const no = row.querySelector(".skill-row-no");
+                if (no) no.textContent = index + 1;
+
+                const skillSelect = row.querySelector('select[name^="Skills["]');
+                if (skillSelect) {
+                    skillSelect.setAttribute("name", `Skills[${index}].Skill`);
+                }
+
+                const evalDate = row.querySelector('input[name$=".EvaluationDate"]');
+                if (evalDate) {
+                    evalDate.setAttribute("name", `Skills[${index}].EvaluationDate`);
+                }
+
+                const proficiency = row.querySelector(".proficiency-input");
+                if (proficiency) {
+                    proficiency.setAttribute("name", `Skills[${index}].Proficiency`);
+                }
+
+                const ratingBox = row.querySelector(".rating-stars");
+                if (ratingBox) {
+                    ratingBox.setAttribute("data-index", index);
+                }
+            });
+
+            skillIndex = rows.length;
+        }
+
+        function addTrainingRow() {
+            const tbody = document.getElementById("trainingsBody");
+            const index = trainingIndex++;
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td class="training-row-no text-center">${index + 1}</td>
+                <td>
+                    <select name="Trainings[${index}].Training"
+                            class="form-select form-select-sm training-select">
+                        ${getTrainingOptions()}
+                    </select>
+                </td>
+                <td>
+                    <input type="date"
+                           name="Trainings[${index}].TrainingDate"
+                           class="form-control form-control-sm bg-light training-date"
+                           readonly />
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-training">×</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            reindexTrainingRows();
+        }
+
+        function reindexTrainingRows() {
+            const rows = document.querySelectorAll("#trainingsBody tr");
+
+            rows.forEach(function (row, index) {
+                const no = row.querySelector(".training-row-no");
+                if (no) no.textContent = index + 1;
+
+                const trainingSelect = row.querySelector('select[name^="Trainings["]');
+                if (trainingSelect) {
+                    trainingSelect.setAttribute("name", `Trainings[${index}].Training`);
+                }
+
+                const trainingDate = row.querySelector('input[name$=".TrainingDate"]');
+                if (trainingDate) {
+                    trainingDate.setAttribute("name", `Trainings[${index}].TrainingDate`);
+                }
+            });
+
+            trainingIndex = rows.length;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const employee = document.getElementById("Employee");
+            if (employee) {
+                employee.addEventListener("change", loadEmployeeDetails);
+            }
+
+            document.getElementById("btnAddSkill").addEventListener("click", addSkillRow);
+            document.getElementById("btnAddTraining").addEventListener("click", addTrainingRow);
+
+            // ERP-like: default one skill row only
+            addSkillRow();
+        });
+
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("rating-star")) {
+                const container = event.target.closest(".rating-stars");
+                const rating = parseInt(event.target.getAttribute("data-value"));
+                setStars(container, rating);
+            }
+
+            if (event.target.classList.contains("remove-skill")) {
+                event.target.closest("tr").remove();
+                reindexSkillRows();
+            }
+
+            if (event.target.classList.contains("remove-training")) {
+                event.target.closest("tr").remove();
+                reindexTrainingRows();
+            }
+        });
+
+        document.addEventListener("change", function (event) {
+            if (event.target.classList.contains("training-select")) {
+                const selected = event.target.options[event.target.selectedIndex];
+                const rawDate = selected ? selected.getAttribute("data-date") : "";
+                const row = event.target.closest("tr");
+                const dateInput = row.querySelector(".training-date");
+
+                if (dateInput && rawDate) {
+                    dateInput.value = rawDate.substring(0, 10);
+                } else if (dateInput) {
+                    dateInput.value = "";
+                }
+            }
+        });
+    </script>
+}

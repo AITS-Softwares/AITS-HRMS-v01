@@ -1,0 +1,64 @@
+﻿@model Erp_Aits.Models.AdditionalSalary
+@{
+    ViewBag.Title = "New Additional Salary";
+}
+
+<form asp-action="CreateAdditionalSalary" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Additional Salary</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series *</label>
+                <input name="AdditionalSalaryCode" class="form-control" value="@ViewBag.NextCode" readonly required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input asp-for="Company" class="form-control" value="AITS" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <input asp-for="Employee" class="form-control" required placeholder="Employee code" />
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input asp-for="IsRecurring" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label">Is Recurring</label>
+                </div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <label class="form-label">Payroll Date *</label>
+                <input asp-for="PayrollDate" type="date" class="form-control" required />
+                <small class="text-muted">The date on which Salary Component with Amount will contribute for Earnings/Deduction in Salary Slip.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mt-3">
+        <h6 class="mb-3">Salary</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Salary Component *</label>
+                <input asp-for="SalaryComponent" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input asp-for="DeductFullTaxOnSelectedPayrollDate" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label">Deduct Full Tax on Selected Payroll Date</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="OverwriteSalaryStructureAmount" class="form-check-input" type="checkbox" checked />
+                    <label class="form-check-label">Overwrite Salary Structure Amount</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Amount *</label>
+                <input asp-for="Amount" type="number" step="0.01" class="form-control" required />
+            </div>
+        </div>
+    </div>
+</form>

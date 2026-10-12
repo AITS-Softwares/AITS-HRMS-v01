@@ -1,0 +1,350 @@
+﻿@model Erp_Aits.Models.LeavePeriod
+
+@{
+    ViewBag.Title = "New Leave Period";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+<form asp-controller="HR"
+      asp-action="CreateLeavePeriod"
+      method="post"
+      id="leavePeriodForm">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h4 class="mb-0 d-inline">
+                New Leave Period
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning ms-2">
+                Not Saved
+            </span>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a href="@Url.Action("LeavePeriod", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="btn btn-dark btn-sm px-4">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="card border rounded-3 p-4">
+
+        <div class="row g-3">
+
+            <!-- ================================================= -->
+            <!-- FROM DATE -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    From Date
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="FromDate"
+                       id="FromDate"
+                       type="date"
+                       class="form-control"
+                       required />
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- COMPANY -->
+            <!-- ERP Link: Company -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Company"
+                        id="Company"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Company --
+                    </option>
+
+                    @if (ViewBag.Companies != null)
+                    {
+                        foreach (var company in ViewBag.Companies)
+                        {
+                            <option value="@company.name">
+                                @company.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- TO DATE -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    To Date
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="ToDate"
+                       id="ToDate"
+                       type="date"
+                       class="form-control"
+                       required />
+
+                <div id="dateValidationMessage"
+                     class="text-danger small mt-1"
+                     style="display:none;">
+                    To date can not be equal or less than from date
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- HOLIDAY LIST FOR OPTIONAL LEAVE -->
+            <!-- ERP Link: Holiday List -->
+            <!-- IMPORTANT:
+                 Only holiday.name is loaded from ERP because your ERP
+                 rejects "company" in Holiday List list query.
+            -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Holiday List for Optional Leave
+                </label>
+
+                <select asp-for="HolidayListForOptionalLeave"
+                        id="HolidayListForOptionalLeave"
+                        class="form-select">
+
+                    <option value="">
+                        -- None --
+                    </option>
+
+                    @if (ViewBag.HolidayLists != null)
+                    {
+                        foreach (var holiday in ViewBag.HolidayLists)
+                        {
+                            <option value="@holiday.name">
+                                @holiday.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- IS ACTIVE -->
+            <!-- ================================================= -->
+
+            <div class="col-md-12">
+
+                <div class="form-check mt-2">
+
+                    <input asp-for="IsActive"
+                           id="IsActive"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label class="form-check-label"
+                           for="IsActive">
+                        Is Active
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        const leavePeriodForm =
+            document.getElementById(
+                "leavePeriodForm"
+            );
+
+        const fromDate =
+            document.getElementById(
+                "FromDate"
+            );
+
+        const toDate =
+            document.getElementById(
+                "ToDate"
+            );
+
+        const validationMessage =
+            document.getElementById(
+                "dateValidationMessage"
+            );
+
+
+        // ============================================================
+        // DATE VALIDATION
+        //
+        // ERP rule:
+        // From Date must be strictly less than To Date.
+        // ============================================================
+
+        function validateLeavePeriodDates(showAlert)
+        {
+            validationMessage.style.display =
+                "none";
+
+
+            if (
+                !fromDate.value ||
+                !toDate.value
+            )
+            {
+                return true;
+            }
+
+
+            if (
+                toDate.value <=
+                fromDate.value
+            )
+            {
+                validationMessage.style.display =
+                    "block";
+
+
+                if (showAlert)
+                {
+                    alert(
+                        "To date can not be equal or less than from date"
+                    );
+                }
+
+
+                return false;
+            }
+
+
+            return true;
+        }
+
+
+        fromDate.addEventListener(
+            "change",
+            function ()
+            {
+                validateLeavePeriodDates(
+                    false
+                );
+            }
+        );
+
+
+        toDate.addEventListener(
+            "change",
+            function ()
+            {
+                validateLeavePeriodDates(
+                    true
+                );
+            }
+        );
+
+
+        // ============================================================
+        // FINAL CLIENT VALIDATION BEFORE POST
+        //
+        // ERPNext remains the authoritative validator for:
+        // - overlapping Leave Periods
+        // - Company link
+        // - Holiday List link
+        // - other server-side rules
+        // ============================================================
+
+        leavePeriodForm.addEventListener(
+            "submit",
+            function (event)
+            {
+                if (
+                    !validateLeavePeriodDates(
+                        true
+                    )
+                )
+                {
+                    event.preventDefault();
+
+                    return false;
+                }
+
+
+                const company =
+                    document.getElementById(
+                        "Company"
+                    ).value;
+
+
+                if (!company)
+                {
+                    event.preventDefault();
+
+                    alert(
+                        "Company is required."
+                    );
+
+                    return false;
+                }
+
+
+                return true;
+            }
+        );
+
+    </script>
+}

@@ -1,0 +1,2764 @@
+﻿@* @{
+    ViewData["Title"] = "Lead Tasks";
+    ViewData["Module"] = "Tasks";
+    ViewData["Icon"] = "tasks";
+    var leadId = ViewBag.LeadId as int?;
+    var leadName = ViewBag.LeadName as string;
+}
+
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-tasks"></i>
+            @if (!string.IsNullOrEmpty(leadName))
+            {
+                <span>Tasks for: @leadName</span>
+            }
+            else
+            {
+                <span>Lead Tasks</span>
+            }
+            <span class="badge-count primary" id="taskCount">0</span>
+        </h5>
+        <div class="d-flex gap-2">
+            <a asp-controller="Leads" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-list"></i> All Leads
+            </a>
+            @if (leadId > 0)
+            {
+                <button type="button" class="btn btn-primary btn-sm" onclick="openCreateTaskModal()">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (leadId > 0)
+    {
+        <!-- Quick Links -->
+        <div class="quick-links mb-3">
+            <div class="btn-group" role="group">
+                <a asp-controller="LeadTasks" asp-action="Index" asp-route-leadId="@leadId" class="btn btn-primary btn-sm active">
+                    <i class="fas fa-tasks"></i> Tasks
+                </a>
+                <a asp-controller="LeadEvents" asp-action="Index" asp-route-leadId="@leadId" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-calendar-alt"></i> Events
+                </a>
+                <a asp-controller="Leads" asp-action="Details" asp-route-id="@leadId" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-eye"></i> Lead Details
+                </a>
+            </div>
+            <span class="text-muted small ms-3">Lead ID: #@leadId</span>
+        </div>
+
+        <!-- Search / Filter -->
+        <div class="search-filter-bar">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <select id="filterStatus" class="form-control" onchange="loadTasks()">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterPriority" class="form-control" onchange="loadTasks()">
+                        <option value="">All Priorities</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" id="searchTask" class="form-control" placeholder="Search tasks..." />
+                        <button class="btn btn-primary btn-sm" onclick="loadTasks()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div id="tasksList">
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p class="mt-2">Loading tasks...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Show All Leads with Tasks -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Select a Lead:</strong> Please select a lead from the list below to view its tasks.
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Lead Name</th>
+                                <th>Company</th>
+                                <th>Email</th>
+                                <th>Tasks</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.Leads != null)
+                            {
+                                foreach (var lead in ViewBag.Leads)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2" style="background: @GetColor(lead.Text);">
+                                                    @lead.Text?.Substring(0, 1)
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">@lead.Text</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@lead.Company</td>
+                                        <td>@lead.Email</td>
+                                        <td>
+                                            <span class="badge bg-primary">@lead.TaskCount</span>
+                                        </td>
+                                        <td>
+                                            <a asp-action="Index" asp-route-leadId="@lead.Value" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-tasks"></i> View Tasks
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="content-card">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-chart-simple"></i> Quick Stats
+                    </h6>
+                    <hr />
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted">Total Leads:</span>
+                        <strong>@(ViewBag.Leads != null ? ViewBag.Leads.Count : 0)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted">Total Tasks:</span>
+                        <strong id="totalAllTasks">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Create Task Modal -->
+<div class="modal fade" id="createTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle text-primary"></i> Create Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <form id="createTaskForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="LeadId" value="@leadId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Task Date</label>
+                                <input type="datetime-local" name="TaskDate" id="createTaskDate" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Assigned To</label>
+                                <select name="AssignedTo" id="createAssignedTo" class="form-control" required>
+                                    <option value="">Select User</option>
+                                    @if (ViewBag.UserList != null)
+                                    {
+                                        foreach (var user in ViewBag.UserList)
+                                        {
+                                            <option value="@user.Id">@user.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Summary</label>
+                                <textarea name="Summary" id="createSummary" class="form-control" rows="3" placeholder="Enter task summary" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="Status" id="createStatus" class="form-control">
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Priority</label>
+                                <select name="Priority" id="createPriority" class="form-control">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="submitCreateTask()">
+                    <i class="fas fa-save"></i> Create Task
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit text-warning"></i> Edit Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <form id="editTaskForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" id="editTaskId" />
+                    <input type="hidden" name="LeadId" id="editLeadId" />
+                    <input type="hidden" name="OpportunityId" id="editOpportunityId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Task Date</label>
+                                <input type="datetime-local" name="TaskDate" id="editTaskDate" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Assigned To</label>
+                                <select name="AssignedTo" id="editAssignedTo" class="form-control" required>
+                                    <option value="">Select User</option>
+                                    @if (ViewBag.UserList != null)
+                                    {
+                                        foreach (var user in ViewBag.UserList)
+                                        {
+                                            <option value="@user.Id">@user.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Summary</label>
+                                <textarea name="Summary" id="editSummary" class="form-control" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="Status" id="editStatus" class="form-control">
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Priority</label>
+                                <select name="Priority" id="editPriority" class="form-control">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="submitEditTask()">
+                    <i class="fas fa-save"></i> Update Task
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Delete Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <p class="mb-0">Are you sure you want to delete this task? This action cannot be undone.</p>
+                <input type="hidden" id="deleteTaskId" />
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteTask()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+               LEAD TASKS PAGE - LEAD STYLE
+               ============================================ */
+
+    /* Stats Cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 10px;
+        }
+
+        .stat-card .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-card .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+    .stat-icon.blue {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .stat-icon.green {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .stat-icon.orange {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+    }
+
+    .stat-icon.purple {
+        background: rgba(155, 89, 182, 0.1);
+        color: #8e44ad;
+    }
+
+    .stat-icon.red {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+
+    /* Badge Count */
+    .badge-count {
+        display: inline-block;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 20px;
+        line-height: 1.5;
+    }
+
+        .badge-count.primary {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .badge-count.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-count.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-count.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    /* Content Card */
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .card-header-custom h5 i {
+                color: #3498db;
+            }
+
+    /* Quick Links */
+    .quick-links {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Search/Filter Bar */
+    .search-filter-bar {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #f0f2f5;
+    }
+
+        .search-filter-bar .form-control,
+        .search-filter-bar .form-select {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .search-filter-bar .input-group .form-control {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .search-filter-bar .input-group .btn {
+            border-radius: 0 8px 8px 0;
+        }
+
+    /* Task Cards */
+    .task-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        border: 1px solid #f0f2f5;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .task-card:hover {
+            border-color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .task-card .task-info {
+            flex: 1;
+        }
+
+        .task-card .task-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 15px;
+        }
+
+        .task-card .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+            .task-card .task-meta i {
+                margin-right: 4px;
+            }
+
+        .task-card .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-badge.inprogress {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-badge.completed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    /* Priority Badges */
+    .priority-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+        .priority-badge.low {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .priority-badge.medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .priority-badge.high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .priority-badge.urgent {
+            background: #dc2626;
+            color: white;
+        }
+
+    /* Avatar */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table th {
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #f0f2f5;
+            background: #f8fafc;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+    .table-hover tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    /* Badge */
+    .badge {
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    /* Alerts */
+    .alert {
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: none;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: #4f46e5;
+        border: none;
+        color: white;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        border: none;
+        color: #475569;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #1a1a2e;
+        }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-outline-primary {
+        border: 1px solid #4f46e5;
+        color: #4f46e5;
+        background: transparent;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline-primary:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+    .btn-outline-info {
+        border: 1px solid #0dcaf0;
+        color: #0dcaf0;
+        background: transparent;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline-info:hover {
+            background: #0dcaf0;
+            color: white;
+        }
+
+    .btn-warning {
+        background: #f59e0b;
+        border: none;
+        color: white;
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+        .btn-warning:hover {
+            background: #d97706;
+            color: white;
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+        .btn-danger:hover {
+            background: #b02a37;
+            color: white;
+        }
+
+    .active {
+        background: #4f46e5;
+        color: white;
+    }
+
+    .btn-group .btn {
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+
+        .btn-group .btn:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .btn-group .btn:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+    /* Form Controls */
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 8px 14px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: none;
+        padding: 20px 24px 0;
+    }
+
+    .modal-body {
+        padding: 20px 24px;
+    }
+
+    .modal-footer {
+        border-top: none;
+        padding: 0 24px 24px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .stats-row
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+        .stat-card .stat-number {
+            font-size: 18px;
+        }
+
+    .task-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+        .task-card .task-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .task-card .task-meta {
+            flex-wrap: wrap;
+        }
+
+    .card-header-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .card-header-custom .d-flex {
+            width: 100%;
+        }
+
+            .card-header-custom .d-flex .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+    .search-filter-bar .row > div {
+        margin-bottom: 8px;
+    }
+
+    .quick-links {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .quick-links .btn-group {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+            .quick-links .btn-group .btn {
+                flex: 1;
+            }
+
+    .table th, .table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .stats-row
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 10px;
+    }
+
+        .stat-card .stat-number {
+            font-size: 16px;
+        }
+
+        .stat-card .stat-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+
+    .table {
+        font-size: 11px;
+    }
+
+        .table th, .table td {
+            padding: 6px 8px;
+        }
+
+    .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .form-control, .form-select {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    }
+</style>
+
+@functions {
+    public string GetColor(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "#4f46e5";
+        var colors = new[] { "#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706", "#dc2626", "#6b7280" };
+        var index = Math.Abs(name.GetHashCode()) % colors.Length;
+        return colors[index];
+    }
+}
+
+@section Scripts {
+    <script>
+        var leadId = @(leadId ?? 0);
+        var users = @Html.Raw(Json.Serialize(ViewBag.UserList));
+
+        $(document).ready(function() {
+            if (leadId > 0) {
+                loadTasks();
+                // Set default date for create form
+                var now = new Date();
+                var formattedDate = now.toISOString().slice(0, 16);
+                $('#createTaskDate').val(formattedDate);
+            }
+        });
+
+        // ============================================================
+        // LOAD TASKS
+        // ============================================================
+        function loadTasks() {
+            var status = $('#filterStatus').val();
+            var priority = $('#filterPriority').val();
+            var search = $('#searchTask').val();
+
+            $.ajax({
+                url: '@Url.Action("GetLeadTasks", "LeadTasks")',
+                type: 'GET',
+                data: {
+                    leadId: leadId,
+                    status: status,
+                    priority: priority,
+                    search: search
+                },
+                success: function(data) {
+                    var html = '';
+                    var total = 0;
+
+                    if (data && data.length > 0) {
+                        total = data.length;
+                        $('#taskCount').text(total);
+
+                        $.each(data, function(i, task) {
+                            var statusClass = task.status ? task.status.toLowerCase().replace(' ', '') : 'pending';
+                            var priorityClass = task.priority ? task.priority.toLowerCase() : 'medium';
+
+                            html += '<div class="task-card">';
+                            html += '<div class="task-info">';
+                            html += '<div class="task-title">' + task.summary + '</div>';
+                            html += '<div class="task-meta">';
+                            html += '<span><i class="fas fa-user"></i> ' + (task.assignedTo || 'Unassigned') + '</span>';
+                            html += '<span><i class="fas fa-calendar"></i> ' + task.taskDate + '</span>';
+                            html += '<span><span class="status-badge ' + statusClass + '">' + task.status + '</span></span>';
+                            if (task.priority) {
+                                html += '<span><span class="priority-badge ' + priorityClass + '">' + task.priority + '</span></span>';
+                            }
+                            html += '</div>';
+                            html += '</div>';
+                            html += '<div class="task-actions">';
+                            html += '<button class="btn btn-warning btn-sm" onclick="openEditTaskModal(' + task.id + ')"><i class="fas fa-edit"></i></button>';
+                            html += '<button class="btn btn-danger btn-sm" onclick="openDeleteTaskModal(' + task.id + ')"><i class="fas fa-trash"></i></button>';
+                            html += '</div>';
+                            html += '</div>';
+                        });
+
+                        $('#tasksList').html(html);
+                    } else {
+                        $('#taskCount').text(0);
+                        $('#tasksList').html('<div class="text-center text-muted py-5"><i class="fas fa-inbox fa-3x d-block mb-3"></i><p>No tasks found for this lead.</p></div>');
+                    }
+                },
+                error: function() {
+                    $('#tasksList').html('<div class="text-center text-muted py-5"><i class="fas fa-exclamation-triangle fa-3x d-block mb-3"></i><p>Error loading tasks. Please try again.</p></div>');
+                }
+            });
+        }
+
+        // ============================================================
+        // RESET FILTERS
+        // ============================================================
+        function resetFilters() {
+            $('#filterStatus').val('');
+            $('#filterPriority').val('');
+            $('#searchTask').val('');
+            loadTasks();
+        }
+
+        // ============================================================
+        // CREATE TASK
+        // ============================================================
+        function openCreateTaskModal() {
+            if (leadId == 0 || leadId == null) {
+                alert('Please select a lead first.');
+                return;
+            }
+            $('#createTaskModal').modal('show');
+        }
+
+        function submitCreateTask() {
+            var formData = {
+                LeadId: leadId,
+                AssignedTo: parseInt($('#createAssignedTo').val()) || null,
+                TaskDate: $('#createTaskDate').val(),
+                Summary: $('#createSummary').val(),
+                Status: $('#createStatus').val(),
+                Priority: $('#createPriority').val()
+            };
+
+            if (!formData.Summary) {
+                alert('Summary is required.');
+                return;
+            }
+
+            if (!formData.AssignedTo) {
+                alert('Please select a user to assign this task.');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Create", "LeadTasks")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    if (response.success) {
+                        $('#createTaskModal').modal('hide');
+                        $('#createSummary').val('');
+                        loadTasks();
+                        showSuccess('Task created successfully!');
+                    } else {
+                        alert(response.message || 'Error creating task.');
+                    }
+                },
+                error: function() {
+                    alert('Error creating task. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // EDIT TASK
+        // ============================================================
+        function openEditTaskModal(id) {
+            $.ajax({
+                url: '@Url.Action("GetTask", "LeadTasks")',
+                type: 'GET',
+                data: { id: id },
+                success: function(response) {
+                    if (response.success) {
+                        var task = response.task;
+                        $('#editTaskId').val(task.id);
+                        $('#editLeadId').val(task.leadId);
+                        $('#editOpportunityId').val(task.opportunityId);
+                        $('#editTaskDate').val(task.taskDate);
+                        $('#editSummary').val(task.summary);
+                        $('#editAssignedTo').val(task.assignedTo);
+                        $('#editStatus').val(task.status);
+                        $('#editPriority').val(task.priority);
+                        $('#editTaskModal').modal('show');
+                    } else {
+                        alert(response.message || 'Error loading task.');
+                    }
+                },
+                error: function() {
+                    alert('Error loading task. Please try again.');
+                }
+            });
+        }
+
+        function submitEditTask() {
+            var formData = {
+                Id: parseInt($('#editTaskId').val()),
+                LeadId: parseInt($('#editLeadId').val()) || null,
+                OpportunityId: parseInt($('#editOpportunityId').val()) || null,
+                AssignedTo: parseInt($('#editAssignedTo').val()) || null,
+                TaskDate: $('#editTaskDate').val(),
+                Summary: $('#editSummary').val(),
+                Status: $('#editStatus').val(),
+                Priority: $('#editPriority').val()
+            };
+
+            if (!formData.Summary) {
+                alert('Summary is required.');
+                return;
+            }
+
+            if (!formData.AssignedTo) {
+                alert('Please select a user to assign this task.');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Update", "LeadTasks")',
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    if (response.success) {
+                        $('#editTaskModal').modal('hide');
+                        loadTasks();
+                        showSuccess('Task updated successfully!');
+                    } else {
+                        alert(response.message || 'Error updating task.');
+                    }
+                },
+                error: function() {
+                    alert('Error updating task. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // DELETE TASK
+        // ============================================================
+        function openDeleteTaskModal(id) {
+            $('#deleteTaskId').val(id);
+            $('#deleteTaskModal').modal('show');
+        }
+
+        function confirmDeleteTask() {
+            var id = $('#deleteTaskId').val();
+
+            $.ajax({
+                url: '@Url.Action("Delete", "LeadTasks")',
+                type: 'DELETE',
+                data: { id: id },
+                success: function(response) {
+                    if (response.success) {
+                        $('#deleteTaskModal').modal('hide');
+                        loadTasks();
+                        showSuccess('Task deleted successfully!');
+                    } else {
+                        alert(response.message || 'Error deleting task.');
+                    }
+                },
+                error: function() {
+                    alert('Error deleting task. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // SHOW SUCCESS MESSAGE
+        // ============================================================
+        function showSuccess(message) {
+            var alertDiv = $('<div class="alert alert-success alert-dismissible fade show">' +
+                '<i class="fas fa-check-circle"></i> ' + message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>');
+            $('.card-header-custom').after(alertDiv);
+            setTimeout(function() {
+                alertDiv.fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+
+        // Make functions globally accessible
+        window.loadTasks = loadTasks;
+        window.resetFilters = resetFilters;
+        window.openCreateTaskModal = openCreateTaskModal;
+        window.submitCreateTask = submitCreateTask;
+        window.openEditTaskModal = openEditTaskModal;
+        window.submitEditTask = submitEditTask;
+        window.openDeleteTaskModal = openDeleteTaskModal;
+        window.confirmDeleteTask = confirmDeleteTask;
+    </script>
+} *@
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Data.SqlClient
+@using System.Collections.Generic
+@using System.Data
+@inject IConfiguration _configuration
+
+@{
+    ViewData["Title"] = "Lead Tasks";
+    ViewData["Module"] = "Tasks";
+    ViewData["Icon"] = "tasks";
+    var leadId = ViewBag.LeadId as int?;
+    var leadName = ViewBag.LeadName as string;
+    var loginType = Context.Session.GetString("LoginType") ?? "User";
+    var userRole = Context.Session.GetString("UserRole") ?? "User";
+    var userId = Context.Session.GetString("UserId");
+    var isFullAccess = loginType == "Company" || userRole == "Admin";
+
+    // Check specific page access from database
+    var canCreateTask = false;
+    var canEditTask = false;
+    var canDeleteTask = false;
+
+    if (!string.IsNullOrEmpty(userId))
+    {
+        try
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // Check Task Create access (PermissionId 28)
+                string query = @"
+                    SELECT CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM UserPermissions
+                            WHERE UserId = @UserId
+                            AND PermissionId = 28
+                            AND CanCreate = 1
+                        ) THEN 1
+                        WHEN EXISTS (
+                            SELECT 1 FROM RolePermissions rp
+                            INNER JOIN Users u ON u.Role = rp.RoleName
+                            WHERE u.Id = @UserId
+                            AND rp.PermissionId = 28
+                            AND rp.CanCreate = 1
+                        ) THEN 1
+                        ELSE 0
+                    END AS HasAccess";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    canCreateTask = result != null && Convert.ToInt32(result) == 1;
+                }
+
+                // Check Task Edit access (PermissionId 29)
+                query = @"
+                    SELECT CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM UserPermissions
+                            WHERE UserId = @UserId
+                            AND PermissionId = 29
+                            AND CanEdit = 1
+                        ) THEN 1
+                        WHEN EXISTS (
+                            SELECT 1 FROM RolePermissions rp
+                            INNER JOIN Users u ON u.Role = rp.RoleName
+                            WHERE u.Id = @UserId
+                            AND rp.PermissionId = 29
+                            AND rp.CanEdit = 1
+                        ) THEN 1
+                        ELSE 0
+                    END AS HasAccess";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    canEditTask = result != null && Convert.ToInt32(result) == 1;
+                }
+
+                // Check Task Delete access (PermissionId 30)
+                query = @"
+                    SELECT CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM UserPermissions
+                            WHERE UserId = @UserId
+                            AND PermissionId = 30
+                            AND CanDelete = 1
+                        ) THEN 1
+                        WHEN EXISTS (
+                            SELECT 1 FROM RolePermissions rp
+                            INNER JOIN Users u ON u.Role = rp.RoleName
+                            WHERE u.Id = @UserId
+                            AND rp.PermissionId = 30
+                            AND rp.CanDelete = 1
+                        ) THEN 1
+                        ELSE 0
+                    END AS HasAccess";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    canDeleteTask = result != null && Convert.ToInt32(result) == 1;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Fallback to role-based access
+            canCreateTask = isFullAccess || userRole == "Manager" || userRole == "User";
+            canEditTask = isFullAccess || userRole == "Manager" || userRole == "User";
+            canDeleteTask = isFullAccess;
+        }
+    }
+    else
+    {
+        canCreateTask = isFullAccess || userRole == "Manager" || userRole == "User";
+        canEditTask = isFullAccess || userRole == "Manager" || userRole == "User";
+        canDeleteTask = isFullAccess;
+    }
+}
+
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-tasks"></i>
+            @if (!string.IsNullOrEmpty(leadName))
+            {
+                <span>Tasks for: @leadName</span>
+            }
+            else
+            {
+                <span>Lead Tasks</span>
+            }
+            <span class="badge-count primary" id="taskCount">0</span>
+        </h5>
+        <div class="d-flex gap-2">
+            <a asp-controller="Leads" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-list"></i> All Leads
+            </a>
+            @if (leadId > 0)
+            {
+                @if (canCreateTask)
+                {
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openCreateTaskModal()">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary btn-sm disabled" title="Add Task (Permission Denied)" disabled>
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                }
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (leadId > 0)
+    {
+        <!-- Quick Links -->
+        <div class="quick-links mb-3">
+           
+            <span class="text-muted small ms-3">Lead ID: #@leadId</span>
+        </div>
+
+        <!-- Search / Filter -->
+        <div class="search-filter-bar">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <select id="filterStatus" class="form-control" onchange="loadTasks()">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterPriority" class="form-control" onchange="loadTasks()">
+                        <option value="">All Priorities</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" id="searchTask" class="form-control" placeholder="Search tasks..." />
+                        <button class="btn btn-primary btn-sm" onclick="loadTasks()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div id="tasksList">
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p class="mt-2">Loading tasks...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Show All Leads with Tasks -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Select a Lead:</strong> Please select a lead from the list below to view its tasks.
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Lead Name</th>
+                                <th>Company</th>
+                                <th>Email</th>
+                                <th>Tasks</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.Leads != null)
+                            {
+                                foreach (var lead in ViewBag.Leads)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2" style="background: @GetColor(lead.Text);">
+                                                    @lead.Text?.Substring(0, 1)
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">@lead.Text</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@lead.Company</td>
+                                        <td>@lead.Email</td>
+                                        <td>
+                                            <span class="badge bg-primary">@lead.TaskCount</span>
+                                        </td>
+                                        <td>
+                                            <a asp-action="Index" asp-route-leadId="@lead.Value" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-tasks"></i> View Tasks
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="content-card">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-chart-simple"></i> Quick Stats
+                    </h6>
+                    <hr />
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted">Total Leads:</span>
+                        <strong>@(ViewBag.Leads != null ? ViewBag.Leads.Count : 0)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted">Total Tasks:</span>
+                        <strong id="totalAllTasks">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Create Task Modal -->
+<div class="modal fade" id="createTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle text-primary"></i> Create Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <form id="createTaskForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="LeadId" value="@leadId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Task Date</label>
+                                <input type="datetime-local" name="TaskDate" id="createTaskDate" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Assigned To</label>
+                                <select name="AssignedTo" id="createAssignedTo" class="form-control" required>
+                                    <option value="">Select User</option>
+                                    @if (ViewBag.UserList != null)
+                                    {
+                                        foreach (var user in ViewBag.UserList)
+                                        {
+                                            <option value="@user.Id">@user.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Summary</label>
+                                <textarea name="Summary" id="createSummary" class="form-control" rows="3" placeholder="Enter task summary" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="Status" id="createStatus" class="form-control">
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Priority</label>
+                                <select name="Priority" id="createPriority" class="form-control">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="submitCreateTask()">
+                    <i class="fas fa-save"></i> Create Task
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit text-warning"></i> Edit Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <form id="editTaskForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" id="editTaskId" />
+                    <input type="hidden" name="LeadId" id="editLeadId" />
+                    <input type="hidden" name="OpportunityId" id="editOpportunityId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Task Date</label>
+                                <input type="datetime-local" name="TaskDate" id="editTaskDate" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Assigned To</label>
+                                <select name="AssignedTo" id="editAssignedTo" class="form-control" required>
+                                    <option value="">Select User</option>
+                                    @if (ViewBag.UserList != null)
+                                    {
+                                        foreach (var user in ViewBag.UserList)
+                                        {
+                                            <option value="@user.Id">@user.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Summary</label>
+                                <textarea name="Summary" id="editSummary" class="form-control" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="Status" id="editStatus" class="form-control">
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Priority</label>
+                                <select name="Priority" id="editPriority" class="form-control">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                @if (canEditTask)
+                {
+                    <button type="button" class="btn btn-warning btn-sm" onclick="submitEditTask()">
+                        <i class="fas fa-save"></i> Update Task
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-warning btn-sm disabled" title="Edit (Permission Denied)" disabled>
+                        <i class="fas fa-save"></i> Update Task
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Delete Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <p class="mb-0">Are you sure you want to delete this task? This action cannot be undone.</p>
+                <input type="hidden" id="deleteTaskId" />
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                @if (canDeleteTask)
+                {
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteTask()">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-danger btn-sm disabled" title="Delete (Permission Denied)" disabled>
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+                   LEAD TASKS PAGE - LEAD STYLE
+                   ============================================ */
+
+    /* Stats Cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 10px;
+        }
+
+        .stat-card .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-card .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+    .stat-icon.blue {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .stat-icon.green {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .stat-icon.orange {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+    }
+
+    .stat-icon.purple {
+        background: rgba(155, 89, 182, 0.1);
+        color: #8e44ad;
+    }
+
+    .stat-icon.red {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+
+    /* Badge Count */
+    .badge-count {
+        display: inline-block;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 20px;
+        line-height: 1.5;
+    }
+
+        .badge-count.primary {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .badge-count.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-count.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-count.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    /* Content Card */
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .card-header-custom h5 i {
+                color: #3498db;
+            }
+
+    /* Quick Links */
+    .quick-links {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Search/Filter Bar */
+    .search-filter-bar {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #f0f2f5;
+    }
+
+        .search-filter-bar .form-control,
+        .search-filter-bar .form-select {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .search-filter-bar .input-group .form-control {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .search-filter-bar .input-group .btn {
+            border-radius: 0 8px 8px 0;
+        }
+
+    /* Task Cards */
+    .task-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        border: 1px solid #f0f2f5;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .task-card:hover {
+            border-color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .task-card .task-info {
+            flex: 1;
+        }
+
+        .task-card .task-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 15px;
+        }
+
+        .task-card .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+            .task-card .task-meta i {
+                margin-right: 4px;
+            }
+
+        .task-card .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-badge.inprogress {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-badge.completed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    /* Priority Badges */
+    .priority-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+        .priority-badge.low {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .priority-badge.medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .priority-badge.high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .priority-badge.urgent {
+            background: #dc2626;
+            color: white;
+        }
+
+    /* Avatar */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table th {
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #f0f2f5;
+            background: #f8fafc;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+    .table-hover tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    /* Badge */
+    .badge {
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    /* Alerts */
+    .alert {
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: none;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: #4f46e5;
+        border: none;
+        color: white;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-primary:hover:not(.disabled) {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            color: white;
+        }
+
+        .btn-primary.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        border: none;
+        color: #475569;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #1a1a2e;
+        }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-outline-primary {
+        border: 1px solid #4f46e5;
+        color: #4f46e5;
+        background: transparent;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline-primary:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+    .btn-outline-info {
+        border: 1px solid #0dcaf0;
+        color: #0dcaf0;
+        background: transparent;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-outline-info:hover {
+            background: #0dcaf0;
+            color: white;
+        }
+
+    .btn-warning {
+        background: #f59e0b;
+        border: none;
+        color: white;
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+        .btn-warning:hover:not(.disabled) {
+            background: #d97706;
+            color: white;
+        }
+
+        .btn-warning.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+        .btn-danger:hover:not(.disabled) {
+            background: #b02a37;
+            color: white;
+        }
+
+        .btn-danger.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .active {
+        background: #4f46e5;
+        color: white;
+    }
+
+    .btn-group .btn {
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+
+        .btn-group .btn:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .btn-group .btn:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+    /* Form Controls */
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 8px 14px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: none;
+        padding: 20px 24px 0;
+    }
+
+    .modal-body {
+        padding: 20px 24px;
+    }
+
+    .modal-footer {
+        border-top: none;
+        padding: 0 24px 24px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .stats-row
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+        .stat-card .stat-number {
+            font-size: 18px;
+        }
+
+    .task-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+        .task-card .task-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .task-card .task-meta {
+            flex-wrap: wrap;
+        }
+
+    .card-header-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .card-header-custom .d-flex {
+            width: 100%;
+        }
+
+            .card-header-custom .d-flex .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+    .search-filter-bar .row > div {
+        margin-bottom: 8px;
+    }
+
+    .quick-links {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .quick-links .btn-group {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+            .quick-links .btn-group .btn {
+                flex: 1;
+            }
+
+    .table th, .table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .stats-row
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 10px;
+    }
+
+        .stat-card .stat-number {
+            font-size: 16px;
+        }
+
+        .stat-card .stat-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+
+    .table {
+        font-size: 11px;
+    }
+
+        .table th, .table td {
+            padding: 6px 8px;
+        }
+
+    .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .form-control, .form-select {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    }
+</style>
+
+@functions {
+    public string GetColor(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "#4f46e5";
+        var colors = new[] { "#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706", "#dc2626", "#6b7280" };
+        var index = Math.Abs(name.GetHashCode()) % colors.Length;
+        return colors[index];
+    }
+}
+
+@section Scripts {
+    <script>
+        var leadId = @(leadId ?? 0);
+        var users = @Html.Raw(Json.Serialize(ViewBag.UserList));
+
+        $(document).ready(function() {
+            if (leadId > 0) {
+                loadTasks();
+                // Set default date for create form
+                var now = new Date();
+                var formattedDate = now.toISOString().slice(0, 16);
+                $('#createTaskDate').val(formattedDate);
+            }
+        });
+
+        // ============================================================
+        // LOAD TASKS
+        // ============================================================
+        function loadTasks() {
+            var status = $('#filterStatus').val();
+            var priority = $('#filterPriority').val();
+            var search = $('#searchTask').val();
+
+            $.ajax({
+                url: '@Url.Action("GetLeadTasks", "LeadTasks")',
+                type: 'GET',
+                data: {
+                    leadId: leadId,
+                    status: status,
+                    priority: priority,
+                    search: search
+                },
+                success: function(data) {
+                    var html = '';
+                    var total = 0;
+
+                    if (data && data.length > 0) {
+                        total = data.length;
+                        $('#taskCount').text(total);
+
+                        $.each(data, function(i, task) {
+                            var statusClass = task.status ? task.status.toLowerCase().replace(' ', '') : 'pending';
+                            var priorityClass = task.priority ? task.priority.toLowerCase() : 'medium';
+
+                            html += '<div class="task-card">';
+                            html += '<div class="task-info">';
+                            html += '<div class="task-title">' + task.summary + '</div>';
+                            html += '<div class="task-meta">';
+                            html += '<span><i class="fas fa-user"></i> ' + (task.assignedTo || 'Unassigned') + '</span>';
+                            html += '<span><i class="fas fa-calendar"></i> ' + task.taskDate + '</span>';
+                            html += '<span><span class="status-badge ' + statusClass + '">' + task.status + '</span></span>';
+                            if (task.priority) {
+                                html += '<span><span class="priority-badge ' + priorityClass + '">' + task.priority + '</span></span>';
+                            }
+                            html += '</div>';
+                            html += '</div>';
+                            html += '<div class="task-actions">';
+
+                            @if (canEditTask)
+                            {
+                                    <text>
+                                    html += '<button class="btn btn-warning btn-sm" onclick="openEditTaskModal(' + task.id + ')"><i class="fas fa-edit"></i></button>';
+                                    </text>
+                            }
+                            else
+                            {
+                                    <text>
+                                    html += '<button class="btn btn-warning btn-sm disabled" title="Edit (Permission Denied)" disabled><i class="fas fa-edit"></i></button>';
+                                    </text>
+                            }
+
+                            @if (canDeleteTask)
+                            {
+                                    <text>
+                                    html += '<button class="btn btn-danger btn-sm" onclick="openDeleteTaskModal(' + task.id + ')"><i class="fas fa-trash"></i></button>';
+                                    </text>
+                            }
+                            else
+                            {
+                                    <text>
+                                    html += '<button class="btn btn-danger btn-sm disabled" title="Delete (Permission Denied)" disabled><i class="fas fa-trash"></i></button>';
+                                    </text>
+                            }
+
+                            html += '</div>';
+                            html += '</div>';
+                        });
+
+                        $('#tasksList').html(html);
+                    } else {
+                        $('#taskCount').text(0);
+                        $('#tasksList').html('<div class="text-center text-muted py-5"><i class="fas fa-inbox fa-3x d-block mb-3"></i><p>No tasks found for this lead.</p></div>');
+                    }
+                },
+                error: function() {
+                    $('#tasksList').html('<div class="text-center text-muted py-5"><i class="fas fa-exclamation-triangle fa-3x d-block mb-3"></i><p>Error loading tasks. Please try again.</p></div>');
+                }
+            });
+        }
+
+        // ============================================================
+        // RESET FILTERS
+        // ============================================================
+        function resetFilters() {
+            $('#filterStatus').val('');
+            $('#filterPriority').val('');
+            $('#searchTask').val('');
+            loadTasks();
+        }
+
+        // ============================================================
+        // CREATE TASK
+        // ============================================================
+        function openCreateTaskModal() {
+            if (leadId == 0 || leadId == null) {
+                alert('Please select a lead first.');
+                return;
+            }
+            $('#createTaskModal').modal('show');
+        }
+
+        function submitCreateTask() {
+            var formData = {
+                LeadId: leadId,
+                AssignedTo: parseInt($('#createAssignedTo').val()) || null,
+                TaskDate: $('#createTaskDate').val(),
+                Summary: $('#createSummary').val(),
+                Status: $('#createStatus').val(),
+                Priority: $('#createPriority').val()
+            };
+
+            if (!formData.Summary) {
+                alert('Summary is required.');
+                return;
+            }
+
+            if (!formData.AssignedTo) {
+                alert('Please select a user to assign this task.');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Create", "LeadTasks")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    if (response.success) {
+                        $('#createTaskModal').modal('hide');
+                        $('#createSummary').val('');
+                        loadTasks();
+                        showSuccess('Task created successfully!');
+                    } else {
+                        alert(response.message || 'Error creating task.');
+                    }
+                },
+                error: function() {
+                    alert('Error creating task. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // EDIT TASK
+        // ============================================================
+        function openEditTaskModal(id) {
+            @if (canEditTask)
+            {
+                    <text>
+                    $.ajax({
+                        url: '@Url.Action("GetTask", "LeadTasks")',
+                        type: 'GET',
+                        data: { id: id },
+                        success: function(response) {
+                            if (response.success) {
+                                var task = response.task;
+                                $('#editTaskId').val(task.id);
+                                $('#editLeadId').val(task.leadId);
+                                $('#editOpportunityId').val(task.opportunityId);
+                                $('#editTaskDate').val(task.taskDate);
+                                $('#editSummary').val(task.summary);
+                                $('#editAssignedTo').val(task.assignedTo);
+                                $('#editStatus').val(task.status);
+                                $('#editPriority').val(task.priority);
+                                $('#editTaskModal').modal('show');
+                            } else {
+                                alert(response.message || 'Error loading task.');
+                            }
+                        },
+                        error: function() {
+                            alert('Error loading task. Please try again.');
+                        }
+                    });
+                    </text>
+            }
+            else
+            {
+                    <text>
+                    alert('You do not have permission to edit this task.');
+                    </text>
+            }
+        }
+
+        function submitEditTask() {
+            var formData = {
+                Id: parseInt($('#editTaskId').val()),
+                LeadId: parseInt($('#editLeadId').val()) || null,
+                OpportunityId: parseInt($('#editOpportunityId').val()) || null,
+                AssignedTo: parseInt($('#editAssignedTo').val()) || null,
+                TaskDate: $('#editTaskDate').val(),
+                Summary: $('#editSummary').val(),
+                Status: $('#editStatus').val(),
+                Priority: $('#editPriority').val()
+            };
+
+            if (!formData.Summary) {
+                alert('Summary is required.');
+                return;
+            }
+
+            if (!formData.AssignedTo) {
+                alert('Please select a user to assign this task.');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Update", "LeadTasks")',
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    if (response.success) {
+                        $('#editTaskModal').modal('hide');
+                        loadTasks();
+                        showSuccess('Task updated successfully!');
+                    } else {
+                        alert(response.message || 'Error updating task.');
+                    }
+                },
+                error: function() {
+                    alert('Error updating task. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // DELETE TASK
+        // ============================================================
+        function openDeleteTaskModal(id) {
+            @if (canDeleteTask)
+            {
+                    <text>
+                    $('#deleteTaskId').val(id);
+                    $('#deleteTaskModal').modal('show');
+                    </text>
+            }
+            else
+            {
+                    <text>
+                    alert('You do not have permission to delete this task.');
+                    </text>
+            }
+        }
+
+        function confirmDeleteTask() {
+            var id = $('#deleteTaskId').val();
+
+            $.ajax({
+                url: '@Url.Action("Delete", "LeadTasks")',
+                type: 'DELETE',
+                data: { id: id },
+                success: function(response) {
+                    if (response.success) {
+                        $('#deleteTaskModal').modal('hide');
+                        loadTasks();
+                        showSuccess('Task deleted successfully!');
+                    } else {
+                        alert(response.message || 'Error deleting task.');
+                    }
+                },
+                error: function() {
+                    alert('Error deleting task. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // SHOW SUCCESS MESSAGE
+        // ============================================================
+        function showSuccess(message) {
+            var alertDiv = $('<div class="alert alert-success alert-dismissible fade show">' +
+                '<i class="fas fa-check-circle"></i> ' + message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>');
+            $('.card-header-custom').after(alertDiv);
+            setTimeout(function() {
+                alertDiv.fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+
+        // Make functions globally accessible
+        window.loadTasks = loadTasks;
+        window.resetFilters = resetFilters;
+        window.openCreateTaskModal = openCreateTaskModal;
+        window.submitCreateTask = submitCreateTask;
+        window.openEditTaskModal = openEditTaskModal;
+        window.submitEditTask = submitEditTask;
+        window.openDeleteTaskModal = openDeleteTaskModal;
+        window.confirmDeleteTask = confirmDeleteTask;
+    </script>
+}

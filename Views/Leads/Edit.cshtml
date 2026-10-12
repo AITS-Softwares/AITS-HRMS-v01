@@ -1,0 +1,1323 @@
+﻿@* @model Erp_Aits.Models.LeadViewModel
+@{
+    ViewData["Title"] = "Edit Lead";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "edit";
+}
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5><i class="fas fa-user-edit"></i> Edit Lead</h5>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.Lead.Id" class="btn btn-info btn-sm">
+                <i class="fas fa-eye"></i> View Details
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Lead.Id" />
+
+        <!-- Section 1: Basic Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-user text-primary"></i>
+                <h6>Primary Contact</h6>
+                <small class="text-muted">Basic identity and job details</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Salutation" class="form-label"></label>
+                            <select asp-for="Lead.Salutation" class="form-control" asp-items="@(new SelectList(Model.SalutationList))">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.FirstName" class="form-label required"></label>
+                            <input asp-for="Lead.FirstName" class="form-control" placeholder="Enter First Name" />
+                            <span asp-validation-for="Lead.FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.MiddleName" class="form-label"></label>
+                            <input asp-for="Lead.MiddleName" class="form-control" placeholder="Enter Middle Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.LastName" class="form-label"></label>
+                            <input asp-for="Lead.LastName" class="form-control" placeholder="Enter Last Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.JobTitle" class="form-label"></label>
+                            <input asp-for="Lead.JobTitle" class="form-control" placeholder="e.g. CEO" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Gender" class="form-label"></label>
+                            <select asp-for="Lead.Gender" class="form-control" asp-items="@(new SelectList(Model.GenderList))">
+                                <option value="">Select</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.LeadOwner" class="form-label"></label>
+                            <input asp-for="Lead.LeadOwner" class="form-control" placeholder="Owner Name" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Contact Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-phone-alt text-blue"></i>
+                <h6>Contact & Social</h6>
+                <small class="text-muted">Email, phone and messaging</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Email" class="form-label required"></label>
+                            <input asp-for="Lead.Email" class="form-control" placeholder="example@mail.com" type="email" />
+                            <span asp-validation-for="Lead.Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.MobileNo" class="form-label required"></label>
+                            <input asp-for="Lead.MobileNo" class="form-control" placeholder="10-digit number" />
+                            <span asp-validation-for="Lead.MobileNo" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.WhatsApp" class="form-label"></label>
+                            <input asp-for="Lead.WhatsApp" class="form-control" placeholder="WhatsApp Number" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Website" class="form-label"></label>
+                            <input asp-for="Lead.Website" class="form-control" placeholder="https://..." />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Phone" class="form-label"></label>
+                            <input asp-for="Lead.Phone" class="form-control" placeholder="Phone Number" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="Lead.PhoneExt" class="form-label"></label>
+                            <input asp-for="Lead.PhoneExt" class="form-control" placeholder="Ext" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Fax" class="form-label"></label>
+                            <input asp-for="Lead.Fax" class="form-control" placeholder="Fax Number" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Organization Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-building text-purple"></i>
+                <h6>Organization Details</h6>
+                <small class="text-muted">Company scale and industry</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Lead.OrganizationName" class="form-label"></label>
+                            <input asp-for="Lead.OrganizationName" class="form-control" placeholder="Company Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Lead.Industry" class="form-label"></label>
+                            <select asp-for="Lead.Industry" class="form-control" asp-items="@(new SelectList(Model.IndustryList))">
+                                <option value="">Select Industry</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.AnnualRevenue" class="form-label"></label>
+                            <input asp-for="Lead.AnnualRevenue" class="form-control" placeholder="Annual Revenue" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Employees" class="form-label"></label>
+                            <input asp-for="Lead.Employees" class="form-control" placeholder="Number of Employees" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.MarketSegment" class="form-label"></label>
+                            <input asp-for="Lead.MarketSegment" class="form-control" placeholder="Market Segment" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Territory" class="form-label"></label>
+                            <select asp-for="Lead.Territory" class="form-control" asp-items="@(new SelectList(Model.TerritoryList))">
+                                <option value="">Select Territory</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Address Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-map-marker-alt text-red"></i>
+                <h6>Address Information</h6>
+                <small class="text-muted">Location details</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.City" class="form-label"></label>
+                            <input asp-for="Lead.City" class="form-control" placeholder="City" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.State" class="form-label"></label>
+                            <input asp-for="Lead.State" class="form-control" placeholder="State" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Country" class="form-label"></label>
+                            <select asp-for="Lead.Country" class="form-control" asp-items="@(new SelectList(Model.CountryList))">
+                                <option value="">Select Country</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.County" class="form-label"></label>
+                            <input asp-for="Lead.County" class="form-control" placeholder="County" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.PrintLanguage" class="form-label"></label>
+                            <select asp-for="Lead.PrintLanguage" class="form-control" asp-items="@(new SelectList(Model.PrintLanguageList))">
+                                <option value="">Select Language</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Classification -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-tags text-amber"></i>
+                <h6>Classification</h6>
+                <small class="text-muted">Lead status and categorization</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Status" class="form-label required"></label>
+                            <select asp-for="Lead.Status" class="form-control" asp-items="@(new SelectList(Model.StatusList))">
+                                <option value="">Select Status</option>
+                            </select>
+                            <span asp-validation-for="Lead.Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.LeadType" class="form-label"></label>
+                            <select asp-for="Lead.LeadType" class="form-control" asp-items="@(new SelectList(Model.LeadTypeList))">
+                                <option value="">Select Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Source" class="form-label"></label>
+                            <select asp-for="Lead.Source" class="form-control" asp-items="@(new SelectList(Model.SourceList))">
+                                <option value="">Select Source</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.RequestType" class="form-label"></label>
+                            <select asp-for="Lead.RequestType" class="form-control" asp-items="@(new SelectList(Model.RequestTypeList))">
+                                <option value="">Select Request Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.QualificationStatus" class="form-label"></label>
+                            <select asp-for="Lead.QualificationStatus" class="form-control" asp-items="@(new SelectList(Model.QualificationStatusList))">
+                                <option value="">Select Qualification</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.QualifiedBy" class="form-label"></label>
+                            <input asp-for="Lead.QualifiedBy" class="form-control" placeholder="Qualified By" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.QualifiedOn" class="form-label"></label>
+                            <input asp-for="Lead.QualifiedOn" class="form-control" type="date" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-clock text-info"></i>
+                <h6>System Information</h6>
+                <small class="text-muted">Read-only audit details</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Created Date</label>
+                            <input class="form-control" value="@Model.Lead.CreatedDate.ToString("dd MMM yyyy HH:mm")" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Created By</label>
+                            <input class="form-control" value="@Model.Lead.CreatedBy" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Modified Date</label>
+                            <input class="form-control" value="@(Model.Lead.ModifiedDate?.ToString("dd MMM yyyy HH:mm") ?? "Never")" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Modified By</label>
+                            <input class="form-control" value="@(Model.Lead.ModifiedBy ?? "Never")" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Lead
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Lead.Id" class="btn btn-danger ms-auto">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .section-card:hover {
+            border-color: #c3c9d0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+    .section-header {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .section-header i {
+            font-size: 18px;
+        }
+
+        .section-header h6 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .section-header small {
+            margin-left: auto;
+            font-size: 12px;
+        }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+
+        .form-label.required:after {
+            content: " *";
+            color: red;
+        }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-control:disabled {
+            background: #f1f5f9;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+    .form-actions {
+        padding: 15px 0;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+        .form-actions .btn {
+            padding: 10px 24px;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-actions .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+            .form-actions .btn-primary:hover {
+                background: #4338ca;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            }
+
+        .form-actions .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+            .form-actions .btn-secondary:hover {
+                background: #e2e8f0;
+                color: #1a1a2e;
+            }
+
+        .form-actions .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+            .form-actions .btn-danger:hover {
+                background: #c82333;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            }
+
+    .ms-auto {
+        margin-left: auto;
+    }
+
+    .text-blue {
+        color: #3b82f6;
+    }
+
+    .text-purple {
+        color: #8b5cf6;
+    }
+
+    .text-red {
+        color: #ef4444;
+    }
+
+    .text-amber {
+        color: #f59e0b;
+    }
+
+    .text-info {
+        color: #0ea5e9;
+    }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-info {
+        background: #0dcaf0;
+        color: white;
+    }
+
+        .btn-info:hover {
+            background: #0bb5d8;
+            color: white;
+        }
+
+    .alert {
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: none;
+        margin-bottom: 16px;
+        font-size: 14px;
+        position: relative;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f0f2f5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        overflow: visible !important;
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .card-header-custom h5 i {
+                color: #4f46e5;
+            }
+
+    @@media (max-width: 768px) {
+        .section-body
+
+    {
+        padding: 15px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .form-actions .btn {
+            justify-content: center;
+        }
+
+    .ms-auto {
+        margin-left: 0;
+    }
+
+    .card-header-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .form-control {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .form-label {
+        font-size: 12px;
+    }
+
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Form validation styling
+            $('.form-control').on('blur', function() {
+                if ($(this).val() && $(this).hasClass('input-validation-error')) {
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+
+            // Confirm before delete
+            $('.btn-danger').on('click', function(e) {
+                if (!confirm('Are you sure you want to delete this lead?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+} *@
+
+@model Erp_Aits.Models.LeadViewModel
+@{
+    ViewData["Title"] = "Edit Lead";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "edit";
+}
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5><i class="fas fa-user-edit"></i> Edit Lead</h5>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.Lead.Id" class="btn btn-info btn-sm">
+                <i class="fas fa-eye"></i> View Details
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Lead.Id" />
+
+        <!-- Section 1: Basic Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-user text-primary"></i>
+                <h6>Primary Contact</h6>
+                <small class="text-muted">Basic identity and job details</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Salutation" class="form-label"></label>
+                            <select asp-for="Lead.Salutation" class="form-control" asp-items="@(new SelectList(Model.SalutationList))">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.FirstName" class="form-label required"></label>
+                            <input asp-for="Lead.FirstName" class="form-control" placeholder="Enter First Name" />
+                            <span asp-validation-for="Lead.FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.MiddleName" class="form-label"></label>
+                            <input asp-for="Lead.MiddleName" class="form-control" placeholder="Enter Middle Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.LastName" class="form-label"></label>
+                            <input asp-for="Lead.LastName" class="form-control" placeholder="Enter Last Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.JobTitle" class="form-label"></label>
+                            <input asp-for="Lead.JobTitle" class="form-control" placeholder="e.g. CEO" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Gender" class="form-label"></label>
+                            <select asp-for="Lead.Gender" class="form-control" asp-items="@(new SelectList(Model.GenderList))">
+                                <option value="">Select</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.LeadOwner" class="form-label"></label>
+                            <input asp-for="Lead.LeadOwner" class="form-control" placeholder="Owner Name" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Contact Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-phone-alt text-blue"></i>
+                <h6>Contact & Social</h6>
+                <small class="text-muted">Email, phone and messaging</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Email" class="form-label required"></label>
+                            <input asp-for="Lead.Email" class="form-control" placeholder="example@mail.com" type="email" />
+                            <span asp-validation-for="Lead.Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.MobileNo" class="form-label required"></label>
+                            <input asp-for="Lead.MobileNo" class="form-control" placeholder="10-digit number" />
+                            <span asp-validation-for="Lead.MobileNo" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.WhatsApp" class="form-label"></label>
+                            <input asp-for="Lead.WhatsApp" class="form-control" placeholder="WhatsApp Number" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Website" class="form-label"></label>
+                            <input asp-for="Lead.Website" class="form-control" placeholder="https://..." />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Phone" class="form-label"></label>
+                            <input asp-for="Lead.Phone" class="form-control" placeholder="Phone Number" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="Lead.PhoneExt" class="form-label"></label>
+                            <input asp-for="Lead.PhoneExt" class="form-control" placeholder="Ext" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Fax" class="form-label"></label>
+                            <input asp-for="Lead.Fax" class="form-control" placeholder="Fax Number" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Organization Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-building text-purple"></i>
+                <h6>Organization Details</h6>
+                <small class="text-muted">Company scale and industry</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Lead.OrganizationName" class="form-label"></label>
+                            <input asp-for="Lead.OrganizationName" class="form-control" placeholder="Company Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Lead.Industry" class="form-label"></label>
+                            <select asp-for="Lead.Industry" class="form-control" asp-items="@(new SelectList(Model.IndustryList))">
+                                <option value="">Select Industry</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.AnnualRevenue" class="form-label"></label>
+                            <input asp-for="Lead.AnnualRevenue" class="form-control" placeholder="Annual Revenue" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Employees" class="form-label"></label>
+                            <input asp-for="Lead.Employees" class="form-control" placeholder="Number of Employees" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.MarketSegment" class="form-label"></label>
+                            <input asp-for="Lead.MarketSegment" class="form-control" placeholder="Market Segment" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Territory" class="form-label"></label>
+                            <select asp-for="Lead.Territory" class="form-control" asp-items="@(new SelectList(Model.TerritoryList))">
+                                <option value="">Select Territory</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Address Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-map-marker-alt text-red"></i>
+                <h6>Address Information</h6>
+                <small class="text-muted">Location details</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Area" class="form-label"></label>
+                            <input asp-for="Lead.Area" class="form-control" placeholder="Enter Area/Locality" />
+                        </div>
+                    </div>
+                   
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.City" class="form-label"></label>
+                            <input asp-for="Lead.City" class="form-control" placeholder="City" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.State" class="form-label"></label>
+                            <input asp-for="Lead.State" class="form-control" placeholder="State" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lead.Country" class="form-label"></label>
+                            <select asp-for="Lead.Country" class="form-control" asp-items="@(new SelectList(Model.CountryList))">
+                                <option value="">Select Country</option>
+                            </select>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Classification -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-tags text-amber"></i>
+                <h6>Classification</h6>
+                <small class="text-muted">Lead status and categorization</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Status" class="form-label required"></label>
+                            <select asp-for="Lead.Status" class="form-control" asp-items="@(new SelectList(Model.StatusList))">
+                                <option value="">Select Status</option>
+                            </select>
+                            <span asp-validation-for="Lead.Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.LeadType" class="form-label"></label>
+                            <select asp-for="Lead.LeadType" class="form-control" asp-items="@(new SelectList(Model.LeadTypeList))">
+                                <option value="">Select Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.Source" class="form-label"></label>
+                            <select asp-for="Lead.Source" class="form-control" asp-items="@(new SelectList(Model.SourceList))">
+                                <option value="">Select Source</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.RequestType" class="form-label"></label>
+                            <select asp-for="Lead.RequestType" class="form-control" asp-items="@(new SelectList(Model.RequestTypeList))">
+                                <option value="">Select Request Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.QualificationStatus" class="form-label"></label>
+                            <select asp-for="Lead.QualificationStatus" class="form-control" asp-items="@(new SelectList(Model.QualificationStatusList))">
+                                <option value="">Select Qualification</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.QualifiedBy" class="form-label"></label>
+                            <input asp-for="Lead.QualifiedBy" class="form-control" placeholder="Qualified By" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Lead.QualifiedOn" class="form-label"></label>
+                            <input asp-for="Lead.QualifiedOn" class="form-control" type="date" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-clock text-info"></i>
+                <h6>System Information</h6>
+                <small class="text-muted">Read-only audit details</small>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Created Date</label>
+                            <input class="form-control" value="@Model.Lead.CreatedDate.ToString("dd MMM yyyy HH:mm")" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Created By</label>
+                            <input class="form-control" value="@Model.Lead.CreatedBy" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Modified Date</label>
+                            <input class="form-control" value="@(Model.Lead.ModifiedDate?.ToString("dd MMM yyyy HH:mm") ?? "Never")" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">Modified By</label>
+                            <input class="form-control" value="@(Model.Lead.ModifiedBy ?? "Never")" disabled style="background: #f1f5f9;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Lead
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Lead.Id" class="btn btn-danger ms-auto">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .section-card:hover {
+            border-color: #c3c9d0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+    .section-header {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .section-header i {
+            font-size: 18px;
+        }
+
+        .section-header h6 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .section-header small {
+            margin-left: auto;
+            font-size: 12px;
+        }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+
+        .form-label.required:after {
+            content: " *";
+            color: red;
+        }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-control:disabled {
+            background: #f1f5f9;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+    .form-actions {
+        padding: 15px 0;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+        .form-actions .btn {
+            padding: 10px 24px;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-actions .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+            .form-actions .btn-primary:hover {
+                background: #4338ca;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            }
+
+        .form-actions .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+            .form-actions .btn-secondary:hover {
+                background: #e2e8f0;
+                color: #1a1a2e;
+            }
+
+        .form-actions .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+            .form-actions .btn-danger:hover {
+                background: #c82333;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            }
+
+    .ms-auto {
+        margin-left: auto;
+    }
+
+    .text-blue {
+        color: #3b82f6;
+    }
+
+    .text-purple {
+        color: #8b5cf6;
+    }
+
+    .text-red {
+        color: #ef4444;
+    }
+
+    .text-amber {
+        color: #f59e0b;
+    }
+
+    .text-info {
+        color: #0ea5e9;
+    }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-info {
+        background: #0dcaf0;
+        color: white;
+    }
+
+        .btn-info:hover {
+            background: #0bb5d8;
+            color: white;
+        }
+
+    .alert {
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: none;
+        margin-bottom: 16px;
+        font-size: 14px;
+        position: relative;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f0f2f5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        overflow: visible !important;
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .card-header-custom h5 i {
+                color: #4f46e5;
+            }
+
+    @@media (max-width: 768px) {
+        .section-body
+
+    {
+        padding: 15px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .form-actions .btn {
+            justify-content: center;
+        }
+
+    .ms-auto {
+        margin-left: 0;
+    }
+
+    .card-header-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .form-control {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .form-label {
+        font-size: 12px;
+    }
+
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Form validation styling
+            $('.form-control').on('blur', function() {
+                if ($(this).val() && $(this).hasClass('input-validation-error')) {
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+
+            // Confirm before delete
+            $('.btn-danger').on('click', function(e) {
+                if (!confirm('Are you sure you want to delete this lead?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

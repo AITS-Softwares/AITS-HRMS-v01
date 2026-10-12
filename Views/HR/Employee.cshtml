@@ -1,0 +1,283 @@
+﻿@* @model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee</h4>
+    <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
+</div>
+
+<div class="mb-3">
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Active" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Active" })">Active</a>
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Inactive" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Inactive" })">Inactive</a>
+        <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("Employee", "HR", new { status = "" })">All</a>
+    </div>
+</div>
+
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+}
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Status</th>
+            <th>Designation</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            @* <tr>
+                <td>@emp.FullName</td>
+                <td><span class="badge bg-success-subtle text-success">@emp.Status</span></td>
+                <td>@emp.Designation</td>
+                <td>@emp.EmployeeCode</td>
+            </tr> *@
+
+@*             <tr style="cursor:pointer" onclick="location.href='@Url.Action("EmployeeDetails", "HR", new { id = emp.Id })'">
+                <td>@emp.FullName</td>
+                <td><span class="badge bg-success-subtle text-success">@emp.Status</span></td>
+                <td>@emp.Designation</td>
+                <td>@emp.EmployeeCode</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No employees found.</p>
+} *@ 
+
+@* @model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee</h4>
+    <div class="d-flex gap-2">
+        <!-- DIRECT FORM TO TRIGGER ERPNEXT SYNC -->
+        <form asp-action="SyncEmployeesFromErpNext" asp-controller="HR" method="post" style="display:inline-block !important; margin:0 !important;">
+            <button type="submit" class="btn btn-primary btn-sm fw-bold">⚡ Sync from ERPNext</button>
+        </form>
+        <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Active" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Active" })">Active</a>
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Inactive" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Inactive" })">Inactive</a>
+        <a class="btn btn-outline-secondary btn-sm @(string.IsNullOrEmpty(ViewBag.StatusFilter as string) ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "" })">All</a>
+    </div>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Status</th>
+            <th>Designation</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td>@(string.IsNullOrWhiteSpace(emp.FullName) ? $"{emp.FirstName} {emp.LastName}".Trim() : emp.FullName)</td>
+                <td>
+                    <span class="badge @(emp.Status == "Active" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                        @emp.Status
+                    </span>
+                </td>
+                <td>@(string.IsNullOrEmpty(emp.Designation) ? "-" : emp.Designation)</td>
+                <td><strong>@(string.IsNullOrEmpty(emp.EmployeeCode) ? emp.ErpNextId : emp.EmployeeCode)</strong></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No employees found. Click "⚡ Sync from ERPNext" to import records.</p>
+} *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* @model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee</h4>
+    <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
+</div>
+
+<div class="mb-3">
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Active" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Active" })">Active</a>
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Inactive" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Inactive" })">Inactive</a>
+        <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("Employee", "HR", new { status = "" })">All</a>
+    </div>
+</div>
+
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+}
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Status</th>
+            <th>Designation</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            @* <tr>
+                <td>@emp.FullName</td>
+                <td><span class="badge bg-success-subtle text-success">@emp.Status</span></td>
+                <td>@emp.Designation</td>
+                <td>@emp.EmployeeCode</td>
+            </tr> *@
+
+@*             <tr style="cursor:pointer" onclick="location.href='@Url.Action("EmployeeDetails", "HR", new { id = emp.Id })'">
+                <td>@emp.FullName</td>
+                <td><span class="badge bg-success-subtle text-success">@emp.Status</span></td>
+                <td>@emp.Designation</td>
+                <td>@emp.EmployeeCode</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No employees found.</p>
+} *@ 
+
+@model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee</h4>
+    @* <div class="d-flex gap-2">
+        <form asp-action="SyncEmployeesFromErpNext" asp-controller="HR" method="post" style="display:inline-block !important; margin:0 !important;">
+            <button type="submit" class="btn btn-primary btn-sm fw-bold">Sync from ERPNext</button>
+        </form>
+        <form asp-action="SyncEmployeesToErpNext" asp-controller="HR" method="post" style="display:inline-block !important; margin:0 !important;">
+            <button type="submit" class="btn btn-outline-primary btn-sm fw-bold">Push to ERPNext</button>
+        </form>
+        <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
+    </div> *@
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Active" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Active" })">Active</a>
+        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Inactive" ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "Inactive" })">Inactive</a>
+        <a class="btn btn-outline-secondary btn-sm @(string.IsNullOrEmpty(ViewBag.StatusFilter as string) ? "active" : "")"
+           href="@Url.Action("Employee", "HR", new { status = "" })">All</a>
+    </div>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Status</th>
+            <th>Designation</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr style="cursor:pointer" onclick="location.href='@Url.Action("EmployeeDetails", "HR", new { id = emp.Id })'">
+                <td>@(string.IsNullOrWhiteSpace(emp.FullName) ? $"{emp.FirstName} {emp.LastName}".Trim() : emp.FullName)</td>
+                <td>
+                    <span class="badge @(emp.Status == "Active" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                        @emp.Status
+                    </span>
+                </td>
+                <td>@(string.IsNullOrEmpty(emp.Designation) ? "-" : emp.Designation)</td>
+                <td><strong>@(string.IsNullOrEmpty(emp.EmployeeCode) ? emp.ErpNextId : emp.EmployeeCode)</strong></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No employees found.</p>
+}

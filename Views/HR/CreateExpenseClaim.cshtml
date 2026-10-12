@@ -1,0 +1,908 @@
+﻿@model Erp_Aits.Models.ExpenseClaim
+
+@{
+    ViewBag.Title = "New Expense Claim";
+}
+
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var emp in ViewBag.Employees)
+        {
+            <option value="@emp.name"
+                    data-name="@emp.employee_name"
+                    data-department="@emp.department"
+                    data-company="@emp.company">
+                @emp.employee_name (@emp.name)
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="userList">
+    @if (ViewBag.Users != null)
+    {
+        foreach (var u in ViewBag.Users)
+        {
+            <option value="@u.name">@u.full_name (@u.name)</option>
+        }
+    }
+</datalist>
+
+<datalist id="departmentList">
+    @if (ViewBag.Departments != null)
+    {
+        foreach (var d in ViewBag.Departments)
+        {
+            <option value="@d.name" data-company="@d.company">@d.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="companyList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.name"
+                    data-gstin="@c.gstin"
+                    data-payable="@c.default_payable_account"
+                    data-cost-center="@c.cost_center">
+                @c.name
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="companyGstinList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.gstin">@c.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="expenseTypeList">
+    @if (ViewBag.ExpenseTypes != null)
+    {
+        foreach (var t in ViewBag.ExpenseTypes)
+        {
+            <option value="@t.name">@t.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="accountList">
+    @if (ViewBag.Accounts != null)
+    {
+        foreach (var acc in ViewBag.Accounts)
+        {
+            <option value="@acc.name"
+                    data-company="@acc.company"
+                    data-account-type="@acc.account_type"
+                    data-root-type="@acc.root_type">
+                @acc.name
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="advanceList">
+    @if (ViewBag.EmployeeAdvances != null)
+    {
+        foreach (var adv in ViewBag.EmployeeAdvances)
+        {
+            <option value="@adv.name"
+                    data-employee="@adv.employee"
+                    data-posting-date="@adv.posting_date"
+                    data-advance-amount="@adv.advance_amount"
+                    data-paid-amount="@adv.paid_amount"
+                    data-claimed-amount="@adv.claimed_amount">
+                @adv.name
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="projectList">
+    @if (ViewBag.Projects != null)
+    {
+        foreach (var p in ViewBag.Projects)
+        {
+            <option value="@p.name" data-company="@p.company">@(p.project_name ?? p.name)</option>
+        }
+    }
+</datalist>
+
+<datalist id="costCenterList">
+    @if (ViewBag.CostCenters != null)
+    {
+        foreach (var cc in ViewBag.CostCenters)
+        {
+            <option value="@cc.name" data-company="@cc.company">@cc.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="taskList">
+    @if (ViewBag.Tasks != null)
+    {
+        foreach (var t in ViewBag.Tasks)
+        {
+            <option value="@t.name" data-project="@t.project">@t.subject (@t.name)</option>
+        }
+    }
+</datalist>
+
+<form action="/HR/CreateExpenseClaim" method="post">
+    <div class="ec-header">
+        <div>
+            <div class="ec-breadcrumb">Expense Claim</div>
+            <h4 class="mb-0">New Expense Claim</h4>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("ExpenseClaims", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    <ul class="nav ec-tabs mb-3" id="expenseTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#expensesTab" type="button">
+                Expenses & Advances
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#accountingTab" type="button">
+                Accounting
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#moreInfoTab" type="button">
+                More Info
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="expensesTab">
+            <div class="ec-section">
+                <h6 class="ec-section-title">Basic Information</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Series</label>
+                        <input name="ExpenseClaimCode"
+                               class="form-control"
+                               value="@ViewBag.NextCode"
+                               readonly
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Expense Approver</label>
+                        <input name="ExpenseApprover"
+                               value="@Model.ExpenseApprover"
+                               class="form-control"
+                               list="userList"
+                               placeholder="Select approver"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">From Employee</label>
+                        <input id="Employee"
+                               name="Employee"
+                               value="@Model.Employee"
+                               class="form-control"
+                               list="employeeList"
+                               placeholder="Select employee"
+                               oninput="autoFillEmployeeData(this.value)"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Employee Name</label>
+                        <input id="EmployeeName"
+                               name="EmployeeName"
+                               value="@Model.EmployeeName"
+                               class="form-control"
+                               readonly />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Approval Status</label>
+                        <select name="ApprovalStatus" class="form-select">
+                            <option value="Draft" selected="@(Model.ApprovalStatus == "Draft")">Draft</option>
+                            <option value="Approved" selected="@(Model.ApprovalStatus == "Approved")">Approved</option>
+                            <option value="Rejected" selected="@(Model.ApprovalStatus == "Rejected")">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label ea-form-label">Department</label>
+
+                        <div class="erp-link-wrapper">
+                            <input id="Department"
+                                   name="Department"
+                                   value="@Model.Department"
+                                   class="form-control ea-input"
+                                   placeholder="Select Department..."
+                                   autocomplete="off"
+                                   oninput="loadErpLinkDropdown(this, 'Department')"
+                                   onfocus="loadErpLinkDropdown(this, 'Department')" />
+
+                            <div class="erp-link-dropdown d-none"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Company</label>
+                        <input id="Company"
+                               name="Company"
+                               value="@(string.IsNullOrWhiteSpace(Model.Company) ? "Vinod Cookware India Private Limited" : Model.Company)"
+                               class="form-control"
+                               list="companyList"
+                               placeholder="Select company"
+                               oninput="autoFillCompanyData(this.value)"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Company GSTIN</label>
+                        <input id="CompanyGstin"
+                               name="CompanyGstin"
+                               value="@Model.CompanyGstin"
+                               class="form-control"
+                               list="companyGstinList"
+                               placeholder="Auto-filled from company" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="ec-section">
+                <h6 class="ec-section-title">Expenses</h6>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle" id="expensesTable">
+                        <thead>
+                            <tr>
+                                <th style="width:60px;">No.</th>
+                                <th>Expense Date</th>
+                                <th>Expense Type</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Sanctioned Amount</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesBody"></tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-dark" onclick="addExpenseRow()">Add Row</button>
+            </div>
+
+            <div class="ec-section">
+                <h6 class="ec-section-title">Taxes and Charges</h6>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle" id="taxesTable">
+                        <thead>
+                            <tr>
+                                <th style="width:60px;">No.</th>
+                                <th>Account Head</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>Total</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="taxesBody"></tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-dark" onclick="addTaxRow()">Add Row</button>
+            </div>
+
+            <div class="ec-section">
+                <h6 class="ec-section-title">Advances</h6>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle" id="advancesTable">
+                        <thead>
+                            <tr>
+                                <th style="width:60px;">No.</th>
+                                <th>Employee Advance</th>
+                                <th>Posting Date</th>
+                                <th>Advance Paid</th>
+                                <th>Unclaimed Amount</th>
+                                <th>Allocated Amount</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="advancesBody"></tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-dark" onclick="addAdvanceRow()">Add Row</button>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="accountingTab">
+            <div class="ec-section">
+                <h6 class="ec-section-title">Accounting Details</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Posting Date</label>
+                        <input name="PostingDate"
+                               type="date"
+                               class="form-control"
+                               value="@(Model.PostingDate?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Clearance Date</label>
+                        <input name="ClearanceDate"
+                               type="date"
+                               class="form-control"
+                               value="@(Model.ClearanceDate?.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Payable Account</label>
+                        <input id="PayableAccount"
+                               name="PayableAccount"
+                               value="@Model.PayableAccount"
+                               class="form-control"
+                               list="accountList"
+                               placeholder="Select payable account" />
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input name="IsPaid" value="true" type="checkbox" class="form-check-input" @(Model.IsPaid ? "checked" : "") />
+                            <input name="IsPaid" value="false" type="hidden" />
+                            <label class="form-check-label">Is Paid</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Remark</label>
+                        <textarea name="Remark" class="form-control" rows="3">@Model.Remark</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ec-section">
+                <h6 class="ec-section-title">Accounting Dimensions</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Project</label>
+                        <input id="Project"
+                               name="Project"
+                               value="@Model.Project"
+                               class="form-control"
+                               list="projectList"
+                               placeholder="Select project" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Cost Center</label>
+                        <input id="CostCenter"
+                               name="CostCenter"
+                               value="@Model.CostCenter"
+                               class="form-control"
+                               list="costCenterList"
+                               placeholder="Select cost center" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="moreInfoTab">
+            <div class="ec-section">
+                <h6 class="ec-section-title">More Info</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        <select name="Status" class="form-select">
+                            <option value="Draft" selected="@(Model.Status == "Draft")">Draft</option>
+                            <option value="Submitted" selected="@(Model.Status == "Submitted")">Submitted</option>
+                            <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Task</label>
+                        <input id="Task"
+                               name="Task"
+                               value="@Model.Task"
+                               class="form-control"
+                               list="taskList"
+                               placeholder="Select task" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    .ec-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .ec-breadcrumb {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .ec-tabs {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 4px;
+        gap: 4px;
+    }
+
+        .ec-tabs .nav-link {
+            border: 0;
+            color: #374151;
+            border-radius: 6px;
+            padding: 8px 14px;
+        }
+
+            .ec-tabs .nav-link.active {
+                background: #111827;
+                color: #fff;
+            }
+
+
+
+    .erp-link-wrapper {
+        position: relative;
+    }
+
+    .erp-link-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #d8dce0;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 6px;
+    }
+
+    .erp-link-option {
+        display: block;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: 8px 10px;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+        .erp-link-option:hover {
+            background: #f1f5f9;
+        }
+
+
+
+
+
+
+
+
+
+    .ec-section {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 16px;
+    }
+
+    .ec-section-title {
+        font-weight: 700;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eef0f2;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 6px;
+        min-height: 38px;
+    }
+
+    .table th {
+        background: #f8fafc;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .table input {
+        min-width: 140px;
+    }
+</style>
+
+<script>
+    let expenseIdx = 0;
+    let taxIdx = 0;
+    let advanceIdx = 0;
+    let erpLinkTimer = null;
+
+    function esc(value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('"', '&quot;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;');
+    }
+
+    function today() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    function findOption(listId, value) {
+        return document.querySelector(`#${listId} option[value="${CSS.escape(value)}"]`);
+    }
+
+    function autoFillEmployeeData(employee) {
+        const opt = findOption('employeeList', employee);
+        if (!opt) return;
+
+        const empName = opt.getAttribute('data-name') || '';
+        const department = opt.getAttribute('data-department') || '';
+        const company = opt.getAttribute('data-company') || '';
+
+        const empNameInput = document.getElementById('EmployeeName');
+        const departmentInput = document.getElementById('Department');
+        const companyInput = document.getElementById('Company');
+
+        if (empNameInput && empName) empNameInput.value = empName;
+        if (departmentInput && department) departmentInput.value = department;
+
+        if (companyInput && company) {
+            companyInput.value = company;
+            autoFillCompanyData(company);
+        }
+    }
+
+    function autoFillCompanyData(company) {
+        const opt = findOption('companyList', company);
+        if (!opt) return;
+
+        const gstin = opt.getAttribute('data-gstin') || '';
+        const payable = opt.getAttribute('data-payable') || '';
+        const costCenter = opt.getAttribute('data-cost-center') || '';
+
+        const gstinInput = document.getElementById('CompanyGstin');
+        const payableInput = document.getElementById('PayableAccount');
+        const costCenterInput = document.getElementById('CostCenter');
+
+        if (gstinInput && gstin) gstinInput.value = gstin;
+        if (payableInput && payable) payableInput.value = payable;
+        if (costCenterInput && costCenter) costCenterInput.value = costCenter;
+    }
+
+    function loadErpLinkDropdown(input, doctype) {
+        clearTimeout(erpLinkTimer);
+
+        erpLinkTimer = setTimeout(async function () {
+            const wrapper = input.closest('.erp-link-wrapper');
+            const dropdown = wrapper?.querySelector('.erp-link-dropdown');
+
+            if (!dropdown) return;
+
+            const employee = document.getElementById('Employee')?.value || '';
+
+            const url =
+                `/HR/SearchExpenseClaimLink?doctype=${encodeURIComponent(doctype)}` +
+                `&txt=${encodeURIComponent(input.value || '')}` +
+                `&employee=${encodeURIComponent(employee)}`;
+
+            const response = await fetch(url);
+            const rows = await response.json();
+
+            dropdown.innerHTML = '';
+
+            if (!rows || !rows.length) {
+                dropdown.classList.add('d-none');
+                return;
+            }
+
+            rows.forEach(row => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'erp-link-option';
+                button.textContent = row.label
+                    ? `${row.name} - ${row.label}`
+                    : row.name;
+
+                button.onclick = function () {
+                    input.value = row.name;
+                    dropdown.classList.add('d-none');
+
+                    if (doctype === 'Employee Advance') {
+                        autoFillAdvanceData(input);
+                    }
+                };
+
+                dropdown.appendChild(button);
+            });
+
+            dropdown.classList.remove('d-none');
+        }, 250);
+    }
+
+    function addExpenseRow(type = '', desc = '', amount = '0.00', sanctionedAmount = '0.00') {
+        const i = expenseIdx++;
+
+        const row = `
+            <tr>
+                <td>${i + 1}</td>
+                <td>
+                    <input type="date"
+                           name="Expenses[${i}].ExpenseDate"
+                           class="form-control form-control-sm"
+                           value="${today()}" />
+                </td>
+                <td>
+                    <input name="Expenses[${i}].ExpenseClaimType"
+                           value="${esc(type)}"
+                           class="form-control form-control-sm"
+                           list="expenseTypeList"
+                           placeholder="Select expense type" />
+                </td>
+                <td>
+                    <input name="Expenses[${i}].Description"
+                           value="${esc(desc)}"
+                           class="form-control form-control-sm" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Expenses[${i}].Amount"
+                           value="${esc(amount)}"
+                           class="form-control form-control-sm expense-amount"
+                           oninput="syncSanctionedAmount(this)" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Expenses[${i}].SanctionedAmount"
+                           value="${esc(sanctionedAmount)}"
+                           class="form-control form-control-sm sanctioned-amount" />
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="this.closest('tr').remove()">×</button>
+                </td>
+            </tr>`;
+
+        document.getElementById('expensesBody').insertAdjacentHTML('beforeend', row);
+
+
+    }
+
+        function syncSanctionedAmount(amountInput) {
+        const row = amountInput.closest('tr');
+        const sanctionedInput = row.querySelector('.sanctioned-amount');
+
+        if (!sanctionedInput) return;
+
+        sanctionedInput.value = amountInput.value || '0.00';
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function addTaxRow(account = '', rate = '', amount = '', total = '') {
+        const i = taxIdx++;
+
+        const row = `
+            <tr>
+                <td>${i + 1}</td>
+                <td>
+                    <input name="Taxes[${i}].AccountHead"
+                           value="${esc(account)}"
+                           class="form-control form-control-sm"
+                           list="accountList"
+                           placeholder="Select account head" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Taxes[${i}].Rate"
+                           value="${esc(rate)}"
+                           class="form-control form-control-sm"
+                           oninput="calculateTaxTotal(this)" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Taxes[${i}].Amount"
+                           value="${esc(amount)}"
+                           class="form-control form-control-sm tax-amount"
+                           oninput="calculateTaxTotal(this)" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Taxes[${i}].Total"
+                           value="${esc(total)}"
+                           class="form-control form-control-sm tax-total" />
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="this.closest('tr').remove()">×</button>
+                </td>
+            </tr>`;
+
+        document.getElementById('taxesBody').insertAdjacentHTML('beforeend', row);
+    }
+
+    function calculateTaxTotal(input) {
+        const row = input.closest('tr');
+        const amount = parseFloat(row.querySelector('.tax-amount')?.value || 0);
+        const total = row.querySelector('.tax-total');
+
+        if (total) {
+            total.value = amount.toFixed(2);
+        }
+    }
+
+    function addAdvanceRow(advance = '', advancePaid = '', unclaimed = '', allocated = '') {
+        const i = advanceIdx++;
+
+        const row = `
+            <tr>
+                <td>${i + 1}</td>
+                <td>
+                    <div class="erp-link-wrapper">
+                        <input name="Advances[${i}].EmployeeAdvance"
+                               value="${esc(advance)}"
+                               class="form-control form-control-sm advance-input"
+                               placeholder="Select employee advance"
+                               autocomplete="off"
+                               oninput="loadErpLinkDropdown(this, 'Employee Advance')"
+                               onfocus="loadErpLinkDropdown(this, 'Employee Advance')"
+                               required />
+                        <div class="erp-link-dropdown d-none"></div>
+                    </div>
+                </td>
+                <td>
+                    <input type="date"
+                           name="Advances[${i}].PostingDate"
+                           class="form-control form-control-sm advance-posting-date"
+                           value="${today()}" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Advances[${i}].AdvancePaid"
+                           value="${esc(advancePaid)}"
+                           class="form-control form-control-sm advance-paid" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Advances[${i}].UnclaimedAmount"
+                           value="${esc(unclaimed)}"
+                           class="form-control form-control-sm advance-unclaimed" />
+                </td>
+                <td>
+                    <input type="number"
+                           step="0.01"
+                           name="Advances[${i}].AllocatedAmount"
+                           value="${esc(allocated)}"
+                           class="form-control form-control-sm advance-allocated" />
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="this.closest('tr').remove()">×</button>
+                </td>
+            </tr>`;
+
+        document.getElementById('advancesBody').insertAdjacentHTML('beforeend', row);
+    }
+
+    function autoFillAdvanceData(input) {
+        const opt = findOption('advanceList', input.value);
+        if (!opt) return;
+
+        const row = input.closest('tr');
+
+        const postingDate = opt.getAttribute('data-posting-date') || '';
+        const advanceAmount = parseFloat(opt.getAttribute('data-advance-amount') || 0);
+        const paidAmount = parseFloat(opt.getAttribute('data-paid-amount') || 0);
+        const claimedAmount = parseFloat(opt.getAttribute('data-claimed-amount') || 0);
+
+        const unclaimed = Math.max(advanceAmount - claimedAmount, 0);
+
+        const postingDateInput = row.querySelector('.advance-posting-date');
+        const paidInput = row.querySelector('.advance-paid');
+        const unclaimedInput = row.querySelector('.advance-unclaimed');
+        const allocatedInput = row.querySelector('.advance-allocated');
+
+        if (postingDateInput && postingDate) {
+            postingDateInput.value = postingDate.substring(0, 10);
+        }
+
+        if (paidInput) {
+            paidInput.value = paidAmount > 0 ? paidAmount.toFixed(2) : advanceAmount.toFixed(2);
+        }
+
+        if (unclaimedInput) {
+            unclaimedInput.value = unclaimed.toFixed(2);
+        }
+
+        if (allocatedInput && !allocatedInput.value) {
+            allocatedInput.value = unclaimed.toFixed(2);
+        }
+    }
+
+    document.addEventListener('click', function (e) {
+        document.querySelectorAll('.erp-link-dropdown').forEach(dropdown => {
+            const wrapper = dropdown.closest('.erp-link-wrapper');
+
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdown.classList.add('d-none');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!document.getElementById('expensesBody').children.length) {
+            addExpenseRow();
+        }
+
+        const companyInput = document.getElementById('Company');
+        if (companyInput && companyInput.value) {
+            autoFillCompanyData(companyInput.value);
+        }
+    });
+</script>

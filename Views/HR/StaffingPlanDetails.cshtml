@@ -1,0 +1,72 @@
+﻿@model Erp_Aits.Models.StaffingPlan
+@{
+    ViewBag.Title = "Staffing Plan " + Model.Name;
+}
+
+<h4 class="mb-3">@Model.Name</h4>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Name</label>
+            <input class="form-control" value="@Model.Name" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">From Date</label>
+            <input type="date" class="form-control" value="@Model.FromDate.ToString("yyyy-MM-dd")" readonly />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <input class="form-control" value="@Model.Company" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">To Date</label>
+            <input type="date" class="form-control" value="@Model.ToDate.ToString("yyyy-MM-dd")" readonly />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Department</label>
+            <input class="form-control" value="@Model.Department" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Details</h6>
+    <label class="form-label">Staffing Details</label>
+    <table class="table table-bordered align-middle mb-0">
+        <thead>
+            <tr>
+                <th style="width:60px">No.</th>
+                <th>Designation</th>
+                <th>Vacancies</th>
+                <th>Estimated Cost Per Position</th>
+                <th>Total Estimated Cost</th>
+                <th>Number Of Positions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int rowNum = 1;
+            }
+            @foreach (var d in Model.Details)
+            {
+                <tr>
+                    <td>@rowNum</td>
+                    <td>@d.Designation</td>
+                    <td>@d.Vacancies</td>
+                    <td>₹@d.EstimatedCostPerPosition.ToString("N2")</td>
+                    <td>₹@d.TotalEstimatedCost.ToString("N2")</td>
+                    <td>@d.NumberOfPositions</td>
+                </tr>
+                rowNum++;
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="card p-4">
+    <label class="form-label">Total Estimated Budget</label>
+    <input type="text" class="form-control" value="₹ @Model.TotalEstimatedBudget.ToString("N2")" readonly />
+</div>

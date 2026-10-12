@@ -1,0 +1,48 @@
+@model Erp_Aits.Models.ActivityType
+@{
+    ViewBag.Title = "Activity Type " + Model.Name;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">@Model.Name</h4>
+    <div class="d-flex gap-2">
+        <a href="/HR/ActivityType" class="btn btn-outline-secondary btn-sm">Back</a>
+        <a href="/HR/ActivityCost" class="btn btn-outline-dark btn-sm">Activity Cost per Employee</a>
+        <form method="post" action="@Url.Action("DeleteActivityType", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Activity Type from ERPNext and HRMS?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+<form method="post" action="@Url.Action("UpdateActivityType", "HR", new { id = Model.Id })">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Activity Type</label>
+                <input name="Name" class="form-control" value="@Model.Name" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Default Billing Rate (INR)</label>
+                <input name="DefaultBillingRate" type="number" step="0.01" class="form-control" value="@Model.DefaultBillingRate" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Default Costing Rate (INR)</label>
+                <input name="DefaultCostingRate" type="number" step="0.01" class="form-control" value="@Model.DefaultCostingRate" />
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                    <input type="checkbox" name="Disabled" value="true" class="form-check-input" checked="@Model.Disabled" />
+                    <input type="hidden" name="Disabled" value="false" />
+                    <label class="form-check-label">Disabled</label>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+</form>

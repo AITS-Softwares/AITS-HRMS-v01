@@ -1,0 +1,144 @@
+﻿@* @model List<Erp_Aits.Models.LeavePolicyAssignment>
+@{
+    ViewBag.Title = "Leave Policy Assignment";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Policy Assignment</h4>
+    <div>
+        @* <a href="@Url.Action("BulkLeavePolicyAssignment", "HR")" class="btn btn-outline-dark btn-sm me-2">Bulk Leave Policy Assignment</a> *@
+@*         <a href="@Url.Action("LeaveControlPanel", "HR")" class="btn btn-outline-dark btn-sm me-2">Bulk Leave Policy Assignment</a>
+        <a href="@Url.Action("CreateLeavePolicyAssignment", "HR")" class="btn btn-dark btn-sm">+ Add Leave Policy Assignment</a>
+    </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employee" value="@ViewBag.EmployeeFilter" class="form-control form-control-sm" placeholder="Employee" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee name" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="company" value="@ViewBag.CompanyFilter" class="form-control form-control-sm" placeholder="Company" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="leavePolicy" value="@ViewBag.LeavePolicyFilter" class="form-control form-control-sm" placeholder="Leave Policy" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Company</th>
+            <th>Leave Policy</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr style="cursor:pointer" onclick="location.href='@Url.Action("LeavePolicyAssignmentDetails", "HR", new { id = a.Id })'">
+                <td>@a.Id</td>
+                <td>@a.Employee</td>
+                <td>@a.EmployeeName</td>
+                <td>@a.Company</td>
+                <td>@a.LeavePolicy</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No leave policy assignments found.</p>
+} *@ 
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.LeavePolicyAssignment>
+@{
+    ViewBag.Title = "Leave Policy Assignment";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Policy Assignment</h4>
+    <div>
+        <a href="@Url.Action("LeaveControlPanel", "HR")" class="btn btn-outline-dark btn-sm me-2">Bulk Leave Policy Assignment</a>
+        <a href="@Url.Action("CreateLeavePolicyAssignment", "HR")" class="btn btn-dark btn-sm">+ Add Leave Policy Assignment</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employee" value="@ViewBag.EmployeeFilter" class="form-control form-control-sm" placeholder="Employee" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee name" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="company" value="@ViewBag.CompanyFilter" class="form-control form-control-sm" placeholder="Company" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="leavePolicy" value="@ViewBag.LeavePolicyFilter" class="form-control form-control-sm" placeholder="Leave Policy" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Company</th>
+            <th>Leave Policy</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var a in Model)
+            {
+                <tr style="cursor:pointer" onclick="location.href='@Url.Action("LeavePolicyAssignmentDetails", "HR", new { id = a.Id })'">
+                    <td>@a.Id</td>
+                    <td>@a.Employee</td>
+                    <td>@a.EmployeeName</td>
+                    <td>@a.Company</td>
+                    <td>@a.LeavePolicy</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-muted text-center py-3">No leave policy assignments found. (Model count: @(Model?.Count ?? 0))</td>
+            </tr>
+        }
+    </tbody>
+</table>

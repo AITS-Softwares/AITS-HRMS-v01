@@ -1,0 +1,234 @@
+﻿@model List<Erp_Aits.Models.KRA>
+
+@{
+    ViewBag.Title = "KRA";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0">KRA</h4>
+
+    <div class="d-flex gap-2">
+        <button type="button"
+                class="btn btn-dark btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#newKraModal">
+            + Add KRA
+        </button>
+
+    </div>
+</div>
+
+<!-- Success message -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+    </div>
+}
+
+<!-- ERPNext error message -->
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+    </div>
+}
+
+<!-- Search -->
+<form method="get"
+      asp-controller="HR"
+      asp-action="KRA"
+      class="row g-2 mb-3">
+
+    <div class="col-md-3">
+        <input type="text"
+               name="id"
+               class="form-control form-control-sm"
+               placeholder="KRA ID / ERPNext ID"
+               value="@ViewBag.IdFilter" />
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit"
+                class="btn btn-sm btn-outline-dark">
+            Filter
+        </button>
+
+        <a href="@Url.Action("KRA", "HR")"
+           class="btn btn-sm btn-outline-secondary">
+            Clear
+        </a>
+    </div>
+
+</form>
+
+<!-- KRA List -->
+<div class="card p-0">
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Local KRA ID</th>
+                        <th>ERPNext ID</th>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var k in Model)
+                    {
+                        <tr style="cursor:pointer;"
+                            onclick="location.href='@Url.Action("KRADetails", "HR", new { id = k.Id })'">
+
+                            <td>@k.KRACode</td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(k.ErpName)
+                                                        ? "-"
+                                                        : k.ErpName)
+                    </td>
+
+                            <td>@k.Title</td>
+
+                        </tr>
+                                }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+
+            <div class="mb-2" style="font-size:2rem;">
+                &#128203;
+            </div>
+
+            <p class="text-muted mb-1">
+                No KRA records found.
+            </p>
+
+            <a href="#"
+               data-bs-toggle="modal"
+               data-bs-target="#newKraModal">
+                Create your first KRA
+            </a>
+
+        </div>
+    }
+
+</div>
+
+<!-- Quick Add Modal -->
+<div class="modal fade"
+     id="newKraModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <form asp-controller="HR"
+                  asp-action="QuickCreateKRA"
+                  method="post"
+                  id="quickCreateKraForm">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">New KRA</h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <label class="form-label">
+                        Title <span class="text-danger">*</span>
+                    </label>
+
+                    <input type="text"
+                           name="Title"
+                           class="form-control"
+                           required
+                           maxlength="255" />
+
+                    <small class="text-muted">
+                        The KRA will be saved in ERPNext first,
+                        then synchronized into HRMS.
+                    </small>
+
+                </div>
+
+                <div class="modal-footer justify-content-between">
+
+                    <a href="@Url.Action("CreateKRA", "HR")"
+                       class="btn btn-outline-secondary btn-sm">
+                        Edit Full Form
+                    </a>
+
+                    <button type="submit"
+                            id="quickCreateKraBtn"
+                            class="btn btn-dark btn-sm">
+                        Save
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const createForm =
+            document.getElementById("quickCreateKraForm");
+
+        const createBtn =
+            document.getElementById("quickCreateKraBtn");
+
+        if (createForm && createBtn) {
+
+            createForm.addEventListener("submit", function () {
+
+                if (!createForm.checkValidity())
+                    return;
+
+                createBtn.disabled = true;
+
+                createBtn.textContent = "Saving...";
+            });
+        }
+
+    });
+</script>

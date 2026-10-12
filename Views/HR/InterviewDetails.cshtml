@@ -1,0 +1,92 @@
+﻿@model Erp_Aits.Models.Interview
+@{
+    ViewBag.Title = "Interview " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Interview - @Model.Id</h4>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane fade show active" id="detailsTab">
+        <h6 class="mb-3">Details</h6>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Interview Round</label>
+                <input class="form-control" value="@Model.InterviewRound" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select class="form-select" disabled>
+                    <option selected="@(Model.Status == "Pending")">Pending</option>
+                    <option selected="@(Model.Status == "Under Review")">Under Review</option>
+                    <option selected="@(Model.Status == "Cleared")">Cleared</option>
+                    <option selected="@(Model.Status == "Rejected")">Rejected</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Job Applicant</label>
+                <input class="form-control" value="@Model.JobApplicant" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Scheduled On</label>
+                <input type="date" class="form-control" value="@Model.ScheduledOn.ToString("yyyy-MM-dd")" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Resume link</label>
+                <input class="form-control" value="@Model.ResumeLink" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">From Time</label>
+                <input type="time" class="form-control" value="@Model.FromTime.ToString(@"hh\:mm")" readonly />
+            </div>
+
+            <div class="col-md-6 offset-md-6">
+                <label class="form-label">To Time</label>
+                <input type="time" class="form-control" value="@Model.ToTime.ToString(@"hh\:mm")" readonly />
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Interviewers</h6>
+        <table class="table table-bordered align-middle mb-1">
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" disabled /></th>
+                    <th style="width:60px">No.</th>
+                    <th>Interviewer</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" class="text-muted text-center py-3">No interviewers recorded</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr class="my-4" />
+        <h6 class="mb-2">Interview Summary</h6>
+        <textarea class="form-control" rows="6" readonly>@Model.InterviewSummary</textarea>
+    </div>
+
+    <div class="tab-pane fade" id="feedbackTab">
+        <h6 class="mb-3">Feedback</h6>
+        @if (string.IsNullOrEmpty(Model.Feedback))
+        {
+            <textarea class="form-control" rows="8" readonly placeholder="No feedback has been received yet"></textarea>
+        }
+        else
+        {
+            <textarea class="form-control" rows="8" readonly>@Model.Feedback</textarea>
+        }
+    </div>
+
+</div>

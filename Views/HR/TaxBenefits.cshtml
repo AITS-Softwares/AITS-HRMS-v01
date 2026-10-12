@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Tax & Benefits";
+}
+
+<style>
+    .workspace-shell {
+        max-width: 980px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 22px;
+        min-height: 650px;
+        position: relative;
+    }
+
+    .workspace-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+
+    .shortcut-row {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 42px;
+        align-items: center;
+    }
+
+    .workspace-link {
+        color: #111827;
+        text-decoration: none;
+        font-size: 14px;
+        display: inline-block;
+        line-height: 1.6;
+    }
+
+        .workspace-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+    .external-arrow {
+        color: #6b7280;
+        font-size: 12px;
+        margin-left: 4px;
+    }
+
+    .badge-soft {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eef0f3;
+        color: #4b5563;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .section-heading {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+
+    .workspace-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(210px, 1fr));
+        column-gap: 64px;
+        row-gap: 34px;
+    }
+
+    .workspace-group h6 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .workspace-group ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .workspace-group li {
+        margin-bottom: 11px;
+    }
+
+    .workspace-actions {
+        position: absolute;
+        right: 14px;
+        bottom: 14px;
+        display: flex;
+        gap: 8px;
+    }
+
+        .workspace-actions a {
+            border: 0;
+            background: #f3f4f6;
+            color: #111827;
+            border-radius: 7px;
+            padding: 6px 12px;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+            .workspace-actions a:hover {
+                background: #e5e7eb;
+            }
+
+    @@media (max-width: 900px) {
+        .shortcut-row,
+        .workspace-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .workspace-shell {
+            padding: 16px;
+        }
+
+        .workspace-actions {
+            position: static;
+            margin-top: 30px;
+        }
+    }
+</style>
+
+<div class="workspace-shell">
+    <h5 class="mb-4 fw-bold">Your Shortcuts</h5>
+
+    <div class="shortcut-row">
+        <a class="workspace-link" href="@Url.Action("EmployeeTaxExemptionDeclaration", "HR")">
+            Employee Tax Exemption Declaration <span class="external-arrow">↗</span>
+        </a>
+
+        <a class="workspace-link" href="@Url.Action("AdditionalSalary", "HR")">
+            Additional Salary <span class="external-arrow">↗</span>
+            <span class="badge-soft">0</span>
+        </a>
+
+        <a class="workspace-link" href="@Url.Action("IncomeTaxComputation", "HR")">
+            Income Tax Computation <span class="external-arrow">↗</span>
+        </a>
+    </div>
+
+    <div class="section-heading">Masters &amp; Reports</div>
+
+    <div class="workspace-grid">
+        <div class="workspace-group">
+            <h6>Tax Setup</h6>
+            <ul>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("IncomeTaxSlab", "HR")">
+                        Income Tax Slab <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("EmployeeTaxExemptionCategory", "HR")">
+                        Employee Tax Exemption Category <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("EmployeeTaxExemptionSubCategory", "HR")">
+                        Employee Tax Exemption Sub Category <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Exemption</h6>
+            <ul>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("EmployeeTaxExemptionDeclaration", "HR")">
+                        Employee Tax Exemption Declaration <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("EmployeeTaxExemptionProofSubmission", "HR")">
+                        Employee Tax Exemption Proof Submission ... <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Benefits</h6>
+            <ul>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("EmployeeBenefitApplication", "HR")">
+                        Employee Benefit Application <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("EmployeeBenefitClaim", "HR")">
+                        Employee Benefit Claim <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Reports</h6>
+            <ul>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("IncomeTaxComputation", "HR")">
+                        Income Tax Computation <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="workspace-link" href="@Url.Action("IncomeTaxDeductions", "HR")">
+                        Income Tax Deductions <span class="external-arrow">↗</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="workspace-actions">
+        <a href="#">↗ Edit</a>
+        <a href="#">+ New</a>
+    </div>
+</div>

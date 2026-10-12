@@ -1,0 +1,133 @@
+﻿@* @model List<Erp_Aits.Models.HRShiftAssignment>
+@{
+    ViewBag.Title = "Shift Assignment";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Assignment</h4>
+    <a href="/HR/CreateShiftAssignment" class="btn btn-dark btn-sm">+ Add Shift Assignment</a>
+</div>
+
+<form method="get" action="/HR/ShiftAssignment" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.EmployeeFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="shiftType" class="form-control form-control-sm" placeholder="Shift Type" value="@ViewBag.ShiftTypeFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Shift Type</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='/HR/ShiftAssignmentDetails/@s.Id'">
+                <td>@s.Id</td>
+                <td>@s.Employee</td>
+                <td>@s.ShiftType</td>
+                <td>@s.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No shift assignments found.</p>
+} *@
+
+
+
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.HRShiftAssignment>
+@{
+    ViewBag.Title = "Shift Assignment";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Assignment</h4>
+    <div>
+        <a href="/HR/CreateShiftAssignment" class="btn btn-dark btn-sm">+ Add Shift Assignment</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+}
+
+<form method="get" action="/HR/ShiftAssignment" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.EmployeeFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="shiftType" class="form-control form-control-sm" placeholder="Shift Type" value="@ViewBag.ShiftTypeFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Shift Type</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var s in Model)
+            {
+                <tr style="cursor:pointer" onclick="window.location='/HR/ShiftAssignmentDetails/@s.Id'">
+                    <td>@s.Id</td>
+                    <td>@s.Employee</td>
+                    <td>@s.ShiftType</td>
+                    <td>@s.Status</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No shift assignments found.</p>
+}

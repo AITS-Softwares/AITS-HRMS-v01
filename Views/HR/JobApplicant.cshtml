@@ -1,0 +1,55 @@
+﻿@model List<Erp_Aits.Models.JobApplicant>
+@{
+    ViewBag.Title = "Job Applicant";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Job Applicant</h4>
+    <a href="@Url.Action("CreateJobApplicant", "HR")" class="btn btn-dark btn-sm">+ Add Job Applicant</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-auto">
+        <input type="text" class="form-control form-control-sm" placeholder="Applicant Name" />
+    </div>
+    <div class="col-auto">
+        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="Open" selected="@(ViewBag.StatusFilter == "Open")">Open</option>
+            <option value="Replied" selected="@(ViewBag.StatusFilter == "Replied")">Replied</option>
+            <option value="Rejected" selected="@(ViewBag.StatusFilter == "Rejected")">Rejected</option>
+            <option value="Hold" selected="@(ViewBag.StatusFilter == "Hold")">Hold</option>
+            <option value="Accepted" selected="@(ViewBag.StatusFilter == "Accepted")">Accepted</option>
+        </select>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Applicant Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.Id</td>
+                <td>@a.ApplicantName</td>
+                <td>@a.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="text-center text-muted py-5">
+        <p>No Job Applicant found with matching filters. Clear filters to see all Job Applicant.</p>
+        <a href="@Url.Action("CreateJobApplicant", "HR")" class="btn btn-light btn-sm">Create a new Job Applicant</a>
+    </div>
+}

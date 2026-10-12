@@ -1,0 +1,140 @@
+﻿@model List<Erp_Aits.Models.JobOpening>
+@{
+    ViewBag.Title = "Job Opening";
+}
+
+<div class="jo-wrap">
+    <div class="jo-breadcrumb">
+        <span>Recruitment</span> <span>&gt;</span> <span class="jo-current">Job Opening</span>
+    </div>
+
+    <div class="jo-header">
+        <h4><i class="fas fa-bars"></i> Job Opening</h4>
+        <a href="@Url.Action("CreateJobOpening", "HR")" class="jo-btn jo-btn-primary">
+            + Add Job Opening
+        </a>
+    </div>
+
+    <div class="jo-body">
+        @if (Model != null && Model.Any())
+        {
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Job Title</th>
+                        <th>Designation</th>
+                        <th>Company</th>
+                        <th>Department</th>
+                        <th>Posted On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var jo in Model)
+                    {
+                        <tr>
+                            <td>@jo.Id</td>
+                            <td>@jo.JobTitle</td>
+                            <td>@jo.Designation</td>
+                            <td>@jo.Company</td>
+                            <td>@jo.Department</td>
+                            <td>@jo.PostedOn.ToString("dd-MM-yyyy")</td>
+                            <td><span class="badge bg-success-subtle text-success">@jo.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="jo-empty">
+                <i class="fas fa-clipboard-list jo-empty-icon"></i>
+                <div class="jo-empty-text">No Job Opening found with matching filters. Clear filters to see all Job Opening.</div>
+                <a href="@Url.Action("CreateJobOpening", "HR")" class="jo-btn jo-btn-light" style="margin-top:14px;">Create a new Job Opening</a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .jo-wrap {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px 24px;
+    }
+
+    .jo-breadcrumb {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 10px;
+    }
+
+    .jo-current {
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+
+    .jo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+        .jo-header h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 20px;
+            color: #1a1a2e;
+        }
+
+    .jo-btn {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .jo-btn:hover {
+            background: #f3f4f6;
+            color: #1a1a2e;
+        }
+
+    .jo-btn-primary {
+        background: #1a1a2e;
+        border-color: #1a1a2e;
+        color: #fff;
+    }
+
+        .jo-btn-primary:hover {
+            background: #000;
+            color: #fff;
+        }
+
+    .jo-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 90px 0;
+        color: #94a3b8;
+        text-align: center;
+    }
+
+    .jo-empty-icon {
+        font-size: 34px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+    }
+
+    .jo-empty-text {
+        font-size: 14px;
+        max-width: 400px;
+    }
+</style>

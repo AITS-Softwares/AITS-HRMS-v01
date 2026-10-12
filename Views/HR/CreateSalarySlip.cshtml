@@ -1,0 +1,528 @@
+﻿@{
+    ViewBag.Title = "New Salary Slip";
+}
+
+<style>
+    .erp-form-page {
+        max-width: 1480px;
+        margin: 0 auto;
+    }
+
+    .erp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .erp-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .menu-icon {
+        border: 0;
+        background: transparent;
+        font-size: 22px;
+        color: #6b7280;
+    }
+
+    .erp-title {
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .not-saved {
+        color: #d9480f;
+        background: #fff1e8;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 14px;
+        margin-left: 8px;
+    }
+
+    .save-btn {
+        background: #111;
+        color: #fff;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .erp-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .tab-row {
+        display: flex;
+        gap: 32px;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0 24px;
+    }
+
+    .tab-btn {
+        border: 0;
+        background: transparent;
+        padding: 15px 0;
+        font-size: 16px;
+        color: #374151;
+        border-bottom: 2px solid transparent;
+    }
+
+        .tab-btn.active {
+            color: #111827;
+            font-weight: 700;
+            border-bottom-color: #111827;
+        }
+
+    .tab-pane {
+        display: none;
+        padding: 20px 24px;
+    }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 18px;
+    }
+
+    .section-block {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 18px 24px;
+    }
+
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 18px 28px;
+    }
+
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 28px;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 7px;
+        color: #374151;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .erp-input, .erp-select {
+        width: 100%;
+        height: 34px;
+        border: 1px solid #e5e7eb;
+        background: #f3f3f3;
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 14px;
+    }
+
+    .check-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+
+    .note-box {
+        color: #374151;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+
+        .note-box a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+    .child-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+    }
+
+    .child-title {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .child-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .child-table th {
+            background: #f3f3f3;
+            padding: 10px;
+            color: #6b7280;
+            font-size: 15px;
+            font-weight: 500;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .child-table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        .child-table input {
+            width: 100%;
+            height: 30px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 6px;
+            padding: 4px 7px;
+        }
+
+    .empty-cell {
+        height: 120px;
+        color: #374151;
+        font-size: 18px;
+    }
+
+    .add-row-btn {
+        margin-top: 12px;
+        background: #f3f4f6;
+        border: 0;
+        border-radius: 7px;
+        padding: 7px 14px;
+        font-size: 16px;
+    }
+</style>
+
+<div class="erp-form-page">
+  <form method="post" action="@Url.Action("CreateSalarySlip", "HR")">
+        <div class="erp-header">
+            <div class="erp-title-left">
+                <button type="button" class="menu-icon">≡</button>
+                <span class="erp-title">New Salary Slip</span>
+                <span class="not-saved">Not Saved</span>
+            </div>
+
+            <button type="submit" class="save-btn">Save</button>
+        </div>
+
+        <div class="erp-card">
+            <div class="tab-row">
+                <button type="button" class="tab-btn active" data-tab="details">Details</button>
+                <button type="button" class="tab-btn" data-tab="paymentDays">Payment Days</button>
+                <button type="button" class="tab-btn" data-tab="earningsDeductions">Earnings &amp; Deductions</button>
+                <button type="button" class="tab-btn" data-tab="bankDetails">Bank Details</button>
+            </div>
+
+            <div id="details" class="tab-pane active">
+                <div class="section-block" style="border-bottom:0;padding:0;">
+                    <h5 class="section-title">Employee Info</h5>
+
+                    <div class="form-grid-3">
+                        <div>
+                            <label class="field-label">Employee <span class="required">*</span></label>
+                            <input type="text" name="Employee" class="erp-input" />
+
+                            <label class="field-label mt-3">Company <span class="required">*</span></label>
+                            <input type="text" name="Company" class="erp-input" />
+                        </div>
+
+                        <div>
+                            <label class="field-label">Posting Date <span class="required">*</span></label>
+                            <input type="text" name="PostingDate" class="erp-input" value="25-09-2026" />
+
+                            <label class="field-label mt-3">Letter Head</label>
+                            <input type="text" name="LetterHead" class="erp-input" value="ttc" />
+                        </div>
+
+                        <div>
+                            <label class="field-label">Status</label>
+                            <input type="text" name="Status" class="erp-input" value="Draft" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-block" style="margin-left:-24px;margin-right:-24px;margin-top:18px;">
+                    <h5 class="section-title">Payroll Info</h5>
+
+                    <div class="form-grid-2">
+                        <div>
+                            <label class="field-label">Payroll Frequency</label>
+                            <select name="PayrollFrequency" class="erp-select">
+                                <option></option>
+                                <option>Monthly</option>
+                                <option>Bimonthly</option>
+                                <option>Fortnightly</option>
+                                <option>Weekly</option>
+                                <option>Daily</option>
+                            </select>
+
+                            <label class="field-label mt-3">Start Date</label>
+                            <input type="date" name="StartDate" class="erp-input" />
+
+                            <label class="field-label mt-3">End Date</label>
+                            <input type="date" name="EndDate" class="erp-input" />
+                        </div>
+
+                        <div>
+                            <label class="check-row">
+                                <input type="checkbox" name="SalarySlipBasedOnTimesheet" />
+                                <span>Salary Slip Based on Timesheet</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding-top:18px;">
+                    <label class="check-row">
+                        <input type="checkbox" name="DeductTaxForUnclaimedEmployeeBenefits" />
+                        <span>Deduct Tax For Unclaimed Employee Benefits</span>
+                    </label>
+
+                    <label class="check-row">
+                        <input type="checkbox" name="DeductTaxForUnsubmittedTaxExemptionProof" />
+                        <span>Deduct Tax For Unsubmitted Tax Exemption Proof</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- PAYMENT DAYS TAB -->
+            <!-- ======================================================= -->
+
+            <div id="paymentDays" class="tab-pane">
+
+                <div style="padding:20px 24px; border-bottom:1px solid #e5e7eb;">
+                    <div style="max-width:760px;">
+
+                        <label class="field-label">Leave Without Pay</label>
+
+                        <input type="number"
+                               step="0.01"
+                               name="LeaveWithoutPay"
+                               class="erp-input" />
+
+                    </div>
+                </div>
+
+                <div style="padding:20px 24px;">
+
+                    <div class="note-box" style="margin-bottom:0;">
+
+                        <strong>Note:</strong>
+                        Payment Days calculations are based on these Payroll Settings:
+
+                        <br /><br />
+
+                        Payroll Based On: <strong>Attendance</strong>
+
+                        <br />
+
+                        Consider Unmarked Attendance As: <strong>Absent</strong>
+
+                        <br />
+
+                        Consider Marked Attendance on Holidays: <strong>Enabled</strong>
+
+                        <br /><br />
+
+                        Click
+                        <a href="@Url.Action("PayrollSettings", "HR")">here</a>
+                        to change the configuration and then resave salary slip.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ======================================================= -->
+            <!-- EARNINGS & DEDUCTIONS TAB -->
+            <!-- THIS OPENING DIV WAS MISSING IN YOUR CODE -->
+            <!-- ======================================================= -->
+
+            <div id="earningsDeductions" class="tab-pane">
+
+                <div class="child-grid">
+
+                    <!-- EARNINGS -->
+
+                    <div>
+
+                        <div class="child-title">
+                            Earnings
+                        </div>
+
+                        <table class="child-table">
+
+                            <thead>
+                                <tr>
+                                    <th style="width:45px;">
+                                        <input type="checkbox" />
+                                    </th>
+
+                                    <th>
+                                        Component <span class="required">*</span>
+                                    </th>
+
+                                    <th>Amount</th>
+
+                                    <th style="width:55px;">⚙</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="earningsBody">
+
+                                <tr id="earningsEmpty">
+                                    <td colspan="4" class="empty-cell">
+                                        No Data
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                        <button type="button"
+                                class="add-row-btn"
+                                onclick="addSlipRow('earningsBody','earningsEmpty')">
+
+                            Add Row
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- DEDUCTIONS -->
+
+                    <div>
+
+                        <div class="child-title">
+                            Deductions
+                        </div>
+
+                        <table class="child-table">
+
+                            <thead>
+                                <tr>
+
+                                    <th style="width:45px;">
+                                        <input type="checkbox" />
+                                    </th>
+
+                                    <th>
+                                        Component <span class="required">*</span>
+                                    </th>
+
+                                    <th>Amount</th>
+
+                                    <th style="width:55px;">⚙</th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody id="deductionsBody">
+
+                                <tr id="deductionsEmpty">
+
+                                    <td colspan="4" class="empty-cell">
+                                        No Data
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                        <button type="button"
+                                class="add-row-btn"
+                                onclick="addSlipRow('deductionsBody','deductionsEmpty')">
+
+                            Add Row
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+                       <div id="bankDetails" class="tab-pane">
+                <div class="form-grid-2">
+                    <div>
+                        <label class="field-label">Journal Entry</label>
+                        <input type="text" name="JournalEntry" class="erp-input" />
+                    </div>
+
+                    <div>
+                        <label class="field-label">Bank Name</label>
+                        <input type="text" name="BankName" class="erp-input" />
+
+                        <label class="field-label mt-4">Bank Account No</label>
+                        <input type="text" name="BankAccountNo" class="erp-input" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.querySelectorAll('.tab-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            document.querySelectorAll('.tab-btn').forEach(function (x) {
+                x.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab-pane').forEach(function (x) {
+                x.classList.remove('active');
+            });
+
+            button.classList.add('active');
+            document.getElementById(button.dataset.tab).classList.add('active');
+        });
+    });
+
+    function addSlipRow(bodyId, emptyId) {
+        const body = document.getElementById(bodyId);
+        const empty = document.getElementById(emptyId);
+
+        if (empty) {
+            empty.remove();
+        }
+
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td><input type="text" name="${bodyId}Components" /></td>
+            <td><input type="number" step="0.01" name="${bodyId}Amounts" /></td>
+            <td>⚙</td>
+        `;
+
+        body.appendChild(row);
+    }
+</script>

@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "Smart ATS";
+}
+
+<h4 class="mb-4">Smart ATS</h4>
+
+<div class="d-flex flex-wrap gap-4">
+    <a href="@Url.Action("ATSCandidate", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>ATS Candidate</span>
+        <span class="badge bg-success-subtle text-success">@ViewBag.ATSCandidateCount</span>
+    </a>
+    <a href="@Url.Action("ATSJobOpening", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>ATS Job Opening</span>
+        <span class="badge bg-primary-subtle text-primary">@ViewBag.ATSJobOpeningCount</span>
+    </a>
+</div>

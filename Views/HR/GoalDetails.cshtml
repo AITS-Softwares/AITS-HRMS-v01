@@ -1,0 +1,137 @@
+@model Erp_Aits.Models.Goal
+@{
+    ViewBag.Title = "Goal " + Model.Id;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-action="UpdateGoal" asp-controller="HR" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="ErpNextId" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">@Model.GoalName</h4>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Goal", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmGoalDelete()">Delete</button>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="GoalName" class="form-label">Goal</label>
+                <input asp-for="GoalName" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Progress" class="form-label">Progress</label>
+                <input asp-for="Progress" id="Progress" type="number" min="0" max="100" step="0.01" class="form-control" />
+            </div>
+
+            <div class="col-md-6 d-flex align-items-center">
+                <div class="form-check mt-4">
+                    <input asp-for="IsGroup" id="IsGroup" class="form-check-input" type="checkbox" />
+                    <label asp-for="IsGroup" class="form-check-label">Is Group</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Status" class="form-label">Status</label>
+                <input asp-for="Status" id="Status" class="form-control" readonly />
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="ParentGoal" class="form-label">Parent Goal</label>
+                <input asp-for="ParentGoal" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Employee" class="form-label">Employee</label>
+                <input asp-for="Employee" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="EmployeeName" class="form-label">Employee Name</label>
+                <input asp-for="EmployeeName" class="form-control" readonly />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Company" class="form-label">Company</label>
+                <input asp-for="Company" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="StartDate" class="form-label">Start Date</label>
+                <input asp-for="StartDate" type="date" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EndDate" class="form-label">End Date</label>
+                <input asp-for="EndDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="AppraisalCycle" class="form-label">Appraisal Cycle</label>
+                <input asp-for="AppraisalCycle" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Kra" class="form-label">KRA</label>
+                <input asp-for="Kra" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+    </div>
+</form>
+
+<form asp-action="DeleteGoal" asp-controller="HR" asp-route-id="@Model.Id" method="post" id="deleteGoalForm" class="d-none">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script>
+        function updateGoalStatus() {
+            const progressInput = document.getElementById('Progress');
+            const statusInput = document.getElementById('Status');
+            const isGroup = document.getElementById('IsGroup').checked;
+            const progress = Number(progressInput.value || 0);
+
+            if (isGroup) {
+                progressInput.value = 0;
+                progressInput.readOnly = true;
+                statusInput.value = 'Pending';
+                return;
+            }
+
+            progressInput.readOnly = false;
+            statusInput.value = progress >= 100 ? 'Completed' : (progress > 0 ? 'In Progress' : 'Pending');
+        }
+
+        function confirmGoalDelete() {
+            if (confirm('Delete this Goal from ERPNext and HRMS?')) {
+                document.getElementById('deleteGoalForm').submit();
+            }
+        }
+
+        document.getElementById('Progress').addEventListener('input', updateGoalStatus);
+        document.getElementById('IsGroup').addEventListener('change', updateGoalStatus);
+        updateGoalStatus();
+    </script>
+}

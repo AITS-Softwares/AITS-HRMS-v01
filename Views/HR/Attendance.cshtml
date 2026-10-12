@@ -1,0 +1,313 @@
+﻿@model List<Erp_Aits.Models.Attendance>
+
+@{
+    ViewBag.Title = "Attendance";
+    int total = Model?.Count ?? 0;
+    int draft = Model?.Count(x => x.DocStatus == 0) ?? 0;
+    int submitted = Model?.Count(x => x.DocStatus == 1) ?? 0;
+    int cancelled = Model?.Count(x => x.DocStatus == 2) ?? 0;
+}
+
+<style>
+    .att-page {
+        padding: 10px 0 34px;
+    }
+
+    .att-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #111827;
+        margin: 0;
+    }
+
+    .att-subtitle {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .att-toolbar {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        margin-bottom: 18px;
+    }
+
+    .att-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        gap: 12px;
+        margin: 18px 0;
+    }
+
+    .att-stat {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px 16px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .att-stat-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .att-stat-value {
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 800;
+        margin-top: 4px;
+    }
+
+    .att-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
+        overflow: hidden;
+    }
+
+    .att-table {
+        margin: 0;
+    }
+
+        .att-table thead th {
+            background: #f8fafc;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 800;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px 16px;
+            white-space: nowrap;
+        }
+
+        .att-table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-color: #eef2f7;
+            font-size: 14px;
+        }
+
+    .att-row {
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+        .att-row:hover {
+            background: #f8fafc;
+        }
+
+    .att-code {
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .att-muted {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .att-empty {
+        text-align: center;
+        padding: 42px 20px;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .btn-add-att {
+        background: #111827;
+        border-color: #111827;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 9px;
+        padding: 9px 16px;
+    }
+
+        .btn-add-att:hover {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: #fff;
+        }
+
+    .filter-input,
+    .filter-select {
+        border-radius: 9px;
+        border: 1px solid #d1d5db;
+        height: 38px;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-weight: 800;
+        font-size: 12px;
+    }
+
+    @@media (max-width: 900px) {
+        .att-stat-grid {
+            grid-template-columns: repeat(2, minmax(120px, 1fr));
+        }
+    }
+</style>
+
+<div class="att-page">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h4 class="att-title">Attendance</h4>
+            <div class="att-subtitle">Manage attendance records synced with ERPNext.</div>
+        </div>
+
+        <a href="@Url.Action("CreateAttendance", "HR")" class="btn btn-add-att">
+            + Add Attendance
+        </a>
+    </div>
+
+    <div class="att-stat-grid">
+        <div class="att-stat">
+            <div class="att-stat-label">Total</div>
+            <div class="att-stat-value">@total</div>
+        </div>
+        <div class="att-stat">
+            <div class="att-stat-label">Draft</div>
+            <div class="att-stat-value">@draft</div>
+        </div>
+        <div class="att-stat">
+            <div class="att-stat-label">Submitted</div>
+            <div class="att-stat-value">@submitted</div>
+        </div>
+        <div class="att-stat">
+            <div class="att-stat-label">Cancelled</div>
+            <div class="att-stat-value">@cancelled</div>
+        </div>
+    </div>
+
+    <div class="att-toolbar">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input type="text"
+                       name="employee"
+                       class="form-control filter-input"
+                       placeholder="Search employee code or name"
+                       value="@ViewBag.EmployeeFilter" />
+            </div>
+
+            <div class="col-md-3">
+                <select name="status" class="form-select filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="Present" selected="@(ViewBag.StatusFilter == "Present")">Present</option>
+                    <option value="Absent" selected="@(ViewBag.StatusFilter == "Absent")">Absent</option>
+                    <option value="On Leave" selected="@(ViewBag.StatusFilter == "On Leave")">On Leave</option>
+                    <option value="Half Day" selected="@(ViewBag.StatusFilter == "Half Day")">Half Day</option>
+                    <option value="Work From Home" selected="@(ViewBag.StatusFilter == "Work From Home")">Work From Home</option>
+                </select>
+            </div>
+
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-outline-secondary">
+                    Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="att-card">
+        <table class="table table-hover att-table">
+            <thead>
+                <tr>
+                    <th>ID / Code</th>
+                    <th>Employee Code</th>
+                    <th>Employee Name</th>
+                    <th>Status</th>
+                    <th>Doc Status</th>
+                    <th>Attendance Date</th>
+                    <th style="width: 170px;">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var a in Model)
+                    {
+                        string statusClass = a.Status == "Present"
+                        ? "bg-success-subtle text-success"
+                        : a.Status == "Absent"
+                        ? "bg-danger-subtle text-danger"
+                        : "bg-warning-subtle text-warning";
+
+                        <tr class="att-row" onclick="window.location='@Url.Action("AttendanceDetails", "HR", new { id = a.Id })'">
+                            <td>
+                                <div class="att-code">@a.AttendanceCode</div>
+                                <div class="att-muted">#@a.Id</div>
+                            </td>
+                            <td>@a.Employee</td>
+                            <td>@a.EmployeeName</td>
+                            <td>
+                                <span class="status-badge @statusClass">@a.Status</span>
+                            </td>
+                            <td>
+                                @if (a.DocStatus == 0)
+                                {
+                                    <span class="badge bg-secondary">Draft</span>
+                                }
+                                else if (a.DocStatus == 1)
+                                {
+                                    <span class="badge bg-primary">Submitted</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Cancelled</span>
+                                }
+                            </td>
+                            <td>@a.AttendanceDate.ToString("dd-MM-yyyy")</td>
+                            <td onclick="event.stopPropagation();">
+                                <a href="@Url.Action("AttendanceDetails", "HR", new { id = a.Id })"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Edit
+                                </a>
+
+                                <form action="@Url.Action("DeleteAttendance", "HR", new { id = a.Id })"
+                                      method="post"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Delete this attendance from local HRMS only?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="att-empty">
+                            No attendance records found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,1794 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model Erp_Aits.Models.PaymentEntry
+
+@{
+    ViewBag.Title = "New Payment Entry";
+}
+
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+
+<!-- ============================================================= -->
+<!-- MASTER DATALISTS -->
+<!-- ============================================================= -->
+
+<datalist id="modeOfPaymentList">
+    @if (ViewBag.ModesOfPayment != null)
+    {
+        foreach (var item in ViewBag.ModesOfPayment)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
+
+<datalist id="dynamicPartyList"></datalist>
+
+<datalist id="dynamicAccountList"></datalist>
+
+
+<datalist id="bankAccountList">
+    @if (ViewBag.BankAccounts != null)
+    {
+        foreach (var item in ViewBag.BankAccounts)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
+
+<datalist id="projectList">
+    @if (ViewBag.Projects != null)
+    {
+        foreach (var item in ViewBag.Projects)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
+
+<datalist id="costCenterList">
+    @if (ViewBag.CostCenters != null)
+    {
+        foreach (var item in ViewBag.CostCenters)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
+
+<datalist id="salesTaxTemplateList">
+    @if (ViewBag.SalesTaxTemplates != null)
+    {
+        foreach (var item in ViewBag.SalesTaxTemplates)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
+
+<datalist id="purchaseTaxTemplateList">
+    @if (ViewBag.PurchaseTaxTemplates != null)
+    {
+        foreach (var item in ViewBag.PurchaseTaxTemplates)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
+
+<form asp-controller="HR"
+      asp-action="CreatePaymentEntry"
+      method="post"
+      id="paymentEntryForm">
+
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h4 class="mb-0 d-inline">
+                New Payment Entry
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning ms-2">
+                Not Saved
+            </span>
+        </div>
+
+
+        <button type="submit"
+                class="btn btn-dark btn-sm px-4">
+
+            Save
+
+        </button>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- TYPE OF PAYMENT -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3">
+
+        <h6 class="mb-3">
+            Type of Payment
+        </h6>
+
+
+        <div class="row g-3">
+
+            <!-- SERIES -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Series
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Series"
+                        class="form-select"
+                        required>
+
+                    @if (ViewBag.NamingSeries != null)
+                    {
+                        foreach (var series in ViewBag.NamingSeries)
+                        {
+                            <option value="@series">
+                                @series
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- POSTING DATE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Posting Date
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="PostingDate"
+                       type="date"
+                       class="form-control"
+                       required />
+
+            </div>
+
+
+            <!-- PAYMENT TYPE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Payment Type
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="PaymentType"
+                        id="PaymentType"
+                        class="form-select"
+                        required>
+
+                    <option value="Receive">
+                        Receive
+                    </option>
+
+                    <option value="Pay">
+                        Pay
+                    </option>
+
+                    <option value="Internal Transfer">
+                        Internal Transfer
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- COMPANY -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Company"
+                        id="Company"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Company --
+                    </option>
+
+                    @if (ViewBag.Companies != null)
+                    {
+                        foreach (var company in ViewBag.Companies)
+                        {
+                            <option value="@company.name">
+                                @company.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- MODE OF PAYMENT -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Mode of Payment
+                </label>
+
+                <input asp-for="ModeOfPayment"
+                       id="ModeOfPayment"
+                       list="modeOfPaymentList"
+                       class="form-control"
+                       placeholder="Select Mode of Payment..." />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- PAYMENT FROM / TO -->
+    <!-- Hidden completely for Internal Transfer -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3"
+         id="partySection">
+
+        <h6 class="mb-3">
+            Payment From / To
+        </h6>
+
+
+        <div class="row g-3">
+
+            <!-- PARTY TYPE - always shown for Receive / Pay -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Party Type
+                </label>
+
+                <select asp-for="PartyType"
+                        id="PartyType"
+                        class="form-select">
+
+                    <option value="">
+                        -- Select Party Type --
+                    </option>
+
+                    <option value="Customer">
+                        Customer
+                    </option>
+
+                    <option value="Supplier">
+                        Supplier
+                    </option>
+
+                    <option value="Employee">
+                        Employee
+                    </option>
+
+                    <option value="Shareholder">
+                        Shareholder
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PARTY: ERP reveals after Party Type -->
+            <div class="col-md-6 dependent-party"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Party
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="Party"
+                       id="Party"
+                       list="dynamicPartyList"
+                       class="form-control"
+                       placeholder="Select Party..." />
+
+            </div>
+
+
+            <!-- PARTY NAME -->
+            <div class="col-md-6 dependent-party"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Party Name
+                </label>
+
+                <input asp-for="PartyName"
+                       id="PartyName"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- COMPANY BANK ACCOUNT -->
+            <div class="col-md-6 dependent-party"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Company Bank Account
+                </label>
+
+                <input asp-for="CompanyBankAccount"
+                       id="CompanyBankAccount"
+                       list="bankAccountList"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- PARTY BANK ACCOUNT -->
+            <div class="col-md-6 dependent-party-selected"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Party Bank Account
+                </label>
+
+                <input asp-for="PartyBankAccount"
+                       id="PartyBankAccount"
+                       list="bankAccountList"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- CONTACT -->
+            <div class="col-md-6 dependent-contact"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Contact
+                </label>
+
+                <input asp-for="ContactPerson"
+                       id="ContactPerson"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- CONTACT EMAIL -->
+            <div class="col-md-6 dependent-contact"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Email
+                </label>
+
+                <input asp-for="ContactEmail"
+                       id="ContactEmail"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- ACCOUNTS -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3">
+
+        <h6 class="mb-3">
+            Accounts
+        </h6>
+
+
+        <div class="row g-3">
+
+            <!-- PARTY BALANCE -->
+            <div class="col-md-6"
+                 id="PartyBalanceContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Party Balance
+                </label>
+
+                <input asp-for="PartyBalance"
+                       id="PartyBalance"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- PAID FROM -->
+            <div class="col-md-6"
+                 id="PaidFromContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Account Paid From
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="PaidFrom"
+                       id="PaidFrom"
+                       list="dynamicAccountList"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- PAID FROM CURRENCY -->
+            <div class="col-md-6"
+                 id="PaidFromCurrencyContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Account Currency (From)
+                </label>
+
+                <input asp-for="PaidFromAccountCurrency"
+                       id="PaidFromAccountCurrency"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- PAID FROM BALANCE -->
+            <div class="col-md-6"
+                 id="PaidFromBalanceContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Account Balance (From)
+                </label>
+
+                <input asp-for="PaidFromAccountBalance"
+                       id="PaidFromAccountBalance"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- PAID TO -->
+            <div class="col-md-6"
+                 id="PaidToContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Account Paid To
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="PaidTo"
+                       id="PaidTo"
+                       list="dynamicAccountList"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- PAID TO CURRENCY -->
+            <div class="col-md-6"
+                 id="PaidToCurrencyContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Account Currency (To)
+                </label>
+
+                <input asp-for="PaidToAccountCurrency"
+                       id="PaidToAccountCurrency"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- PAID TO BALANCE -->
+            <div class="col-md-6"
+                 id="PaidToBalanceContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Account Balance (To)
+                </label>
+
+                <input asp-for="PaidToAccountBalance"
+                       id="PaidToAccountBalance"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- AMOUNT -->
+    <!-- ERP shows after BOTH accounts exist -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3"
+         id="amountSection"
+         style="display:none;">
+
+        <h6 class="mb-3">
+            Amount
+        </h6>
+
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Paid Amount
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="PaidAmount"
+                       id="PaidAmount"
+                       type="number"
+                       step="0.01"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Received Amount
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="ReceivedAmount"
+                       id="ReceivedAmount"
+                       type="number"
+                       step="0.01"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Source Exchange Rate
+                </label>
+
+                <input asp-for="SourceExchangeRate"
+                       id="SourceExchangeRate"
+                       type="number"
+                       step="0.000000001"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Target Exchange Rate
+                </label>
+
+                <input asp-for="TargetExchangeRate"
+                       id="TargetExchangeRate"
+                       type="number"
+                       step="0.000000001"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- TAXES -->
+    <!-- Only Customer / Supplier -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3"
+         id="taxSection"
+         style="display:none;">
+
+        <h6 class="mb-3">
+            Taxes and Charges
+        </h6>
+
+
+        <!-- CUSTOMER -->
+        <div id="salesTaxContainer"
+             style="display:none;"
+             class="mb-3">
+
+            <label class="form-label">
+                Sales Taxes and Charges Template
+            </label>
+
+            <input asp-for="SalesTaxesChargesTemplate"
+                   list="salesTaxTemplateList"
+                   class="form-control" />
+
+        </div>
+
+
+        <!-- SUPPLIER -->
+        <div id="purchaseTaxContainer"
+             style="display:none;"
+             class="mb-3">
+
+            <label class="form-label">
+                Purchase Taxes and Charges Template
+            </label>
+
+            <input asp-for="PurchaseTaxesChargesTemplate"
+                   list="purchaseTaxTemplateList"
+                   class="form-control" />
+
+        </div>
+
+
+        <div class="d-flex justify-content-between mb-2">
+
+            <label class="form-label mb-0">
+                Advance Taxes and Charges
+            </label>
+
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    id="AddTaxButton">
+
+                Add Row
+
+            </button>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered align-middle"
+                   id="taxTable">
+
+                <thead>
+
+                    <tr>
+                        <th style="width:50px;">
+                            No.
+                        </th>
+
+                        <th>
+                            Type
+                        </th>
+
+                        <th>
+                            Account Head
+                        </th>
+
+                        <th>
+                            Tax Rate
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Total
+                        </th>
+
+                        <th style="width:60px;">
+                        </th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="taxBody">
+
+                    <tr id="noTaxRow">
+
+                        <td colspan="7"
+                            class="text-center text-muted">
+
+                            No Data
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- GST -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3">
+
+        <h6 class="mb-3">
+            GST Details
+        </h6>
+
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company Address
+                </label>
+
+                <input asp-for="CompanyAddress"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <div class="col-md-6 customer-gst"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Customer Address
+                </label>
+
+                <input asp-for="CustomerAddress"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company GSTIN
+                </label>
+
+                <input asp-for="CompanyGstin"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <div class="col-md-6 customer-gst"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Customer GSTIN
+                </label>
+
+                <input asp-for="BillingAddressGstin"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <div class="col-md-6 customer-gst"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Place of Supply
+                </label>
+
+                <input asp-for="PlaceOfSupply"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <div class="col-md-6 customer-gst"
+                 style="display:none;">
+
+                <label class="form-label">
+                    GST Category
+                </label>
+
+                <input asp-for="GstCategory"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- TRANSACTION REFERENCE -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3"
+         id="referenceSection"
+         style="display:none;">
+
+        <h6 class="mb-3">
+            Transaction ID
+        </h6>
+
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Cheque/Reference No
+                </label>
+
+                <input asp-for="ReferenceNo"
+                       id="ReferenceNo"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Cheque/Reference Date
+                </label>
+
+                <input asp-for="ReferenceDate"
+                       id="ReferenceDate"
+                       type="date"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- ACCOUNTING DIMENSIONS -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4">
+
+        <h6 class="mb-3">
+            Accounting Dimensions
+        </h6>
+
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Project
+                </label>
+
+                <input asp-for="Project"
+                       list="projectList"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Cost Center
+                </label>
+
+                <input asp-for="CostCenter"
+                       list="costCenterList"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        let taxIndex = 0;
+
+
+        const paymentType =
+            document.getElementById("PaymentType");
+
+        const company =
+            document.getElementById("Company");
+
+        const partyType =
+            document.getElementById("PartyType");
+
+        const party =
+            document.getElementById("Party");
+
+        const paidFrom =
+            document.getElementById("PaidFrom");
+
+        const paidTo =
+            document.getElementById("PaidTo");
+
+        const modeOfPayment =
+            document.getElementById("ModeOfPayment");
+
+
+        // ============================================================
+        // ERP DEPENDENCY ENGINE
+        // ============================================================
+
+               function refreshVisibility()
+        {
+            const payment = paymentType.value;
+            const pt = partyType.value;
+            const partyValue = party.value;
+
+            const showPartySection =
+                payment === "Receive" ||
+                payment === "Pay";
+
+            document.getElementById("partySection").style.display =
+                showPartySection ? "" : "none";
+
+            document
+                .querySelectorAll(".dependent-party")
+                .forEach(function(el)
+                {
+                    el.style.display =
+                        showPartySection && pt
+                            ? ""
+                            : "none";
+                });
+
+            document
+                .querySelectorAll(".dependent-party-selected")
+                .forEach(function(el)
+                {
+                    el.style.display =
+                        showPartySection && pt && partyValue
+                            ? ""
+                            : "none";
+                });
+
+            document
+                .querySelectorAll(".dependent-contact")
+                .forEach(function(el)
+                {
+                    el.style.display =
+                        showPartySection &&
+                        partyValue &&
+                        pt !== "Employee"
+                            ? ""
+                            : "none";
+                });
+
+            const showPaidFrom =
+                payment === "Internal Transfer" ||
+                payment === "Pay" ||
+                !!partyValue;
+
+            const showPaidTo =
+                payment === "Internal Transfer" ||
+                payment === "Receive" ||
+                !!partyValue;
+
+            document.getElementById("PaidFromContainer").style.display =
+                showPaidFrom ? "" : "none";
+
+            document.getElementById("PaidToContainer").style.display =
+                showPaidTo ? "" : "none";
+
+            document.getElementById("PaidFromCurrencyContainer").style.display =
+                showPaidFrom && !!paidFrom.value ? "" : "none";
+
+            document.getElementById("PaidFromBalanceContainer").style.display =
+                showPaidFrom && !!paidFrom.value ? "" : "none";
+
+            document.getElementById("PaidToCurrencyContainer").style.display =
+                showPaidTo && !!paidTo.value ? "" : "none";
+
+            const paidToBalanceContainer =
+                document.getElementById("PaidToBalanceContainer");
+
+            if (paidToBalanceContainer)
+            {
+                paidToBalanceContainer.style.display =
+                    showPaidTo && !!paidTo.value ? "" : "none";
+            }
+
+            document.getElementById("PartyBalanceContainer").style.display =
+                partyValue ? "" : "none";
+
+            document.getElementById("amountSection").style.display =
+                paidFrom.value && paidTo.value ? "" : "none";
+
+            document.getElementById("referenceSection").style.display =
+                paidFrom.value && paidTo.value ? "" : "none";
+
+            const customer = pt === "Customer";
+            const supplier = pt === "Supplier";
+
+            document.getElementById("taxSection").style.display =
+                customer || supplier ? "" : "none";
+
+            document.getElementById("salesTaxContainer").style.display =
+                customer ? "" : "none";
+
+            document.getElementById("purchaseTaxContainer").style.display =
+                supplier ? "" : "none";
+
+            document
+                .querySelectorAll(".customer-gst")
+                .forEach(function(el)
+                {
+                    el.style.display =
+                        customer && partyValue ? "" : "none";
+                });
+        }        // ============================================================
+        // COMPANY → ACCOUNT MASTER
+        // ============================================================
+
+        async function loadAccounts()
+        {
+            const list =
+                document.getElementById(
+                    "dynamicAccountList"
+                );
+
+
+            list.innerHTML = "";
+
+
+            if (!company.value)
+                return;
+
+
+            try
+            {
+                const response =
+                    await fetch(
+                        "/HR/GetPaymentEntryAccounts?company="
+                        + encodeURIComponent(
+                            company.value
+                        )
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                data.forEach(
+                    function(item)
+                    {
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+                        option.value =
+                            item.name;
+
+                        list.appendChild(
+                            option
+                        );
+                    }
+                );
+            }
+            catch(error)
+            {
+                console.error(error);
+            }
+        }
+
+
+        // ============================================================
+        // PARTY TYPE → PARTY MASTER
+        // ============================================================
+
+        async function loadParties()
+        {
+            const list =
+                document.getElementById(
+                    "dynamicPartyList"
+                );
+
+
+            list.innerHTML = "";
+
+            party.value = "";
+
+            document.getElementById(
+                "PartyName"
+            ).value = "";
+
+
+            if (!partyType.value)
+            {
+                refreshVisibility();
+                return;
+            }
+
+
+            try
+            {
+                const response =
+                    await fetch(
+                        "/HR/GetPartiesByDocType?doctype="
+                        + encodeURIComponent(
+                            partyType.value
+                        )
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                data.forEach(
+                    function(item)
+                    {
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+
+                        option.value =
+                            item.name;
+
+
+                        option.label =
+                            item.title
+                                ? item.name
+                                    + " - "
+                                    + item.title
+                                : item.name;
+
+
+                        list.appendChild(
+                            option
+                        );
+                    }
+                );
+            }
+            catch(error)
+            {
+                console.error(error);
+            }
+
+
+            refreshVisibility();
+        }
+
+
+        // ============================================================
+        // PARTY → PARTY DETAILS + PARTY ACCOUNT
+        // ============================================================
+
+             async function loadPartyDetails()
+        {
+            if (
+                !partyType.value ||
+                !party.value ||
+                !company.value
+            )
+            {
+                refreshVisibility();
+                return;
+            }
+
+            try
+            {
+                const postingDate =
+                    document.getElementById("PostingDate");
+
+                const url =
+                    "/HR/GetPaymentEntryPartyDetails"
+                    + "?partyType=" + encodeURIComponent(partyType.value)
+                    + "&party=" + encodeURIComponent(party.value)
+                    + "&company=" + encodeURIComponent(company.value)
+                    + "&paymentType=" + encodeURIComponent(paymentType.value)
+                    + "&postingDate=" + encodeURIComponent(postingDate.value || "");
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.success)
+                {
+                    console.error(data.message || "Unable to load party details.");
+                    refreshVisibility();
+                    return;
+                }
+
+                document.getElementById("PartyName").value =
+                    data.partyName || "";
+
+                document.getElementById("PartyBalance").value =
+                    data.partyBalance || 0;
+
+                document.getElementById("CompanyBankAccount").value =
+                    data.companyBankAccount || "";
+
+                document.getElementById("PartyBankAccount").value =
+                    data.partyBankAccount || "";
+
+                document.getElementById("ContactPerson").value =
+                    data.contactPerson || "";
+
+                document.getElementById("ContactEmail").value =
+                    data.contactEmail || "";
+
+                if (data.paidFrom)
+                    paidFrom.value = data.paidFrom;
+
+                if (data.paidTo)
+                    paidTo.value = data.paidTo;
+
+                document.getElementById("PaidFromAccountCurrency").value =
+                    data.paidFromAccountCurrency || "";
+
+                document.getElementById("PaidToAccountCurrency").value =
+                    data.paidToAccountCurrency || "";
+
+                document.getElementById("PaidFromAccountBalance").value =
+                    data.paidFromAccountBalance || 0;
+
+                const paidToBalance =
+                    document.getElementById("PaidToAccountBalance");
+
+                if (paidToBalance)
+                {
+                    paidToBalance.value =
+                        data.paidToAccountBalance || 0;
+                }
+
+                document.getElementById("SourceExchangeRate").value =
+                    data.sourceExchangeRate || 1;
+
+                document.getElementById("TargetExchangeRate").value =
+                    data.targetExchangeRate || 1;
+            }
+            catch(error)
+            {
+                console.error(error);
+            }
+
+            refreshVisibility();
+        }
+
+        // ============================================================
+        // MODE OF PAYMENT → DEFAULT BANK/CASH ACCOUNT
+        // ============================================================
+
+        async function loadModeOfPaymentAccount()
+        {
+            if (
+                !modeOfPayment.value ||
+                !company.value
+            )
+            {
+                return;
+            }
+
+
+            try
+            {
+                const response =
+                    await fetch(
+                        "/HR/GetPaymentEntryModeOfPaymentDetails"
+                        + "?modeOfPayment="
+                        + encodeURIComponent(
+                            modeOfPayment.value
+                        )
+                        + "&company="
+                        + encodeURIComponent(
+                            company.value
+                        )
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data.defaultAccount)
+                    return;
+
+
+                // Pay:
+                // company bank/cash is Paid From
+
+                if (
+                    paymentType.value ===
+                    "Pay"
+                )
+                {
+                    paidFrom.value =
+                        data.defaultAccount;
+
+                    await loadPaidFromDetails();
+                }
+
+
+                // Receive:
+                // company bank/cash is Paid To
+
+                else if (
+                    paymentType.value ===
+                    "Receive"
+                )
+                {
+                    paidTo.value =
+                        data.defaultAccount;
+
+                    await loadPaidToDetails();
+                }
+            }
+            catch(error)
+            {
+                console.error(error);
+            }
+
+
+            refreshVisibility();
+        }
+
+
+        // ============================================================
+        // ACCOUNT DETAILS
+        // ============================================================
+
+        async function getAccountDetails(
+            account)
+        {
+            if (!account)
+                return null;
+
+
+            try
+            {
+                const response =
+                    await fetch(
+                        "/HR/GetPaymentEntryAccountDetails?account="
+                        + encodeURIComponent(
+                            account
+                        )
+                    );
+
+
+                return await response.json();
+            }
+            catch(error)
+            {
+                console.error(error);
+
+                return null;
+            }
+        }
+
+
+        async function loadPaidFromDetails()
+        {
+            const data =
+                await getAccountDetails(
+                    paidFrom.value
+                );
+
+
+            if (
+                data &&
+                data.success
+            )
+            {
+                document.getElementById(
+                    "PaidFromAccountCurrency"
+                ).value =
+                    data.currency || "";
+            }
+
+
+            refreshVisibility();
+        }
+
+
+        async function loadPaidToDetails()
+        {
+            const data =
+                await getAccountDetails(
+                    paidTo.value
+                );
+
+
+            if (
+                data &&
+                data.success
+            )
+            {
+                document.getElementById(
+                    "PaidToAccountCurrency"
+                ).value =
+                    data.currency || "";
+            }
+
+
+            refreshVisibility();
+        }
+
+
+        // ============================================================
+        // PAYMENT TYPE CHANGE
+        // ============================================================
+
+                      async function paymentTypeChanged()
+        {
+            paidFrom.value = "";
+            paidTo.value = "";
+
+            document.getElementById("PaidFromAccountCurrency").value = "";
+            document.getElementById("PaidToAccountCurrency").value = "";
+            document.getElementById("PaidFromAccountBalance").value = "";
+
+            const paidToBalance =
+                document.getElementById("PaidToAccountBalance");
+
+            if (paidToBalance)
+                paidToBalance.value = "";
+
+            if (paymentType.value === "Internal Transfer")
+            {
+                partyType.value = "";
+                party.value = "";
+
+                document.getElementById("PartyName").value = "";
+                document.getElementById("PartyBalance").value = "";
+                document.getElementById("CompanyBankAccount").value = "";
+                document.getElementById("PartyBankAccount").value = "";
+                document.getElementById("ContactPerson").value = "";
+                document.getElementById("ContactEmail").value = "";
+            }
+
+            await loadModeOfPaymentAccount();
+
+            if (
+                paymentType.value !== "Internal Transfer" &&
+                partyType.value &&
+                party.value
+            )
+            {
+                await loadPartyDetails();
+            }
+
+            refreshVisibility();
+        }
+
+        // ============================================================
+        // TAX TABLE
+        // ============================================================
+
+        function addTaxRow()
+        {
+            const noData =
+                document.getElementById(
+                    "noTaxRow"
+                );
+
+
+            if (noData)
+                noData.remove();
+
+
+            const body =
+                document.getElementById(
+                    "taxBody"
+                );
+
+
+            const index =
+                taxIndex++;
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td class="tax-number">
+                    ${index + 1}
+                </td>
+
+                <td>
+                    <select name="Taxes[${index}].Type"
+                            class="form-select form-select-sm">
+
+                        <option value="Actual">
+                            Actual
+                        </option>
+
+                        <option value="On Net Total">
+                            On Net Total
+                        </option>
+
+                        <option value="On Previous Row Amount">
+                            On Previous Row Amount
+                        </option>
+
+                        <option value="On Previous Row Total">
+                            On Previous Row Total
+                        </option>
+
+                    </select>
+                </td>
+
+                <td>
+                    <input name="Taxes[${index}].AccountHead"
+                           list="dynamicAccountList"
+                           class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <input name="Taxes[${index}].TaxRate"
+                           type="number"
+                           step="0.01"
+                           class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <input name="Taxes[${index}].Amount"
+                           type="number"
+                           step="0.01"
+                           class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <input name="Taxes[${index}].Total"
+                           type="number"
+                           step="0.01"
+                           class="form-control form-control-sm"
+                           readonly />
+                </td>
+
+                <td>
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm remove-tax">
+
+                        ×
+
+                    </button>
+                </td>
+            `;
+
+
+            body.appendChild(row);
+
+            reindexTaxRows();
+        }
+
+
+        function reindexTaxRows()
+        {
+            const rows =
+                document.querySelectorAll(
+                    "#taxBody tr:not(#noTaxRow)"
+                );
+
+
+            rows.forEach(
+                function(row, index)
+                {
+                    row.querySelector(
+                        ".tax-number"
+                    ).textContent =
+                        index + 1;
+
+
+                    const controls =
+                        row.querySelectorAll(
+                            "select, input"
+                        );
+
+
+                    controls.forEach(
+                        function(control)
+                        {
+                            if (!control.name)
+                                return;
+
+
+                            control.name =
+                                control.name.replace(
+                                    /Taxes\[\d+\]/,
+                                    "Taxes[" +
+                                    index +
+                                    "]"
+                                );
+                        }
+                    );
+                }
+            );
+
+
+            taxIndex =
+                rows.length;
+        }
+
+
+        // ============================================================
+        // EVENTS
+        // ============================================================
+
+        paymentType.addEventListener(
+            "change",
+            paymentTypeChanged
+        );
+
+
+        company.addEventListener(
+            "change",
+            async function()
+            {
+                paidFrom.value = "";
+                paidTo.value = "";
+
+                await loadAccounts();
+
+                await loadModeOfPaymentAccount();
+
+                refreshVisibility();
+            }
+        );
+
+
+        partyType.addEventListener(
+            "change",
+            loadParties
+        );
+
+
+        party.addEventListener(
+            "change",
+            loadPartyDetails
+        );
+
+
+        party.addEventListener(
+            "blur",
+            loadPartyDetails
+        );
+
+
+        modeOfPayment.addEventListener(
+            "change",
+            loadModeOfPaymentAccount
+        );
+
+
+        paidFrom.addEventListener(
+            "change",
+            loadPaidFromDetails
+        );
+
+
+        paidTo.addEventListener(
+            "change",
+            loadPaidToDetails
+        );
+
+
+        document.getElementById(
+            "AddTaxButton"
+        ).addEventListener(
+            "click",
+            addTaxRow
+        );
+
+
+        document.addEventListener(
+            "click",
+            function(event)
+            {
+                if (
+                    event.target.classList.contains(
+                        "remove-tax"
+                    )
+                )
+                {
+                    event.target
+                        .closest("tr")
+                        .remove();
+
+
+                    reindexTaxRows();
+                }
+            }
+        );
+
+
+        // ============================================================
+        // INITIAL PAGE
+        // ============================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async function()
+            {
+                await loadAccounts();
+
+                refreshVisibility();
+            }
+        );
+
+    </script>
+}

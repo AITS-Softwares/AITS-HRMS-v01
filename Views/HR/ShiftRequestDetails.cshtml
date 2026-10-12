@@ -1,0 +1,189 @@
+@model Erp_Aits.Models.ShiftRequest
+@{
+    ViewBag.Title = Model.ShiftRequestCode;
+    bool isSubmitted = Model.DocStatus == 1 || string.Equals(Model.Status, "Submitted", StringComparison.OrdinalIgnoreCase);
+    bool isCancelled = Model.DocStatus == 2 || string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool canEdit = !isSubmitted && !isCancelled;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">@Model.EmployeeName</h4>
+        <small class="text-muted">@Model.ShiftRequestCode</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("ShiftRequest", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+        @if (canEdit)
+        {
+            <button id="primaryActionButton" type="submit" form="shiftRequestForm" name="actionCommand" value="Submit" class="btn btn-success btn-sm">Submit</button>
+        }
+        @if (isSubmitted)
+        {
+            <form method="post" action="@Url.Action("UpdateShiftRequest", "HR", new { id = Model.Id })" onsubmit="return confirm('Cancel this submitted Shift Request in ERPNext and HRMS?');">
+                <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-danger btn-sm">Cancel</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+
+<form id="shiftRequestForm" method="post" action="@Url.Action("UpdateShiftRequest", "HR", new { id = Model.Id })">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ShiftRequestCode" value="@Model.ShiftRequestCode" />
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type</label>
+                @if (canEdit)
+                {
+                    <select name="ShiftType" class="form-select" required>
+                        <option value="">-- Select Shift Type --</option>
+                        @if (ViewBag.ShiftTypes != null)
+                        {
+                            foreach (var shift in ViewBag.ShiftTypes)
+                            {
+                                var name = shift.name?.ToString();
+                                <option value="@name" selected="@(Model.ShiftType == name)">@name</option>
+                            }
+                        }
+                    </select>
+                }
+                else { <input class="form-control" value="@Model.ShiftType" readonly /> }
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Company</label>
+                @if (canEdit)
+                {
+                    <select name="Company" id="Company" class="form-select" required>
+                        <option value="">-- Select Company --</option>
+                        @if (ViewBag.Companies != null)
+                        {
+                            foreach (var company in ViewBag.Companies)
+                            {
+                                var name = company.name?.ToString();
+                                <option value="@name" selected="@(Model.Company == name)">@name</option>
+                            }
+                        }
+                    </select>
+                }
+                else { <input class="form-control" value="@Model.Company" readonly /> }
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee</label>
+                @if (canEdit)
+                {
+                    <select name="Employee" id="Employee" class="form-select" required onchange="setEmployeeDetails(this)">
+                        <option value="">-- Select Employee --</option>
+                        @if (ViewBag.Employees != null)
+                        {
+                            foreach (var emp in ViewBag.Employees)
+                            {
+                                var name = emp.name?.ToString();
+                                var employeeName = emp.employee_name?.ToString();
+                                var company = emp.company?.ToString();
+                                var department = emp.department?.ToString();
+                                <option value="@name" data-name="@employeeName" data-company="@company" data-department="@department" selected="@(Model.Employee == name)">@name - @employeeName</option>
+                            }
+                        }
+                    </select>
+                }
+                else { <input class="form-control" value="@Model.Employee" readonly /> }
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee Name</label>
+                <input name="EmployeeName" id="EmployeeName" class="form-control" value="@Model.EmployeeName" readonly="@(!canEdit)" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Department</label>
+                <input name="Department" id="Department" class="form-control" value="@Model.Department" readonly="@(!canEdit)" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Approver</label>
+                @if (canEdit)
+                {
+                    <select name="Approver" class="form-select" required>
+                        <option value="">-- Select Approver --</option>
+                        @if (ViewBag.Users != null)
+                        {
+                            foreach (var user in ViewBag.Users)
+                            {
+                                var name = user.name?.ToString();
+                                <option value="@name" selected="@(Model.Approver == name)">@name</option>
+                            }
+                        }
+                    </select>
+                }
+                else { <input class="form-control" value="@Model.Approver" readonly /> }
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                @if (canEdit)
+                {
+                    <select name="Status" class="form-select" required>
+                        @foreach (var status in new[] { "Draft", "Approved", "Rejected" })
+                        {
+                            <option value="@status" selected="@(string.Equals(Model.Status, status, StringComparison.OrdinalIgnoreCase))">@status</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Status" readonly />
+                }
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">From Date</label>
+                <input name="FromDate" type="date" class="form-control" value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" readonly="@(!canEdit)" required="@canEdit" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">To Date</label>
+                <input name="ToDate" type="date" class="form-control" value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" readonly="@(!canEdit)" />
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<script>
+    function setEmployeeDetails(selectElement) {
+        var selected = selectElement.options[selectElement.selectedIndex];
+        document.getElementById("EmployeeName").value = selected.getAttribute("data-name") || "";
+        document.getElementById("Department").value = selected.getAttribute("data-department") || "";
+        var company = selected.getAttribute("data-company") || "";
+        var companySelect = document.getElementById("Company");
+        if (companySelect && company) {
+            companySelect.value = company;
+        }
+    }
+
+    (function () {
+        var form = document.getElementById("shiftRequestForm");
+        var primary = document.getElementById("primaryActionButton");
+        if (!form || !primary) return;
+
+        var markDirty = function () {
+            primary.textContent = "Save";
+            primary.value = "Save";
+            primary.classList.remove("btn-success");
+            primary.classList.add("btn-dark");
+        };
+
+        form.querySelectorAll("input, select, textarea").forEach(function (field) {
+            if (field.type !== "hidden") {
+                field.addEventListener("change", markDirty);
+                field.addEventListener("input", markDirty);
+            }
+        });
+    })();
+</script>

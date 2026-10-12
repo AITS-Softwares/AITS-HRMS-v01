@@ -1,0 +1,245 @@
+@model Erp_Aits.Models.LeavePeriod
+@{
+    ViewBag.Title = "Leave Period - " + Model.Id;
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-controller="HR"
+      asp-action="UpdateLeavePeriod"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="leavePeriodForm">
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">Leave Period - @Model.Company</h4>
+            <span class="badge bg-success-subtle text-success ms-2">Saved</span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("LeavePeriod", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Back
+            </a>
+
+            <button type="button"
+                    id="editBtn"
+                    class="btn btn-outline-dark btn-sm px-4">
+                Edit
+            </button>
+
+            <button type="submit"
+                    id="saveBtn"
+                    class="btn btn-dark btn-sm px-4"
+                    style="display:none;">
+                Save
+            </button>
+
+            <button type="submit"
+                    form="deleteLeavePeriodForm"
+                    class="btn btn-danger btn-sm px-4"
+                    onclick="return confirm('Delete this Leave Period from ERPNext and HRMS?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">
+                    From Date
+                    <span class="text-danger">*</span>
+                </label>
+                <input asp-for="FromDate"
+                       id="FromDate"
+                       type="date"
+                       class="form-control editable-field"
+                       value="@Model.FromDate.ToString("yyyy-MM-dd")"
+                       disabled
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Company
+                    <span class="text-danger">*</span>
+                </label>
+                <select asp-for="Company"
+                        id="Company"
+                        class="form-select editable-field"
+                        disabled
+                        required>
+                    <option value="">-- Select Company --</option>
+                    @if (ViewBag.Companies != null)
+                    {
+                        foreach (var company in ViewBag.Companies)
+                        {
+                            var companyName = company.name?.ToString();
+                            <option value="@companyName" selected="@(Model.Company == companyName)">
+                                @companyName
+                            </option>
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(Model.Company))
+                    {
+                        <option value="@Model.Company" selected>@Model.Company</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    To Date
+                    <span class="text-danger">*</span>
+                </label>
+                <input asp-for="ToDate"
+                       id="ToDate"
+                       type="date"
+                       class="form-control editable-field"
+                       value="@Model.ToDate.ToString("yyyy-MM-dd")"
+                       disabled
+                       required />
+                <div id="dateValidationMessage"
+                     class="text-danger small mt-1"
+                     style="display:none;">
+                    To date can not be equal or less than from date
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Holiday List for Optional Leave</label>
+                <select asp-for="HolidayListForOptionalLeave"
+                        id="HolidayListForOptionalLeave"
+                        class="form-select editable-field"
+                        disabled>
+                    <option value="">-- None --</option>
+                    @if (ViewBag.HolidayLists != null)
+                    {
+                        foreach (var holiday in ViewBag.HolidayLists)
+                        {
+                            var holidayName = holiday.name?.ToString();
+                            <option value="@holidayName" selected="@(Model.HolidayListForOptionalLeave == holidayName)">
+                                @holidayName
+                            </option>
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(Model.HolidayListForOptionalLeave))
+                    {
+                        <option value="@Model.HolidayListForOptionalLeave" selected>@Model.HolidayListForOptionalLeave</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-check mt-2">
+                    <input asp-for="IsActive"
+                           id="IsActive"
+                           class="form-check-input editable-field"
+                           type="checkbox"
+                           disabled />
+                    <label class="form-check-label" for="IsActive">
+                        Is Active
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form asp-controller="HR"
+      asp-action="DeleteLeavePeriod"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteLeavePeriodForm">
+</form>
+
+@section Scripts
+{
+    <script>
+        const leavePeriodForm = document.getElementById("leavePeriodForm");
+        const editBtn = document.getElementById("editBtn");
+        const saveBtn = document.getElementById("saveBtn");
+        const editableFields = document.querySelectorAll(".editable-field");
+        const fromDate = document.getElementById("FromDate");
+        const toDate = document.getElementById("ToDate");
+        const validationMessage = document.getElementById("dateValidationMessage");
+
+        function setEditing(isEditing) {
+            editableFields.forEach(function (field) {
+                field.disabled = !isEditing;
+            });
+
+            editBtn.style.display = isEditing ? "none" : "";
+            saveBtn.style.display = isEditing ? "" : "none";
+        }
+
+        function validateLeavePeriodDates(showAlert) {
+            validationMessage.style.display = "none";
+
+            if (!fromDate.value || !toDate.value) {
+                return true;
+            }
+
+            if (toDate.value <= fromDate.value) {
+                validationMessage.style.display = "block";
+
+                if (showAlert) {
+                    alert("To date can not be equal or less than from date");
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        editBtn.addEventListener("click", function () {
+            setEditing(true);
+        });
+
+        fromDate.addEventListener("change", function () {
+            validateLeavePeriodDates(false);
+        });
+
+        toDate.addEventListener("change", function () {
+            validateLeavePeriodDates(true);
+        });
+
+        leavePeriodForm.addEventListener("submit", function (event) {
+            setEditing(true);
+
+            if (!validateLeavePeriodDates(true)) {
+                event.preventDefault();
+                return false;
+            }
+
+            if (!document.getElementById("Company").value) {
+                event.preventDefault();
+                alert("Company is required.");
+                return false;
+            }
+
+            return true;
+        });
+    </script>
+}

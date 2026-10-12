@@ -1,0 +1,202 @@
+﻿@* @model Erp_Aits.Models.HRShiftScheduleAssignment
+@{
+    ViewBag.Title = "New Shift Schedule Assignment";
+}
+
+<form method="post" action="/HR/CreateShiftScheduleAssignment">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Schedule Assignment</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Employee Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <input name="Employee" class="form-control" required autofocus />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input name="Company" class="form-control" required value="@Model.Company" />
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Shift Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Schedule *</label>
+                <input name="ShiftSchedule" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mt-2">
+                    <input name="Enabled" class="form-check-input" type="checkbox" value="true" checked />
+                    <label class="form-check-label">Enabled</label>
+                </div>
+                <small class="text-muted">Select this if you want shift assignments to be automatically created indefinitely.</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <input name="ShiftLocation" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Create Shifts After *</label>
+                <input name="CreateShiftsAfter" type="date" class="form-control" required value="@Model.CreateShiftsAfter.ToString("yyyy-MM-dd")" />
+                <small class="text-muted">New shift assignments will be created after this date.</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Status</label>
+                <select name="ShiftStatus" class="form-select">
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.HRShiftScheduleAssignment
+@{
+    ViewBag.Title = "New Shift Schedule Assignment";
+    var employees = ViewBag.EmployeesList as List<object> ?? new List<object>();
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var shiftSchedules = ViewBag.ShiftSchedules as List<string> ?? new List<string>();
+    var shiftLocations = ViewBag.ShiftLocations as List<string> ?? new List<string>();
+}
+
+<form method="post" action="/HR/CreateShiftScheduleAssignment">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Schedule Assignment</h4>
+        <div>
+            <a href="@Url.Action("HRShiftAssignmentList", "HR")" class="btn btn-outline-secondary btn-sm me-2">Back to List</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+    }
+
+    <div class="card p-4">
+        <h6 class="mb-3">Employee Details</h6>
+        <div class="row g-3">
+            <!-- Employee Dropdown mapped from ERPNext -->
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <select name="Employee" id="employeeSelect" class="form-select" required onchange="updateEmpName(this)">
+                    <option value="">-- Select Employee --</option>
+                    @foreach (var emp in employees)
+                    {
+                        var empId = emp.GetType().GetProperty("EmployeeId")?.GetValue(emp, null)?.ToString();
+                        var empName = emp.GetType().GetProperty("EmployeeName")?.GetValue(emp, null)?.ToString();
+                        <option value="@empId" data-empname="@empName">@empId - @empName</option>
+                    }
+                </select>
+                <input type="hidden" name="EmployeeName" id="employeeNameInput" />
+            </div>
+
+            <!-- Company Dropdown mapped from ERPNext -->
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <select name="Company" class="form-select" required>
+                    <option value="">-- Select Company --</option>
+                    @foreach (var comp in companies)
+                    {
+                        <option value="@comp">@comp</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Shift Details</h6>
+        <div class="row g-3">
+            <!-- Shift Schedule Dropdown with Create New Link -->
+            <div class="col-md-6">
+                <label class="form-label">Shift Schedule *</label>
+                <select name="ShiftSchedule" class="form-select" required onchange="handleSchedChange(this)">
+                    <option value="">-- Select Shift Schedule --</option>
+                    @foreach (var sched in shiftSchedules)
+                    {
+                        <option value="@sched">@sched</option>
+                    }
+                    <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Shift Schedule</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-check mt-4">
+                    <input name="Enabled" class="form-check-input" type="checkbox" value="true" checked />
+                    <label class="form-check-label">Enabled</label>
+                </div>
+                <small class="text-muted">Select this if you want shift assignments to be automatically created indefinitely.</small>
+            </div>
+
+            <!-- Shift Location Dropdown with Create New Link -->
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <select name="ShiftLocation" class="form-select" onchange="handleLocChange(this)">
+                    <option value="">-- Select Shift Location --</option>
+                    @foreach (var loc in shiftLocations)
+                    {
+                        <option value="@loc">@loc</option>
+                    }
+                    <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Shift Location</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Create Shifts After *</label>
+                <input name="CreateShiftsAfter" type="date" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                <small class="text-muted">New shift assignments will be created after this date.</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Status</label>
+                <select name="ShiftStatus" class="form-select">
+                    <option value="Active" selected>Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function updateEmpName(selectElement) {
+        var selectedOption = selectElement.options[selectElement.selectedIndex];
+        document.getElementById("employeeNameInput").value = selectedOption.getAttribute("data-empname") || "";
+    }
+
+    function handleSchedChange(sel) {
+        if (sel.value === "__CREATE_NEW__") {
+            sel.value = "";
+            location.href = '@Url.Action("CreateShiftSchedule", "HR")';
+        }
+    }
+
+    function handleLocChange(sel) {
+        if (sel.value === "__CREATE_NEW__") {
+            sel.value = "";
+            location.href = '@Url.Action("CreateShiftLocation", "HR")';
+        }
+    }
+</script>

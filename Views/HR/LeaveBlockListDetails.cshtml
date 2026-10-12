@@ -1,0 +1,241 @@
+@model Erp_Aits.Models.LeaveBlockList
+@{
+    ViewBag.Title = "Leave Block List - " + Model.LeaveBlockListName;
+    var leaveTypes = ViewBag.LeaveTypes as List<string> ?? new List<string>();
+    var allowedUsers = ViewBag.AllowedUsersList as List<string> ?? new List<string>();
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form asp-controller="HR"
+      asp-action="UpdateLeaveBlockList"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="leaveBlockForm">
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Leave Block List - @Model.LeaveBlockListName</h4>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("LeaveBlockList", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+            <button type="submit"
+                    form="deleteLeaveBlockListForm"
+                    class="btn btn-danger btn-sm px-4"
+                    onclick="return confirm('Delete this Leave Block List from ERPNext and HRMS?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-2">
+        <div class="col-md-6">
+            <label class="form-label">Leave Block List Name <span class="text-danger">*</span></label>
+            <input asp-for="LeaveBlockListName" class="form-control" required />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Leave Type</label>
+            <select asp-for="LeaveType" class="form-select">
+                <option value="">-- Select Leave Type --</option>
+                @if (!string.IsNullOrWhiteSpace(Model.LeaveType) && !leaveTypes.Contains(Model.LeaveType))
+                {
+                    <option value="@Model.LeaveType" selected>@Model.LeaveType</option>
+                }
+                @foreach (var lt in leaveTypes)
+                {
+                    <option value="@lt" selected="@(Model.LeaveType == lt)">@lt</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Company <span class="text-danger">*</span></label>
+            <input asp-for="Company" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="form-check mb-1 mt-3">
+        <input asp-for="AppliesToCompany" class="form-check-input" type="checkbox" />
+        <label class="form-check-label" for="AppliesToCompany">Applies to Company</label>
+    </div>
+    <p class="text-muted small mb-4">If not checked, the list will have to be added to each Department where it has to be applied.</p>
+
+    <hr />
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h6 class="mb-0">Block Days</h6>
+            <p class="text-muted small mb-0">Stop users from making Leave Applications on following days.</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="addDateRowBtn">Add Row</button>
+    </div>
+
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th style="width:70px">No.</th>
+                <th>Block Date <span class="text-danger">*</span></th>
+                <th>Reason <span class="text-danger">*</span></th>
+                <th style="width:70px"></th>
+            </tr>
+        </thead>
+        <tbody id="datesBody">
+            @if (Model.BlockDates != null && Model.BlockDates.Any())
+            {
+                for (int i = 0; i < Model.BlockDates.Count; i++)
+                {
+                    <tr>
+                        <td class="row-no">@(i + 1)</td>
+                        <td>
+                            <input type="date" name="BlockDates[@i].BlockDate" class="form-control date-input" value="@Model.BlockDates[i].BlockDate.ToString("yyyy-MM-dd")" required />
+                        </td>
+                        <td>
+                            <input type="text" name="BlockDates[@i].Reason" class="form-control date-input" value="@Model.BlockDates[i].Reason" required />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this, 'datesBody')">X</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <hr />
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h6 class="mb-0">Allow Users</h6>
+            <p class="text-muted small mb-0">Allow the following users to approve Leave Applications for block days.</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="addUserRowBtn">Add Row</button>
+    </div>
+
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th style="width:70px">No.</th>
+                <th>Allow User</th>
+                <th style="width:70px"></th>
+            </tr>
+        </thead>
+        <tbody id="usersBody">
+            @if (Model.AllowedUsers != null && Model.AllowedUsers.Any())
+            {
+                for (int i = 0; i < Model.AllowedUsers.Count; i++)
+                {
+                    <tr>
+                        <td class="row-no">@(i + 1)</td>
+                        <td>
+                            <select name="AllowedUsers[@i].AllowUser" class="form-select user-input">
+                                <option value="">-- Select Allow User --</option>
+                                @if (!string.IsNullOrWhiteSpace(Model.AllowedUsers[i].AllowUser) && !allowedUsers.Contains(Model.AllowedUsers[i].AllowUser))
+                                {
+                                    <option value="@Model.AllowedUsers[i].AllowUser" selected>@Model.AllowedUsers[i].AllowUser</option>
+                                }
+                                @foreach (var user in allowedUsers)
+                                {
+                                    <option value="@user" selected="@(Model.AllowedUsers[i].AllowUser == user)">@user</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this, 'usersBody')">X</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</form>
+
+<form asp-controller="HR"
+      asp-action="DeleteLeaveBlockList"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteLeaveBlockListForm">
+</form>
+
+@section Scripts {
+    <script>
+        const users = @Html.Raw(Json.Serialize(allowedUsers));
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function renumberRows(bodyId) {
+            const body = document.getElementById(bodyId);
+            body.querySelectorAll("tr").forEach(function (row, index) {
+                row.querySelector(".row-no").innerText = index + 1;
+                const inputs = row.querySelectorAll(bodyId === "datesBody" ? ".date-input" : ".user-input");
+                if (bodyId === "datesBody" && inputs.length >= 2) {
+                    inputs[0].name = `BlockDates[${index}].BlockDate`;
+                    inputs[1].name = `BlockDates[${index}].Reason`;
+                }
+                if (bodyId === "usersBody" && inputs.length >= 1) {
+                    inputs[0].name = `AllowedUsers[${index}].AllowUser`;
+                }
+            });
+        }
+
+        function removeRow(button, bodyId) {
+            button.closest("tr").remove();
+            renumberRows(bodyId);
+        }
+
+        document.getElementById("addDateRowBtn").addEventListener("click", function () {
+            const body = document.getElementById("datesBody");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="row-no"></td>
+                <td><input type="date" class="form-control date-input" required /></td>
+                <td><input type="text" class="form-control date-input" required /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this, 'datesBody')">X</button></td>`;
+            body.appendChild(row);
+            renumberRows("datesBody");
+        });
+
+        document.getElementById("addUserRowBtn").addEventListener("click", function () {
+            const body = document.getElementById("usersBody");
+            let options = '<option value="">-- Select Allow User --</option>';
+            users.forEach(function (user) {
+                options += `<option value="${escapeHtml(user)}">${escapeHtml(user)}</option>`;
+            });
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="row-no"></td>
+                <td><select class="form-select user-input">${options}</select></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this, 'usersBody')">X</button></td>`;
+            body.appendChild(row);
+            renumberRows("usersBody");
+        });
+
+        document.getElementById("leaveBlockForm").addEventListener("submit", function (event) {
+            renumberRows("datesBody");
+            renumberRows("usersBody");
+
+            if (!document.querySelector("#datesBody input[type='date']")) {
+                event.preventDefault();
+                alert("At least one Leave Block List Date is required.");
+                return false;
+            }
+
+            return true;
+        });
+    </script>
+}

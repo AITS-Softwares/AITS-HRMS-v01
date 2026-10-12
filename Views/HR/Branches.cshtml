@@ -1,0 +1,337 @@
+﻿@* @model List<Erp_Aits.Models.Branch>
+@{
+    ViewBag.Title = "Branch";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Branch</h4>
+    <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newBranchModal">
+        + Add Branch
+    </button>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.BranchName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No branches found.</p>
+}
+
+<!-- New Branch Modal -->
+<div class="modal fade" id="newBranchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateBranch" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Branch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Branch *</label>
+                    <input type="text" name="BranchName" class="form-control" required autofocus />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@model List<Erp_Aits.Models.Branch>
+@{
+    ViewBag.Title = "Branches";
+}
+
+<!-- Success / Error Notifications -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Branches</h4>
+    <div>
+        <!-- Sync FROM ERPNext (Download) -->
+        <form asp-action="SyncBranchesFromErpNext" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-dark btn-sm me-1" title="Download from ERPNext">
+                ↓ Sync From ERPNext
+            </button>
+        </form>
+
+        <!-- Sync TO ERPNext (Upload) -->
+        <form asp-action="SyncLocalBranchesToErpNext" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary btn-sm me-2" title="Upload to ERPNext">
+                ↑ Sync To ERPNext
+            </button>
+        </form>
+
+        <!-- Add Branch Modal Trigger -->
+        <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newBranchModal">
+            + Add Branch
+        </button>
+    </div>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Branch Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.BranchName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No branches found.</p>
+}
+
+<!-- New Branch Modal -->
+<div class="modal fade" id="newBranchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateBranch" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Branch</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Branch *</label>
+                    <input type="text" name="BranchName" class="form-control" required autofocus />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.Branch>
+
+@{
+    ViewBag.Title = "Branches";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (ViewBag.SyncWarning != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.SyncWarning
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0">
+        Branches
+    </h4>
+
+    <button type="button"
+            class="btn btn-dark btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#newBranchModal">
+
+        + Add Branch
+
+    </button>
+
+</div>
+
+<div class="card p-0">
+
+    <table class="table table-hover align-middle mb-0">
+
+        <thead>
+            <tr>
+                <th>Branch Name</th>
+                <th>ERPNext ID</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (Model != null && Model.Any())
+            {
+                foreach (var b in Model)
+                {
+                    <tr style="cursor:pointer;"
+                        onclick="window.location='@Url.Action(
+                                                    "BranchDetails",
+                                                    "HR",
+                                                    new { id = b.Id })'">
+
+                        <td>
+                            @b.BranchName
+                        </td>
+
+                        <td>
+                            <span class="text-muted">
+                                @(string.IsNullOrWhiteSpace(b.ErpName)
+                                                        ? "-"
+                                                        : b.ErpName)
+                    </span>
+                </td>
+
+                    </tr>
+                        }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2"
+                        class="text-center text-muted py-4">
+
+                        No branches found.
+
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- CREATE BRANCH MODAL -->
+<div class="modal fade"
+     id="newBranchModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <form asp-action="CreateBranch"
+                  asp-controller="HR"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        New Branch
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <label class="form-label">
+                        Branch
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <input type="text"
+                           name="BranchName"
+                           class="form-control"
+                           required
+                           autofocus />
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="submit"
+                            class="btn btn-dark btn-sm">
+                        Save
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

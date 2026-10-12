@@ -1,0 +1,115 @@
+﻿@model Erp_Aits.Models.Interview
+@{
+    ViewBag.Title = "New Interview";
+}
+
+<form asp-action="CreateInterview" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Interview</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="detailsTab">
+            <h6 class="mb-3">Details</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Interview Round *</label>
+                    <input asp-for="InterviewRound" class="form-control" required autofocus />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Status *</label>
+                    <select asp-for="Status" class="form-select">
+                        <option>Pending</option>
+                        <option>Under Review</option>
+                        <option>Cleared</option>
+                        <option>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Job Applicant *</label>
+                    <input asp-for="JobApplicant" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Scheduled On *</label>
+                    <input asp-for="ScheduledOn" type="date" class="form-control" required value="@Model.ScheduledOn.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Resume link</label>
+                    <input asp-for="ResumeLink" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">From Time *</label>
+                    <input asp-for="FromTime" type="time" class="form-control" required />
+                </div>
+
+                <div class="col-md-6 offset-md-6">
+                    <label class="form-label">To Time *</label>
+                    <input asp-for="ToTime" type="time" class="form-control" required />
+                </div>
+            </div>
+
+            <hr />
+            <h6 class="mb-3">Interviewers</h6>
+            <table class="table table-bordered align-middle mb-1" id="interviewersTable">
+                <thead>
+                    <tr>
+                        <th style="width:40px"><input type="checkbox" disabled /></th>
+                        <th style="width:60px">No.</th>
+                        <th>Interviewer</th>
+                        <th style="width:50px"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addInterviewerRow()">+ Add Row</button>
+            <p class="text-muted mt-2"><em>Note: Interviewer rows are UI-only for now — needs a separate linked table to save.</em></p>
+
+            <hr class="my-4" />
+            <h6 class="mb-2">Interview Summary</h6>
+            <textarea asp-for="InterviewSummary" class="form-control" rows="6"></textarea>
+        </div>
+
+        <div class="tab-pane fade" id="feedbackTab">
+            <h6 class="mb-3">Feedback</h6>
+            <textarea asp-for="Feedback" class="form-control" rows="8"></textarea>
+        </div>
+
+    </div>
+</form>
+
+<script>
+    function addInterviewerRow() {
+        var tbody = document.getElementById('interviewersTable').querySelector('tbody');
+        var rowNum = tbody.rows.length + 1;
+
+        var row = document.createElement('tr');
+
+        var checkCell = document.createElement('td');
+        checkCell.innerHTML = '<input type="checkbox" />';
+
+        var numCell = document.createElement('td');
+        numCell.innerText = rowNum;
+
+        var nameCell = document.createElement('td');
+        nameCell.innerHTML = '<input class="form-control form-control-sm border-0" placeholder="Interviewer" />';
+
+        var editCell = document.createElement('td');
+        editCell.innerHTML = '<i class="fas fa-pen text-muted" style="cursor:pointer"></i>';
+
+        row.appendChild(checkCell);
+        row.appendChild(numCell);
+        row.appendChild(nameCell);
+        row.appendChild(editCell);
+
+        tbody.appendChild(row);
+    }
+</script>

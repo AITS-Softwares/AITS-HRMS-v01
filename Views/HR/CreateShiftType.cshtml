@@ -1,0 +1,107 @@
+﻿@model Erp_Aits.Models.ShiftType
+
+@{
+    ViewBag.Title = "New Shift Type";
+    var holidayLists = ViewBag.HolidayLists as List<string> ?? new List<string>();
+}
+
+@functions {
+    string FormatTime(string value)
+    {
+        if (TimeSpan.TryParse(value, out var time))
+            return time.ToString(@"hh\:mm\:ss");
+
+        return value ?? "";
+    }
+}
+
+<form asp-action="CreateShiftType" asp-controller="HR" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Type</h4>
+        <div>
+            <a href="@Url.Action("ShiftType", "HR")" class="btn btn-outline-secondary btn-sm me-2">Back to List</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save & Push to ERPNext</button>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mb-3">@TempData["Success"]</div>
+    }
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type Name <span class="text-danger">*</span></label>
+                <input type="text"
+                       name="Name"
+                       class="form-control"
+                       value="@Model.Name"
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Holiday List <span class="text-danger">*</span></label>
+                <select name="HolidayList" class="form-select" required>
+                    <option value="">Select Holiday List</option>
+                    @foreach (var hl in holidayLists)
+                    {
+                        <option value="@hl" selected="@(Model.HolidayList == hl)">
+                            @hl
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Start Time <span class="text-danger">*</span></label>
+                <input type="time"
+                       name="StartTime"
+                       class="form-control"
+                       value="@FormatTime(Model.StartTime)"
+                       step="1"
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Roster Color</label>
+                <select name="RosterColor" class="form-select">
+                    <option value="Blue" selected="@(Model.RosterColor == "Blue" || string.IsNullOrWhiteSpace(Model.RosterColor))">Blue</option>
+                    <option value="Green" selected="@(Model.RosterColor == "Green")">Green</option>
+                    <option value="Red" selected="@(Model.RosterColor == "Red")">Red</option>
+                    <option value="Orange" selected="@(Model.RosterColor == "Orange")">Orange</option>
+                    <option value="Purple" selected="@(Model.RosterColor == "Purple")">Purple</option>
+                    <option value="Yellow" selected="@(Model.RosterColor == "Yellow")">Yellow</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">End Time <span class="text-danger">*</span></label>
+                <input type="time"
+                       name="EndTime"
+                       class="form-control"
+                       value="@FormatTime(Model.EndTime)"
+                       step="1"
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-check mt-4">
+                    <input type="hidden" name="EnableAutoAttendance" value="false" />
+                    <input type="checkbox"
+                           name="EnableAutoAttendance"
+                           value="true"
+                           class="form-check-input"
+                           id="EnableAutoAttendance"
+                           @(Model.EnableAutoAttendance ? "checked" : "") />
+                    <label class="form-check-label" for="EnableAutoAttendance">Enable Auto Attendance</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

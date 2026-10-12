@@ -1,0 +1,113 @@
+﻿@model Erp_Aits.Models.UserTaskViewModel
+
+<div class="modal fade" id="createTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title">
+                    <i class="fas fa-tasks text-primary"></i> Create Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <form id="createTaskForm" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="UserTask.LeadId" value="@Model.UserTask.LeadId" />
+                    <input type="hidden" name="UserTask.OpportunityId" value="@Model.UserTask.OpportunityId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Task Date</label>
+                                <input type="datetime-local" name="UserTask.TaskDate" class="form-control"
+                                       value="@Model.UserTask.TaskDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Assigned To</label>
+                                <select name="UserTask.AssignedTo" class="form-control" required>
+                                    <option value="">Select User</option>
+                                    @foreach (var user in Model.UserList)
+                                    {
+                                        <option value="@user.Id">@user.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Summary</label>
+                                <textarea name="UserTask.Summary" class="form-control" rows="3"
+                                          placeholder="Enter task summary" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="UserTask.Status" class="form-control">
+                                    @foreach (var status in Model.StatusList)
+                                    {
+                                        <option value="@status" selected="@(status == Model.UserTask.Status)">@status</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Priority</label>
+                                <select name="UserTask.Priority" class="form-control">
+                                    @foreach (var priority in Model.PriorityList)
+                                    {
+                                        <option value="@priority" selected="@(priority == Model.UserTask.Priority)">@priority</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Attachment</label>
+                                <input type="file" name="AttachmentFile" class="form-control" />
+                                <small class="text-muted">Max file size: 5MB. Allowed: .pdf, .doc, .docx, .jpg, .png</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="submitTask()">
+                    <i class="fas fa-save"></i> Create Task
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitTask() {
+        var formData = new FormData(document.getElementById('createTaskForm'));
+
+        $.ajax({
+            url: '@Url.Action("Create", "Tasks")',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#createTaskModal').modal('hide');
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message || 'Error creating task.');
+                }
+            },
+            error: function() {
+                alert('Error creating task. Please try again.');
+            }
+        });
+    }
+</script>

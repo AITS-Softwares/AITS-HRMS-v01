@@ -1,0 +1,145 @@
+﻿@model Erp_Aits.Models.AppraisalCycle
+@{
+    ViewBag.Title = "Appraisal Cycle " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Appraisal Cycle - @Model.Id</h4>
+    <div class="d-flex gap-2">
+        <a asp-action="AppraisalCycle" class="btn btn-outline-secondary">Back</a>
+        @if (string.Equals(Model.Status, "Not Started", StringComparison.OrdinalIgnoreCase))
+        {
+            <form asp-action="StartAppraisalCycle" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary">Start</button>
+            </form>
+        }
+        else if (string.Equals(Model.Status, "In Progress", StringComparison.OrdinalIgnoreCase))
+        {
+            <form asp-action="CompleteAppraisalCycle" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success">Mark as Completed</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overviewTab">Overview</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#applicableForTab">Applicable For</a></li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane fade show active" id="overviewTab">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Cycle Name</label>
+                <input class="form-control" value="@Model.CycleName" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Start Date</label>
+                <input class="form-control" value="@Model.StartDate.ToString("dd-MM-yyyy")" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Company</label>
+                <input class="form-control" value="@Model.Company" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input class="form-control" value="@Model.EndDate.ToString("dd-MM-yyyy")" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <input class="form-control" value="@Model.Status" readonly />
+            </div>
+        </div>
+
+        <hr />
+        <h6 class="mb-2">Description</h6>
+        <textarea class="form-control mb-4" rows="6" readonly>@Model.Description</textarea>
+
+        <hr />
+        <h6 class="mb-3">Settings</h6>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">KRA Evaluation Method</label>
+                <input class="form-control" value="@Model.KRAEvaluationMethod" readonly />
+            </div>
+        </div>
+
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" checked="@Model.CalculateFinalScoreFormula" disabled />
+            <label class="form-check-label">Calculate Final Score based on Formula</label>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="applicableForTab">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Branch</label>
+                <input class="form-control" value="@Model.Branch" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Designation</label>
+                <input class="form-control" value="@Model.Designation" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Department</label>
+                <input class="form-control" value="@Model.Department" readonly />
+            </div>
+        </div>
+
+        <hr />
+        <h6 class="mb-3">Employees</h6>
+        <table class="table table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Appraisal Template</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Appraisal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Employees != null && Model.Employees.Any())
+                {
+                    int i = 1;
+                    foreach (var e in Model.Employees)
+                    {
+                        <tr>
+                            <td>@(i++)</td>
+                            <td>@e.Employee</td>
+                            <td>@e.EmployeeName</td>
+                            <td>@e.AppraisalTemplate</td>
+                            <td>@e.Department</td>
+                            <td>@e.Designation</td>
+                        <td>
+                            <a asp-action="Appraisal" asp-route-employee="@e.Employee" asp-route-appraisalCycle="@Model.ErpNextId" class="btn btn-sm btn-outline-primary">Open</a>
+                        </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="text-muted text-center py-3">No employees added</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

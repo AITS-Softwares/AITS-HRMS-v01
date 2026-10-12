@@ -1,0 +1,94 @@
+﻿@model List<Erp_Aits.Models.TrainingFeedback>
+@{
+    ViewBag.Title = "Training Feedback";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Training Feedback</h4>
+    <a href="@Url.Action("CreateTrainingFeedback", "HR")" class="btn btn-dark btn-sm">+ Add Training Feedback</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employee" value="@ViewBag.EmployeeFilter" class="form-control form-control-sm" placeholder="Employee" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee Name" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="trainingEvent" value="@ViewBag.TrainingEventFilter" class="form-control form-control-sm" placeholder="Training Event" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Employee</th>
+                <th>Employee Name</th>
+                <th>Training Event</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in Model)
+            {
+                <tr style="cursor:pointer" onclick="location.href='@Url.Action("TrainingFeedbackDetails", "HR", new { id = f.Id })'">
+                    <td>@f.Id</td>
+                    <td>@f.Employee</td>
+                    <td>@f.EmployeeName</td>
+                    <td>@f.TrainingEvent</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="text-center py-5">
+        <p class="text-muted">You haven't created a Training Feedback yet</p>
+        <a href="@Url.Action("CreateTrainingFeedback", "HR")" class="btn btn-outline-dark btn-sm">Create your first Training Feedback</a>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@section Scripts {
+    <script>
+        async function loadFromErpNext() {
+            try {
+                const response = await fetch('@Url.Action("GetErpNextTrainingFeedback", "HR")');
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log("ERPNext raw data:", result.data);
+                    alert("ERPNext call succeeded! Check the browser console (F12) for the data.");
+                } else {
+                    console.error("ERPNext error:", result.error);
+                    alert("ERPNext call failed: " + result.error);
+                }
+            } catch (err) {
+                console.error("Fetch failed:", err);
+                alert("Fetch failed — check console for details.");
+            }
+        }
+
+        // Runs automatically when this page loads
+        loadFromErpNext();
+    </script>
+}

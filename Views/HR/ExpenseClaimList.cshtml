@@ -1,0 +1,56 @@
+﻿@model List<Erp_Aits.Models.ExpenseClaim>
+@{
+    ViewBag.Title = "Expense Claim";
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Expense Claim</h4>
+    <div class="d-flex gap-2">
+        <form asp-action="SyncExpenseClaimsFromErpNext" asp-controller="HR" method="post" style="display:inline-block !important; margin:0 !important;">
+            <button type="submit" class="btn btn-primary btn-sm fw-bold">⚡ Sync from ERPNext</button>
+        </form>
+        <a href="@Url.Action("CreateExpenseClaim", "HR")" class="btn btn-dark btn-sm">+ Add Expense Claim</a>
+    </div>
+</div>
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>From Employee</th>
+            <th>Employee Name</th>
+            <th>Company</th>
+            <th>Posting Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ec in Model)
+        {
+            <tr>
+                <td><strong>@ec.ExpenseClaimCode</strong></td>
+                <td>@ec.Employee</td>
+                <td>@ec.EmployeeName</td>
+                <td>@ec.Company</td>
+                <td>@(ec.PostingDate?.ToString("dd-MM-yyyy"))</td>
+                <td><span class="badge bg-secondary-subtle text-secondary">@ec.ApprovalStatus</span></td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (!Model.Any())
+{
+    <p class="text-muted">No expense claims found. Click "⚡ Sync from ERPNext" to import records.</p>
+}

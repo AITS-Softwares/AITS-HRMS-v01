@@ -1,0 +1,318 @@
+﻿@model Erp_Aits.Models.AttendanceRequest
+
+@{
+    ViewBag.Title = "New Attendance Request";
+
+    var employees = ViewBag.Employees;
+    var companies = ViewBag.Companies;
+    var shifts = ViewBag.Shifts;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-1">New Attendance Request</h4>
+        <span class="badge bg-warning text-dark">Not Saved</span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("AttendanceRequest", "HR")" class="btn btn-outline-secondary btn-sm">
+            Back to List
+        </a>
+
+        <button type="submit" form="attendanceRequestCreateForm" class="btn btn-dark btn-sm">
+            Save
+        </button>
+    </div>
+</div>
+
+<form action="@Url.Action("CreateAttendanceRequest", "HR")" method="post" id="attendanceRequestCreateForm">
+    @Html.AntiForgeryToken()
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <h5 class="mb-3">Employee Details</h5>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Employee <span class="text-danger">*</span></label>
+                    <select class="form-select" name="Employee" id="Employee" required>
+                        <option value="">-- Select Employee --</option>
+
+                        @if (employees != null)
+                        {
+                            foreach (var emp in employees)
+                            {
+                                string empCode = emp.name != null ? emp.name.ToString() : "";
+                                string empName = emp.employee_name != null ? emp.employee_name.ToString() : "";
+
+                                if (empCode == Model.Employee)
+                                {
+                                    <option value="@empCode" data-name="@empName" selected="selected">
+                                        @empCode - @empName
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@empCode" data-name="@empName">
+                                        @empCode - @empName
+                                    </option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Name</label>
+                    <input type="text"
+                           class="form-control"
+                           name="EmployeeName"
+                           id="EmployeeName"
+                           value="@Model.EmployeeName"
+                           readonly="readonly" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company <span class="text-danger">*</span></label>
+                    <select class="form-select" name="Company" required>
+                        <option value="">-- Select Company --</option>
+
+                        @if (companies != null)
+                        {
+                            foreach (var company in companies)
+                            {
+                                string companyName = company.name != null ? company.name.ToString() : "";
+
+                                if (companyName == Model.Company)
+                                {
+                                    <option value="@companyName" selected="selected">@companyName</option>
+                                }
+                                else
+                                {
+                                    <option value="@companyName">@companyName</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">From Date <span class="text-danger">*</span></label>
+                    <input type="date"
+                           class="form-control"
+                           name="FromDate"
+                           id="FromDate"
+                           value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))"
+                           required="required" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">To Date <span class="text-danger">*</span></label>
+                    <input type="date"
+                           class="form-control"
+                           name="ToDate"
+                           id="ToDate"
+                           value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))"
+                           required="required" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <h5 class="mb-3">Request Details</h5>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Reason <span class="text-danger">*</span></label>
+                    <select class="form-select" name="Reason" required>
+                        @if (Model.Reason == "Work From Home" || string.IsNullOrWhiteSpace(Model.Reason))
+                        {
+                            <option value="Work From Home" selected="selected">Work From Home</option>
+                        }
+                        else
+                        {
+                            <option value="Work From Home">Work From Home</option>
+                        }
+
+                        @if (Model.Reason == "On Duty")
+                        {
+                            <option value="On Duty" selected="selected">On Duty</option>
+                        }
+                        else
+                        {
+                            <option value="On Duty">On Duty</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Shift</label>
+                    <select class="form-select" name="Shift">
+                        <option value="">-- Select Shift --</option>
+
+                        @if (shifts != null)
+                        {
+                            foreach (var shift in shifts)
+                            {
+                                string shiftName = shift != null ? shift.ToString() : "";
+
+                                if (shiftName == Model.Shift)
+                                {
+                                    <option value="@shiftName" selected="selected">@shiftName</option>
+                                }
+                                else
+                                {
+                                    <option value="@shiftName">@shiftName</option>
+                                }
+                            }
+                        }
+                    </select>
+                    <div class="form-text">Note: Shift will not be overwritten in existing attendance records.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-check mt-2">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               name="HalfDay"
+                               id="HalfDay"
+                               value="true"
+                               checked="@Model.HalfDay" />
+                        <input type="hidden" name="HalfDay" value="false" />
+                        <label class="form-check-label" for="HalfDay">Half Day</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6" id="halfDayDateBox" style="display:none;">
+                    <label class="form-label">Half Day Date <span class="text-danger">*</span></label>
+                    <input type="date"
+                           class="form-control"
+                           name="HalfDayDate"
+                           id="HalfDayDate"
+                           value="@(Model.HalfDayDate.HasValue? Model.HalfDayDate.Value.ToString("yyyy-MM-dd") : "")" />
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-check mt-2">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               name="IncludeHolidays"
+                               id="IncludeHolidays"
+                               value="true"
+                               checked="@Model.IncludeHolidays" />
+                        <input type="hidden" name="IncludeHolidays" value="false" />
+                        <label class="form-check-label" for="IncludeHolidays">Include Holidays</label>
+                    </div>
+                    <div class="form-text">Select if any of the days selected for request are holidays.</div>
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Explanation</label>
+                    <textarea class="form-control"
+                              name="Explanation"
+                              rows="3">@Model.Explanation</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    .card {
+        border-radius: 8px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 42px;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .form-text {
+        font-size: 13px;
+        color: #6c757d;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const employeeSelect = document.getElementById("Employee");
+        const employeeNameInput = document.getElementById("EmployeeName");
+
+        if (employeeSelect && employeeNameInput) {
+            employeeSelect.addEventListener("change", function () {
+                const selected = employeeSelect.options[employeeSelect.selectedIndex];
+                employeeNameInput.value = selected ? (selected.getAttribute("data-name") || "") : "";
+            });
+        }
+
+        const halfDay = document.getElementById("HalfDay");
+        const halfDayDateBox = document.getElementById("halfDayDateBox");
+        const halfDayDate = document.getElementById("HalfDayDate");
+        const fromDate = document.getElementById("FromDate");
+
+        function toggleHalfDayDate() {
+            if (!halfDay || !halfDayDateBox) return;
+
+            if (halfDay.checked) {
+                halfDayDateBox.style.display = "block";
+
+                if (halfDayDate) {
+                    halfDayDate.setAttribute("required", "required");
+
+                    if (!halfDayDate.value && fromDate && fromDate.value) {
+                        halfDayDate.value = fromDate.value;
+                    }
+                }
+            } else {
+                halfDayDateBox.style.display = "none";
+
+                if (halfDayDate) {
+                    halfDayDate.removeAttribute("required");
+                    halfDayDate.value = "";
+                }
+            }
+        }
+
+        if (halfDay) {
+            halfDay.addEventListener("change", toggleHalfDayDate);
+            toggleHalfDayDate();
+        }
+
+        if (fromDate && halfDayDate) {
+            fromDate.addEventListener("change", function () {
+                if (halfDay && halfDay.checked && !halfDayDate.value) {
+                    halfDayDate.value = fromDate.value;
+                }
+            });
+        }
+    });
+</script>

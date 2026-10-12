@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Bulk Assignment Result";
+    var results = (List<string>)ViewBag.Results;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Bulk Leave Policy Assignment Result</h4>
+    <a href="@Url.Action("LeavePolicyAssignment", "HR")" class="btn btn-outline-secondary btn-sm">Back to List</a>
+</div>
+
+<p class="mb-3"><strong>@ViewBag.Count</strong> assignment(s) created successfully.</p>
+
+<table class="table table-bordered align-middle">
+    <thead>
+        <tr><th>No.</th><th>Assignment</th></tr>
+    </thead>
+    <tbody>
+        @if (results != null && results.Any())
+        {
+            int i = 1;
+            foreach (var r in results)
+            {
+                <tr><td>@(i++)</td><td>@r</td></tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="2" class="text-muted text-center py-3">No assignments were created.</td></tr>
+        }
+    </tbody>
+</table>

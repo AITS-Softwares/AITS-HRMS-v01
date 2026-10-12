@@ -1,0 +1,130 @@
+﻿@model List<Erp_Aits.Models.AttendanceRequest>
+
+@{
+    ViewBag.Title = "Attendance Request";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Attendance Request</h4>
+
+    <a href="@Url.Action("CreateAttendanceRequest", "HR")" class="btn btn-outline-primary btn-sm">
+        + Add
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Employee</th>
+                        <th>Employee Name</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Reason</th>
+                        <th>Doc Status</th>
+                        <th style="width: 120px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            string docStatusText = item.DocStatus == 1
+                            ? "Submitted"
+                            : item.DocStatus == 2
+                            ? "Cancelled"
+                            : "Draft";
+
+                            string badgeClass = item.DocStatus == 1
+                            ? "bg-success"
+                            : item.DocStatus == 2
+                            ? "bg-danger"
+                            : "bg-secondary";
+
+                            <tr class="attendance-request-row"
+                                onclick="window.location='@Url.Action("AttendanceRequestDetails", "HR", new { id = item.Id })'">
+                                <td class="fw-semibold">
+                                    @(string.IsNullOrWhiteSpace(item.AttendanceRequestCode) ? item.ErpNextId : item.AttendanceRequestCode)
+                                </td>
+                                <td>@item.Employee</td>
+                                <td>@item.EmployeeName</td>
+                                <td>@(item.FromDate.HasValue? item.FromDate.Value.ToString("dd-MM-yyyy") : "")</td>
+                                <td>@(item.ToDate.HasValue? item.ToDate.Value.ToString("dd-MM-yyyy") : "")</td>
+                                <td>@item.Reason</td>
+                                <td>
+                                    <span class="badge @badgeClass">@docStatusText</span>
+                                </td>
+                                <td onclick="event.stopPropagation();">
+                                    <form asp-action="DeleteAttendanceRequest"
+                                          asp-controller="HR"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to delete this Attendance Request?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No attendance request records found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .attendance-request-row {
+        cursor: pointer;
+    }
+
+        .attendance-request-row:hover {
+            background-color: #f5f7fb;
+        }
+
+    .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .table th {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+</style>

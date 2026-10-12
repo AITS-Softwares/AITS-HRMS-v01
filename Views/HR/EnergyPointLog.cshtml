@@ -1,0 +1,89 @@
+﻿@model List<Erp_Aits.Models.EnergyPointLog>
+@{
+    ViewBag.Title = "Energy Point Log";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Energy Point Log</h4>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" title="Reload" onclick="reloadReport()">
+            &#x21bb;
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" title="More options">&#8942;</button>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" asp-action="EnergyPointLog" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="userName" class="form-control form-control-sm" placeholder="User" value="@ViewBag.UserFilter" />
+    </div>
+    <div class="col-md-2">
+        <select name="type" class="form-select form-select-sm">
+            <option value="">Type</option>
+            <option value="Auto" selected="@("Auto" == (string)ViewBag.TypeFilter)">Auto</option>
+            <option value="Manual" selected="@("Manual" == (string)ViewBag.TypeFilter)">Manual</option>
+            <option value="Review" selected="@("Review" == (string)ViewBag.TypeFilter)">Review</option>
+            <option value="Revert" selected="@("Revert" == (string)ViewBag.TypeFilter)">Revert</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="rule" class="form-control form-control-sm" placeholder="Rule" value="@ViewBag.RuleFilter" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="referenceDoc" class="form-control form-control-sm" placeholder="Reference Docum..." value="@ViewBag.ReferenceDocFilter" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-dark">Filter</button>
+    </div>
+</form>
+
+<!-- Report grid -->
+<div class="card p-0">
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Rule</th>
+                    <th>Reference Document</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td>@log.LogCode</td>
+                        <td>@log.UserName</td>
+                        <td>@log.Type</td>
+                        <td>@log.Rule</td>
+                        <td>@log.ReferenceDoctype @log.ReferenceName</td>
+                        <td>@log.Points</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-2" style="font-size:2rem;">&#128203;</div>
+            <p class="text-muted mb-0">You haven't created a Energy Point Log yet</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function reloadReport() {
+            window.location.reload();
+        }
+    </script>
+}

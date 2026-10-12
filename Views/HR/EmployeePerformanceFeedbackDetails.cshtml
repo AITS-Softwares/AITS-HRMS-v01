@@ -1,0 +1,497 @@
+﻿@model Erp_Aits.Models.EmployeePerformanceFeedback
+
+@{
+    ViewBag.Title =
+        "Employee Performance Feedback - "
+        + Model.EmployeeName;
+}
+
+<style>
+    .details-star {
+        font-size: 21px;
+        line-height: 1;
+    }
+
+        .details-star.active {
+            color: #f4b400;
+        }
+
+        .details-star.empty {
+            color: #d1d5db;
+        }
+</style>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div>
+
+        <h4 class="mb-0">
+            @Model.EmployeeName
+        </h4>
+
+        @if (Model.DocStatus == 0)
+        {
+            <span class="badge bg-danger-subtle text-danger">
+                Draft
+            </span>
+        }
+        else if (Model.DocStatus == 1)
+        {
+            <span class="badge bg-success-subtle text-success">
+                Submitted
+            </span>
+        }
+        else if (Model.DocStatus == 2)
+        {
+            <span class="badge bg-secondary-subtle text-secondary">
+                Cancelled
+            </span>
+        }
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("EmployeePerformanceFeedback", "HR")"
+           class="btn btn-outline-secondary btn-sm">
+
+            Back to List
+
+        </a>
+
+        @if (Model.DocStatus == 0)
+        {
+            <form asp-action="SubmitEmployeePerformanceFeedback"
+                  asp-controller="HR"
+                  asp-route-id="@Model.Id"
+                  method="post"
+                  class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="btn btn-dark btn-sm">
+                    Submit
+                </button>
+            </form>
+
+            <form asp-action="DeleteEmployeePerformanceFeedback"
+                  asp-controller="HR"
+                  asp-route-id="@Model.Id"
+                  method="post"
+                  class="d-inline"
+                  onsubmit="return confirm('Delete this Employee Performance Feedback from ERPNext and HRMS?');">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="btn btn-outline-danger btn-sm">
+                    Delete
+                </button>
+            </form>
+        }
+        else if (Model.DocStatus == 1)
+        {
+            <form asp-action="CancelEmployeePerformanceFeedback"
+                  asp-controller="HR"
+                  asp-route-id="@Model.Id"
+                  method="post"
+                  class="d-inline"
+                  onsubmit="return confirm('Cancel this Employee Performance Feedback in ERPNext and HRMS?');">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="btn btn-outline-danger btn-sm">
+                    Cancel
+                </button>
+            </form>
+        }
+    </div>
+
+</div>
+
+
+<ul class="nav nav-tabs mb-3">
+
+    <li class="nav-item">
+
+        <a class="nav-link active"
+           data-bs-toggle="tab"
+           href="#empDetailsTab">
+
+            Employee Details
+
+        </a>
+
+    </li>
+
+
+    <li class="nav-item">
+
+        <a class="nav-link"
+           data-bs-toggle="tab"
+           href="#feedbackTab">
+
+            Feedback
+
+        </a>
+
+    </li>
+
+</ul>
+
+
+<div class="tab-content">
+
+    <!-- ========================================================= -->
+    <!-- EMPLOYEE DETAILS -->
+    <!-- ========================================================= -->
+
+    <div class="tab-pane fade show active"
+         id="empDetailsTab">
+
+        <div class="card border rounded-3 p-4 mb-3">
+
+            <div class="row g-3">
+
+
+                <!-- For Employee -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        For Employee
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.ForEmployee"
+                           readonly />
+
+                </div>
+
+
+                <!-- Reviewer -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Reviewer
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.Reviewer"
+                           readonly />
+
+                </div>
+
+
+                <!-- Added On -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Added On
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.AddedOn.ToString("dd-MM-yyyy HH:mm:ss")"
+                           readonly />
+
+                    <small class="text-muted">
+                        Asia/Kolkata
+                    </small>
+
+                </div>
+
+
+                <!-- Employee Name -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Employee Name
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.EmployeeName"
+                           readonly />
+
+                </div>
+
+
+                <!-- Reviewer Name -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Reviewer Name
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.ReviewerName"
+                           readonly />
+
+                </div>
+
+
+                <!-- Appraisal Cycle -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Appraisal Cycle
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.AppraisalCycle"
+                           readonly />
+
+                </div>
+
+
+                <!-- Company -->
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Company
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.Company"
+                           readonly />
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- APPRAISAL -->
+        <!-- ===================================================== -->
+
+        <div class="card border rounded-3 p-4">
+
+            <div class="row mb-4">
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Appraisal
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.Appraisal"
+                           readonly />
+
+                </div>
+
+            </div>
+
+
+            <!-- Feedback Ratings -->
+            <h6 class="mb-3">
+                Feedback Ratings
+            </h6>
+
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered align-middle mb-4">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th style="width:60px;">
+                                No.
+                            </th>
+
+                            <th>
+                                Criteria
+                            </th>
+
+                            <th style="width:180px;">
+                                Weightage (%)
+                            </th>
+
+                            <th style="width:280px;">
+                                Rating
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (
+                                                Model.FeedbackRatings != null &&
+                                                Model.FeedbackRatings.Any()
+                                                )
+                        {
+                            int index = 1;
+
+
+                            foreach (
+                            var rating
+                            in Model.FeedbackRatings
+                            )
+                            {
+                                decimal ratingValue =
+                                rating.Rating;
+
+
+                                int starCount =
+                                (int)Math.Round(
+                                ratingValue * 5,
+                                MidpointRounding.AwayFromZero
+                                );
+
+
+                                <tr>
+
+                                    <td>
+                                        @index
+                                    </td>
+
+
+                                    <td>
+                                        @rating.Criteria
+                                    </td>
+
+
+                                    <td>
+                                        @rating.Weightage.ToString("0.##")%
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="d-flex align-items-center gap-1">
+
+                                            @for (
+                                                                                int star = 1;
+                                                                                star <= 5;
+                                                                                star++
+                                                                                )
+                                            {
+                                                if (
+                                                star <= starCount
+                                                )
+                                                {
+                                                    <span class="details-star active">
+                                                        ★
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="details-star empty">
+                                                        ☆
+                                                    </span>
+                                                }
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="4"
+                                    class="text-center text-muted py-3">
+
+                                    No Feedback Ratings
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- Total Score -->
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Total Score
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.TotalScore.ToString("0.##")"
+                           readonly />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- FEEDBACK TAB -->
+    <!-- ========================================================= -->
+
+    <div class="tab-pane fade"
+         id="feedbackTab">
+
+        <div class="card border rounded-3 p-4">
+
+            <label class="form-label">
+                Feedback
+            </label>
+
+
+            <div class="border rounded bg-light p-3"
+                 style="
+                    min-height:140px;
+                    white-space:pre-wrap;
+                    text-align:left;
+                 ">
+
+                @if (
+                                string.IsNullOrWhiteSpace(
+                                Model.Feedback
+                                )
+                                )
+                {
+                    <span class="text-muted">
+                        No Feedback
+                    </span>
+                }
+                else
+                {
+                    @Html.Raw(Model.Feedback)
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

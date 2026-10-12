@@ -1,0 +1,497 @@
+﻿@* @model Erp_Aits.Models.TimeSheet
+@{
+    ViewBag.Title = "New Timesheet";
+}
+<style>
+    .timer-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+    }
+
+    .timer-modal-box {
+        background: #fff;
+        border-radius: 10px;
+        width: 520px;
+        max-width: 92%;
+        padding: 28px 34px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    }
+
+    .timer-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .timer-modal-close {
+        cursor: pointer;
+        font-size: 26px;
+        line-height: 1;
+        color: #888;
+        border: none;
+        background: none;
+    }
+
+    .timer-display {
+        font-size: 46px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        text-align: center;
+    }
+</style>
+
+@* <form method="post" action="/HR/Timesheet" id="timesheetForm"> *@
+@*     <form method="post" action="/HR/CreateTimesheet" id="timesheetForm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline-block me-2">New Timesheet</h4>
+            <span class="badge bg-warning-subtle text-warning">Not Saved</span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-dark btn-sm" id="timerBtn" onclick="openTimerModal()">Start Timer</button>
+            <button type="submit" class="btn btn-outline-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series *</label>
+                <input name="Series" class="form-control" value="@Model.Series" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <input class="form-control" value="@Model.Status" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company</label>
+                <input name="Company" class="form-control" value="@Model.Company" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Project</label>
+                <input name="Project" class="form-control" value="@Model.Project" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Customer</label>
+                <input name="Customer" class="form-control" value="@Model.Customer" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Currency</label>
+                <input name="Currency" class="form-control" value="@Model.Currency" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Exchange Rate</label>
+                <input name="ExchangeRate" type="number" step="0.001" class="form-control" value="@Model.ExchangeRate" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6>Employee Detail</h6>
+        <label class="form-label">Employee</label>
+        <input name="Employee" class="form-control mb-3" value="@Model.Employee" />
+
+        <label class="form-label">Time Sheets</label>
+        <table class="table table-bordered align-middle mb-1" id="timeLogsTable">
+            <thead>
+                <tr>
+                    <th style="width:30px"></th>
+                    <th style="width:40px">No.</th>
+                    <th>Activity Type</th>
+                    <th>From Time</th>
+                    <th style="width:90px">Hrs</th>
+                    <th>Project</th>
+                    <th>Task</th>
+                    <th style="width:80px">Is Billable</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addLogRow()">Add Row</button>
+
+        <label class="form-label mt-3">Total Working Hours</label>
+        <input id="totalWorkingHours" class="form-control" value="0" readonly />
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6>Billing Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Total Billable Hours</label>
+                <input name="TotalBillableHours" class="form-control" value="0" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Total Billable Amount (INR)</label>
+                <input name="TotalBillableAmount" class="form-control" value="0.00" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Total Costing Amount (INR)</label>
+                <input name="TotalCostingAmount" class="form-control" value="0.00" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <label class="form-label">Note</label>
+        <textarea name="Note" class="form-control" rows="4">@Model.Note</textarea>
+    </div>
+</form>
+
+<!-- Timer Modal -->
+<div id="timerModalOverlay" class="timer-modal-overlay">
+    <div class="timer-modal-box">
+        <div class="timer-modal-header">
+            <h5 class="mb-0">Timer</h5>
+            <button type="button" class="timer-modal-close" onclick="closeTimerModal()">&times;</button>
+        </div>
+        <hr />
+        <div class="mb-3">
+            <label class="form-label">Activity Type <span class="text-danger">*</span></label>
+            <input type="text" id="modalActivityType" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Project</label>
+            <input type="text" id="modalProject" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Task</label>
+            <input type="text" id="modalTask" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Expected Hrs</label>
+            <input type="number" step="0.01" id="modalExpectedHrs" class="form-control" />
+        </div>
+        <hr />
+        <div id="timerDisplay" class="timer-display">00:00:00</div>
+        <div class="text-center">
+            <button type="button" class="btn btn-dark px-4 mt-3" id="modalTimerBtn" onclick="toggleModalTimer()">Start</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var rowCount = 0;
+
+    var modalTimerRunning = false;
+    var modalTimerInterval = null;
+    var modalTimerStartedAt = null;
+
+    function addLogRow(prefill) {
+        prefill = prefill || {};
+        rowCount++;
+        var tbody = document.getElementById('timeLogsTable').querySelector('tbody');
+        var row = document.createElement('tr');
+        row.dataset.index = rowCount;
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td>${rowCount}</td>
+            <td><input type="text" name="ActivityTypes" class="form-control form-control-sm border-0" value="${prefill.activityType || ''}" /></td>
+            <td><input type="datetime-local" name="FromTimes" class="form-control form-control-sm border-0" value="${prefill.fromTime || ''}" /></td>
+            <td><input type="number" step="0.001" name="LogHrs" class="form-control form-control-sm border-0" value="${prefill.hrs || '0.000'}" oninput="recalcTotals()" /></td>
+            <td><input type="text" name="LogProjects" class="form-control form-control-sm border-0" value="${prefill.project || ''}" /></td>
+            <td><input type="text" name="LogTasks" class="form-control form-control-sm border-0" value="${prefill.task || ''}" /></td>
+            <td class="text-center"><input type="checkbox" name="IsBillableArr" value="true" /></td>
+        `;
+        tbody.appendChild(row);
+        return row;
+    }
+
+    function recalcTotals() {
+        var hrsInputs = document.querySelectorAll('input[name="LogHrs"]');
+        var total = 0;
+        hrsInputs.forEach(function (inp) { total += parseFloat(inp.value) || 0; });
+        document.getElementById('totalWorkingHours').value = total.toFixed(3);
+    }
+
+    function toDateTimeLocal(d) {
+        var pad = function (n) { return n < 10 ? '0' + n : n; };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function formatElapsed(ms) {
+        var totalSeconds = Math.floor(ms / 1000);
+        var h = Math.floor(totalSeconds / 3600);
+        var m = Math.floor((totalSeconds % 3600) / 60);
+        var s = totalSeconds % 60;
+        var pad = function (n) { return n < 10 ? '0' + n : n; };
+        return pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    function openTimerModal() {
+        document.getElementById('modalActivityType').value = '';
+        document.getElementById('modalProject').value = '';
+        document.getElementById('modalTask').value = '';
+        document.getElementById('modalExpectedHrs').value = '';
+        document.getElementById('timerDisplay').textContent = '00:00:00';
+        document.getElementById('modalTimerBtn').textContent = 'Start';
+        modalTimerRunning = false;
+        document.getElementById('timerModalOverlay').style.display = 'flex';
+    }
+
+    function closeTimerModal() {
+        if (modalTimerRunning) {
+            if (!confirm('Timer is running. Stop and discard this timer?')) return;
+            clearInterval(modalTimerInterval);
+            modalTimerRunning = false;
+            document.getElementById('timerBtn').textContent = 'Start Timer';
+            document.getElementById('timerBtn').disabled = false;
+        }
+        document.getElementById('timerModalOverlay').style.display = 'none';
+    }
+
+    function toggleModalTimer() {
+        var btn = document.getElementById('modalTimerBtn');
+
+        if (!modalTimerRunning) {
+            var activityType = document.getElementById('modalActivityType').value.trim();
+            if (!activityType) {
+                alert('Activity Type is required.');
+                return;
+            }
+
+            modalTimerStartedAt = new Date();
+            modalTimerRunning = true;
+            btn.textContent = 'Stop';
+
+            document.getElementById('timerBtn').textContent = 'Timer Running...';
+            document.getElementById('timerBtn').disabled = true;
+
+            modalTimerInterval = setInterval(function () {
+                var elapsed = new Date() - modalTimerStartedAt;
+                document.getElementById('timerDisplay').textContent = formatElapsed(elapsed);
+            }, 1000);
+        } else {
+            clearInterval(modalTimerInterval);
+            modalTimerRunning = false;
+
+            var elapsedMs = new Date() - modalTimerStartedAt;
+            var elapsedHrs = elapsedMs / 1000 / 3600;
+
+            var activityType = document.getElementById('modalActivityType').value.trim();
+            var project = document.getElementById('modalProject').value.trim();
+            var task = document.getElementById('modalTask').value.trim();
+
+            addLogRow({
+                activityType: activityType,
+                project: project,
+                task: task,
+                fromTime: toDateTimeLocal(modalTimerStartedAt),
+                hrs: elapsedHrs.toFixed(3)
+            });
+            recalcTotals();
+
+            document.getElementById('timerBtn').textContent = 'Start Timer';
+            document.getElementById('timerBtn').disabled = false;
+
+            document.getElementById('timerModalOverlay').style.display = 'none';
+        }
+    }
+</script> *@ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.TimeSheet
+@{
+    ViewBag.Title = "New Timesheet";
+    var seriesList = ViewBag.SeriesList as List<string> ?? new List<string>();
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var customers = ViewBag.Customers as List<string> ?? new List<string>();
+    var currencies = ViewBag.Currencies as List<string> ?? new List<string>();
+    var employees = ViewBag.Employees as List<string> ?? new List<string>();
+    var projects = ViewBag.Projects as List<string> ?? new List<string>();
+    var activityTypes = ViewBag.ActivityTypes as List<string> ?? new List<string>();
+    var tasks = ViewBag.Tasks as List<string> ?? new List<string>();
+}
+
+<form method="post" action="/HR/CreateTimesheet" id="timesheetForm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline-block me-2">New Timesheet</h4>
+            <span class="badge bg-warning-subtle text-warning">Not Saved</span>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series *</label>
+                <select name="Series" class="form-select" required>
+                    <option value="TS-.YYYY.-" selected>TS-.YYYY.-</option>
+                    @foreach (var s in seriesList)
+                    {
+                        <option value="@s">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <input class="form-control" value="@Model.Status" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company</label>
+                <select name="Company" class="form-select">
+                    <option value="">-- Select Company --</option>
+                    @foreach (var c in companies)
+                    {
+                        <option value="@c">@c</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Project</label>
+                <select name="Project" class="form-select">
+                    <option value="">-- Select Project --</option>
+                    @foreach (var p in projects)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Customer</label>
+                <select name="Customer" class="form-select">
+                    <option value="">-- Select Customer --</option>
+                    @foreach (var cust in customers)
+                    {
+                        <option value="@cust">@cust</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Currency</label>
+                <select name="Currency" class="form-select">
+                    <option value="INR" selected>INR</option>
+                    @foreach (var cur in currencies)
+                    {
+                        <option value="@cur">@cur</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Exchange Rate</label>
+                <input name="ExchangeRate" type="number" step="0.001" class="form-control" value="@Model.ExchangeRate" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6>Employee Detail</h6>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Employee</label>
+                <select name="Employee" class="form-select">
+                    <option value="">-- Select Employee --</option>
+                    @foreach (var emp in employees)
+                    {
+                        <option value="@emp">@emp</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="StartDate" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">End Date</label>
+                <input type="date" name="EndDate" class="form-control" />
+            </div>
+        </div>
+
+        <label class="form-label">Time Sheets (Time Logs)</label>
+        <table class="table table-bordered align-middle mb-1">
+            <thead>
+                <tr>
+                    <th style="width:40px">No.</th>
+                    <th>Activity Type</th>
+                    <th>From Time</th>
+                    <th>To Time</th>
+                    <th style="width:110px">Hrs</th>
+                    <th>Project</th>
+                    <th>Task</th>
+                    <th style="width:80px">Is Billable</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Render 3 pure server-side form rows for direct collection binding -->
+                @for (int i = 0; i < 3; i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>
+                            <select name="TimeLogs[@i].ActivityType" class="form-select form-select-sm">
+                                <option value="">-- Select Activity --</option>
+                                @foreach (var act in activityTypes)
+                                {
+                                    <option value="@act">@act</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="datetime-local" name="TimeLogs[@i].FromTime" class="form-control form-control-sm" />
+                        </td>
+                        <td>
+                            <input type="datetime-local" name="TimeLogs[@i].ToTime" class="form-control form-control-sm" />
+                        </td>
+                        <td>
+                            <input type="number" step="0.001" name="TimeLogs[@i].Hrs" class="form-control form-control-sm" value="0.000" />
+                        </td>
+                        <td>
+                            <select name="TimeLogs[@i].Project" class="form-select form-select-sm">
+                                <option value="">-- Select Project --</option>
+                                @foreach (var p in projects)
+                                {
+                                    <option value="@p">@p</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select name="TimeLogs[@i].Task" class="form-select form-select-sm">
+                                <option value="">-- Select Task --</option>
+                                @foreach (var task in tasks)
+                                {
+                                    <option value="@task">@task</option>
+                                }
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox" name="TimeLogs[@i].IsBillable" value="true" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card p-4">
+        <label class="form-label">Note</label>
+        <textarea name="Note" class="form-control" rows="4">@Model.Note</textarea>
+    </div>
+</form>

@@ -1,0 +1,228 @@
+﻿@{
+    ViewBag.Title = "Leave Control Panel";
+    var employees = (List<Erp_Aits.Models.Employee>)ViewBag.Employees;
+    var leavePeriods = ViewBag.LeavePeriodsStrings as List<string> ?? new List<string>();
+    var leavePolicies = ViewBag.LeavePoliciesStrings as List<string> ?? new List<string>();
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+
+    var employmentTypes = ViewBag.EmploymentTypes as List<string> ?? new List<string>();
+    var branches = ViewBag.Branches as List<string> ?? new List<string>();
+    var designations = ViewBag.Designations as List<string> ?? new List<string>();
+    var departments = ViewBag.Departments as List<string> ?? new List<string>();
+    var employeeGrades = ViewBag.EmployeeGrades as List<string> ?? new List<string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Control Panel</h4>
+    <button type="submit" form="controlPanelForm" class="btn btn-dark btn-sm">Allocate Leave</button>
+</div>
+
+<form id="controlPanelForm" asp-action="AllocateLeave" method="post">
+
+    <h6 class="mb-3">Set Leave Details</h6>
+    <div class="row g-3 mb-2">
+        <div class="col-md-6">
+            <label class="form-label">Dates Based On</label>
+            <select name="datesBasedOn" class="form-select" id="datesBasedOn" onchange="toggleDateFields()">
+                <option value="Leave Period">Leave Period</option>
+                <option value="Joining Date">Joining Date</option>
+                <option value="Custom Range">Custom Range</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" name="allocateBasedOnLeavePolicy" value="true" id="allocateBasedOnLeavePolicy" checked onchange="toggleLeavePolicy()" />
+                <label class="form-check-label" for="allocateBasedOnLeavePolicy">Allocate Based On Leave Policy</label>
+            </div>
+        </div>
+
+        <div class="col-md-6" id="leavePeriodField">
+            <label class="form-label">Leave Period <span class="text-danger">*</span></label>
+            <select name="leavePeriod" class="form-select">
+                <option value="">-- Select --</option>
+                @foreach (var lpName in leavePeriods)
+                {
+                    <option value="@lpName">@lpName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6" id="leavePolicyField">
+            <label class="form-label">Leave Policy <span class="text-danger">*</span></label>
+            <select name="leavePolicyId" class="form-select">
+                <option value="">-- Select --</option>
+                @foreach (var lpolName in leavePolicies)
+                {
+                    <option value="@lpolName">@lpolName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6" id="fromDateField" style="display:none;">
+            <label class="form-label">From Date <span class="text-danger">*</span></label>
+            <input type="date" name="fromDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="col-md-6" id="toDateField" style="display:none;">
+            <label class="form-label">To Date <span class="text-danger">*</span></label>
+            <input type="date" name="toDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+
+    <div class="form-check mb-1">
+        <input class="form-check-input" type="checkbox" name="carryForward" value="true" id="carryForward" checked />
+        <label class="form-check-label" for="carryForward">Carry Forward</label>
+    </div>
+    <p class="text-muted small mb-4">Add unused leaves from previous leave period's allocation to this allocation</p>
+
+    <hr />
+    <h6 class="mb-3">Quick Filters</h6>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <select name="company" class="form-select">
+                <option value="">-- Select Company --</option>
+                @foreach (var comp in companies)
+                {
+                    <option value="@comp">@comp</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employment Type</label>
+            <select name="employmentType" class="form-select" onchange="handleCreateNew(this, '/HR/CreateEmploymentType')">
+                <option value="">-- Select Employment Type --</option>
+                @foreach (var et in employmentTypes)
+                {
+                    <option value="@et">@et</option>
+                }
+                <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Employment Type</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select" onchange="handleCreateNew(this, '/HR/CreateBranch')">
+                <option value="">-- Select Branch --</option>
+                @foreach (var b in branches)
+                {
+                    <option value="@b">@b</option>
+                }
+                <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Branch</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Designation</label>
+            <select name="designation" class="form-select" onchange="handleCreateNew(this, '/HR/CreateDesignation')">
+                <option value="">-- Select Designation --</option>
+                @foreach (var des in designations)
+                {
+                    <option value="@des">@des</option>
+                }
+                <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Designation</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Department</label>
+            <select name="department" class="form-select" onchange="handleCreateNew(this, '/HR/CreateDepartment')">
+                <option value="">-- Select Department --</option>
+                @foreach (var dept in departments)
+                {
+                    <option value="@dept">@dept</option>
+                }
+                <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Department</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employee Grade</label>
+            <select name="employeeGrade" class="form-select" onchange="handleCreateNew(this, '/HR/CreateEmployeeGrade')">
+                <option value="">-- Select Employee Grade --</option>
+                @foreach (var eg in employeeGrades)
+                {
+                    <option value="@eg">@eg</option>
+                }
+                <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Employee Grade</option>
+            </select>
+        </div>
+    </div>
+
+    <hr />
+    <h6 class="mb-3">Select Employees</h6>
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" id="selectAll" onchange="toggleAll(this)" /></th>
+                <th>Employee</th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Department</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (employees != null && employees.Any())
+            {
+                foreach (var e in employees)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="emp-check" name="SelectedEmployees" value="@e.EmployeeCode" />
+                            <input type="hidden" name="SelectedEmployeeNames" value="@e.FullName" />
+                        </td>
+                        <td>@e.EmployeeCode</td>
+                        <td>@e.FullName</td>
+                        <td>@e.Company</td>
+                        <td>@e.Department</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="5" class="text-muted text-center py-3">No Data</td></tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+@section Scripts {
+    <script>
+        function toggleAll(source) {
+            document.querySelectorAll('.emp-check').forEach(cb => cb.checked = source.checked);
+        }
+
+        function toggleDateFields() {
+            const val = document.getElementById('datesBasedOn').value;
+            const leavePeriodField = document.getElementById('leavePeriodField');
+            const fromDateField = document.getElementById('fromDateField');
+            const toDateField = document.getElementById('toDateField');
+
+            if (val === 'Leave Period') {
+                leavePeriodField.style.display = 'block';
+                fromDateField.style.display = 'none';
+                toDateField.style.display = 'none';
+            } else if (val === 'Joining Date') {
+                leavePeriodField.style.display = 'none';
+                fromDateField.style.display = 'none';
+                toDateField.style.display = 'block';
+            } else if (val === 'Custom Range') {
+                leavePeriodField.style.display = 'none';
+                fromDateField.style.display = 'block';
+                toDateField.style.display = 'block';
+            }
+        }
+
+        function toggleLeavePolicy() {
+            const checked = document.getElementById('allocateBasedOnLeavePolicy').checked;
+            document.getElementById('leavePolicyField').style.display = checked ? 'block' : 'none';
+        }
+
+        function handleCreateNew(selectElement, redirectUrl) {
+            if (selectElement.value === '__CREATE_NEW__') {
+                location.href = redirectUrl;
+            }
+        }
+
+        window.onload = function() {
+            toggleDateFields();
+            toggleLeavePolicy();
+        };
+    </script>
+}

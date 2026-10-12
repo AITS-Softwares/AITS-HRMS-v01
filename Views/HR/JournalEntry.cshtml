@@ -1,0 +1,156 @@
+﻿@model List<Erp_Aits.Models.JournalEntryListRow>
+
+@{
+    ViewBag.Title = "Journal Entry";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Journal Entry</h4>
+
+    <div class="d-flex gap-2">
+        <form asp-action="SyncJournalEntriesFromErpNext"
+              asp-controller="HR"
+              method="post"
+              style="display:inline-block; margin:0;">
+            <button type="submit" class="btn btn-primary btn-sm">
+                Sync from ERPNext
+            </button>
+        </form>
+
+        <a href="@Url.Action("CreateJournalEntry", "HR")" class="btn btn-dark btn-sm">
+            + Add Journal Entry
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text"
+               name="id"
+               class="form-control form-control-sm"
+               placeholder="ID / ERPNext Ref"
+               value="@ViewBag.IdFilter" />
+    </div>
+
+    <div class="col-auto">
+        <input type="text"
+               name="title"
+               class="form-control form-control-sm"
+               placeholder="Title"
+               value="@ViewBag.TitleFilter" />
+    </div>
+
+    <div class="col-auto">
+        <select name="entryType" class="form-select form-select-sm">
+            <option value="">Entry Type</option>
+
+            @{
+                var entryTypes = new[]
+                {
+                        "Journal Entry",
+                        "Inter Company Journal Entry",
+                        "Bank Entry",
+                        "Cash Entry",
+                        "Credit Card Entry",
+                        "Debit Note",
+                        "Credit Note",
+                        "Contra Entry",
+                        "Excise Entry",
+                        "Write Off Entry",
+                        "Opening Entry",
+                        "Depreciation Entry",
+                        "Exchange Rate Revaluation",
+                        "Exchange Gain Or Loss",
+                        "Deferred Revenue"
+                        };
+            }
+
+            @foreach (var et in entryTypes)
+            {
+                <option value="@et" selected="@(ViewBag.EntryTypeFilter == et)">
+                    @et
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <input type="text"
+               name="company"
+               class="form-control form-control-sm"
+               placeholder="Company"
+               value="@ViewBag.CompanyFilter" />
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+            Search
+        </button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ERPNext Ref</th>
+            <th>Entry Type</th>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Posting Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var j in Model)
+        {
+            <tr style="cursor:pointer"
+                onclick="window.location='@Url.Action("JournalEntryDetails", "HR", new { id = j.Id })'">
+                <td>@j.Id</td>
+
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(j.ErpNextId))
+                    {
+                        <span class="badge bg-success-subtle text-success">
+                            @j.ErpNextId
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary-subtle text-secondary">
+                            Local
+                        </span>
+                    }
+                </td>
+
+                <td>@j.EntryType</td>
+                <td>@j.Title</td>
+                <td>@j.Company</td>
+                <td>@j.PostingDate.ToString("dd-MM-yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="text-muted text-center py-5">
+        No Journal Entry found with matching filters.
+    </p>
+}

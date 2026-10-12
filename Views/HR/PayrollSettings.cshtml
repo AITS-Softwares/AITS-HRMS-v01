@@ -1,0 +1,437 @@
+﻿@model Erp_Aits.Models.PayrollSettings
+
+@{
+    ViewBag.Title = "Payroll Settings";
+}
+
+<style>
+    .payroll-settings-page {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .erp-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .erp-title-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .erp-menu-icon {
+        border: 0;
+        background: transparent;
+        font-size: 22px;
+        color: #4b5563;
+    }
+
+    .erp-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .not-saved-badge {
+        background: #fff1e7;
+        color: #c2410c;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .save-btn {
+        background: #050505;
+        color: white;
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 18px;
+        font-weight: 600;
+    }
+
+    .settings-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: white;
+        overflow: visible;
+    }
+
+    .settings-section {
+        padding: 22px 24px 26px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+        .settings-section:last-child {
+            border-bottom: 0;
+        }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 22px;
+    }
+
+    .form-label {
+        font-size: 15px;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .form-control,
+    .form-select {
+        border: 0;
+        background: #f3f4f6;
+        border-radius: 8px;
+        height: 40px;
+        font-size: 15px;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: #f3f4f6;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, .16);
+        }
+
+    .field-help {
+        color: #374151;
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .erp-check-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+        .erp-check-row input {
+            width: 18px;
+            height: 18px;
+        }
+
+    .erp-link-wrapper {
+        position: relative;
+    }
+
+    .erp-link-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 3000;
+        background: #fff;
+        border: 1px solid #d8dce0;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .12);
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 6px;
+    }
+
+    .erp-link-option {
+        display: block;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: 8px 10px;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+        .erp-link-option:hover {
+            background: #f1f5f9;
+        }
+
+    .comment-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-top: 28px;
+    }
+</style>
+
+<div class="payroll-settings-page">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="PayrollSettings" asp-controller="HR" method="post">
+        <div class="erp-title-row">
+            <div class="erp-title-left">
+                <button type="button" class="erp-menu-icon">☰</button>
+                <h4 class="erp-title">Payroll Settings</h4>
+                <span class="not-saved-badge">Not Saved</span>
+            </div>
+
+            <button type="submit" class="save-btn">Save</button>
+        </div>
+
+        <div class="settings-card">
+            <section class="settings-section">
+                <h5 class="section-title">Working Days and Hours</h5>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Calculate Payroll Working Days Based On</label>
+                        <select asp-for="CalculatePayrollWorkingDaysBasedOn" class="form-select">
+                            <option value="Attendance">Attendance</option>
+                            <option value="Leave">Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Max working hours against Timesheet</label>
+                        <input asp-for="MaxWorkingHoursAgainstTimesheet"
+                               type="number"
+                               step="0.01"
+                               min="0"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Consider Unmarked Attendance As</label>
+                        <select asp-for="ConsiderUnmarkedAttendanceAs" class="form-select">
+                            <option value="Absent">Absent</option>
+                            <option value="Present">Present</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Fraction of Daily Salary for Half Day</label>
+                        <input asp-for="FractionOfDailySalaryForHalfDay"
+                               type="number"
+                               step="0.01"
+                               min="0"
+                               max="1"
+                               class="form-control" />
+                        <div class="field-help">
+                            The fraction of daily wages to be paid for half-day attendance
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="erp-check-row">
+                            <input asp-for="IncludeHolidaysInTotalWorkingDays" type="checkbox" />
+                            <label asp-for="IncludeHolidaysInTotalWorkingDays">
+                                Include holidays in Total no. of Working Days
+                            </label>
+                        </div>
+
+                        <div class="field-help">
+                            If enabled, total no. of working days will include holidays, and this will reduce the value of Salary Per Day
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="erp-check-row">
+                            <input asp-for="ConsiderMarkedAttendanceOnHolidays" type="checkbox" />
+                            <label asp-for="ConsiderMarkedAttendanceOnHolidays">
+                                Consider Marked Attendance on Holidays
+                            </label>
+                        </div>
+
+                        <div class="field-help">
+                            If enabled, deducts payment days for absent attendance on holidays. By default, holidays are considered as paid
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+
+
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h5 class="section-title">Salary Slip</h5>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="erp-check-row">
+                            <input asp-for="DisableRoundedTotal" type="checkbox" />
+                            <label asp-for="DisableRoundedTotal">Disable Rounded Total</label>
+                        </div>
+
+                        <div class="field-help">
+                            If checked, hides and disables Rounded Total field in Salary Slips
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="erp-check-row">
+                            <input asp-for="ShowLeaveBalancesInSalarySlip" type="checkbox" />
+                            <label asp-for="ShowLeaveBalancesInSalarySlip">
+                                Show Leave Balances in Salary Slip
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h5 class="section-title">Email</h5>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="erp-check-row">
+                            <input asp-for="EmailSalarySlipToEmployee" type="checkbox" />
+                            <label asp-for="EmailSalarySlipToEmployee">
+                                Email Salary Slip to Employee
+                            </label>
+                        </div>
+
+                        <div class="field-help">
+                            Emails salary slip to employee based on preferred email selected in Employee
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Salary Slip Email Template</label>
+                        <div class="erp-link-wrapper">
+                            <input asp-for="SalarySlipEmailTemplate"
+                                   class="form-control"
+                                   autocomplete="off"
+                                   oninput="loadPayrollSettingsDropdown(this, 'Email Template')"
+                                   onfocus="loadPayrollSettingsDropdown(this, 'Email Template')" />
+                            <div class="erp-link-dropdown d-none"></div>
+                        </div>
+
+                        <label class="form-label mt-3">Email Account</label>
+                        <div class="erp-link-wrapper">
+                            <input asp-for="EmailAccount"
+                                   class="form-control"
+                                   autocomplete="off"
+                                   oninput="loadPayrollSettingsDropdown(this, 'Email Account')"
+                                   onfocus="loadPayrollSettingsDropdown(this, 'Email Account')" />
+                            <div class="erp-link-dropdown d-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h5 class="section-title">Other Settings</h5>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="erp-check-row">
+                            <input asp-for="ProcessPayrollAccountingEntryBasedOnEmployee" type="checkbox" />
+                            <label asp-for="ProcessPayrollAccountingEntryBasedOnEmployee">
+                                Process Payroll Accounting Entry based on Employee
+                            </label>
+                        </div>
+
+                        <div class="field-help">
+                            If checked, Payroll Payable will be booked against each employee
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </form>
+
+    <h4 class="comment-title">Comments</h4>
+</div>
+
+<script>
+    let payrollSettingsTimer = null;
+
+    async function fetchJsonSafe(url) {
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                return [];
+            }
+
+            const text = await response.text();
+
+            if (!text || !text.trim()) {
+                return [];
+            }
+
+            return JSON.parse(text);
+        } catch {
+            return [];
+        }
+    }
+
+    function loadPayrollSettingsDropdown(input, doctype) {
+        clearTimeout(payrollSettingsTimer);
+
+        payrollSettingsTimer = setTimeout(async function () {
+            const wrapper = input.closest('.erp-link-wrapper');
+            const dropdown = wrapper?.querySelector('.erp-link-dropdown');
+
+            if (!dropdown) return;
+
+            const url =
+                `/HR/SearchPayrollSettingsLink?doctype=${encodeURIComponent(doctype)}` +
+                `&txt=${encodeURIComponent(input.value || '')}`;
+
+            const rows = await fetchJsonSafe(url);
+
+            dropdown.innerHTML = '';
+
+            if (!rows || !rows.length) {
+                dropdown.classList.add('d-none');
+                return;
+            }
+
+            rows.forEach(row => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'erp-link-option';
+                button.textContent = row.label && row.label !== row.name
+                    ? `${row.name} - ${row.label}`
+                    : row.name;
+
+                button.onclick = function () {
+                    input.value = row.name || '';
+                    dropdown.classList.add('d-none');
+                };
+
+                dropdown.appendChild(button);
+            });
+
+            dropdown.classList.remove('d-none');
+        }, 250);
+    }
+
+    document.addEventListener('click', function (event) {
+        document.querySelectorAll('.erp-link-dropdown').forEach(dropdown => {
+            const wrapper = dropdown.closest('.erp-link-wrapper');
+
+            if (wrapper && !wrapper.contains(event.target)) {
+                dropdown.classList.add('d-none');
+            }
+        });
+    });
+</script>

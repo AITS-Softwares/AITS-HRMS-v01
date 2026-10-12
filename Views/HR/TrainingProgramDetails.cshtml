@@ -1,0 +1,55 @@
+﻿@model Erp_Aits.Models.TrainingProgram
+@{
+    ViewBag.Title = Model.TrainingProgramName;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">@Model.TrainingProgramName</h4>
+        <small class="text-muted">@Model.TrainingProgramCode</small>
+    </div>
+    <a href="@Url.Action("TrainingProgram", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+</div>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Training Program</label>
+            <div class="form-control bg-light">@Model.TrainingProgramName</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <div class="form-control bg-light">@Model.Company</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Status</label>
+            <div><span class="badge bg-secondary-subtle text-secondary">@Model.Status</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Trainer Name</label>
+            <div class="form-control bg-light">@Model.TrainerName</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Supplier</label>
+            <div class="form-control bg-light">@Model.Supplier</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Trainer Email</label>
+            <div class="form-control bg-light">@Model.TrainerEmail</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Contact Number</label>
+            <div class="form-control bg-light">@Model.ContactNumber</div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <label class="form-label">Description</label>
+    <div class="form-control bg-light" style="min-height:200px; white-space:pre-wrap;">@Model.Description</div>
+</div>

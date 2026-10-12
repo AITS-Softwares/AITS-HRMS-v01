@@ -1,0 +1,90 @@
+﻿@model List<Erp_Aits.Models.ShiftAttendanceRow>
+@{
+    ViewBag.Title = "Shift Attendance";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Attendance</h4>
+</div>
+
+<form method="get" action="/HR/ShiftAttendance" class="card p-3 mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <input type="date" name="fromDate" class="form-control form-control-sm"
+                   value="@(((DateTime)ViewBag.FromDate).ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-auto">
+            <input type="date" name="toDate" class="form-control form-control-sm"
+                   value="@(((DateTime)ViewBag.ToDate).ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-auto">
+            <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.Employee" />
+        </div>
+        <div class="col-auto">
+            <input type="text" name="shiftType" class="form-control form-control-sm" placeholder="Shift Type" value="@ViewBag.ShiftType" />
+        </div>
+        <div class="col-auto">
+            <input type="text" name="department" class="form-control form-control-sm" placeholder="Department" value="@ViewBag.Department" />
+        </div>
+        <div class="col-auto">
+            <input type="text" name="company" class="form-control form-control-sm" placeholder="Company" value="@ViewBag.Company" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-dark">Refresh</button>
+        </div>
+    </div>
+    <div class="row g-4 mt-2">
+        <div class="col-auto form-check">
+            <input type="checkbox" name="lateEntry" value="true" class="form-check-input" id="lateEntryCheck" checked="@ViewBag.LateEntry" />
+            <label class="form-check-label" for="lateEntryCheck">Late Entry</label>
+        </div>
+        <div class="col-auto form-check">
+            <input type="checkbox" name="earlyExit" value="true" class="form-check-input" id="earlyExitCheck" checked="@ViewBag.EarlyExit" />
+            <label class="form-check-label" for="earlyExitCheck">Early Exit</label>
+        </div>
+        <div class="col-auto form-check">
+            <input type="checkbox" name="considerGracePeriod" value="true" class="form-check-input" id="graceCheck" checked="@ViewBag.ConsiderGracePeriod" />
+            <label class="form-check-label" for="graceCheck">Consider Grace Period</label>
+        </div>
+        <div class="col-auto form-check">
+            <input type="checkbox" name="includeWithoutCheckins" value="true" class="form-check-input" id="withoutCheckinsCheck" checked="@ViewBag.IncludeWithoutCheckins" />
+            <label class="form-check-label" for="withoutCheckinsCheck">Include Shift Attendance Without Checkins</label>
+        </div>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Employee Name</th>
+                <th>Department</th>
+                <th>Shift</th>
+                <th>Status</th>
+                <th>Attendance Date</th>
+                <th>Late Entry</th>
+                <th>Early Exit</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Employee</td>
+                    <td>@r.EmployeeName</td>
+                    <td>@r.Department</td>
+                    <td>@r.Shift</td>
+                    <td>@r.Status</td>
+                    <td>@r.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                    <td>@(r.LateEntry ? "Yes" : "")</td>
+                    <td>@(r.EarlyExit ? "Yes" : "")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted text-center py-5">Nothing to show</p>
+}

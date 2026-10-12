@@ -1,0 +1,853 @@
+﻿@model Erp_Aits.Models.Goal
+
+@{
+    ViewBag.Title = "New Goal";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">
+
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+
+    </div>
+}
+
+
+<form asp-action="CreateGoal"
+      asp-controller="HR"
+      method="post">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h4 class="mb-0 d-inline">
+                New Goal
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning ms-2">
+                Not Saved
+            </span>
+
+        </div>
+
+
+        <button type="submit"
+                class="btn btn-dark btn-sm px-4">
+            Save
+        </button>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- BASIC GOAL DETAILS -->
+    <!-- Always visible -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3">
+
+        <div class="row g-3">
+
+            <!-- Goal -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Goal
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="GoalName"
+                       id="GoalName"
+                       class="form-control"
+                       required />
+
+            </div>
+
+
+            <!-- Progress -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Progress
+                </label>
+
+                <input asp-for="Progress"
+                       id="Progress"
+                       type="number"
+                       min="0"
+                       max="100"
+                       step="0.01"
+                       class="form-control" />
+
+            </div>
+
+
+            <!-- Is Group -->
+            <div class="col-md-6">
+
+                <div class="form-check mt-2">
+
+                    <input asp-for="IsGroup"
+                           id="IsGroup"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label class="form-check-label"
+                           for="IsGroup">
+                        Is Group
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- Status -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Status
+                </label>
+
+                <input asp-for="Status"
+                       id="Status"
+                       class="form-control bg-light"
+                       value="Pending"
+                       readonly />
+
+            </div>
+
+
+            <!-- Parent Goal
+                 Current ERP only shows this after employee -->
+            <div class="col-md-6 employee-dependent"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Parent Goal
+                </label>
+
+                <select asp-for="ParentGoal"
+                        id="ParentGoal"
+                        class="form-select">
+
+                    <option value="">
+                        -- Select Parent Goal --
+                    </option>
+
+                    @if (ViewBag.Goals != null)
+                    {
+                        foreach (var g in ViewBag.Goals)
+                        {
+                            <option value="@g.name"
+                                    data-employee="@g.employee"
+                                    data-kra="@g.kra"
+                                    data-cycle="@g.appraisal_cycle"
+                                    data-is-group="@g.is_group">
+
+                                @g.goal_name
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- EMPLOYEE -->
+    <!-- Always visible -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3">
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Employee"
+                        id="Employee"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Employee --
+                    </option>
+
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            <option value="@emp.name"
+                                    data-name="@emp.employee_name"
+                                    data-company="@emp.company">
+
+                                @emp.name - @emp.employee_name
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- Everything below only becomes visible when Employee selected -->
+
+            <div class="col-md-6 employee-dependent"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Start Date
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="StartDate"
+                       id="StartDate"
+                       type="date"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6 employee-dependent"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Employee Name
+                </label>
+
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <div class="col-md-6 employee-dependent"
+                 style="display:none;">
+
+                <label class="form-label">
+                    End Date
+                </label>
+
+                <input asp-for="EndDate"
+                       id="EndDate"
+                       type="date"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6 employee-dependent"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Company
+                </label>
+
+                <input asp-for="Company"
+                       id="Company"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- APPRAISAL LINKING -->
+    <!-- Only after Employee selected -->
+    <!-- ========================================================= -->
+
+    <div id="appraisalLinkingSection"
+         class="card border rounded-3 p-4 mb-3"
+         style="display:none;">
+
+        <h6 class="mb-2">
+            Appraisal Linking
+        </h6>
+
+        <p class="text-muted small mb-3">
+
+            Link the cycle and tag KRA to your goal to update
+            the appraisal's goal score based on the goal progress.
+
+        </p>
+
+
+        <div class="row g-3">
+
+
+            <!-- Appraisal Cycle -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Appraisal Cycle
+                </label>
+
+                <select asp-for="AppraisalCycle"
+                        id="AppraisalCycle"
+                        class="form-select">
+
+                    <option value="">
+                        -- Select Appraisal Cycle --
+                    </option>
+
+                    @if (ViewBag.AppraisalCycles != null)
+                    {
+                        foreach (var cycle in ViewBag.AppraisalCycles)
+                        {
+                            <option value="@cycle.name"
+                                    data-start="@cycle.start_date"
+                                    data-end="@cycle.end_date">
+
+                                @(cycle.cycle_name ?? cycle.name)
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- KRA -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    KRA
+                </label>
+
+                <select asp-for="Kra"
+                        id="Kra"
+                        class="form-select">
+
+                    <option value="">
+                        -- Select KRA --
+                    </option>
+
+                    @if (ViewBag.Kras != null)
+                    {
+                        foreach (var kra in ViewBag.Kras)
+                        {
+                            <option value="@kra.name">
+
+                                @(kra.title ?? kra.name)
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- DESCRIPTION -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4">
+
+        <h6 class="mb-3">
+            Description
+        </h6>
+
+        @await Html.PartialAsync(
+        "_RichTextEditor",
+                new ViewDataDictionary(ViewData)
+                {
+                { "FieldName", "Description" },
+                { "Content", Model.Description }
+                }
+                )
+
+    </div>
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        const employee =
+            document.getElementById(
+                "Employee"
+            );
+
+
+        const parentGoal =
+            document.getElementById(
+                "ParentGoal"
+            );
+
+
+        const appraisalCycle =
+            document.getElementById(
+                "AppraisalCycle"
+            );
+
+
+        const kra =
+            document.getElementById(
+                "Kra"
+            );
+
+
+        const progress =
+            document.getElementById(
+                "Progress"
+            );
+
+
+        const status =
+            document.getElementById(
+                "Status"
+            );
+
+
+        const isGroup =
+            document.getElementById(
+                "IsGroup"
+            );
+
+
+        // ============================================================
+        // EMPLOYEE
+        // ============================================================
+
+        employee.addEventListener(
+            "change",
+            function () {
+
+                const employeeId =
+                    this.value;
+
+
+                const selected =
+                    this.options[
+                        this.selectedIndex
+                    ];
+
+
+                document.getElementById(
+                    "EmployeeName"
+                ).value =
+                    selected &&
+                    employeeId
+                        ? selected.getAttribute(
+                            "data-name"
+                        ) || ""
+                        : "";
+
+
+                document.getElementById(
+                    "Company"
+                ).value =
+                    selected &&
+                    employeeId
+                        ? selected.getAttribute(
+                            "data-company"
+                        ) || ""
+                        : "";
+
+
+                document
+                    .querySelectorAll(
+                        ".employee-dependent"
+                    )
+                    .forEach(
+                        function (element) {
+
+                            element.style.display =
+                                employeeId
+                                    ? ""
+                                    : "none";
+                        }
+                    );
+
+
+                document.getElementById(
+                    "appraisalLinkingSection"
+                ).style.display =
+                    employeeId
+                        ? ""
+                        : "none";
+
+
+                // Filter parent goals to same employee
+                Array.from(
+                    parentGoal.options
+                ).forEach(
+                    function (option) {
+
+                        if (!option.value)
+                        {
+                            option.hidden = false;
+                            return;
+                        }
+
+
+                        const sameEmployee =
+                            option.getAttribute(
+                                "data-employee"
+                            ) === employeeId;
+
+
+                        const isGroupGoal =
+                            option.getAttribute(
+                                "data-is-group"
+                            ) == "1";
+
+
+                        option.hidden =
+                            !(sameEmployee &&
+                              isGroupGoal);
+                    }
+                );
+
+
+                parentGoal.value = "";
+
+
+                if (!employeeId)
+                {
+                    appraisalCycle.value = "";
+                    kra.value = "";
+
+                    document.getElementById(
+                        "StartDate"
+                    ).value = "";
+
+                    document.getElementById(
+                        "EndDate"
+                    ).value = "";
+                }
+
+            }
+        );
+
+
+        // ============================================================
+        // PARENT GOAL
+        //
+        // ERP fetches KRA and Appraisal Cycle from parent_goal.
+        // ============================================================
+
+        parentGoal.addEventListener(
+            "change",
+            function () {
+
+                const selected =
+                    this.options[
+                        this.selectedIndex
+                    ];
+
+
+                if (!selected ||
+                    !this.value)
+                {
+                    appraisalCycle.disabled = false;
+                    kra.disabled = false;
+
+                    return;
+                }
+
+
+                const parentKra =
+                    selected.getAttribute(
+                        "data-kra"
+                    ) || "";
+
+
+                const parentCycle =
+                    selected.getAttribute(
+                        "data-cycle"
+                    ) || "";
+
+
+                kra.value =
+                    parentKra;
+
+
+                appraisalCycle.value =
+                    parentCycle;
+
+
+                // Same as ERP:
+                // read_only when parent_goal exists
+                kra.disabled =
+                    true;
+
+                appraisalCycle.disabled =
+                    true;
+
+
+                // Disabled controls do not POST,
+                // so add hidden mirror values.
+                setHiddenValue(
+                    "HiddenKra",
+                    "Kra",
+                    parentKra
+                );
+
+
+                setHiddenValue(
+                    "HiddenAppraisalCycle",
+                    "AppraisalCycle",
+                    parentCycle
+                );
+
+
+                loadCycleDates();
+            }
+        );
+
+
+        // ============================================================
+        // APPRAISAL CYCLE -> START/END DATE
+        // ============================================================
+
+        appraisalCycle.addEventListener(
+            "change",
+            function () {
+
+                loadCycleDates();
+
+
+                // In ERP KRA becomes required when cycle selected
+                // and no parent goal.
+                if (
+                    this.value &&
+                    !parentGoal.value
+                )
+                {
+                    kra.required =
+                        true;
+                }
+                else
+                {
+                    kra.required =
+                        false;
+                }
+
+            }
+        );
+
+
+        function loadCycleDates() {
+
+            const selected =
+                appraisalCycle.options[
+                    appraisalCycle.selectedIndex
+                ];
+
+
+            if (!selected ||
+                !appraisalCycle.value)
+            {
+                return;
+            }
+
+
+            const start =
+                selected.getAttribute(
+                    "data-start"
+                );
+
+
+            const end =
+                selected.getAttribute(
+                    "data-end"
+                );
+
+
+            if (
+                start &&
+                !document.getElementById(
+                    "StartDate"
+                ).value
+            )
+            {
+                document.getElementById(
+                    "StartDate"
+                ).value =
+                    start.substring(
+                        0,
+                        10
+                    );
+            }
+
+
+            if (
+                end &&
+                !document.getElementById(
+                    "EndDate"
+                ).value
+            )
+            {
+                document.getElementById(
+                    "EndDate"
+                ).value =
+                    end.substring(
+                        0,
+                        10
+                    );
+            }
+        }
+
+
+        // ============================================================
+        // PROGRESS -> STATUS
+        // ============================================================
+
+        progress.addEventListener(
+            "input",
+            function () {
+
+                let value =
+                    parseFloat(
+                        this.value || 0
+                    );
+
+
+                if (value > 100)
+                {
+                    this.value =
+                        100;
+
+                    value =
+                        100;
+                }
+
+
+                if (value < 0)
+                {
+                    this.value =
+                        0;
+
+                    value =
+                        0;
+                }
+
+
+                if (value === 0)
+                {
+                    status.value =
+                        "Pending";
+                }
+                else if (value >= 100)
+                {
+                    status.value =
+                        "Completed";
+                }
+                else
+                {
+                    status.value =
+                        "In Progress";
+                }
+
+            }
+        );
+
+
+        // ============================================================
+        // IS GROUP
+        // ============================================================
+
+        isGroup.addEventListener(
+            "change",
+            function () {
+
+                if (this.checked)
+                {
+                    progress.value =
+                        "0";
+
+                    progress.readOnly =
+                        true;
+
+                    status.value =
+                        "Pending";
+                }
+                else
+                {
+                    progress.readOnly =
+                        false;
+                }
+
+            }
+        );
+
+
+        function setHiddenValue(
+            id,
+            name,
+            value)
+        {
+            let input =
+                document.getElementById(
+                    id
+                );
+
+
+            if (!input)
+            {
+                input =
+                    document.createElement(
+                        "input"
+                    );
+
+
+                input.type =
+                    "hidden";
+
+
+                input.id =
+                    id;
+
+
+                input.name =
+                    name;
+
+
+                document.querySelector(
+                    "form"
+                ).appendChild(
+                    input
+                );
+            }
+
+
+            input.value =
+                value || "";
+        }
+
+    </script>
+}

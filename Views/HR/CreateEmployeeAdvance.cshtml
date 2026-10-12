@@ -1,0 +1,425 @@
+﻿@* @model Erp_Aits.Models.EmployeeAdvance
+@{
+    ViewBag.Title = "New Employee Advance";
+}
+
+<form asp-action="CreateEmployeeAdvance" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee Advance</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series</label>
+                <input name="EmployeeAdvanceCode" class="form-control" value="@ViewBag.NextCode" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Posting Date *</label>
+                <input asp-for="PostingDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <input asp-for="Employee" class="form-control" required placeholder="Employee code" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input asp-for="Company" class="form-control" value="AITS" required />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Purpose &amp; Amount</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Purpose *</label>
+                <textarea asp-for="Purpose" class="form-control" rows="6" required></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Advance Amount *</label>
+                <input asp-for="AdvanceAmount" type="number" step="0.01" class="form-control" required />
+                <small class="text-muted">Amount of expense</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Accounting</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Advance Account</label>
+                <input asp-for="AdvanceAccount" class="form-control" />
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                    <input asp-for="RepayUnclaimedFromSalary" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label">Repay Unclaimed Amount from Salary</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Mode of Payment</label>
+                <input asp-for="ModeOfPayment" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">More Info</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select asp-for="Status" class="form-select">
+                    <option>Draft</option>
+                    <option>Paid</option>
+                    <option>Unpaid</option>
+                    <option>Claimed</option>
+                    <option>Returned</option>
+                    <option>Partly Claimed and Returned</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.EmployeeAdvance
+@{
+    ViewBag.Title = "New Employee Advance";
+}
+
+<form asp-action="CreateEmployeeAdvance" method="post">
+    <div class="ea-form-header">
+        <div class="ea-detail-header-left">
+            <a href="@Url.Action("EmployeeAdvance", "HR")" class="ea-back-btn" title="Back to list">←</a>
+            <div>
+                <div class="ea-breadcrumb">Employee Advance</div>
+                <h4 class="mb-0">New Employee Advance</h4>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm ea-save-btn">💾 Save</button>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">
+            <span class="ea-section-icon">🏢</span> Basic Information
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Series</label>
+                <input name="EmployeeAdvanceCode" class="form-control ea-input" value="@ViewBag.NextCode" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Posting Date <span class="ea-required">*</span></label>
+                <input asp-for="PostingDate" type="date" class="form-control ea-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Employee <span class="ea-required">*</span></label>
+                <input asp-for="Employee" class="form-control ea-input" list="employeeList" required placeholder="Employee code" oninput="fillEmployeeAdvanceEmployee(this.value)" />
+                <datalist id="employeeList">
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            <option value="@emp.name" data-name="@emp.employee_name" data-company="@emp.company">@emp.employee_name</option>
+                        }
+                    }
+                </datalist>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Company <span class="ea-required">*</span></label>
+                <input asp-for="Company" id="Company" class="form-control ea-input" value="@(string.IsNullOrWhiteSpace(Model.Company) ? "Vinod Cookware India Private Limited" : Model.Company)" required />
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">
+            <span class="ea-section-icon">📝</span> Purpose &amp; Amount
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Purpose <span class="ea-required">*</span></label>
+                <textarea asp-for="Purpose" class="form-control ea-input" rows="6" required></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Advance Amount <span class="ea-required">*</span></label>
+                <div class="ea-amount-input-wrapper">
+                    <span class="ea-amount-prefix">₹</span>
+                    <input asp-for="AdvanceAmount" type="number" step="0.01" class="form-control ea-input ea-amount-input" required />
+                </div>
+                <small class="text-muted">Amount of expense</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">
+            <span class="ea-section-icon">💳</span> Accounting
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Advance Account</label>
+                <input asp-for="AdvanceAccount" class="form-control ea-input" placeholder="Advance account" />
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <label class="ea-toggle">
+                    <input asp-for="RepayUnclaimedFromSalary" type="checkbox" />
+                    <span class="ea-toggle-slider"></span>
+                    <span class="ea-toggle-label">Repay Unclaimed Amount from Salary</span>
+                </label>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Mode of Payment</label>
+                <input asp-for="ModeOfPayment" class="form-control ea-input" list="mopList" placeholder="Select or type mode of payment" />
+                <datalist id="mopList">
+                    @if (ViewBag.ModesOfPayment != null)
+                    {
+                        foreach (var mop in ViewBag.ModesOfPayment)
+                        {
+                            <option value="@mop.name"></option>
+                        }
+                    }
+                </datalist>
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-section mb-4">
+        <div class="ea-section-title">
+            <span class="ea-section-icon">ℹ️</span> More Info
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Status</label>
+                <input asp-for="Status" class="form-control ea-input" value="Draft" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-mobile-save-bar d-md-none">
+        <button type="submit" class="btn btn-dark w-100">💾 Save</button>
+    </div>
+</form>
+
+<style>
+    .ea-form-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ea-detail-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .ea-back-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #e2e5e9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        text-decoration: none;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        transition: background 0.15s ease;
+    }
+
+        .ea-back-btn:hover {
+            background: #f0f1f3;
+            color: #000;
+        }
+
+    .ea-breadcrumb {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 0.1rem;
+    }
+
+    .ea-save-btn {
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        font-weight: 500;
+    }
+
+    .ea-section {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ea-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 1.1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f0f1f3;
+    }
+
+    .ea-section-icon {
+        font-size: 1.05rem;
+    }
+
+    .ea-form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.35rem;
+    }
+
+    .ea-required {
+        color: #dc3545;
+    }
+
+    .ea-input {
+        border-radius: 8px;
+        border: 1px solid #dfe2e6;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.92rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .ea-input:focus {
+            border-color: #495057;
+            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+        }
+
+        .ea-input[readonly] {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+    .ea-amount-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .ea-amount-prefix {
+        position: absolute;
+        left: 0.85rem;
+        color: #6c757d;
+        font-weight: 600;
+        pointer-events: none;
+    }
+
+    .ea-amount-input {
+        padding-left: 1.8rem !important;
+    }
+
+    /* Toggle switch for checkbox */
+    .ea-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        cursor: pointer;
+        user-select: none;
+        margin-bottom: 0.4rem;
+    }
+
+        .ea-toggle input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .ea-toggle-slider {
+        position: relative;
+        width: 42px;
+        height: 24px;
+        background: #dfe2e6;
+        border-radius: 999px;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .ea-toggle-slider::before {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+    .ea-toggle input:checked + .ea-toggle-slider {
+        background: #212529;
+    }
+
+        .ea-toggle input:checked + .ea-toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+    .ea-toggle-label {
+        font-size: 0.9rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .ea-mobile-save-bar {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding: 0.85rem 0;
+        margin-top: -0.5rem;
+        border-top: 1px solid #eee;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    @@media (max-width: 767px) {
+        .ea-section {
+            padding: 1.1rem;
+        }
+
+        .ea-save-btn {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    function fillEmployeeAdvanceEmployee(employee) {
+        const option = document.querySelector(`#employeeList option[value="${CSS.escape(employee)}"]`);
+        if (!option) return;
+
+        const company = option.getAttribute("data-company") || "";
+        const companyInput = document.getElementById("Company");
+        if (company && companyInput) {
+            companyInput.value = company;
+        }
+    }
+</script>

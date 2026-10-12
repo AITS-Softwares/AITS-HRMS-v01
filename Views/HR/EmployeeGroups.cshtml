@@ -1,0 +1,260 @@
+﻿@* @model IEnumerable<Erp_Aits.Models.EmployeeGroup>
+@{
+    ViewBag.Title = "Employee Groups List";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0 fw-bold">
+        Employee Groups
+    </h4>
+
+    <div class="d-flex gap-2">
+
+        <form asp-action="SyncEmployeeGroupsFromErpNext"
+              asp-controller="HR"
+              method="post"
+              style="display:inline;">
+
+            <button type="submit"
+                    class="btn btn-outline-primary btn-sm px-3">
+                🔄 Sync from ERPNext
+            </button>
+
+        </form>
+
+        <a href="@Url.Action("CreateEmployeeGroup", "HR")"
+           class="btn btn-dark btn-sm px-4 fw-bold">
+            + Add Employee Group
+        </a>
+
+    </div>
+
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border rounded-3 p-4 shadow-sm bg-white">
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 60px;" class="text-center text-muted small">ID</th>
+                    <th class="text-muted small">Group Name</th>
+                    <th class="text-muted small">ERPNext ID</th>
+                    <th style="width: 100px;" class="text-center text-muted small">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var group in Model)
+                    {
+                        <tr>
+                            <td class="text-center text-muted small">@group.Id</td>
+                            <td>
+                                <span class="fw-bold text-dark">@group.GroupName</span>
+                            </td>
+                            <td>
+                                <span class="text-muted">@group.ErpNextId</span>
+                            </td>
+                            <td class="text-center">
+                                <a href="@Url.Action("EmployeeGroupDetails", "HR", new { id = group.Id })" class="btn btn-sm btn-outline-dark">Edit</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">No Employee Groups Found</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model IEnumerable<Erp_Aits.Models.EmployeeGroup>
+
+@{
+    ViewBag.Title = "Employee Groups List";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0 fw-bold">
+        Employee Groups
+    </h4>
+
+    <a href="@Url.Action("CreateEmployeeGroup", "HR")"
+       class="btn btn-dark btn-sm px-4 fw-bold">
+        + Add Employee Group
+    </a>
+
+</div>
+
+<!-- Success message -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show"
+         role="alert">
+
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+
+    </div>
+}
+
+<!-- Error message -->
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show"
+         role="alert">
+
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+
+    </div>
+}
+
+<!-- Automatic synchronization warning -->
+@if (ViewBag.SyncWarning != null)
+{
+    <div class="alert alert-warning"
+         role="alert">
+
+        @ViewBag.SyncWarning
+
+        <div class="small mt-1">
+            Showing existing HRMS records.
+            Automatic refresh was not completed.
+        </div>
+
+    </div>
+}
+
+<div class="card border rounded-3 p-4 shadow-sm bg-white">
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered align-middle mb-0">
+
+            <thead class="table-light">
+
+                <tr>
+                    <th style="width:80px;"
+                        class="text-center text-muted small">
+                        ID
+                    </th>
+
+                    <th class="text-muted small">
+                        Group Name
+                    </th>
+
+                    <th class="text-muted small">
+                        ERPNext ID
+                    </th>
+
+                    <th style="width:110px;"
+                        class="text-center text-muted small">
+                        Actions
+                    </th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var group in Model)
+                    {
+                        <tr>
+
+                            <td class="text-center text-muted small">
+                                @group.Id
+                            </td>
+
+                            <td>
+                                <span class="fw-bold text-dark">
+                                    @group.GroupName
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="text-muted">
+                                    @group.ErpNextId
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+
+                                <a href="@Url.Action(
+                                                                       "EmployeeGroupDetails",
+                                                                       "HR",
+                                                                       new { id = group.Id })"
+                           class="btn btn-sm btn-outline-dark">
+                            Edit
+                        </a>
+
+                            </td>
+
+                        </tr>
+                                }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4"
+                            class="text-center text-muted py-4">
+                            No Employee Groups Found
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

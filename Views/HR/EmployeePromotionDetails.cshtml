@@ -1,0 +1,69 @@
+﻿@model Erp_Aits.Models.EmployeePromotion
+@{
+    ViewBag.Title = "Employee Promotion " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Promotion - @Model.Id</h4>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Employee</label>
+        <input class="form-control" value="@Model.Employee - @Model.EmployeeName" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Promotion Date</label>
+        <input class="form-control" value="@Model.PromotionDate.ToString("dd-MM-yyyy")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Salary Currency</label>
+        <input class="form-control" value="@Model.SalaryCurrency" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Company</label>
+        <input class="form-control" value="@Model.Company" readonly />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-1">Employee Promotion Details</h6>
+<p class="text-muted small mb-3">Properties updated in the Employee master on promotion submission</p>
+
+<table class="table table-bordered align-middle mb-4">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>Property</th>
+            <th>Current</th>
+            <th>New</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Details != null && Model.Details.Any())
+        {
+            int i = 1;
+            foreach (var d in Model.Details)
+            {
+                <tr>
+                    <td>@(i++)</td>
+                    <td>@d.Property</td>
+                    <td>@d.CurrentValue</td>
+                    <td>@d.NewValue</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-muted text-center py-3">No Data</td></tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+<h6 class="mb-3">Salary Details</h6>
+<div class="mb-3" style="max-width: 300px;">
+    <label class="form-label">Current CTC</label>
+    <input class="form-control" value="@(Model.CurrentCTC?.ToString("N2"))" readonly />
+</div>

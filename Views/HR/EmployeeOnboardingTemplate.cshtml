@@ -1,0 +1,203 @@
+﻿@model List<Erp_Aits.Models.EmployeeOnboardingTemplate>
+
+@{
+    ViewBag.Title = "Employee Onboarding Template";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0 fw-bold">
+        Employee Onboarding Template
+    </h4>
+
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("CreateEmployeeOnboardingTemplate", "HR")"
+           class="btn btn-dark btn-sm px-4 fw-bold">
+            + Add Employee Onboarding Template
+        </a>
+    </div>
+
+</div>
+
+<form method="get"
+      action="@Url.Action("EmployeeOnboardingTemplate", "HR")"
+      class="row g-2 mb-3">
+
+    <div class="col-auto">
+        <input type="text"
+               name="id"
+               value="@ViewBag.IdFilter"
+               class="form-control form-control-sm"
+               placeholder="ID" />
+    </div>
+
+    <div class="col-auto">
+        <input type="text"
+               name="title"
+               value="@ViewBag.TitleFilter"
+               class="form-control form-control-sm"
+               placeholder="Title" />
+    </div>
+
+    <div class="col-auto">
+        <button type="submit"
+                class="btn btn-sm btn-outline-secondary">
+            Search
+        </button>
+    </div>
+
+    <div class="col-auto">
+        <a href="@Url.Action("EmployeeOnboardingTemplate", "HR")"
+           class="btn btn-sm btn-outline-secondary">
+            Clear
+        </a>
+    </div>
+
+</form>
+
+<div class="card border rounded-3 p-4 shadow-sm bg-white">
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-light">
+                <tr>
+                    <th style="width:80px;"
+                        class="text-muted small">
+                        ID
+                    </th>
+
+                    <th class="text-muted small">
+                        ERPNext Ref
+                    </th>
+
+                    <th class="text-muted small">
+                        Title
+                    </th>
+
+                    <th class="text-muted small">
+                        Company
+                    </th>
+
+                    <th class="text-muted small">
+                        Department
+                    </th>
+
+                    <th class="text-muted small">
+                        Designation
+                    </th>
+
+                    <th class="text-muted small">
+                        Employee Grade
+                    </th>
+
+                    <th style="width:100px;"
+                        class="text-center text-muted small">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var t in Model)
+                    {
+                        <tr style="cursor:pointer"
+                            onclick="window.location='@Url.Action("EmployeeOnboardingTemplateDetails", "HR", new { id = t.Id })'">
+
+                            <td>
+                                <strong>@t.Id</strong>
+                            </td>
+
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(t.ErpNextId))
+                                {
+                                    <span class="badge bg-success-subtle text-success">
+                                        @t.ErpNextId
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-muted">
+                                        Not Synced
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <span class="fw-semibold">
+                                    @t.Title
+                                </span>
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(t.Company) ? "-" : t.Company)
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(t.Department) ? "-" : t.Department)
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(t.Designation) ? "-" : t.Designation)
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(t.EmployeeGrade) ? "-" : t.EmployeeGrade)
+                            </td>
+
+                            <td class="text-center">
+                                <a href="@Url.Action("EmployeeOnboardingTemplateDetails", "HR", new { id = t.Id })"
+                                   class="btn btn-sm btn-outline-dark"
+                                   onclick="event.stopPropagation();">
+                                    View
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8"
+                            class="text-center text-muted py-5">
+                            No Employee Onboarding Templates Found
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

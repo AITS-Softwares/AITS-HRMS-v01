@@ -1,0 +1,46 @@
+﻿@model Erp_Aits.Models.ATSJobOpening
+@{
+    ViewBag.Title = Model.JobTitle;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">@Model.JobTitle</h4>
+        <small class="text-muted">@Model.ATSJobOpeningCode</small>
+    </div>
+    <a href="@Url.Action("ATSJobOpening", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Stats</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><span class="badge bg-secondary-subtle text-secondary">@Model.Status</span></div>
+        <div class="col-md-6"><span class="badge bg-secondary-subtle text-secondary">@Model.OpenPositions Open Position(s)</span></div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Job Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Job Title</label><div class="form-control bg-light">@Model.JobTitle</div></div>
+        <div class="col-md-6"><label class="form-label">Open Positions</label><div class="form-control bg-light">@Model.OpenPositions</div></div>
+        <div class="col-md-6"><label class="form-label">Department</label><div class="form-control bg-light">@Model.Department</div></div>
+        <div class="col-md-6"><label class="form-label">Experience Required</label><div class="form-control bg-light">@Model.ExperienceRequired</div></div>
+        <div class="col-md-6"><label class="form-label">Status</label><div class="form-control bg-light">@Model.Status</div></div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Role Description</h6>
+    <label class="form-label">Required Skills</label>
+    <div class="form-control bg-light mb-3" style="min-height:80px;">@Model.RequiredSkills</div>
+    <label class="form-label">Job Description</label>
+    <div class="form-control bg-light" style="min-height:180px; white-space:pre-wrap;">@Model.JobDescription</div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Hiring Ownership</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Hiring Manager</label><div class="form-control bg-light">@Model.HiringManager</div></div>
+    </div>
+</div>

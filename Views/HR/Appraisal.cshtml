@@ -1,0 +1,127 @@
+﻿@* @model List<Erp_Aits.Models.Appraisal>
+@{
+    ViewBag.Title = "Appraisal";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Appraisal</h4>
+    <a href="@Url.Action("CreateAppraisal", "HR")" class="btn btn-dark btn-sm">+ Add Appraisal</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.EmployeeFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="appraisalCycle" class="form-control form-control-sm" placeholder="Appraisal Cycle" value="@ViewBag.AppraisalCycleFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="appraisalTemplate" class="form-control form-control-sm" placeholder="Appraisal Template" value="@ViewBag.AppraisalTemplateFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Appraisal Cycle</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='@Url.Action("AppraisalDetails", "HR", new { id = a.Id })'">
+                <td>@a.Id</td>
+                <td>@a.Employee</td>
+                <td>@a.EmployeeName</td>
+                <td>@a.AppraisalCycle</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No appraisals found.</p>
+} *@
+
+
+
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.Appraisal>
+@{
+    ViewBag.Title = "Appraisal";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Appraisal</h4>
+    <div>
+        <a href="@Url.Action("CreateAppraisal", "HR")" class="btn btn-dark btn-sm">+ Add Appraisal</a>
+    </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.EmployeeFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="appraisalCycle" class="form-control form-control-sm" placeholder="Appraisal Cycle" value="@ViewBag.AppraisalCycleFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="appraisalTemplate" class="form-control form-control-sm" placeholder="Appraisal Template" value="@ViewBag.AppraisalTemplateFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Appraisal Cycle</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='@Url.Action("AppraisalDetails", "HR", new { id = a.Id })'">
+                <td>@a.Id</td>
+                <td>@a.Employee</td>
+                <td>@a.EmployeeName</td>
+                <td>@a.AppraisalCycle</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No appraisals found.</p>
+}

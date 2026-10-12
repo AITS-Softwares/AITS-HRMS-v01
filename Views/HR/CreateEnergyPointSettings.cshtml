@@ -1,0 +1,215 @@
+﻿@model Erp_Aits.Models.EnergyPointSettings
+@{
+    ViewBag.Title = "Energy Point Settings";
+    var rolesJson = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Roles ?? new List<object>());
+    var users = ViewBag.Users;
+}
+
+<form asp-action="CreateEnergyPointSettings" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">Energy Point Settings</h4>
+            <span class="badge bg-success-subtle text-success ms-2">Enabled</span>
+        </div>
+
+        <div>
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#giveReviewPointsModal">
+                Give Review Points
+            </button>
+
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="card p-3 mb-3">
+        <div class="form-check">
+            <input asp-for="Enabled" class="form-check-input" type="checkbox" id="enabledCheck" onchange="toggleSettings()" />
+            <label class="form-check-label" asp-for="Enabled">Enabled</label>
+        </div>
+    </div>
+
+    <div id="settingsBody" class="card p-3" style="display:@(Model.Enabled ? "block" : "none");">
+        <h6 class="mb-3">Review Levels</h6>
+
+        <table class="table table-bordered align-middle mb-1" id="levelsTable">
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" disabled /></th>
+                    <th style="width:50px">No.</th>
+                    <th>Level Name <span class="text-danger">*</span></th>
+                    <th>Role <span class="text-danger">*</span></th>
+                    <th style="width:160px">Review Points <span class="text-danger">*</span></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.ReviewLevels != null && Model.ReviewLevels.Any())
+                {
+                    int i = 1;
+                    foreach (var lvl in Model.ReviewLevels)
+                    {
+                        <tr>
+                            <td><input type="checkbox" /></td>
+                            <td>@(i++)</td>
+
+                            <td>
+                                <input type="text"
+                                       name="LevelNames"
+                                       class="form-control form-control-sm border-0"
+                                       value="@lvl.LevelName" />
+                            </td>
+
+                            <td>
+                                <select name="Roles" class="form-select form-select-sm border-0">
+                                    <option value="">Select Role</option>
+                                    @if (ViewBag.Roles != null)
+                                    {
+                                        foreach (var role in ViewBag.Roles)
+                                        {
+                                            string roleName = role.name?.ToString();
+                                            <option value="@roleName" selected="@(lvl.Role == roleName)">
+                                                @roleName
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+
+                            <td>
+                                <input type="number"
+                                       name="ReviewPointsArr"
+                                       class="form-control form-control-sm border-0 text-end"
+                                       value="@lvl.ReviewPoints" />
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (Model.ReviewLevels == null || !Model.ReviewLevels.Any())
+        {
+            <div class="text-muted text-center py-3 border-top-0 border" style="border-top: none;">No Data</div>
+        }
+
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 mb-4" onclick="addLevelRow()">Add Row</button>
+
+        <div class="mb-3">
+            <label class="form-label">Point Allocation Periodicity</label>
+            <select asp-for="PointAllocationPeriodicity" class="form-select">
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Last Point Allocation Date</label>
+            <input asp-for="LastPointAllocationDate"
+                   type="date"
+                   class="form-control"
+                   value="@(Model.LastPointAllocationDate?.ToString("yyyy-MM-dd"))"
+                   readonly />
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="giveReviewPointsModal" tabindex="-1" aria-labelledby="giveReviewPointsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="GiveReviewPoints" asp-controller="HR" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="giveReviewPointsLabel">Give Review Points</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">User <span class="text-danger">*</span></label>
+                    <select name="UserId" class="form-select" required>
+                        <option value="">Select User</option>
+
+                        @if (users != null)
+                        {
+                            foreach (var user in users)
+                            {
+                                string userId = user.name?.ToString();
+                                string fullName = user.full_name?.ToString();
+
+                                <option value="@userId">
+                                    @(string.IsNullOrWhiteSpace(fullName) ? userId : fullName + " (" + userId + ")")
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Points <span class="text-danger">*</span></label>
+                    <input type="number" name="Points" class="form-control" min="1" required />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-dark btn-sm">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const energyPointRoles = @Html.Raw(rolesJson);
+
+    function toggleSettings() {
+        var checkbox = document.getElementById('enabledCheck');
+        var body = document.getElementById('settingsBody');
+
+        body.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    function getRoleOptions() {
+        let html = '<option value="">Select Role</option>';
+
+        energyPointRoles.forEach(function (role) {
+            const name = role.name || '';
+            html += '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
+        });
+
+        return html;
+    }
+
+    function addLevelRow() {
+        var tbody = document.querySelector('#levelsTable tbody');
+        var rowNum = tbody.rows.length + 1;
+
+        var row = document.createElement('tr');
+        row.innerHTML =
+            '<td><input type="checkbox" /></td>' +
+            '<td>' + rowNum + '</td>' +
+            '<td><input type="text" name="LevelNames" class="form-control form-control-sm border-0" /></td>' +
+            '<td><select name="Roles" class="form-select form-select-sm border-0">' + getRoleOptions() + '</select></td>' +
+            '<td><input type="number" name="ReviewPointsArr" class="form-control form-control-sm border-0 text-end" value="0" /></td>';
+
+        tbody.appendChild(row);
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+</script>

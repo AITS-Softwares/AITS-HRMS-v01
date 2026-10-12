@@ -1,0 +1,72 @@
+﻿@model List<Erp_Aits.Models.EmployeeReferral>
+@{
+    ViewBag.Title = "Employee Referral";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Referral</h4>
+    <a href="@Url.Action("CreateEmployeeReferral", "HR")" class="btn btn-dark btn-sm">+ Add Employee Referral</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="fullName" class="form-control form-control-sm" placeholder="Full Name" value="@ViewBag.FullNameFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="date" name="date" class="form-control form-control-sm" value="@(ViewBag.DateFilter as DateTime?)?.ToString(" yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <select name="status" class="form-select form-select-sm">
+            <option value="">Status</option>
+            <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Pending</option>
+            <option value="Accepted" selected="@(ViewBag.StatusFilter == "Accepted")">Accepted</option>
+            <option value="Rejected" selected="@(ViewBag.StatusFilter == "Rejected")">Rejected</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <input type="text" name="forDesignation" class="form-control form-control-sm" placeholder="For Designation" value="@ViewBag.ForDesignationFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="contactNo" class="form-control form-control-sm" placeholder="Contact No" value="@ViewBag.ContactNoFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="referrer" class="form-control form-control-sm" placeholder="Referrer" value="@ViewBag.ReferrerFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>For Designation</th>
+            <th>Referrer</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='@Url.Action("EmployeeReferralDetails", "HR", new { id = r.Id })'">
+                <td>@r.Id</td>
+                <td>@r.FirstName @r.LastName</td>
+                <td>@r.ReferralDate.ToString("dd-MM-yyyy")</td>
+                <td>@r.Status</td>
+                <td>@r.ForDesignation</td>
+                <td>@r.Referrer</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No employee referrals found.</p>
+}

@@ -1,0 +1,1078 @@
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.runtime.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.exe
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.deps.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.runtimeconfig.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.pdb
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Azure.Core.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.DataSet.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Humanizer.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\RBush.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.AttributedModel.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Convention.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Hosting.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Runtime.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.TypedParts.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Drawing.Common.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Memory.Data.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Runtime.Caching.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Security.Permissions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Windows.Extensions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.AssemblyReference.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfoInputs.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfo.cs
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.CoreCompileInputs.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cs
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\bundle\Erp_Aits.styles.css
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\projectbundle\Erp_Aits.bundle.scp.css
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.Up2Date
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\refint\Erp_Aits.dll
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.pdb
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.genruntimeconfig.cache
+C:\Users\developer2\source\repos\Erp_Aits\Erp_Aits\obj\Debug\net8.0\ref\Erp_Aits.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.Development.json
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.json
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.runtime.json
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.endpoints.json
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.exe
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.deps.json
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.runtimeconfig.json
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.pdb
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Azure.Core.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Azure.Identity.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ClosedXML.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.DataSet.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Humanizer.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\RBush.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.CodeDom.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.AttributedModel.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Convention.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Hosting.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Runtime.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.TypedParts.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Drawing.Common.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Memory.Data.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Runtime.Caching.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Security.Permissions.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Windows.Extensions.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
+C:\komal\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.AssemblyReference.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.GeneratedMSBuildEditorConfig.editorconfig
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfoInputs.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfo.cs
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.CoreCompileInputs.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.MvcApplicationPartsAssemblyInfo.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cs
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\bundle\Erp_Aits.styles.css
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\projectbundle\Erp_Aits.bundle.scp.css
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.development.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.Up2Date
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.dll
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\refint\Erp_Aits.dll
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.pdb
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.genruntimeconfig.cache
+C:\komal\Erp_Aits\Erp_Aits\obj\Debug\net8.0\ref\Erp_Aits.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.exe
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.pdb
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\appsettings.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.runtime.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.deps.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Erp_Aits.runtimeconfig.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Azure.Core.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.DataSet.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Humanizer.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\RBush.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Composition.AttributedModel.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Composition.Convention.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Composition.Hosting.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Composition.Runtime.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Composition.TypedParts.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Drawing.Common.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Memory.Data.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Runtime.Caching.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Security.Permissions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\System.Windows.Extensions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.AssemblyReference.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfoInputs.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfo.cs
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.CoreCompileInputs.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cs
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\scopedcss\bundle\Erp_Aits.styles.css
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\scopedcss\projectbundle\Erp_Aits.bundle.scp.css
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.Up2Date
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\refint\Erp_Aits.dll
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.pdb
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\Erp_Aits.genruntimeconfig.cache
+C:\Users\developer3\Downloads\backup\Erp_Aits\obj\Debug\net8.0\ref\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase1-build\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.exe
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Azure.Core.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelDataReader.DataSet.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Humanizer.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\RBush.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.AttributedModel.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Convention.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Hosting.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.Runtime.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Composition.TypedParts.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Drawing.Common.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Memory.Data.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Runtime.Caching.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Security.Permissions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\System.Windows.Extensions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.AssemblyReference.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfoInputs.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.AssemblyInfo.cs
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.CoreCompileInputs.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.RazorAssemblyInfo.cs
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\bundle\Erp_Aits.styles.css
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\scopedcss\projectbundle\Erp_Aits.bundle.scp.css
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.csproj.Up2Date
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\refint\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\Erp_Aits.genruntimeconfig.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\ref\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\phase2a-company-build-2\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\leave-shift-sync-ui-build\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\transaction-sync-build\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build2\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build3\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build4\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build5\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build6\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build7\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-assignment2\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-nullfix\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-schedule-lifecycle\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timeout-guard\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-sync\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-no-autorefresh\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-roster-field\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-type-auto-no-button\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-workflow\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-login-db-error\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-shift-request-status\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-activity\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-timesheet\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype2\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-delete\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leavetype-fields\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-period\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-flow\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-submit-fix\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-block-list\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-build-leave-policy-allocation-2\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-after-db-check\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-allocation-cancel-policy\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-leave-policy-assignment\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-advance\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-expense-claim-type\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-travel-request\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-purpose-of-travel\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-attendance-tools\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-flow\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-template-refresh\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-kra-sync\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-employee-performance-feedback\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\Erp_Aits.staticwebassets.endpoints.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-goal-flow\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets\msbuild.Erp_Aits.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets\msbuild.build.Erp_Aits.props
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.Erp_Aits.props
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.Erp_Aits.props
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Debug\net8.0\staticwebassets.pack.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-appraisal-cycle\Erp_Aits.pdb
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\global.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\Erp_Aits.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\tmp\verify-policy-cancel\Erp_Aits.pdb

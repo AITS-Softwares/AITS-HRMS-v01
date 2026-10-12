@@ -1,0 +1,906 @@
+﻿@* @model Erp_Aits.Models.Customer
+@{
+    ViewData["Title"] = "Customer Details";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "user";
+}
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-user text-primary"></i>
+            Customer Details: @Model.CustomerCode
+        </h5>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Basic Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    <h6>Basic Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Code</span>
+                        <span class="detail-value">
+                            <span class="badge bg-primary">@Model.CustomerCode</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Name</span>
+                        <span class="detail-value"><strong>@Model.CustomerName</strong></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Group</span>
+                        <span class="detail-value">@(Model.CustomerGroup ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Type</span>
+                        <span class="detail-value">
+                            <span class="badge bg-info">@(Model.CustomerType ?? "N/A")</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </span>
+                    </div>
+                    @if (Model.LeadId.HasValue)
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Lead Reference</span>
+                            <span class="detail-value">
+                                <span class="badge bg-secondary">Lead ID: @Model.LeadId</span>
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-address-card text-success"></i>
+                    <h6>Contact Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Contact Person</span>
+                        <span class="detail-value"><strong>@Model.ContactPerson</strong></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Mobile Number</span>
+                        <span class="detail-value">
+                            <a href="tel:@Model.MobileNumber">
+                                <i class="fas fa-phone"></i> @Model.MobileNumber
+                            </a>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Primary Email</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.PrimaryEmail))
+                            {
+                                <a href="mailto:@Model.PrimaryEmail">
+                                    <i class="fas fa-envelope"></i> @Model.PrimaryEmail
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Additional Email</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.AdditionalEmail))
+                            {
+                                <a href="mailto:@Model.AdditionalEmail">
+                                    <i class="fas fa-envelope"></i> @Model.AdditionalEmail
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Domain / Website</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.Domain))
+                            {
+                                <a href="http://@Model.Domain" target="_blank">
+                                    <i class="fas fa-globe"></i> @Model.Domain
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <!-- Organization Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-building text-warning"></i>
+                    <h6>Organization Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Organization Name</span>
+                        <span class="detail-value">@(Model.OrganizationName ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value">@(Model.Address ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">City</span>
+                        <span class="detail-value">@(Model.City ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">State</span>
+                        <span class="detail-value">@(Model.State ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Country</span>
+                        <span class="detail-value">@(Model.Country ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Pin Code</span>
+                        <span class="detail-value">@(Model.PinCode ?? "N/A")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.FullAddress))
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Full Address</span>
+                            <span class="detail-value">@Model.FullAddress</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Tax & Commission Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-tags text-info"></i>
+                    <h6>Tax & Commission Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">PAN Number</span>
+                        <span class="detail-value">@(Model.PanNumber ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">GST Number</span>
+                        <span class="detail-value">@(Model.GstNumber ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">GST Category</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.GstCategory))
+                            {
+                                <span class="badge bg-secondary">@Model.GstCategory</span>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Commission Rate</span>
+                        <span class="detail-value">
+                            @if (Model.CommissionRate.HasValue)
+                            {
+                                <span class="badge bg-warning text-dark">@Model.CommissionRate.Value.ToString("0.00")%</span>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Agent</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.AgentName))
+                            {
+                                <span><i class="fas fa-user-tie"></i> @Model.AgentName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Unassigned</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-clock text-secondary"></i>
+                    <h6>System Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Created Date</span>
+                        <span class="detail-value">@Model.CreatedDate.ToString("dd MMM yyyy HH:mm")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Created By</span>
+                        <span class="detail-value">@(Model.CreatedBy ?? "System")</span>
+                    </div>
+                    @if (Model.ModifiedDate.HasValue)
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Modified Date</span>
+                            <span class="detail-value">@Model.ModifiedDate?.ToString("dd MMM yyyy HH:mm")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Modified By</span>
+                            <span class="detail-value">@(Model.ModifiedBy ?? "N/A")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f0f2f5;
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+    .detail-section {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid #f0f2f5;
+        overflow: hidden;
+    }
+
+    .detail-header {
+        padding: 12px 16px;
+        background: #fafbfc;
+        border-bottom: 1px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .detail-header h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+    .detail-body {
+        padding: 12px 16px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        font-size: 13px;
+        color: #94a3b8;
+        font-weight: 500;
+        flex: 0 0 40%;
+    }
+
+    .detail-value {
+        font-size: 13px;
+        color: #1a1a2e;
+        font-weight: 500;
+        text-align: right;
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+
+    .alert {
+        border-radius: 12px;
+    }
+</style> *@
+
+
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Data.SqlClient
+@using System.Collections.Generic
+@using System.Data
+@inject IConfiguration _configuration
+@model Erp_Aits.Models.Customer
+@{
+    ViewData["Title"] = "Customer Details";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "user";
+    var loginType = Context.Session.GetString("LoginType") ?? "User";
+    var userRole = Context.Session.GetString("UserRole") ?? "User";
+    var userId = Context.Session.GetString("UserId");
+
+    // Default to false
+    var canEditCustomer = false;
+    var canDeleteCustomer = false;
+
+    // Check based on role first
+    if (loginType == "Company" || userRole == "Admin")
+    {
+        canEditCustomer = true;
+        canDeleteCustomer = true;
+    }
+    else if (userRole == "Manager")
+    {
+        canEditCustomer = true;
+        canDeleteCustomer = false;
+    }
+    else if (!string.IsNullOrEmpty(userId))
+    {
+        try
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // Check Customer Edit permission (PermissionId = 10)
+                string query = @"
+                    SELECT CanEdit
+                    FROM UserPermissions
+                    WHERE UserId = @UserId
+                    AND PermissionId = 10";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        canEditCustomer = Convert.ToBoolean(result);
+                    }
+                }
+
+                // Check Customer Delete permission (PermissionId = 11)
+                query = @"
+                    SELECT CanDelete
+                    FROM UserPermissions
+                    WHERE UserId = @UserId
+                    AND PermissionId = 11";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        canDeleteCustomer = Convert.ToBoolean(result);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Fallback
+            canEditCustomer = loginType == "Company" || userRole == "Admin" || userRole == "Manager";
+            canDeleteCustomer = loginType == "Company" || userRole == "Admin";
+        }
+    }
+}
+@* <-- THIS IS THE CLOSING BRACE YOU WERE MISSING *@
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-user text-primary"></i>
+            Customer Details: @Model.CustomerCode
+        </h5>
+        <div class="d-flex gap-2">
+            @if (canEditCustomer)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-warning btn-sm disabled" title="Edit (Permission Denied)" disabled>
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            }
+
+            @if (canDeleteCustomer)
+            {
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-danger btn-sm disabled" title="Delete (Permission Denied)" disabled>
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            }
+
+            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Basic Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    <h6>Basic Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Code</span>
+                        <span class="detail-value">
+                            <span class="badge bg-primary">@Model.CustomerCode</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Name</span>
+                        <span class="detail-value"><strong>@Model.CustomerName</strong></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Group</span>
+                        <span class="detail-value">@(Model.CustomerGroup ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Type</span>
+                        <span class="detail-value">
+                            <span class="badge bg-info">@(Model.CustomerType ?? "N/A")</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </span>
+                    </div>
+                    @if (Model.LeadId.HasValue)
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Lead Reference</span>
+                            <span class="detail-value">
+                                <span class="badge bg-secondary">Lead ID: @Model.LeadId</span>
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-address-card text-success"></i>
+                    <h6>Contact Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Contact Person</span>
+                        <span class="detail-value"><strong>@Model.ContactPerson</strong></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Mobile Number</span>
+                        <span class="detail-value">
+                            <a href="tel:@Model.MobileNumber">
+                                <i class="fas fa-phone"></i> @Model.MobileNumber
+                            </a>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Primary Email</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.PrimaryEmail))
+                            {
+                                <a href="mailto:@Model.PrimaryEmail">
+                                    <i class="fas fa-envelope"></i> @Model.PrimaryEmail
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Additional Email</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.AdditionalEmail))
+                            {
+                                <a href="mailto:@Model.AdditionalEmail">
+                                    <i class="fas fa-envelope"></i> @Model.AdditionalEmail
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Domain / Website</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.Domain))
+                            {
+                                <a href="http://@Model.Domain" target="_blank">
+                                    <i class="fas fa-globe"></i> @Model.Domain
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <!-- Organization Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-building text-warning"></i>
+                    <h6>Organization Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Organization Name</span>
+                        <span class="detail-value">@(Model.OrganizationName ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value">@(Model.Address ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">City</span>
+                        <span class="detail-value">@(Model.City ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">State</span>
+                        <span class="detail-value">@(Model.State ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Country</span>
+                        <span class="detail-value">@(Model.Country ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Pin Code</span>
+                        <span class="detail-value">@(Model.PinCode ?? "N/A")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.FullAddress))
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Full Address</span>
+                            <span class="detail-value">@Model.FullAddress</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Tax & Commission Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-tags text-info"></i>
+                    <h6>Tax & Commission Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">PAN Number</span>
+                        <span class="detail-value">@(Model.PanNumber ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">GST Number</span>
+                        <span class="detail-value">@(Model.GstNumber ?? "N/A")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">GST Category</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.GstCategory))
+                            {
+                                <span class="badge bg-secondary">@Model.GstCategory</span>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Commission Rate</span>
+                        <span class="detail-value">
+                            @if (Model.CommissionRate.HasValue)
+                            {
+                                <span class="badge bg-warning text-dark">@Model.CommissionRate.Value.ToString("0.00")%</span>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Agent</span>
+                        <span class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.AgentName))
+                            {
+                                <span><i class="fas fa-user-tie"></i> @Model.AgentName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Unassigned</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="detail-section">
+                <div class="detail-header">
+                    <i class="fas fa-clock text-secondary"></i>
+                    <h6>System Information</h6>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Created Date</span>
+                        <span class="detail-value">@Model.CreatedDate.ToString("dd MMM yyyy HH:mm")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Created By</span>
+                        <span class="detail-value">@(Model.CreatedBy ?? "System")</span>
+                    </div>
+                    @if (Model.ModifiedDate.HasValue)
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Modified Date</span>
+                            <span class="detail-value">@Model.ModifiedDate?.ToString("dd MMM yyyy HH:mm")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Modified By</span>
+                            <span class="detail-value">@(Model.ModifiedBy ?? "N/A")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f0f2f5;
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+    .detail-section {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid #f0f2f5;
+        overflow: hidden;
+    }
+
+    .detail-header {
+        padding: 12px 16px;
+        background: #fafbfc;
+        border-bottom: 1px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .detail-header h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+    .detail-body {
+        padding: 12px 16px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        font-size: 13px;
+        color: #94a3b8;
+        font-weight: 500;
+        flex: 0 0 40%;
+    }
+
+    .detail-value {
+        font-size: 13px;
+        color: #1a1a2e;
+        font-weight: 500;
+        text-align: right;
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+
+    .alert {
+        border-radius: 12px;
+    }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .btn-sm.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+        .btn-warning:hover:not(.disabled) {
+            background: #d97706;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            color: white;
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+        .btn-danger:hover:not(.disabled) {
+            background: #b02a37;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #1a1a2e;
+        }
+</style>

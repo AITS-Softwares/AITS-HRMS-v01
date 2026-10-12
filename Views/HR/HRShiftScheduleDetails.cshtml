@@ -1,0 +1,156 @@
+@model Erp_Aits.Models.HRShiftSchedule
+@{
+    ViewBag.Title = "Shift Schedule " + Model.Id;
+    var shiftTypes = ViewBag.ShiftTypes as List<string> ?? new List<string>();
+    string[] daysList = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    bool isSubmitted = string.Equals(Model.Status, "Submitted", StringComparison.OrdinalIgnoreCase);
+    bool isCancelled = string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool canEdit = !isSubmitted && !isCancelled;
+    var rows = Model.Days.Any() ? Model.Days : new List<Erp_Aits.Models.HRShiftScheduleDay> { new Erp_Aits.Models.HRShiftScheduleDay() };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">@Model.Name</h4>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("HRShiftScheduleList", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+        @if (canEdit)
+        {
+            <button type="submit" form="shiftScheduleForm" name="actionCommand" value="Submit" class="btn btn-success btn-sm">Submit</button>
+            <form method="post" action="@Url.Action("DeleteShiftSchedule", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Shift Schedule from ERPNext and HRMS?');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+            </form>
+        }
+        @if (isSubmitted)
+        {
+            <form method="post" action="@Url.Action("UpdateShiftSchedule", "HR", new { id = Model.Id })" onsubmit="return confirm('Cancel this submitted Shift Schedule in ERPNext and HRMS?');">
+                <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-danger btn-sm">Cancel</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+
+<form id="shiftScheduleForm" method="post" action="@Url.Action("UpdateShiftSchedule", "HR", new { id = Model.Id })">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="Status" value="@Model.Status" />
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Name *</label>
+                <input name="Name" class="form-control" value="@Model.Name" required readonly="@(!canEdit)" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <input class="form-control" value="@Model.Status" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                @if (canEdit)
+                {
+                    <select name="ShiftType" class="form-select" required>
+                        <option value="">-- Select Shift Type --</option>
+                        @foreach (var st in shiftTypes)
+                        {
+                            <option value="@st" selected="@(Model.ShiftType == st)">@st</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.ShiftType" readonly />
+                }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Frequency *</label>
+                @if (canEdit)
+                {
+                    <select name="Frequency" class="form-select" required>
+                        @foreach (var f in new[] { "Every Week", "Every 2 Weeks", "Every 3 Weeks", "Every 4 Weeks" })
+                        {
+                            <option value="@f" selected="@(Model.Frequency == f)">@f</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Frequency" readonly />
+                }
+            </div>
+        </div>
+
+        <label class="form-label">Repeat On Days</label>
+        <table class="table table-bordered align-middle mb-0" id="daysTable">
+            <thead><tr><th>Day</th><th style="width:90px">Action</th></tr></thead>
+            <tbody>
+                @if (canEdit)
+                {
+                    foreach (var d in rows)
+                    {
+                        <tr>
+                            <td>
+                                <select name="Days" class="form-select">
+                                    <option value="">-- Select Day --</option>
+                                    @foreach (var day in daysList)
+                                    {
+                                        <option value="@day" selected="@(d.Day == day)">@day</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Remove</button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    foreach (var d in Model.Days)
+                    {
+                        <tr><td>@d.Day</td><td></td></tr>
+                    }
+                    if (!Model.Days.Any())
+                    {
+                        <tr><td class="text-center text-muted py-3" colspan="2">No days recorded</td></tr>
+                    }
+                }
+            </tbody>
+        </table>
+        @if (canEdit)
+        {
+            <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-sm btn-light border" onclick="addDayRow()">Add Row</button>
+                <button type="submit" name="actionCommand" value="Save" class="btn btn-dark btn-sm">Save</button>
+            </div>
+        }
+    </div>
+</form>
+
+@if (canEdit)
+{
+    <script>
+        const dayOptions = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        function addDayRow() {
+            const tbody = document.querySelector('#daysTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>
+                <select name="Days" class="form-select">
+                    <option value="">-- Select Day --</option>
+                    ${dayOptions.map(day => `<option value="${day}">${day}</option>`).join('')}
+                </select>
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Remove</button>
+            </td>`;
+            tbody.appendChild(row);
+        }
+    </script>
+}

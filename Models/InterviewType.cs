@@ -1,0 +1,9 @@
+﻿namespace Erp_Aits.Models
+{
+    public class InterviewType
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+}

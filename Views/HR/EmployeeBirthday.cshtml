@@ -1,0 +1,108 @@
+﻿@model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee Birthday";
+    var months = new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Birthday</h4>
+    <div class="d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Actions
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#" onclick="setChart(); return false;">Set Chart</a></li>
+                <li><a class="dropdown-item" href="#" onclick="addChartToDashboard(); return false;">Add Chart to Dashboard</a></li>
+                <li><a class="dropdown-item" href="#" onclick="createCard(); return false;">Create Card</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" title="Reload Report" onclick="reloadReport()">
+            &#x21bb;
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" title="More options">&#8942;</button>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" asp-action="EmployeeBirthday" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <select name="month" class="form-select form-select-sm">
+            @foreach (var m in months)
+            {
+                <option value="@m" selected="@(m == ViewBag.Month)">@m</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="company" class="form-control form-control-sm" placeholder="Company" value="@ViewBag.Company" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-dark">Filter</button>
+    </div>
+</form>
+
+<!-- Report grid -->
+<div class="card p-0">
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Name</th>
+                    <th>Date of B...</th>
+                    <th>Branch</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Ge...</th>
+                    <th>Company</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model)
+                {
+                    <tr>
+                        <td>@emp.EmployeeCode</td>
+                        <td>@emp.FullName</td>
+                        <td>@(emp.DateOfBirth?.ToString("dd-MM-yyyy"))</td>
+                        <td></td>
+                        <td>@emp.Department</td>
+                        <td>@emp.Designation</td>
+                        <td>@emp.Gender</td>
+                        <td>@emp.Company</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-2" style="font-size:2rem;">&#128196;</div>
+            <p class="text-muted mb-0">Nothing to show</p>
+        </div>
+    }
+</div>
+
+<p class="text-muted small mt-2">For comparison, use &gt;5, &lt;10 or =324. For ranges, use 5:10 (for values between 5 &amp; 10).</p>
+
+@section Scripts {
+    <script>
+        function reloadReport() {
+            window.location.reload();
+        }
+
+        function setChart() {
+            alert('Set Chart clicked - wire this up to your charting logic.');
+        }
+
+        function addChartToDashboard() {
+            alert('Add Chart to Dashboard clicked - wire this up to your dashboard logic.');
+        }
+
+        function createCard() {
+            alert('Create Card clicked - wire this up to your card creation logic.');
+        }
+    </script>
+}

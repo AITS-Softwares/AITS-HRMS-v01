@@ -1,0 +1,132 @@
+﻿@* @model List<Erp_Aits.Models.EmployeeOnboarding>
+@{
+    ViewBag.Title = "Employee Onboarding";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Onboarding</h4>
+    <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn btn-dark btn-sm">+ Add Employee Onboarding</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee Name" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee Name</th>
+            <th>Date of Joining</th>
+            <th>Boarding Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr style="cursor:pointer" onclick="location.href='@Url.Action("EmployeeOnboardingDetails", "HR", new { id = e.Id })'">
+                <td>@e.Id</td>
+                <td>@e.EmployeeName</td>
+                <td>@e.DateOfJoining.ToString("dd-MM-yyyy")</td>
+                <td>@e.BoardingStatus</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No employee onboarding records found.</p>
+} *@
+
+@model List<Erp_Aits.Models.EmployeeOnboarding>
+@{
+    ViewBag.Title = "Employee Onboarding";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Onboarding</h4>
+    @* <div class="d-flex gap-2">
+        <form asp-action="SyncEmployeeOnboardingFromErpNext" asp-controller="HR" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-primary btn-sm">⚡ Sync from ERPNext</button>
+        </form>
+        <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn btn-dark btn-sm">+ Add Employee Onboarding</a>
+    </div> *@
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn btn-dark btn-sm">
+            + Add Employee Onboarding
+        </a>
+    </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee Name" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ERPNext Ref</th>
+            <th>Employee Name</th>
+            <th>Company</th>
+            <th>Date of Joining</th>
+            <th>Boarding Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr style="cursor:pointer" onclick="location.href='@Url.Action("EmployeeOnboardingDetails", "HR", new { id = e.Id })'">
+                <td><strong>@e.Id</strong></td>
+                <td><small class="text-muted">@(string.IsNullOrEmpty(e.ErpNextId) ? "-" : e.ErpNextId)</small></td>
+                <td>@e.EmployeeName</td>
+                <td>@e.Company</td>
+                <td>@e.DateOfJoining.ToString("dd-MM-yyyy")</td>
+                <td>
+                    @{
+                        var badgeClass = e.BoardingStatus == "Completed" ? "bg-success-subtle text-success"
+                        : e.BoardingStatus == "In Process" ? "bg-primary-subtle text-primary"
+                        : "bg-warning-subtle text-warning";
+                    }
+                    <span class="badge @badgeClass">@e.BoardingStatus</span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No employee onboarding records found.</p>
+}

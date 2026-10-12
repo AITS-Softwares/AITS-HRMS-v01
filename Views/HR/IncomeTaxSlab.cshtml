@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "Income Tax Slab";
+}
+
+<style>
+    .erp-list-page {
+        max-width: 1210px;
+        margin: 0 auto;
+    }
+
+    .erp-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .erp-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .erp-menu-icon {
+        border: 1px solid #9ca3af;
+        background: #fff;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 24px;
+        line-height: 1;
+        color: #111827;
+    }
+
+    .erp-title {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .erp-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .erp-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 15px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .erp-btn-dark {
+        background: #111;
+        color: #fff;
+    }
+
+    .erp-btn-light {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .list-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        min-height: 600px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .list-filter-row {
+        display: grid;
+        grid-template-columns: 190px 1fr auto auto;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e5e7eb;
+        align-items: center;
+    }
+
+    .erp-input {
+        height: 38px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f3f4f6;
+        padding: 7px 12px;
+        font-size: 16px;
+    }
+
+    .empty-state {
+        position: absolute;
+        top: 47%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #374151;
+    }
+
+    .empty-icon {
+        width: 62px;
+        height: 62px;
+        margin: 0 auto 18px;
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 32px;
+    }
+
+    .empty-text {
+        margin-bottom: 14px;
+        font-size: 18px;
+    }
+
+    .pagination-row {
+        position: absolute;
+        left: 28px;
+        bottom: 20px;
+        display: flex;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .pagination-row span {
+            padding: 8px 14px;
+            background: #fff;
+            border-right: 1px solid #e5e7eb;
+            font-size: 18px;
+        }
+
+            .pagination-row span:last-child {
+                border-right: 0;
+            }
+
+    @@media (max-width: 900px) {
+        .erp-title-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .list-filter-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="erp-list-page">
+    <div class="erp-title-row">
+        <div class="erp-title-left">
+            <button type="button" class="erp-menu-icon">☰</button>
+            <div class="erp-title">Income Tax Slab</div>
+        </div>
+
+        <div class="erp-toolbar">
+            <button type="button" class="erp-btn erp-btn-light">☷ List View</button>
+            <button type="button" class="erp-btn erp-btn-light">↻</button>
+            <button type="button" class="erp-btn erp-btn-light">...</button>
+            <a href="@Url.Action("CreateIncomeTaxSlab", "HR")" class="erp-btn erp-btn-dark">+ Add Income Tax Slab</a>
+        </div>
+    </div>
+
+    <main class="list-card">
+        <form method="get" class="list-filter-row">
+            <input type="text" name="id" class="erp-input" placeholder="ID" value="@Context.Request.Query["id"]" />
+            <div></div>
+            <button type="submit" class="erp-btn erp-btn-light">Filter</button>
+            <button type="button" class="erp-btn erp-btn-light">Created On</button>
+        </form>
+
+        <div class="empty-state">
+            <div class="empty-icon">☷</div>
+            <div class="empty-text">You haven't created a Income Tax Slab yet</div>
+            <a href="@Url.Action("CreateIncomeTaxSlab", "HR")" class="erp-btn erp-btn-light">
+                Create your first Income Tax Slab
+            </a>
+        </div>
+
+        <div class="pagination-row">
+            <span>20</span>
+            <span>100</span>
+            <span>500</span>
+            <span>2500</span>
+        </div>
+    </main>
+</div>

@@ -1,0 +1,286 @@
+﻿@model Erp_Aits.Models.Branch
+
+@{
+    ViewBag.Title = "Branch Details";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show"
+         role="alert">
+
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show"
+         role="alert">
+
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+@if (ViewBag.SyncWarning != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show"
+         role="alert">
+
+        @ViewBag.SyncWarning
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+}
+
+
+<!-- ========================================================= -->
+<!-- UPDATE FORM -->
+<!-- ========================================================= -->
+
+<form asp-controller="HR"
+      asp-action="UpdateBranch"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="updateBranchForm">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden"
+           asp-for="Id" />
+
+    <!-- Keep ERPNext identity hidden.
+         Do not show it as extra field in UI. -->
+    <input type="hidden"
+           asp-for="ErpName" />
+
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h4 class="mb-0">
+                Branch Details
+            </h4>
+
+        </div>
+
+
+        <div class="d-flex gap-2 align-items-center">
+
+            <!-- Back -->
+            <a href="@Url.Action("Branches", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+
+                Back
+
+            </a>
+
+
+            <!-- Edit -->
+            <button type="button"
+                    id="btnEditBranch"
+                    class="btn btn-primary btn-sm px-3">
+
+                Edit
+
+            </button>
+
+
+            <!-- Delete -->
+            <button type="submit"
+                    form="deleteBranchForm"
+                    class="btn btn-danger btn-sm px-3"
+                    onclick="return confirm('Are you sure? This Branch will be deleted from both ERPNext and HRMS.');">
+
+                <i class="fa fa-trash me-1"></i>
+                Delete
+
+            </button>
+
+
+            <!-- Update -->
+            <button type="submit"
+                    id="btnUpdateBranch"
+                    class="btn btn-dark btn-sm px-4 fw-bold"
+                    style="display:none;">
+
+                Update Changes
+
+            </button>
+
+
+            <!-- Cancel Edit -->
+            <button type="button"
+                    id="btnCancelEdit"
+                    class="btn btn-outline-secondary btn-sm"
+                    style="display:none;">
+
+                Cancel Edit
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- BRANCH FORM -->
+    <!-- ===================================================== -->
+
+    <div class="card border rounded-3 p-4 shadow-sm bg-white">
+
+        <div class="row">
+
+            <div class="col-md-12">
+
+                <label class="form-label">
+                    Branch Name
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="BranchName"
+                       id="BranchName"
+                       class="form-control"
+                       readonly
+                       required />
+
+                <span asp-validation-for="BranchName"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+<!-- ========================================================= -->
+<!-- DELETE FORM -->
+<!-- MUST STAY OUTSIDE UPDATE FORM -->
+<!-- ========================================================= -->
+
+<form asp-controller="HR"
+      asp-action="DeleteBranch"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteBranchForm"
+      class="d-none">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+
+<!-- ========================================================= -->
+<!-- SCRIPT -->
+<!-- ========================================================= -->
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const editButton =
+                document.getElementById(
+                    "btnEditBranch"
+                );
+
+            const updateButton =
+                document.getElementById(
+                    "btnUpdateBranch"
+                );
+
+            const cancelButton =
+                document.getElementById(
+                    "btnCancelEdit"
+                );
+
+            const branchName =
+                document.getElementById(
+                    "BranchName"
+                );
+
+
+            if (!editButton ||
+                !updateButton ||
+                !branchName)
+            {
+                return;
+            }
+
+
+            // =================================================
+            // EDIT MODE
+            // =================================================
+
+            editButton.addEventListener(
+                "click",
+                function () {
+
+                    branchName.readOnly = false;
+
+                    branchName.focus();
+
+                    editButton.style.display =
+                        "none";
+
+                    updateButton.style.display =
+                        "inline-block";
+
+                    if (cancelButton)
+                    {
+                        cancelButton.style.display =
+                            "inline-block";
+                    }
+
+                }
+            );
+
+
+            // =================================================
+            // CANCEL EDIT
+            // Reload original server values
+            // =================================================
+
+            if (cancelButton)
+            {
+                cancelButton.addEventListener(
+                    "click",
+                    function () {
+
+                        window.location.reload();
+
+                    }
+                );
+            }
+
+        }
+    );
+
+</script>

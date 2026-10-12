@@ -1,0 +1,122 @@
+@model Erp_Aits.Models.KRA
+@{
+    ViewBag.Title = Model.Title;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErpNextError"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+    </div>
+}
+
+<form asp-controller="HR"
+      asp-action="UpdateKRA"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="kraDetailsForm">
+
+    @Html.AntiForgeryToken()
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0">@Model.Title</h4>
+            <small class="text-muted">
+                @Model.KRACode
+                @if (!string.IsNullOrWhiteSpace(Model.ErpName))
+                {
+                    <span> | ERPNext: @Model.ErpName</span>
+                }
+            </small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("KRA", "HR")"
+               class="btn btn-outline-dark btn-sm">
+                Back to List
+            </a>
+
+            <button type="submit"
+                    id="saveKraBtn"
+                    class="btn btn-dark btn-sm">
+                Save
+            </button>
+
+            <button type="submit"
+                    form="deleteKraForm"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this KRA from ERPNext and HRMS?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label asp-for="Title" class="form-label">
+                    Title <span class="text-danger">*</span>
+                </label>
+                <input asp-for="Title"
+                       class="form-control"
+                       maxlength="255"
+                       required />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Description" class="form-label">
+                    Description
+                </label>
+                <textarea asp-for="Description"
+                          class="form-control"
+                          rows="6"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form asp-controller="HR"
+      asp-action="DeleteKRA"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteKraForm"
+      class="d-none">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("kraDetailsForm");
+        const saveBtn = document.getElementById("saveKraBtn");
+
+        if (!form || !saveBtn)
+            return;
+
+        form.addEventListener("submit", function () {
+            if (!form.checkValidity())
+                return;
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1" ' +
+                'role="status" aria-hidden="true"></span> Saving...';
+        });
+    });
+</script>

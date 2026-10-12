@@ -1,0 +1,435 @@
+﻿@{
+    ViewBag.Title = "New Salary Structure";
+}
+
+<style>
+    .erp-form-page {
+        max-width: 1210px;
+        margin: 0 auto;
+    }
+
+    .erp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .erp-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .menu-icon {
+        border: 0;
+        background: transparent;
+        font-size: 20px;
+        color: #6b7280;
+    }
+
+    .erp-title {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .not-saved {
+        color: #d9480f;
+        background: #fff1e8;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+
+    .save-btn {
+        background: #111;
+        color: #fff;
+        border: 0;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-weight: 600;
+    }
+
+    .erp-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .tab-row {
+        display: flex;
+        gap: 28px;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0 20px;
+    }
+
+    .tab-btn {
+        border: 0;
+        background: transparent;
+        padding: 13px 0;
+        font-size: 14px;
+        color: #374151;
+        border-bottom: 2px solid transparent;
+    }
+
+        .tab-btn.active {
+            color: #111827;
+            font-weight: 700;
+            border-bottom-color: #111827;
+        }
+
+    .tab-pane {
+        display: none;
+        padding: 18px 20px;
+    }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 28px;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 7px;
+        color: #374151;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .erp-input, .erp-select {
+        width: 100%;
+        height: 34px;
+        border: 1px solid #e5e7eb;
+        background: #f3f3f3;
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 14px;
+    }
+
+    .check-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .child-label {
+        font-size: 13px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .child-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .child-table th {
+            background: #f3f3f3;
+            padding: 8px;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .child-table td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+
+        .child-table input {
+            width: 100%;
+            height: 30px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 6px;
+            padding: 4px 7px;
+            font-size: 13px;
+        }
+
+    .empty-cell {
+        height: 92px;
+        color: #6b7280;
+    }
+
+    .add-row-btn {
+        margin-top: 10px;
+        background: #f3f4f6;
+        border: 0;
+        border-radius: 7px;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .help-link {
+        margin-top: 18px;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: #374151;
+        font-size: 13px;
+    }
+
+    .modal-backdrop-custom {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.58);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-box {
+        width: 545px;
+        max-width: calc(100% - 30px);
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 12px 35px rgba(0,0,0,.25);
+    }
+
+    .modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        font-weight: 700;
+    }
+
+    .modal-body {
+        padding: 18px 20px;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+        .modal-body h4 {
+            font-weight: 700;
+            margin: 0 0 12px;
+        }
+
+        .modal-body code {
+            color: #7c3aed;
+            background: transparent;
+            font-size: 13px;
+        }
+</style>
+
+<div class="erp-form-page">
+    <form method="post" action="#">
+        <div class="erp-header">
+            <div class="erp-title-left">
+                <button type="button" class="menu-icon">≡</button>
+                <span class="erp-title">New Salary Structure</span>
+                <span class="not-saved">Not Saved</span>
+            </div>
+            <button type="submit" class="save-btn">Save</button>
+        </div>
+
+        <div class="erp-card">
+            <div class="tab-row">
+                <button type="button" class="tab-btn active" data-tab="details">Details</button>
+                <button type="button" class="tab-btn" data-tab="earningDeduction">Earnings &amp; Deductions</button>
+                <button type="button" class="tab-btn" data-tab="account">Account</button>
+            </div>
+
+            <div id="details" class="tab-pane active">
+                <div class="form-grid">
+                    <div>
+                        <label class="field-label">Name <span class="required">*</span></label>
+                        <input type="text" name="Name" class="erp-input" />
+
+                        <label class="field-label mt-3">Company <span class="required">*</span></label>
+                        <input type="text" name="Company" class="erp-input" />
+
+                        <label class="field-label mt-3">Letter Head</label>
+                        <input type="text" name="LetterHead" class="erp-input" />
+                    </div>
+
+                    <div>
+                        <label class="field-label">Is Active <span class="required">*</span></label>
+                        <select name="IsActive" class="erp-select">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+
+                        <label class="field-label mt-3">Currency <span class="required">*</span></label>
+                        <input type="text" name="Currency" value="INR" class="erp-input" />
+                    </div>
+
+                    <div>
+                        <label class="field-label">Leave Encashment Amount Per Day (INR)</label>
+                        <input type="number" step="0.01" name="LeaveEncashmentAmountPerDay" class="erp-input" />
+
+                        <label class="field-label mt-3">Max Benefits (Amount) (INR)</label>
+                        <input type="number" step="0.01" name="MaxBenefitsAmount" class="erp-input" />
+                    </div>
+
+                    <div>
+                        <label class="check-row">
+                            <input type="checkbox" name="SalarySlipBasedOnTimesheet" />
+                            <span>Salary Slip Based on Timesheet</span>
+                        </label>
+
+                        <label class="field-label mt-4">Payroll Frequency <span class="required">*</span></label>
+                        <select name="PayrollFrequency" class="erp-select">
+                            <option>Monthly</option>
+                            <option>Bimonthly</option>
+                            <option>Fortnightly</option>
+                            <option>Weekly</option>
+                            <option>Daily</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="earningDeduction" class="tab-pane">
+                <label class="child-label">Earnings</label>
+                <table class="child-table">
+                    <thead>
+                        <tr>
+                            <th style="width:45px;"><input type="checkbox" /></th>
+                            <th style="width:70px;">No.</th>
+                            <th>Component <span class="required">*</span></th>
+                            <th>Abbr</th>
+                            <th>Amount</th>
+                            <th>Depends on Payment Days</th>
+                            <th>Is Tax Applicable</th>
+                            <th style="width:55px;">Gear</th>
+                        </tr>
+                    </thead>
+                    <tbody id="earningsBody">
+                        <tr id="earningsEmpty"><td colspan="8" class="empty-cell">No Data</td></tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addStructureRow('earningsBody','earningsEmpty')">Add Row</button>
+
+                <label class="child-label mt-4">Deductions</label>
+                <table class="child-table">
+                    <thead>
+                        <tr>
+                            <th style="width:45px;"><input type="checkbox" /></th>
+                            <th style="width:70px;">No.</th>
+                            <th>Component <span class="required">*</span></th>
+                            <th>Abbr</th>
+                            <th>Amount</th>
+                            <th>Depends on Payment Days</th>
+                            <th>Is Tax Applicable</th>
+                            <th style="width:55px;">Gear</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deductionsBody">
+                        <tr id="deductionsEmpty"><td colspan="8" class="empty-cell">No Data</td></tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addStructureRow('deductionsBody','deductionsEmpty')">Add Row</button>
+
+                <br />
+                <button type="button" class="help-link" onclick="openFormulaHelp()">Condition and Formula Help</button>
+            </div>
+
+            <div id="account" class="tab-pane">
+                <div class="form-grid">
+                    <div>
+                        <label class="field-label">Mode of Payment</label>
+                        <input type="text" name="ModeOfPayment" class="erp-input" />
+                    </div>
+
+                    <div>
+                        <label class="field-label">Payment Account</label>
+                        <input type="text" name="PaymentAccount" class="erp-input" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="formulaHelpModal" class="modal-backdrop-custom">
+    <div class="modal-box">
+        <div class="modal-head">
+            <span>Condition and Formula Help</span>
+            <button type="button" onclick="closeFormulaHelp()" style="border:0;background:transparent;font-size:22px;">x</button>
+        </div>
+        <div class="modal-body">
+            <h4>Variables</h4>
+            <ul>
+                <li>Variables from Salary Structure Assignment:<br /><code>base = Base, variable = Variable</code> etc.</li>
+                <li>Variables from Employee:<br /><code>Employment Type = employment_type, Branch = branch</code> etc.</li>
+                <li>Variables from Salary Slip:<br /><code>Payment Days = payment_days, Leave without pay = leave_without_pay</code> etc.</li>
+                <li>Abbreviation from Salary Component:<br /><code>BS = Basic Salary</code> etc.</li>
+                <li>Some additional variables:<br /><code>gross_pay</code> and <code>annual_taxable_earning</code> can also be used.</li>
+                <li>Direct Amount can also be used</li>
+            </ul>
+
+            <h4>Examples for Conditions and formula</h4>
+            <ul>
+                <li>Calculating Basic Salary based on <code>base</code><br /><code>Condition: base &lt; 10000</code><br /><br /><code>Formula: base * .2</code></li>
+                <li>Calculating HRA based on Basic Salary <code>BS</code><br /><code>Condition: BS &gt; 2000</code><br /><br /><code>Formula: BS * .1</code></li>
+                <li>Calculating TDS based on Employment Type <code>employment_type</code><br /><code>Condition: employment_type=="Intern"</code><br /><br /><code>Amount: 1000</code></li>
+                <li>Calculating Income Tax based on <code>annual_taxable_earning</code><br /><code>Condition: annual_taxable_earning &gt; 2000000</code><br /><br /><code>Formula: annual_taxable_earning * 0.10</code></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.tab-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+            button.classList.add('active');
+            document.getElementById(button.dataset.tab).classList.add('active');
+        });
+    });
+
+       function addStructureRow(bodyId, emptyId) {
+        const body = document.getElementById(bodyId);
+        const empty = document.getElementById(emptyId);
+
+        if (empty) {
+            empty.remove();
+        }
+
+        const rowNo = body.querySelectorAll('tr').length + 1;
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td>${rowNo}</td>
+            <td><input type="text" name="${bodyId}Components" /></td>
+            <td><input type="text" name="${bodyId}Abbrs" /></td>
+            <td><input type="number" step="0.01" name="${bodyId}Amounts" /></td>
+            <td><input type="checkbox" name="${bodyId}DependsOnPaymentDays" /></td>
+            <td><input type="checkbox" name="${bodyId}IsTaxApplicable" /></td>
+            <td>⚙</td>
+        `;
+
+        body.appendChild(row);
+    }
+    function openFormulaHelp() {
+        document.getElementById('formulaHelpModal').style.display = 'flex';
+    }
+
+    function closeFormulaHelp() {
+        document.getElementById('formulaHelpModal').style.display = 'none';
+    }
+</script>

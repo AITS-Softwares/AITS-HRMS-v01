@@ -1,0 +1,87 @@
+﻿@model List<Erp_Aits.Models.VehicleExpenseRow>
+@{
+    ViewBag.Title = "Vehicle Expenses";
+    var currentYear = DateTime.Now.Year;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Vehicle Expenses</h4>
+    <button class="btn btn-sm btn-outline-secondary" title="Reload" onclick="location.reload()">
+        &#x21bb;
+    </button>
+</div>
+
+<form method="get" asp-action="VehicleExpenses" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <select name="fiscalYearDropdown" class="form-select form-select-sm">
+            <option value="">Fiscal Year</option>
+            @for (int y = currentYear - 3; y <= currentYear + 1; y++)
+            {
+                string fy = $"{y}-{y + 1}";
+                <option value="@fy" selected="@(fy == (string)ViewBag.FiscalYearDropdown)">@fy</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="fromDate" class="form-control form-control-sm" placeholder="From Date" value="@(ViewBag.FromDate != null ? ((DateTime)ViewBag.FromDate).ToString("yyyy-MM-dd") : "")" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="toDate" class="form-control form-control-sm" placeholder="To Date" value="@(ViewBag.ToDate != null ? ((DateTime)ViewBag.ToDate).ToString("yyyy-MM-dd") : "")" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="fiscalYearText" class="form-control form-control-sm" placeholder="Fiscal Year" value="@ViewBag.FiscalYearText" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="vehicle" class="form-control form-control-sm" placeholder="Vehicle" value="@ViewBag.Vehicle" />
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.Employee" />
+    </div>
+    <div class="col-md-2 mt-2">
+        <button type="submit" class="btn btn-sm btn-dark">Search</button>
+    </div>
+</form>
+
+<div class="card p-0">
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Vehicle</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Log Date</th>
+                    <th>Fiscal Year</th>
+                    <th>Fuel Expense</th>
+                    <th>Service Expense</th>
+                    <th>Other Expense</th>
+                    <th>Total Expense</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>@r.Vehicle</td>
+                        <td>@r.Employee</td>
+                        <td>@r.EmployeeName</td>
+                        <td>@(r.LogDate?.ToString("dd-MM-yyyy"))</td>
+                        <td>@r.FiscalYear</td>
+                        <td>@r.FuelExpense.ToString("0.00")</td>
+                        <td>@r.ServiceExpense.ToString("0.00")</td>
+                        <td>@r.OtherExpense.ToString("0.00")</td>
+                        <td>@r.TotalExpense.ToString("0.00")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-2" style="font-size:2rem;">&#128196;</div>
+            <p class="text-muted mb-0">Nothing to show</p>
+        </div>
+    }
+</div>

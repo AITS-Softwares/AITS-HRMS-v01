@@ -1,0 +1,592 @@
+﻿@model Erp_Aits.Models.EmployeeOnboarding
+
+@{
+    ViewBag.Title = "New Employee Onboarding";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3" role="alert">
+        <strong>ERPNext Validation:</strong>
+        <span class="ms-2">@TempData["ErpNextError"]</span>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3" role="alert">
+        @TempData["Success"]
+    </div>
+}
+
+<form asp-action="CreateEmployeeOnboarding"
+      asp-controller="HR"
+      method="post"
+      id="onboardingForm">
+
+    @Html.AntiForgeryToken()
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee Onboarding</h4>
+
+        <button type="submit" class="btn btn-dark btn-sm px-4">
+            Save
+        </button>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Job Applicant
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="JobApplicant"
+                        id="JobApplicant"
+                        class="form-select"
+                        required>
+                    <option value="">-- Select Accepted Job Applicant --</option>
+
+                    @if (ViewBag.JobApplicants != null)
+                    {
+                        foreach (var ja in ViewBag.JobApplicants)
+                        {
+                            <option value="@ja.name">
+                                @ja.name - @ja.applicant_name
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Company
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Company"
+                        id="Company"
+                        class="form-select"
+                        required>
+                    <option value="">-- Select Company --</option>
+
+                    @if (ViewBag.Companies != null)
+                    {
+                        foreach (var company in ViewBag.Companies)
+                        {
+                            <option value="@company.name">@company.name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Job Offer
+                    <span class="text-danger">*</span>
+                </label>
+
+                <div class="input-group">
+                    <input asp-for="JobOffer"
+                           id="JobOffer"
+                           class="form-control"
+                           list="JobOfferList"
+                           value="@(ViewBag.SelectedJobOffer ?? Model.JobOffer)"
+                           required
+                           placeholder="Type or select Job Offer" />
+
+                    <button type="button"
+                            id="btnCreateJobOffer"
+                            class="btn btn-outline-secondary"
+                            title="Create New Job Offer">
+                        +
+                    </button>
+                </div>
+
+                <datalist id="JobOfferList">
+                    @if (ViewBag.JobOffers != null)
+                    {
+                        foreach (var jo in ViewBag.JobOffers)
+                        {
+                            <option value="@jo.name">@jo.name - @jo.applicant_name</option>
+                        }
+                    }
+                </datalist>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Boarding Status</label>
+
+                <input asp-for="BoardingStatus"
+                       id="BoardingStatus"
+                       class="form-control"
+                       value="Pending"
+                       readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee Onboarding Template</label>
+
+                <select asp-for="EmployeeOnboardingTemplate"
+                        id="EmployeeOnboardingTemplate"
+                        class="form-select">
+                    <option value="">-- Select Employee Onboarding Template --</option>
+
+                    @if (ViewBag.Templates != null)
+                    {
+                        foreach (var template in ViewBag.Templates)
+                        {
+                            <option value="@template.name">@template.name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+        <h6 class="fw-bold mb-3">Employee Details</h6>
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Employee Name
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Date of Joining
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="DateOfJoining"
+                       type="date"
+                       id="DateOfJoining"
+                       class="form-control"
+                       value="@Model.DateOfJoining.ToString("yyyy-MM-dd")"
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Department</label>
+
+                <select asp-for="Department"
+                        id="Department"
+                        class="form-select">
+                    <option value="">-- Select Department --</option>
+
+                    @if (ViewBag.Departments != null)
+                    {
+                        foreach (var department in ViewBag.Departments)
+                        {
+                            <option value="@department.name">@department.name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">
+                    Onboarding Begins On
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="OnboardingBeginsOn"
+                       type="date"
+                       id="OnboardingBeginsOn"
+                       class="form-control"
+                       value="@Model.OnboardingBeginsOn.ToString("yyyy-MM-dd")"
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Designation</label>
+
+                <select asp-for="Designation"
+                        id="Designation"
+                        class="form-select">
+                    <option value="">-- Select Designation --</option>
+
+                    @if (ViewBag.Designations != null)
+                    {
+                        foreach (var designation in ViewBag.Designations)
+                        {
+                            <option value="@designation.name">@designation.name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee Grade</label>
+
+                <select asp-for="EmployeeGrade"
+                        id="EmployeeGrade"
+                        class="form-select">
+                    <option value="">-- Select Employee Grade --</option>
+
+                    @if (ViewBag.EmployeeGrades != null)
+                    {
+                        foreach (var grade in ViewBag.EmployeeGrades)
+                        {
+                            <option value="@grade.name">@grade.name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Holiday List</label>
+
+                <select asp-for="HolidayList"
+                        id="HolidayList"
+                        class="form-select">
+                    <option value="">-- Select Holiday List --</option>
+
+                    @if (ViewBag.HolidayLists != null)
+                    {
+                        foreach (var holiday in ViewBag.HolidayLists)
+                        {
+                            <option value="@holiday.name">@holiday.name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="fw-bold mb-1">Onboarding Activities</h6>
+                <small class="text-muted">Activities</small>
+            </div>
+
+            <button type="button"
+                    id="btnAddActivity"
+                    class="btn btn-sm btn-outline-secondary">
+                + Add Row
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle" id="activitiesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px">No.</th>
+                        <th>
+                            Activity Name
+                            <span class="text-danger">*</span>
+                        </th>
+                        <th>User</th>
+                        <th style="width:160px">Begin On (Days)</th>
+                        <th style="width:160px">Duration (Days)</th>
+                        <th style="width:60px"></th>
+                    </tr>
+                </thead>
+
+                <tbody id="activitiesBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+        <div class="form-check">
+            <input asp-for="NotifyUsersByEmail"
+                   id="NotifyUsersByEmail"
+                   class="form-check-input"
+                   type="checkbox" />
+
+            <label class="form-check-label" for="NotifyUsersByEmail">
+                Notify users by email
+            </label>
+        </div>
+    </div>
+
+</form>
+
+@section Scripts {
+    <script>
+        let rowCount = 0;
+
+        const userOptionsHtml = `
+            <option value="">-- Select User --</option>
+            @if (ViewBag.Users != null)
+            {
+                    foreach (var user in ViewBag.Users)
+                    {
+                            <text>
+                                <option value="@user.name">@user.full_name (@user.name)</option>
+                            </text>
+                    }
+            }
+        `;
+
+        function addRow(activityName = "", user = "", beginOn = 0, duration = 1) {
+            rowCount++;
+
+            const tbody = document.getElementById("activitiesBody");
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td class="row-no">${rowCount}</td>
+
+                <td>
+                    <input type="text"
+                           name="ActivityNames"
+                           class="form-control form-control-sm"
+                           value="${escapeHtml(activityName)}"
+                           placeholder="Activity Name"
+                           required />
+                </td>
+
+                <td>
+                    <select name="Users"
+                            class="form-select form-select-sm activity-user">
+                        ${userOptionsHtml}
+                    </select>
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="BeginOnDaysArr"
+                           class="form-control form-control-sm"
+                           value="${beginOn ?? 0}" />
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="DurationDaysArr"
+                           class="form-control form-control-sm"
+                           value="${duration ?? 1}"
+                           min="0" />
+                </td>
+
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger btn-remove-activity">
+                        ×
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+
+            if (user) {
+                const userSelect = tr.querySelector(".activity-user");
+
+                if (userSelect) {
+                    userSelect.value = user;
+                }
+            }
+
+            renumberRows();
+        }
+
+        function removeRow(button) {
+            const row = button.closest("tr");
+
+            if (row) {
+                row.remove();
+            }
+
+            renumberRows();
+        }
+
+        function renumberRows() {
+            const rows = document.querySelectorAll("#activitiesBody tr");
+
+            rowCount = rows.length;
+
+            rows.forEach(function (row, index) {
+                const cell = row.querySelector(".row-no");
+
+                if (cell) {
+                    cell.textContent = index + 1;
+                }
+            });
+        }
+
+        function escapeHtml(value) {
+            if (!value) {
+                return "";
+            }
+
+            const div = document.createElement("div");
+            div.textContent = value;
+
+            return div.innerHTML;
+        }
+
+        async function loadApplicantDetails() {
+            const applicant = document.getElementById("JobApplicant").value;
+            const employeeName = document.getElementById("EmployeeName");
+
+            employeeName.value = "";
+
+            if (!applicant) {
+                return;
+            }
+
+            try {
+                const url =
+                    '@Url.Action("GetJobApplicantDetails", "HR")'
+                    + "?jobApplicant="
+                    + encodeURIComponent(applicant);
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data || data.success !== true) {
+                    console.error(
+                        data && data.message
+                            ? data.message
+                            : "Unable to load Job Applicant."
+                    );
+
+                    return;
+                }
+
+                employeeName.value = data.employeeName || "";
+            }
+            catch (error) {
+                console.error("Job Applicant load error:", error);
+            }
+        }
+
+        async function loadTemplateDetails() {
+            const templateName =
+                document.getElementById("EmployeeOnboardingTemplate").value;
+
+            if (!templateName) {
+                return;
+            }
+
+            try {
+                const url =
+                    '@Url.Action("GetEmployeeOnboardingTemplateDetails", "HR")'
+                    + "?templateName="
+                    + encodeURIComponent(templateName);
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data || data.success !== true) {
+                    console.error(
+                        data && data.message
+                            ? data.message
+                            : "Unable to load Employee Onboarding Template."
+                    );
+
+                    return;
+                }
+
+                if (data.company) {
+                    const company = document.getElementById("Company");
+
+                    if (company) {
+                        company.value = data.company;
+                    }
+                }
+
+                if (data.department) {
+                    const department = document.getElementById("Department");
+
+                    if (department) {
+                        department.value = data.department;
+                    }
+                }
+
+                if (data.designation) {
+                    const designation = document.getElementById("Designation");
+
+                    if (designation) {
+                        designation.value = data.designation;
+                    }
+                }
+
+                if (data.employeeGrade) {
+                    const grade = document.getElementById("EmployeeGrade");
+
+                    if (grade) {
+                        grade.value = data.employeeGrade;
+                    }
+                }
+
+                if (Array.isArray(data.activities)) {
+                    const tbody = document.getElementById("activitiesBody");
+
+                    tbody.innerHTML = "";
+                    rowCount = 0;
+
+                    data.activities.forEach(function (activity) {
+                        addRow(
+                            activity.activityName || "",
+                            activity.user || "",
+                            activity.beginOn ?? 0,
+                            activity.duration ?? 1
+                        );
+                    });
+                }
+            }
+            catch (error) {
+                console.error("Employee Onboarding Template load error:", error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const applicant = document.getElementById("JobApplicant");
+            const template = document.getElementById("EmployeeOnboardingTemplate");
+            const addButton = document.getElementById("btnAddActivity");
+            const createJobOfferButton = document.getElementById("btnCreateJobOffer");
+
+            if (applicant) {
+                applicant.addEventListener("change", async function () {
+                    await loadApplicantDetails();
+                });
+            }
+
+            if (template) {
+                template.addEventListener("change", loadTemplateDetails);
+            }
+
+            if (createJobOfferButton) {
+                createJobOfferButton.addEventListener("click", function () {
+                    window.location.href =
+                        '@Url.Action("CreateJobOffer", "HR")'
+                        + "?returnToOnboarding=true";
+                });
+            }
+
+            if (addButton) {
+                addButton.addEventListener("click", function () {
+                    addRow("", "", 0, 1);
+                });
+            }
+
+            document.addEventListener("click", function (event) {
+                const button = event.target.closest(".btn-remove-activity");
+
+                if (!button) {
+                    return;
+                }
+
+                removeRow(button);
+            });
+        });
+    </script>
+}

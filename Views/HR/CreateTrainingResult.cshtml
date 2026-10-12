@@ -1,0 +1,54 @@
+﻿@model Erp_Aits.Models.TrainingResult
+@{
+    ViewBag.Title = "New Training Result";
+}
+
+<form asp-action="CreateTrainingResult" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">New Training Result</h4>
+            <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label">Training Event <span class="text-danger">*</span></label>
+        <input asp-for="TrainingEvent" class="form-control" required autofocus />
+    </div>
+
+    <label class="form-label">Employees</label>
+    <table class="table table-bordered align-middle mb-1" id="employeesTable">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" disabled /></th>
+                <th style="width:50px">No.</th>
+                <th>Employee</th>
+                <th>Hours</th>
+                <th>Grade</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addEmployeeRow()">Add Row</button>
+
+</form>
+
+<script>
+    function addEmployeeRow() {
+        var tbody = document.querySelector('#employeesTable tbody');
+        var rowNum = tbody.rows.length + 1;
+
+        var row = document.createElement('tr');
+        row.innerHTML =
+            '<td><input type="checkbox" /></td>' +
+            '<td>' + rowNum + '</td>' +
+            '<td><input type="text" name="Employees" class="form-control form-control-sm border-0" /></td>' +
+            '<td><input type="number" step="0.01" name="Hours" class="form-control form-control-sm border-0" /></td>' +
+            '<td><input type="text" name="Grades" class="form-control form-control-sm border-0" /></td>' +
+            '<td><input type="text" name="Comments" class="form-control form-control-sm border-0" /></td>';
+
+        tbody.appendChild(row);
+    }
+</script>

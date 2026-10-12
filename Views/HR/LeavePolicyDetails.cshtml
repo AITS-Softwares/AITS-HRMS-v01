@@ -1,0 +1,320 @@
+@model Erp_Aits.Models.LeavePolicy
+@{
+    ViewBag.Title = "Leave Policy - " + Model.Title;
+    var leaveTypes = ViewBag.LeaveTypes as List<Erp_Aits.Models.LeaveType> ?? new List<Erp_Aits.Models.LeaveType>();
+    bool isDraft = Model.DocStatus == 0;
+    bool isSubmitted = Model.DocStatus == 1;
+    bool isCancelled = Model.DocStatus == 2;
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-controller="HR"
+      asp-action="UpdateLeavePolicy"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="leavePolicyForm">
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+    <input asp-for="DocStatus" type="hidden" />
+    <input asp-for="Status" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">Leave Policy - @Model.Title</h4>
+            @if (isSubmitted)
+            {
+                <span class="badge bg-secondary ms-2">Submitted</span>
+            }
+            else if (isCancelled)
+            {
+                <span class="badge bg-danger ms-2">Cancelled</span>
+            }
+            else
+            {
+                <span class="badge bg-warning-subtle text-warning ms-2">Draft</span>
+            }
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("LeavePolicy", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Back
+            </a>
+
+            @if (isDraft)
+            {
+                <button type="submit"
+                        class="btn btn-dark btn-sm px-4">
+                    Save
+                </button>
+
+                <button type="submit"
+                        class="btn btn-success btn-sm px-4"
+                        formaction="@Url.Action("SubmitLeavePolicy", "HR", new { id = Model.Id })">
+                    Submit
+                </button>
+            }
+            else if (isSubmitted)
+            {
+                <button type="submit"
+                        class="btn btn-danger btn-sm px-4"
+                        formaction="@Url.Action("CancelLeavePolicy", "HR", new { id = Model.Id })"
+                        onclick="return confirm('Cancel this Leave Policy in ERPNext and HRMS?');">
+                    Cancel
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">
+                Policy Title
+                <span class="text-danger">*</span>
+            </label>
+            <input asp-for="Title"
+                   class="form-control editable-field"
+                   readonly="@(!isDraft)"
+                   required />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Document Status</label>
+            <input class="form-control" value="@Model.Status" readonly />
+        </div>
+    </div>
+
+    <hr />
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h6 class="mb-0">Leave Allocations</h6>
+            <p class="text-muted small mb-0">Leave Policy Details</p>
+        </div>
+
+        @if (isDraft)
+        {
+            <button type="button"
+                    id="addRowBtn"
+                    class="btn btn-sm btn-outline-secondary">
+                Add Row
+            </button>
+        }
+    </div>
+
+    <table class="table table-bordered align-middle" id="detailsTable">
+        <thead>
+            <tr>
+                <th style="width:70px">No.</th>
+                <th>Leave Type</th>
+                <th style="width:220px">Annual Allocation</th>
+                @if (isDraft)
+                {
+                    <th style="width:70px"></th>
+                }
+            </tr>
+        </thead>
+        <tbody id="detailsBody">
+            @if (Model.Details != null && Model.Details.Any())
+            {
+                for (int i = 0; i < Model.Details.Count; i++)
+                {
+                    <tr>
+                        <td class="row-no">@(i + 1)</td>
+                        <td>
+                            <select name="Details[@i].LeaveType"
+                                    class="form-select detail-input"
+                                    disabled="@(!isDraft)"
+                                    required>
+                                <option value="">-- Select Leave Type --</option>
+                                @{
+                                    var hasCurrent = leaveTypes.Any(lt => lt.LeaveTypeName == Model.Details[i].LeaveType);
+                                }
+                                @if (!hasCurrent && !string.IsNullOrWhiteSpace(Model.Details[i].LeaveType))
+                                {
+                                    <option value="@Model.Details[i].LeaveType" selected>@Model.Details[i].LeaveType</option>
+                                }
+                                @foreach (var leaveType in leaveTypes)
+                                {
+                                    <!option value="@leaveType.LeaveTypeName" @(leaveType.LeaveTypeName == Model.Details[i].LeaveType ? "selected" : "")>
+                                        @leaveType.LeaveTypeName
+                                    </!option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number"
+                                   step="0.001"
+                                   name="Details[@i].AnnualAllocation"
+                                   class="form-control detail-input"
+                                   value="@Model.Details[i].AnnualAllocation"
+                                   readonly="@(!isDraft)"
+                                   required />
+                        </td>
+                        @if (isDraft)
+                        {
+                            <td>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="removeRow(this)">
+                                    X
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td class="row-no">1</td>
+                    <td>
+                        <select name="Details[0].LeaveType"
+                                class="form-select detail-input"
+                                disabled="@(!isDraft)"
+                                required>
+                            <option value="">-- Select Leave Type --</option>
+                            @foreach (var leaveType in leaveTypes)
+                            {
+                                <option value="@leaveType.LeaveTypeName">@leaveType.LeaveTypeName</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number"
+                               step="0.001"
+                               name="Details[0].AnnualAllocation"
+                               class="form-control detail-input"
+                               value="0"
+                               readonly="@(!isDraft)"
+                               required />
+                    </td>
+                    @if (isDraft)
+                    {
+                        <td>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="removeRow(this)">
+                                X
+                            </button>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+@section Scripts
+{
+    @if (isDraft)
+    {
+        <script>
+            const leaveTypes = @Html.Raw(Json.Serialize(leaveTypes.Select(lt => lt.LeaveTypeName)));
+            const form = document.getElementById("leavePolicyForm");
+            const addRowBtn = document.getElementById("addRowBtn");
+            const detailsBody = document.getElementById("detailsBody");
+
+            function escapeHtml(value) {
+                return String(value ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function leaveTypeOptions() {
+                let options = '<option value="">-- Select Leave Type --</option>';
+                leaveTypes.forEach(function (leaveType) {
+                    options += `<option value="${escapeHtml(leaveType)}">${escapeHtml(leaveType)}</option>`;
+                });
+                return options;
+            }
+
+            function addRow() {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="row-no"></td>
+                    <td>
+                        <select class="form-select detail-input" required>
+                            ${leaveTypeOptions()}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" step="0.001" class="form-control detail-input" value="0" required />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">X</button>
+                    </td>`;
+
+                detailsBody.appendChild(row);
+                renumberRows();
+            }
+
+            function removeRow(button) {
+                const rows = detailsBody.querySelectorAll("tr");
+                if (rows.length <= 1) {
+                    alert("At least one Leave Policy Detail row is required.");
+                    return;
+                }
+
+                button.closest("tr").remove();
+                renumberRows();
+            }
+
+            function renumberRows() {
+                detailsBody.querySelectorAll("tr").forEach(function (row, index) {
+                    row.querySelector(".row-no").innerText = index + 1;
+
+                    const inputs = row.querySelectorAll(".detail-input");
+                    if (inputs.length >= 2) {
+                        inputs[0].name = `Details[${index}].LeaveType`;
+                        inputs[1].name = `Details[${index}].AnnualAllocation`;
+                    }
+                });
+            }
+
+            addRowBtn.addEventListener("click", addRow);
+
+            form.addEventListener("submit", function (event) {
+                renumberRows();
+
+                const title = document.querySelector("[name='Title']").value.trim();
+                if (!title) {
+                    event.preventDefault();
+                    alert("Title is required.");
+                    return false;
+                }
+
+                const hasRow = Array.from(detailsBody.querySelectorAll("select")).some(function (select) {
+                    return select.value.trim();
+                });
+
+                if (!hasRow) {
+                    event.preventDefault();
+                    alert("At least one Leave Policy Detail row is required.");
+                    return false;
+                }
+
+                return true;
+            });
+        </script>
+    }
+}

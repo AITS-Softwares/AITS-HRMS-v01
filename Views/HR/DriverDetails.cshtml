@@ -1,0 +1,91 @@
+﻿@model Erp_Aits.Models.Driver
+@{
+    ViewBag.Title = "Driver " + Model.FullName;
+}
+<h4 class="mb-3">@Model.FullName</h4>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Series</label>
+            <input class="form-control" value="@Model.Series" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employee</label>
+            <input class="form-control" value="@Model.Employee" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Full Name</label>
+            <input class="form-control" value="@Model.FullName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Cellphone Number</label>
+            <input class="form-control" value="@Model.CellNumber" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Status</label>
+            <input class="form-control" value="@Model.Status" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Address</label>
+            <input class="form-control" value="@Model.Address" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Transporter</label>
+            <input class="form-control" value="@Model.Transporter" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">License Details</h6>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">License Number</label>
+            <input class="form-control" value="@Model.LicenseNumber" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Issuing Date</label>
+            <input class="form-control" value="@(Model.IssuingDate.HasValue? Model.IssuingDate.Value.ToString("yyyy-MM-dd") : "")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Expiry Date</label>
+            <input class="form-control" value="@(Model.ExpiryDate.HasValue? Model.ExpiryDate.Value.ToString("yyyy-MM-dd") : "")" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Driving License Categories</h6>
+    <table class="table table-bordered align-middle mb-0">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Driver licence class</th>
+                <th>Description</th>
+                <th>Issuing Date</th>
+                <th>Expiry Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int rowNo = 0;
+            }
+            @foreach (var c in Model.LicenseCategories)
+            {
+                rowNo++;
+                <tr>
+                    <td>@rowNo</td>
+                    <td>@c.Category</td>
+                    <td>@c.Description</td>
+                    <td>@(c.IssuingDate.HasValue? c.IssuingDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                    <td>@(c.ExpiryDate.HasValue? c.ExpiryDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                </tr>
+            }
+            @if (!Model.LicenseCategories.Any())
+            {
+                <tr><td colspan="5" class="text-center text-muted py-3">No Data</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

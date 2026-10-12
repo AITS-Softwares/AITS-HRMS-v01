@@ -1,0 +1,31 @@
+﻿@model Erp_Aits.Models.TrainingFeedback
+@{
+    ViewBag.Title = "New Training Feedback";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">New Training Feedback</h4>
+</div>
+
+<form asp-action="CreateTrainingFeedback" method="post">
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Employee <span class="text-danger">*</span></label>
+            <input type="text" name="Employee" class="form-control" value="@Model.Employee" required />
+            <span class="text-danger">@ViewData.ModelState["Employee"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Training Event <span class="text-danger">*</span></label>
+            <input type="text" name="TrainingEvent" class="form-control" value="@Model.TrainingEvent" required />
+            <span class="text-danger">@ViewData.ModelState["TrainingEvent"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Feedback <span class="text-danger">*</span></label>
+        <textarea name="Feedback" class="form-control" rows="10" required>@Model.Feedback</textarea>
+        <span class="text-danger">@ViewData.ModelState["Feedback"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+    </div>
+
+    <button type="submit" class="btn btn-dark">Save</button>
+</form>

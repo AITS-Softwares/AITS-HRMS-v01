@@ -1,0 +1,194 @@
+﻿@{
+    ViewBag.Title = "Salary Payout";
+}
+
+<style>
+    .workspace-shell {
+        max-width: 980px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 22px;
+    }
+
+    .workspace-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+
+    .shortcut-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+        gap: 24px;
+        margin-bottom: 36px;
+    }
+
+    .workspace-link {
+        color: #111827;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .workspace-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+    .external-arrow {
+        color: #6b7280;
+        font-size: 12px;
+        margin-left: 4px;
+    }
+
+    .badge-soft {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eef0f3;
+        color: #4b5563;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .section-heading {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+
+    .workspace-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
+        column-gap: 64px;
+        row-gap: 36px;
+    }
+
+    .workspace-group h6 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .workspace-group ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .workspace-group li {
+        margin-bottom: 11px;
+    }
+
+    @@media (max-width: 900px) {
+        .shortcut-row,
+        .workspace-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .workspace-shell {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="workspace-shell">
+    <div class="workspace-title">Salary Payout</div>
+
+    <h5 class="mb-3 fw-bold">Your Shortcuts</h5>
+
+    <div class="shortcut-row">
+        <a class="workspace-link" href="@Url.Action("SalarySlip", "HR")">
+            Salary Slip <span class="external-arrow">↗</span>
+            <span class="badge-soft">0 Draft</span>
+        </a>
+
+        <a class="workspace-link" href="@Url.Action("PayrollEntry", "HR")">
+            Payroll Entry <span class="external-arrow">↗</span>
+            <span class="badge-soft">0 Draft</span>
+        </a>
+
+        <a class="workspace-link" href="@Url.Action("SalaryRegister", "HR")">
+            Salary Register <span class="external-arrow">↗</span>
+        </a>
+    </div>
+
+    <div class="section-heading">Transactions &amp; Reports</div>
+
+    <div class="workspace-grid">
+        <div class="workspace-group">
+            <h6>Masters</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("SalaryComponent", "HR")">Salary Component <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("SalaryStructure", "HR")">Salary Structure <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("IncomeTaxSlab", "HR")">Income Tax Slab <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("PayrollPeriod", "HR")">Payroll Period <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Payroll</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("SalaryStructureAssignment", "HR")">Salary Structure Assignment <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("BulkSalaryStructureAssignment", "HR")">Bulk Salary Structure Assignment <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("SalarySlip", "HR")">Salary Slip <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("PayrollEntry", "HR")">Payroll Entry <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("SalaryWithholding", "HR")">Salary Withholding <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Incentives</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("AdditionalSalary", "HR")">Additional Salary <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("EmployeeIncentive", "HR")">Employee Incentive <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("RetentionBonus", "HR")">Retention Bonus <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Accounting</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("ChartOfAccounts", "HR")">Chart of Accounts <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("ChartOfCostCenters", "HR")">Chart of Cost Centers <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("PaymentEntry", "HR")">Payment Entry <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("JournalEntry", "HR")">Journal Entry <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("AccountsSettings", "HR")">Accounts Settings <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("AccountingDimension", "HR")">Accounting Dimension <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("Currency", "HR")">Currency <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Accounting Reports</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("GeneralLedger", "HR")">General Ledger <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("AccountsPayable", "HR")">Accounts Payable <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("AccountsReceivable", "HR")">Accounts Receivable <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Payroll Reports</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("SalaryRegister", "HR")">Salary Register <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("BankRemittance", "HR")">Bank Remittance <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("SalaryPaymentsBasedOnPaymentMode", "HR")">Salary Payments Based On Payment Mode ... <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("SalaryPaymentsViaEcs", "HR")">Salary Payments via ECS <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("IncomeTaxComputation", "HR")">Income Tax Computation <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+
+        <div class="workspace-group">
+            <h6>Deduction Reports</h6>
+            <ul>
+                <li><a class="workspace-link" href="@Url.Action("ProvidentFundDeductions", "HR")">Provident Fund Deductions <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("ProfessionalTaxDeductions", "HR")">Professional Tax Deductions <span class="external-arrow">↗</span></a></li>
+                <li><a class="workspace-link" href="@Url.Action("IncomeTaxDeductions", "HR")">Income Tax Deductions <span class="external-arrow">↗</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>

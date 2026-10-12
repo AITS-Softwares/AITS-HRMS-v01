@@ -1,0 +1,257 @@
+@model Erp_Aits.Models.ExpenseClaimType
+@{
+    ViewBag.Title = "Expense Claim Type " + Model.Name;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>ERPNext Validation:</strong> @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<select id="accountMaster" style="display:none;">
+    @if (ViewBag.Accounts != null)
+    {
+        foreach (var acc in ViewBag.Accounts)
+        {
+            <option value="@acc.name" data-company="@acc.company">@acc.name</option>
+        }
+    }
+</select>
+
+<form asp-action="UpdateExpenseClaimType"
+      asp-controller="HR"
+      method="post"
+      id="expenseClaimTypeForm">
+
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="hidden" asp-for="ErpNextId" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">@Model.Name</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.ErpNextId))
+            {
+                <span class="badge bg-success-subtle text-success ms-2">@Model.ErpNextId</span>
+            }
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="/HR/ExpenseClaimType" class="btn btn-outline-secondary btn-sm">Back</a>
+            <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+            <button type="submit"
+                    form="deleteExpenseClaimTypeForm"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this Expense Claim Type from HRMS and ERPNext?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">
+                    Expense Claim Type
+                    <span class="text-danger">*</span>
+                </label>
+                <input asp-for="Name" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label d-block">&nbsp;</label>
+                <div class="form-check">
+                    <input asp-for="DeferredExpenseAccount"
+                           class="form-check-input"
+                           type="checkbox" />
+                    <label asp-for="DeferredExpenseAccount"
+                           class="form-check-label">
+                        Deferred Expense Account
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Accounts</h6>
+            <button type="button"
+                    id="btnAddAccount"
+                    class="btn btn-sm btn-outline-secondary">
+                + Add Row
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle" id="accountsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Company</th>
+                        <th>
+                            Default Account
+                            <span class="text-danger">*</span>
+                        </th>
+                        <th style="width:70px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsBody">
+                    @if (Model.Accounts != null && Model.Accounts.Any())
+                    {
+                        for (int i = 0; i < Model.Accounts.Count; i++)
+                        {
+                            <tr>
+                                <td class="row-number text-center">@(i + 1)</td>
+                                <td>
+                                    <input name="Accounts[@i].Company"
+                                           class="form-control form-control-sm company-input"
+                                           value="@Model.Accounts[i].Company" />
+                                </td>
+                                <td>
+                                    <select name="Accounts[@i].DefaultAccount"
+                                            class="form-select form-select-sm account-select"
+                                            data-selected="@Model.Accounts[i].DefaultAccount"
+                                            required>
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger remove-account">
+                                        ×
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noAccountsRow">
+                            <td colspan="4" class="text-center text-muted py-3">No Data</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4">
+        <label class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+    </div>
+</form>
+
+<form id="deleteExpenseClaimTypeForm"
+      asp-action="DeleteExpenseClaimType"
+      asp-controller="HR"
+      method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>
+
+@section Scripts
+{
+    <script>
+        let accountRowIndex = document.querySelectorAll('#accountsBody tr:not(#noAccountsRow)').length;
+
+        function getAccountOptions(selected = '') {
+            let html = '<option value="">-- Select Default Account --</option>';
+            const source = document.getElementById('accountMaster');
+
+            Array.from(source.options).forEach(function(option) {
+                const value = option.value || '';
+                const isSelected = value === selected ? ' selected' : '';
+                html += '<option value="' + escapeHtml(value) + '"' + isSelected + '>'
+                    + escapeHtml(option.textContent.trim())
+                    + '</option>';
+            });
+
+            return html;
+        }
+
+        function fillAccountDropdowns() {
+            document.querySelectorAll('.account-select').forEach(function(select) {
+                const selected = select.getAttribute('data-selected') || select.value || '';
+                select.innerHTML = getAccountOptions(selected);
+                select.value = selected;
+            });
+        }
+
+        function addAccountRow(company = '', account = '') {
+            const noData = document.getElementById('noAccountsRow');
+            if (noData) noData.remove();
+
+            const tbody = document.getElementById('accountsBody');
+            const index = accountRowIndex++;
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td class="row-number text-center">${index + 1}</td>
+                <td>
+                    <input name="Accounts[${index}].Company"
+                           class="form-control form-control-sm company-input"
+                           value="${escapeHtml(company)}" />
+                </td>
+                <td>
+                    <select name="Accounts[${index}].DefaultAccount"
+                            class="form-select form-select-sm account-select"
+                            required>
+                        ${getAccountOptions(account)}
+                    </select>
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-account">
+                        ×
+                    </button>
+                </td>`;
+
+            tbody.appendChild(row);
+            reindexRows();
+        }
+
+        document.getElementById('btnAddAccount').addEventListener('click', function() {
+            addAccountRow();
+        });
+
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-account')) {
+                event.target.closest('tr').remove();
+                reindexRows();
+
+                if (document.querySelectorAll('#accountsBody tr').length === 0) {
+                    document.getElementById('accountsBody').innerHTML =
+                        '<tr id="noAccountsRow"><td colspan="4" class="text-center text-muted py-3">No Data</td></tr>';
+                }
+            }
+        });
+
+        function reindexRows() {
+            const rows = document.querySelectorAll('#accountsBody tr:not(#noAccountsRow)');
+
+            rows.forEach(function(row, index) {
+                row.querySelector('.row-number').textContent = index + 1;
+                row.querySelector('.company-input').name = `Accounts[${index}].Company`;
+                row.querySelector('.account-select').name = `Accounts[${index}].DefaultAccount`;
+            });
+
+            accountRowIndex = rows.length;
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = value || '';
+            return div.innerHTML;
+        }
+
+        fillAccountDropdowns();
+    </script>
+}

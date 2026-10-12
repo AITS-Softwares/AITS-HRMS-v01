@@ -1,0 +1,1394 @@
+﻿@* @model IEnumerable<Erp_Aits.Models.Customer>
+@{
+    ViewData["Title"] = "Customers";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "users";
+}
+
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-users"></i> Customer List
+        </h5>
+        <div class="d-flex gap-2">
+            <a asp-controller="Leads" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Leads
+            </a>
+            <a asp-action="Create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Add Customer
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Search / Filter -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <input type="text" name="searchTerm" class="form-control" placeholder="Search customers..." />
+        </div>
+        <div class="col-md-2">
+            <select name="customerType" class="form-control">
+                <option value="">All Types</option>
+                <option value="Business">Business</option>
+                <option value="Individual">Individual</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Reset
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="customerTable">
+            <thead>
+                <tr>
+                    <th>Customer Code</th>
+                    <th>Customer Name</th>
+                    <th>Contact Person</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Group</th>
+                    <th>Agent</th>
+                    <th>Status</th>
+                    <th style="min-width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary">@item.CustomerCode</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2" style="background: @GetColor(item.CustomerName);">
+                                        @item.CustomerName?.Substring(0, 1)
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">@item.CustomerName</div>
+                                        @if (!string.IsNullOrEmpty(item.OrganizationName))
+                                        {
+                                            <div class="text-muted small">@item.OrganizationName</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@item.ContactPerson</td>
+                            <td>@item.MobileNumber</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.PrimaryEmail))
+                                {
+                                    <a href="mailto:@item.PrimaryEmail" class="text-primary">@item.PrimaryEmail</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-@(item.CustomerType == "Business" ? "info" : "warning")">
+                                    @(item.CustomerType ?? "N/A")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">@(item.CustomerGroup ?? "N/A")</span>
+                            </td>
+                            <td>@(item.AgentName ?? "Unassigned")</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                            No customers found. Create your first customer!
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+           CUSTOMERS PAGE - LEAD STYLE
+           ============================================ */
+
+    /* Stats Cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 10px;
+        }
+
+        .stat-card .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-card .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+    .stat-icon.blue {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .stat-icon.green {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .stat-icon.orange {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+    }
+
+    .stat-icon.purple {
+        background: rgba(155, 89, 182, 0.1);
+        color: #8e44ad;
+    }
+
+    .stat-icon.red {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+
+    /* Content Card */
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+            .card-header-custom h5 i {
+                color: #3498db;
+                margin-right: 8px;
+            }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table th {
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #f0f2f5;
+            background: #f8fafc;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+    .table-hover tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    /* Avatar */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    /* Badge */
+    .badge {
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    /* Alerts */
+    .alert {
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: none;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Form Controls */
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 8px 14px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* Buttons */
+    .btn-primary {
+        background: #4f46e5;
+        border: none;
+        color: white;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        border: none;
+        color: #475569;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #1a1a2e;
+        }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    /* Button Group Styles */
+    .btn-group-sm .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 4px;
+        margin: 0 2px;
+        border: none;
+        color: white;
+        transition: all 0.2s;
+    }
+
+        .btn-group-sm .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+    .btn-info {
+        background: #0dcaf0;
+    }
+
+        .btn-info:hover {
+            background: #0bb5d8;
+        }
+
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            color: #212529;
+        }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+        .btn-danger:hover {
+            background: #b02a37;
+        }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 14px;
+        }
+
+            .stat-card .stat-number {
+                font-size: 18px;
+            }
+
+        .table th, .table td {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .card-header-custom {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+            .card-header-custom .d-flex {
+                width: 100%;
+            }
+
+                .card-header-custom .d-flex .btn {
+                    flex: 1;
+                    justify-content: center;
+                }
+
+        .btn-group-sm .btn {
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+
+        .table td:last-child {
+            min-width: 120px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-card {
+            padding: 10px;
+        }
+
+            .stat-card .stat-number {
+                font-size: 16px;
+            }
+
+            .stat-card .stat-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+        .table {
+            font-size: 11px;
+        }
+
+            .table th, .table td {
+                padding: 6px 8px;
+            }
+
+        .btn-group-sm .btn {
+            padding: 2px 5px;
+            font-size: 10px;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        .content-card {
+            padding: 16px;
+        }
+
+        .form-control, .form-select {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+    }
+</style>
+
+@functions {
+    public string GetColor(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "#4f46e5";
+        var colors = new[] { "#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706", "#dc2626", "#6b7280" };
+        var index = Math.Abs(name.GetHashCode()) % colors.Length;
+        return colors[index];
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Initialize DataTable (if DataTables is included)
+            if ($.fn.DataTable) {
+                $('#customerTable').DataTable({
+                    pageLength: 10,
+                    order: [[1, 'asc']],
+                    language: {
+                        search: "Search customers:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ customers",
+                        emptyTable: "No customers found"
+                    },
+                    responsive: true,
+                    columnDefs: [
+                        { orderable: false, targets: -1 }
+                    ]
+                });
+            }
+        });
+    </script>
+} *@
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Data.SqlClient
+@using System.Collections.Generic
+@using System.Data
+@inject IConfiguration _configuration
+@model IEnumerable<Erp_Aits.Models.Customer>
+@{
+    ViewData["Title"] = "Customers";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "users";
+    var loginType = Context.Session.GetString("LoginType") ?? "User";
+    var userRole = Context.Session.GetString("UserRole") ?? "User";
+    var isFullAccess = loginType == "Company" || userRole == "Admin";
+    var userId = Context.Session.GetString("UserId");
+
+    // Check specific page access from database
+    var canCreateCustomer = false;
+    var canEditCustomer = false;
+    var canDeleteCustomer = false;
+
+    if (!string.IsNullOrEmpty(userId))
+    {
+        try
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // Check Customer Create access
+                string query = @"
+                    SELECT CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM Permissions p
+                            INNER JOIN UserPermissions up ON p.Id = up.PermissionId
+                            WHERE up.UserId = @UserId
+                            AND p.ControllerName = 'Customers'
+                            AND p.ActionName = 'Create'
+                            AND up.CanCreate = 1
+                        ) THEN 1
+                        ELSE 0
+                    END AS HasAccess";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    canCreateCustomer = result != null && Convert.ToInt32(result) == 1;
+                }
+
+                // Check Customer Edit access
+                query = @"
+                    SELECT CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM Permissions p
+                            INNER JOIN UserPermissions up ON p.Id = up.PermissionId
+                            WHERE up.UserId = @UserId
+                            AND p.ControllerName = 'Customers'
+                            AND p.ActionName = 'Edit'
+                            AND up.CanEdit = 1
+                        ) THEN 1
+                        ELSE 0
+                    END AS HasAccess";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    canEditCustomer = result != null && Convert.ToInt32(result) == 1;
+                }
+
+                // Check Customer Delete access
+                query = @"
+                    SELECT CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM Permissions p
+                            INNER JOIN UserPermissions up ON p.Id = up.PermissionId
+                            WHERE up.UserId = @UserId
+                            AND p.ControllerName = 'Customers'
+                            AND p.ActionName = 'Delete'
+                            AND up.CanDelete = 1
+                        ) THEN 1
+                        ELSE 0
+                    END AS HasAccess";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                    var result = cmd.ExecuteScalar();
+                    canDeleteCustomer = result != null && Convert.ToInt32(result) == 1;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Fallback to role-based access
+            canCreateCustomer = isFullAccess || userRole == "Manager" || userRole == "User";
+            canEditCustomer = isFullAccess || userRole == "Manager";
+            canDeleteCustomer = isFullAccess;
+        }
+    }
+    else
+    {
+        canCreateCustomer = isFullAccess || userRole == "Manager" || userRole == "User";
+        canEditCustomer = isFullAccess || userRole == "Manager";
+        canDeleteCustomer = isFullAccess;
+    }
+}
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-users"></i> Customer List
+        </h5>
+        <div class="d-flex gap-2">
+            <a asp-controller="Leads" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Leads
+            </a>
+            @if (canCreateCustomer)
+            {
+                <a asp-action="Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Customer
+                </a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary btn-sm disabled" title="Add Customer (Permission Denied)" disabled>
+                    <i class="fas fa-plus"></i> Add Customer
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Search / Filter -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <input type="text" name="searchTerm" class="form-control" placeholder="Search customers..." />
+        </div>
+        <div class="col-md-2">
+            <select name="customerType" class="form-control">
+                <option value="">All Types</option>
+                <option value="Business">Business</option>
+                <option value="Individual">Individual</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Reset
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="customerTable">
+            <thead>
+                <tr>
+                    <th>Customer Code</th>
+                    <th>Customer Name</th>
+                    <th>Contact Person</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Group</th>
+                    <th>Agent</th>
+                    <th>Status</th>
+                    <th style="min-width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="code-link" title="View Details">
+                                    @item.CustomerCode
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2" style="background: @GetColor(item.CustomerName);">
+                                        @item.CustomerName?.Substring(0, 1)
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">@item.CustomerName</div>
+                                        @if (!string.IsNullOrEmpty(item.OrganizationName))
+                                        {
+                                            <div class="text-muted small">@item.OrganizationName</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@item.ContactPerson</td>
+                            <td>@item.MobileNumber</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.PrimaryEmail))
+                                {
+                                    <a href="mailto:@item.PrimaryEmail" class="text-primary">@item.PrimaryEmail</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="type-badge">@(item.CustomerType ?? "N/A")</span>
+                            </td>
+                            <td>
+                                <span class="group-badge">@(item.CustomerGroup ?? "N/A")</span>
+                            </td>
+                            <td>@(item.AgentName ?? "Unassigned")</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <!-- View Button - Always Visible -->
+                                    @* <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a> *@
+
+                                    <!-- Edit Button - Based on Permission -->
+                                    @if (canEditCustomer)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-warning disabled" title="Edit (Permission Denied)" disabled>
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    }
+
+                                    <!-- Delete Button - Based on Permission -->
+                                    @if (canDeleteCustomer)
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-danger disabled" title="Delete (Permission Denied)" disabled>
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                            No customers found. Create your first customer!
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+                   CUSTOMERS PAGE - LEAD STYLE
+                   ============================================ */
+
+    /* Code Link Style */
+    .code-link {
+        color: #1a1a2e;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-block;
+        border-bottom: 2px solid transparent;
+        font-size: 14px;
+    }
+
+        .code-link:hover {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .code-link i {
+            margin-left: 4px;
+            font-size: 11px;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .code-link:hover i {
+            opacity: 1;
+        }
+
+    /* Type Badge - No Background */
+    .type-badge {
+        font-weight: 600;
+        color: #1a1a2e;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+
+    /* Group Badge - No Background */
+    .group-badge {
+        font-weight: 500;
+        color: #1a1a2e;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+
+    /* Stats Cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 10px;
+        }
+
+        .stat-card .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-card .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+    .stat-icon.blue {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .stat-icon.green {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .stat-icon.orange {
+        background: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+    }
+
+    .stat-icon.purple {
+        background: rgba(155, 89, 182, 0.1);
+        color: #8e44ad;
+    }
+
+    .stat-icon.red {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+
+    /* Content Card */
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f4f6f9;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+            .card-header-custom h5 i {
+                color: #3498db;
+                margin-right: 8px;
+            }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table th {
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #f0f2f5;
+            background: #f8fafc;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+    .table-hover tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    /* Avatar */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    /* Badge */
+    .badge {
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .bg-success {
+        background: #22c55e !important;
+        color: white;
+    }
+
+    .bg-danger {
+        background: #ef4444 !important;
+        color: white;
+    }
+
+    /* Alerts */
+    .alert {
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: none;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Form Controls */
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 8px 14px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* Buttons */
+    .btn-primary {
+        background: #4f46e5;
+        border: none;
+        color: white;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-primary:hover:not(.disabled) {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            color: white;
+        }
+
+        .btn-primary.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        border: none;
+        color: #475569;
+        padding: 6px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #1a1a2e;
+        }
+
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    /* Button Group Styles */
+    .btn-group-sm .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+        border-radius: 4px;
+        margin: 0 2px;
+        border: none;
+        color: white;
+        transition: all 0.2s;
+    }
+
+        .btn-group-sm .btn:hover:not(.disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-group-sm .btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .btn-info {
+        background: #0dcaf0;
+    }
+
+        .btn-info:hover:not(.disabled) {
+            background: #0bb5d8;
+        }
+
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+        .btn-warning:hover:not(.disabled) {
+            background: #e0a800;
+            color: #212529;
+        }
+
+        .btn-warning.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+        .btn-danger:hover:not(.disabled) {
+            background: #b02a37;
+        }
+
+        .btn-danger.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .stats-row
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+        .stat-card .stat-number {
+            font-size: 18px;
+        }
+
+    .table th, .table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .card-header-custom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .card-header-custom .d-flex {
+            width: 100%;
+        }
+
+            .card-header-custom .d-flex .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+    .btn-group-sm .btn {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+
+    .table td:last-child {
+        min-width: 120px;
+    }
+
+    .code-link {
+        font-size: 12px;
+    }
+
+    .type-badge, .group-badge {
+        font-size: 11px;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .stats-row
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 10px;
+    }
+
+        .stat-card .stat-number {
+            font-size: 16px;
+        }
+
+        .stat-card .stat-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+
+    .table {
+        font-size: 11px;
+    }
+
+        .table th, .table td {
+            padding: 6px 8px;
+        }
+
+    .btn-group-sm .btn {
+        padding: 2px 5px;
+        font-size: 10px;
+    }
+
+    .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .form-control, .form-select {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .code-link {
+        font-size: 11px;
+    }
+
+    .type-badge, .group-badge {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+
+    }
+</style>
+
+@functions {
+    public string GetColor(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "#4f46e5";
+        var colors = new[] { "#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706", "#dc2626", "#6b7280" };
+        var index = Math.Abs(name.GetHashCode()) % colors.Length;
+        return colors[index];
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Initialize DataTable (if DataTables is included)
+            if ($.fn.DataTable) {
+                $('#customerTable').DataTable({
+                    pageLength: 10,
+                    order: [[1, 'asc']],
+                    language: {
+                        search: "Search customers:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ customers",
+                        emptyTable: "No customers found"
+                    },
+                    responsive: true,
+                    columnDefs: [
+                        { orderable: false, targets: -1 }
+                    ]
+                });
+            }
+        });
+    </script>
+}

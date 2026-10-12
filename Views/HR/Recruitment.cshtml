@@ -1,0 +1,516 @@
+﻿@model Erp_Aits.Models.RecruitmentDashboardViewModel
+@{
+    ViewBag.Title = "Recruitment";
+}
+
+<div class="rec-wrap">
+
+    <!-- Header band -->
+    <div class="rec-header-band">
+        <div class="rec-breadcrumb">
+            <span class="rec-breadcrumb-icon"><i class="fas fa-bars"></i></span>
+            <h4>Recruitment</h4>
+        </div>
+        <p class="rec-header-sub">Track openings, applicants, interviews and offers in one place</p>
+    </div>
+
+    <!-- Shortcuts -->
+    <div class="rec-shortcuts">
+        <a href="@Url.Action("JobOpening", "HR")" class="rec-shortcut-card rec-c-blue">
+            <div class="rec-shortcut-top">
+                <span class="rec-shortcut-icon"><i class="fas fa-briefcase"></i></span>
+                <i class="fas fa-arrow-up-right-from-square rec-ext-icon"></i>
+            </div>
+            <span class="rec-shortcut-title">Job Opening</span>
+            <span class="rec-badge">@Model.JobOpeningOpenCount Open</span>
+        </a>
+        <a href="@Url.Action("JobApplicant", "HR")" class="rec-shortcut-card rec-c-violet">
+            <div class="rec-shortcut-top">
+                <span class="rec-shortcut-icon"><i class="fas fa-user-tie"></i></span>
+                <i class="fas fa-arrow-up-right-from-square rec-ext-icon"></i>
+            </div>
+            <span class="rec-shortcut-title">Job Applicant</span>
+            <span class="rec-badge">@Model.JobApplicantOpenCount Open</span>
+        </a>
+        <a href="@Url.Action("JobOffer", "HR")" class="rec-shortcut-card rec-c-emerald">
+            <div class="rec-shortcut-top">
+                <span class="rec-shortcut-icon"><i class="fas fa-file-signature"></i></span>
+                <i class="fas fa-arrow-up-right-from-square rec-ext-icon"></i>
+            </div>
+            <span class="rec-shortcut-title">Job Offer</span>
+            <span class="rec-badge">@Model.JobOfferAcceptedCount Accepted</span>
+        </a>
+        <a href="@Url.Action("RecruitmentDashboard", "HR")" class="rec-shortcut-card rec-c-amber">
+            <div class="rec-shortcut-top">
+                <span class="rec-shortcut-icon"><i class="fas fa-chart-line"></i></span>
+                <i class="fas fa-arrow-up-right-from-square rec-ext-icon"></i>
+            </div>
+            <span class="rec-shortcut-title">Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Interviews This Week -->
+    <div class="rec-panel rec-panel-accent">
+        <div class="rec-panel-header">
+            <h5><i class="fas fa-calendar-days rec-panel-icon"></i>Interviews (This Week)</h5>
+        </div>
+
+        @if (Model.InterviewsThisWeek != null && Model.InterviewsThisWeek.Any())
+        {
+            <div class="rec-table-scroll">
+                <table class="rec-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Job Opening</th>
+                            <th>Round</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in Model.InterviewsThisWeek)
+                        {
+                            <tr>
+                                <td class="rec-td-strong">@i.CandidateName</td>
+                                <td>@i.JobOpening</td>
+                                <td>@i.InterviewRound</td>
+                                <td>@i.InterviewDate.ToString("dd-MM-yyyy")</td>
+                                <td><span class="rec-status-pill">@i.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="rec-no-data">
+                <i class="fas fa-calendar-check rec-no-data-icon"></i>
+                <p>No interviews scheduled this week</p>
+            </div>
+        }
+
+        <a href="@Url.Action("Interview", "HR")" class="rec-viewlist-btn">View List <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <!-- Masters & Reports -->
+    <h5 class="rec-section-title">Masters &amp; Reports</h5>
+
+    <div class="rec-grid">
+        <div class="rec-col rec-c-blue">
+            <h6><i class="fas fa-suitcase rec-col-icon"></i>Jobs</h6>
+            <a href="@Url.Action("StaffingPlan", "HR")">Staffing Plan</a>
+            <a href="@Url.Action("JobRequisition", "HR")">Job Requisition</a>
+            <a href="@Url.Action("JobOpening", "HR")">Job Opening</a>
+            <a href="@Url.Action("JobApplicant", "HR")">Job Applicant</a>
+            <a href="@Url.Action("JobOffer", "HR")">Job Offer</a>
+            <a href="@Url.Action("EmployeeReferral", "HR")">Employee Referral</a>
+        </div>
+
+        <div class="rec-col rec-c-violet">
+            <h6><i class="fas fa-comments rec-col-icon"></i>Interviews</h6>
+            <a href="@Url.Action("InterviewType", "HR")">Interview Type</a>
+            <a href="@Url.Action("InterviewRound", "HR")">Interview Round</a>
+            <a href="@Url.Action("Interview", "HR")">Interview</a>
+            <a href="@Url.Action("InterviewFeedback", "HR")">Interview Feedback</a>
+        </div>
+
+        <div class="rec-col rec-c-teal">
+            <h6><i class="fas fa-file-contract rec-col-icon"></i>Appointment</h6>
+            <a href="@Url.Action("AppointmentLetterTemplate", "HR")">Appointment Letter Template</a>
+            <a href="@Url.Action("AppointmentLetter", "HR")">Appointment Letter</a>
+        </div>
+
+        <div class="rec-col rec-c-amber">
+            <h6><i class="fas fa-chart-simple rec-col-icon"></i>Reports</h6>
+            <a href="@Url.Action("RecruitmentAnalytics", "HR")">Recruitment Analytics</a>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    :root {
+        --rec-navy: #0f1b38;
+        --rec-navy-soft: #16244a;
+        --rec-indigo: #4f46e5;
+        --rec-bg: #f4f6fa;
+        --rec-border: #e4e8f0;
+        --rec-text: #1a1a2e;
+        --rec-text-muted: #64748b;
+        --rec-radius: 12px;
+        /* accent palette */
+        --blue: #2563eb;
+        --blue-bg: #eaf1ff;
+        --violet: #7c3aed;
+        --violet-bg: #f3edfe;
+        --emerald: #059669;
+        --emerald-bg: #e8f8f1;
+        --amber: #d97706;
+        --amber-bg: #fef3e2;
+        --teal: #0d9488;
+        --teal-bg: #e6f7f5;
+    }
+
+    .rec-wrap {
+        padding: 0 4px 24px;
+        background: var(--rec-bg);
+        color: var(--rec-text);
+    }
+
+    /* Header band */
+    .rec-header-band {
+        background: linear-gradient(120deg, var(--rec-navy) 0%, #24336b 55%, var(--rec-indigo) 130%);
+        border-radius: var(--rec-radius);
+        padding: 22px 26px;
+        margin: 8px 0 24px;
+        box-shadow: 0 6px 20px rgba(15, 27, 56, 0.18);
+    }
+
+    .rec-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .rec-breadcrumb-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.14);
+        color: #fff;
+        border-radius: 9px;
+        font-size: 14px;
+    }
+
+    .rec-breadcrumb h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        color: #fff;
+    }
+
+    .rec-header-sub {
+        margin: 8px 0 0 48px;
+        color: rgba(255,255,255,0.72);
+        font-size: 13px;
+    }
+
+    /* Shortcut / KPI cards */
+    .rec-shortcuts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .rec-shortcut-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid var(--rec-border);
+        border-top: 3px solid var(--card-color, var(--rec-indigo));
+        border-radius: var(--rec-radius);
+        padding: 18px 20px;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 108px;
+        box-shadow: 0 1px 2px rgba(15, 27, 56, 0.04);
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+        .rec-shortcut-card:hover {
+            box-shadow: 0 10px 22px rgba(15, 27, 56, 0.10);
+            transform: translateY(-2px);
+        }
+
+    .rec-shortcut-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .rec-shortcut-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-bg, #eef0ff);
+        color: var(--card-color, var(--rec-indigo));
+        border-radius: 9px;
+        font-size: 15px;
+    }
+
+    .rec-ext-icon {
+        font-size: 10px;
+        color: #c2c8d6;
+    }
+
+    .rec-shortcut-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--rec-navy);
+    }
+
+    .rec-badge {
+        align-self: flex-start;
+        background: var(--card-bg, #eef0ff);
+        color: var(--card-color, var(--rec-indigo));
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    /* accent color assignments */
+    .rec-c-blue {
+        --card-color: var(--blue);
+        --card-bg: var(--blue-bg);
+    }
+
+    .rec-c-violet {
+        --card-color: var(--violet);
+        --card-bg: var(--violet-bg);
+    }
+
+    .rec-c-emerald {
+        --card-color: var(--emerald);
+        --card-bg: var(--emerald-bg);
+    }
+
+    .rec-c-amber {
+        --card-color: var(--amber);
+        --card-bg: var(--amber-bg);
+    }
+
+    .rec-c-teal {
+        --card-color: var(--teal);
+        --card-bg: var(--teal-bg);
+    }
+
+    /* Panel */
+    .rec-panel {
+        background: #fff;
+        border: 1px solid var(--rec-border);
+        border-radius: var(--rec-radius);
+        padding: 22px;
+        margin-bottom: 28px;
+        box-shadow: 0 1px 2px rgba(15, 27, 56, 0.04);
+    }
+
+    .rec-panel-accent {
+        border-left: 4px solid var(--rec-indigo);
+    }
+
+    .rec-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+        .rec-panel-header h5 {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--rec-navy);
+            margin: 0;
+        }
+
+    .rec-panel-icon {
+        color: var(--rec-indigo);
+        font-size: 13px;
+        margin-right: 8px;
+    }
+
+    .rec-table-scroll {
+        overflow-x: auto;
+    }
+
+    .rec-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 560px;
+    }
+
+        .rec-table thead th {
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--rec-text-muted);
+            padding: 10px 12px;
+            background: #f8f9fc;
+            border-bottom: 1px solid var(--rec-border);
+        }
+
+        .rec-table tbody td {
+            padding: 12px;
+            font-size: 13.5px;
+            color: var(--rec-text);
+            border-bottom: 1px solid #f0f2f6;
+        }
+
+        .rec-table tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+    .rec-td-strong {
+        font-weight: 600;
+    }
+
+    .rec-status-pill {
+        display: inline-block;
+        background: var(--emerald-bg);
+        color: var(--emerald);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    .rec-no-data {
+        text-align: center;
+        color: var(--rec-text-muted);
+        padding: 48px 0 40px;
+        background: linear-gradient(180deg, #f8f9ff 0%, #fbfcfe 100%);
+        border: 1px dashed #c7cdf7;
+        border-radius: 10px;
+    }
+
+    .rec-no-data-icon {
+        font-size: 22px;
+        color: var(--rec-indigo);
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .rec-no-data p {
+        margin: 0;
+        font-size: 13.5px;
+        font-weight: 500;
+    }
+
+    .rec-viewlist-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(120deg, var(--rec-navy), var(--rec-indigo));
+        border-radius: 8px;
+        padding: 11px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 16px;
+        transition: filter 0.15s ease;
+    }
+
+        .rec-viewlist-btn:hover {
+            filter: brightness(1.08);
+        }
+
+        .rec-viewlist-btn i {
+            font-size: 11px;
+        }
+
+    /* Masters & Reports */
+    .rec-section-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--rec-navy);
+        margin-bottom: 16px;
+    }
+
+    .rec-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .rec-col {
+        background: #fff;
+        border: 1px solid var(--rec-border);
+        border-top: 3px solid var(--card-color, var(--rec-indigo));
+        border-radius: var(--rec-radius);
+        padding: 18px 20px;
+    }
+
+        .rec-col h6 {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--rec-navy);
+            margin: 0 0 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--rec-border);
+        }
+
+    .rec-col-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: var(--card-bg, #eef0ff);
+        color: var(--card-color, var(--rec-indigo));
+        border-radius: 6px;
+        font-size: 11px;
+        margin-right: 8px;
+    }
+
+    .rec-col a {
+        display: block;
+        color: var(--rec-text);
+        text-decoration: none;
+        font-size: 13.5px;
+        padding: 7px 8px;
+        border-radius: 6px;
+        margin-bottom: 2px;
+        transition: background 0.12s ease, color 0.12s ease, padding-left 0.12s ease;
+    }
+
+        .rec-col a:hover {
+            background: var(--card-bg, #eef0ff);
+            color: var(--card-color, var(--rec-indigo));
+            padding-left: 12px;
+        }
+
+    @@media (max-width: 1100px) {
+        .rec-shortcuts {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .rec-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .rec-shortcuts {
+            grid-template-columns: 1fr;
+        }
+
+        .rec-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .rec-panel {
+            padding: 16px;
+        }
+
+        .rec-header-band {
+            padding: 18px 20px;
+        }
+    }
+</style>

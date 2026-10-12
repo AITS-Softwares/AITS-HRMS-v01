@@ -1,0 +1,2034 @@
+﻿@* @using Microsoft.Extensions.Configuration
+@using Microsoft.Data.SqlClient
+@using System.Collections.Generic
+@using System.Data
+@inject IConfiguration _configuration
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CRM System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* Your existing styles - keep all your original styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .sidebar {
+            height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #ffffff;
+            border-right: 1px solid #e9ecef;
+            padding-top: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 20px 24px;
+            border-bottom: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .sidebar-brand .brand-icon {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+
+            .sidebar-brand .brand-text {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1a1a2e;
+                letter-spacing: -0.5px;
+            }
+
+                .sidebar-brand .brand-text span {
+                    color: #4f46e5;
+                }
+
+        .sidebar-menu-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px 20px;
+        }
+
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+        }
+
+            .sidebar-menu .menu-label {
+                color: #94a3b8;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                padding: 16px 12px 8px;
+                letter-spacing: 0.8px;
+            }
+
+            .sidebar-menu li {
+                margin: 2px 0;
+                border-radius: 10px;
+                transition: all 0.2s;
+            }
+
+                .sidebar-menu li:hover {
+                    background: #f1f5f9;
+                }
+
+                .sidebar-menu li.active {
+                    background: #eef2ff;
+                }
+
+                    .sidebar-menu li.active a {
+                        color: #4f46e5;
+                        font-weight: 600;
+                    }
+
+                        .sidebar-menu li.active a i {
+                            color: #4f46e5;
+                        }
+
+                .sidebar-menu li a {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px 14px;
+                    color: #475569;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.2s;
+                    border-radius: 10px;
+                    gap: 12px;
+                }
+
+                    .sidebar-menu li a i {
+                        width: 20px;
+                        font-size: 16px;
+                        color: #94a3b8;
+                        text-align: center;
+                        transition: all 0.2s;
+                    }
+
+                    .sidebar-menu li a:hover {
+                        color: #1a1a2e;
+                    }
+
+                        .sidebar-menu li a:hover i {
+                            color: #4f46e5;
+                        }
+
+                    .sidebar-menu li a .badge-count {
+                        margin-left: auto;
+                        background: #eef2ff;
+                        color: #4f46e5;
+                        font-size: 11px;
+                        font-weight: 600;
+                        padding: 2px 10px;
+                        border-radius: 20px;
+                        transition: all 0.2s;
+                    }
+
+                .sidebar-menu li.active a .badge-count {
+                    background: #4f46e5;
+                    color: white;
+                }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .sidebar-footer .avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                font-size: 14px;
+                flex-shrink: 0;
+            }
+
+            .sidebar-footer .user-name {
+                font-size: 13px;
+                font-weight: 600;
+                color: #1a1a2e;
+                line-height: 1.2;
+            }
+
+            .sidebar-footer .user-role {
+                font-size: 11px;
+                color: #94a3b8;
+            }
+
+            .sidebar-footer .logout-btn {
+                margin-left: auto;
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 18px;
+                transition: all 0.2s;
+                padding: 4px 8px;
+                border-radius: 8px;
+            }
+
+                .sidebar-footer .logout-btn:hover {
+                    color: #dc2626;
+                    background: #fee2e2;
+                }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 24px 32px 32px;
+            min-height: 100vh;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f0f2f5;
+        }
+
+            .top-navbar .page-title {
+                font-size: 20px;
+                font-weight: 600;
+                color: #1a1a2e;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+                .top-navbar .page-title i {
+                    color: #4f46e5;
+                    font-size: 20px;
+                    background: #eef2ff;
+                    padding: 8px;
+                    border-radius: 12px;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .top-navbar .page-title .title-text {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                    .top-navbar .page-title .title-text small {
+                        font-size: 12px;
+                        font-weight: 400;
+                        color: #94a3b8;
+                    }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+            .user-info .notification-btn {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: 1px solid #f0f2f5;
+                background: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #64748b;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-size: 16px;
+            }
+
+                .user-info .notification-btn:hover {
+                    background: #f8fafc;
+                    border-color: #e2e8f0;
+                }
+
+                .user-info .notification-btn .badge-dot {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    width: 8px;
+                    height: 8px;
+                    background: #ef4444;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                }
+
+            .user-info .user-profile {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 4px 12px 4px 4px;
+                border-radius: 50px;
+                border: 1px solid #f0f2f5;
+                cursor: pointer;
+                transition: all 0.2s;
+                background: white;
+            }
+
+                .user-info .user-profile:hover {
+                    border-color: #e2e8f0;
+                    background: #fafafa;
+                }
+
+                .user-info .user-profile .avatar {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 13px;
+                }
+
+                .user-info .user-profile .user-details {
+                    line-height: 1.3;
+                }
+
+                    .user-info .user-profile .user-details .name {
+                        font-size: 13px;
+                        font-weight: 600;
+                        color: #1a1a2e;
+                    }
+
+                    .user-info .user-profile .user-details .role {
+                        font-size: 11px;
+                        color: #94a3b8;
+                    }
+
+                .user-info .user-profile .chevron {
+                    color: #94a3b8;
+                    font-size: 12px;
+                    margin-left: 4px;
+                }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid #f0f2f5;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+                border-color: #e2e8f0;
+            }
+
+            .stat-card .stat-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+
+            .stat-card .stat-info {
+                flex: 1;
+            }
+
+            .stat-card .stat-number {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1a1a2e;
+                line-height: 1.2;
+            }
+
+            .stat-card .stat-label {
+                font-size: 13px;
+                color: #94a3b8;
+                font-weight: 500;
+            }
+
+            .stat-card .stat-change {
+                font-size: 12px;
+                font-weight: 600;
+                padding: 2px 10px;
+                border-radius: 20px;
+                margin-top: 4px;
+                display: inline-block;
+            }
+
+        .stat-change.up {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-change.down {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-icon.blue {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .stat-icon.green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-icon.orange {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .stat-icon.red {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-icon.purple {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #f0f2f5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+            .content-card .card-header-custom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #f0f2f5;
+            }
+
+                .content-card .card-header-custom h5 {
+                    margin: 0;
+                    font-weight: 600;
+                    color: #1a1a2e;
+                    font-size: 16px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                    .content-card .card-header-custom h5 i {
+                        color: #4f46e5;
+                    }
+
+        .btn-primary {
+            background: #4f46e5;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+            .btn-primary:hover {
+                background: #4338ca;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            border: none;
+            color: #475569;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+            .btn-secondary:hover {
+                background: #e2e8f0;
+                color: #1a1a2e;
+            }
+
+        .btn-customer {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+            .btn-customer:hover {
+                background: #6d28d9;
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            }
+
+        .badge-customer {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .login-type-badge {
+            font-size: 9px;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+            .login-type-badge.company {
+                background: #dbeafe;
+                color: #2563eb;
+            }
+
+            .login-type-badge.admin {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+
+            .login-type-badge.user {
+                background: #dcfce7;
+                color: #16a34a;
+            }
+
+        @@media (max-width: 992px) {
+            .sidebar
+
+        {
+            width: 72px;
+        }
+
+        .sidebar-brand .brand-text,
+        .sidebar-brand span,
+        .sidebar-menu li a span,
+        .sidebar-menu li a .badge-count,
+        .menu-label,
+        .sidebar-footer .user-details,
+        .sidebar-footer .logout-btn {
+            display: none;
+        }
+
+        .sidebar-brand {
+            padding: 16px;
+            justify-content: center;
+        }
+
+            .sidebar-brand .brand-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+        .sidebar-menu li a {
+            padding: 12px;
+            justify-content: center;
+        }
+
+            .sidebar-menu li a i {
+                margin: 0;
+                font-size: 18px;
+            }
+
+        .sidebar-footer {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .main-content {
+            margin-left: 72px;
+            padding: 16px;
+        }
+
+        .top-navbar .page-title .title-text small {
+            display: none;
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .main-content
+
+        {
+            padding: 12px;
+        }
+
+        .top-navbar {
+            padding: 12px 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+            .top-navbar .page-title {
+                font-size: 16px;
+            }
+
+                .top-navbar .page-title i {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 14px;
+                }
+
+        .user-info .user-profile .user-details {
+            display: none;
+        }
+
+        .stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 16px;
+        }
+
+            .stat-card .stat-number {
+                font-size: 20px;
+            }
+
+        .content-card {
+            padding: 16px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="brand-text">CRM<span>System</span></div>
+        </div>
+
+        <!-- Dynamic Menu -->
+        <div class="sidebar-menu-wrapper">
+            <ul class="sidebar-menu">
+                @{
+                    var userId = Context.Session.GetString("UserId");
+                    var loginType = Context.Session.GetString("LoginType") ?? "User";
+                    var userRole = Context.Session.GetString("UserRole") ?? "User";
+                    var userName = Context.Session.GetString("UserName") ?? "User";
+                    var companyName = Context.Session.GetString("CompanyName") ?? "";
+
+                    var menuItems = new Dictionary<string, List<dynamic>>();
+                    var isFullAccess = loginType == "Company" || userRole == "Admin";
+                    var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                    if (!string.IsNullOrEmpty(userId) || loginType == "Company")
+                    {
+                        try
+                        {
+                            using (var conn = new SqlConnection(connectionString))
+                            {
+                                conn.Open();
+                                string query = "";
+
+                                if (isFullAccess)
+                                {
+                                    // Company or Admin - show ALL pages
+                                    query = @"
+                                SELECT
+                                Id,
+                                ControllerName,
+                                ActionName,
+                                DisplayName,
+                                Icon,
+                                MenuOrder,
+                                ParentMenu
+                                FROM Permissions
+                                WHERE IsActive = 1
+                                AND MenuOrder IS NOT NULL
+                                ORDER BY MenuOrder";
+
+                                    using (var cmd = new SqlCommand(query, conn))
+                                    {
+                                        using (var reader = cmd.ExecuteReader())
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                var permission = new
+                                                {
+                                                    Id = Convert.ToInt32(reader["Id"]),
+                                                    ControllerName = reader["ControllerName"]?.ToString() ?? "",
+                                                    ActionName = reader["ActionName"]?.ToString() ?? "",
+                                                    DisplayName = reader["DisplayName"]?.ToString() ?? "",
+                                                    Icon = reader["Icon"]?.ToString() ?? "",
+                                                    MenuOrder = reader["MenuOrder"] != DBNull.Value ? Convert.ToInt32(reader["MenuOrder"]) : (int?)null,
+                                                    ParentMenu = reader["ParentMenu"]?.ToString() ?? ""
+                                                };
+
+                                                var parentMenu = permission.ParentMenu ?? "Main";
+
+                                                if (!menuItems.ContainsKey(parentMenu))
+                                                {
+                                                    menuItems[parentMenu] = new List<dynamic>();
+                                                }
+                                                menuItems[parentMenu].Add(permission);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(userId))
+                                {
+                                    // Regular user - show only assigned pages
+                                    query = @"
+                                SELECT
+                                p.Id,
+                                p.ControllerName,
+                                p.ActionName,
+                                p.DisplayName,
+                                p.Icon,
+                                p.MenuOrder,
+                                p.ParentMenu
+                                FROM Permissions p
+                                INNER JOIN UserPermissions up ON p.Id = up.PermissionId
+                                WHERE up.UserId = @UserId
+                                AND up.CanView = 1
+                                AND p.IsActive = 1
+                                AND p.MenuOrder IS NOT NULL
+                                ORDER BY p.MenuOrder";
+
+                                    using (var cmd = new SqlCommand(query, conn))
+                                    {
+                                        cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                                        using (var reader = cmd.ExecuteReader())
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                var permission = new
+                                                {
+                                                    Id = Convert.ToInt32(reader["Id"]),
+                                                    ControllerName = reader["ControllerName"]?.ToString() ?? "",
+                                                    ActionName = reader["ActionName"]?.ToString() ?? "",
+                                                    DisplayName = reader["DisplayName"]?.ToString() ?? "",
+                                                    Icon = reader["Icon"]?.ToString() ?? "",
+                                                    MenuOrder = reader["MenuOrder"] != DBNull.Value ? Convert.ToInt32(reader["MenuOrder"]) : (int?)null,
+                                                    ParentMenu = reader["ParentMenu"]?.ToString() ?? ""
+                                                };
+
+                                                var parentMenu = permission.ParentMenu ?? "Main";
+
+                                                if (!menuItems.ContainsKey(parentMenu))
+                                                {
+                                                    menuItems[parentMenu] = new List<dynamic>();
+                                                }
+                                                menuItems[parentMenu].Add(permission);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log error
+                        }
+                    }
+
+                    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+                    var mainItems = menuItems.Where(kvp => string.IsNullOrEmpty(kvp.Key) || kvp.Key == "Main").SelectMany(kvp => kvp.Value).ToList();
+                    var groupedItems = menuItems.Where(kvp => !string.IsNullOrEmpty(kvp.Key) && kvp.Key != "Main").ToList();
+                }
+
+                @if (mainItems.Any())
+                {
+                    <li class="menu-label">Main</li>
+                    @foreach (var item in mainItems.OrderBy(m => m.MenuOrder))
+                    {
+                        var isActive = currentController == item.ControllerName && currentAction == item.ActionName;
+                        <li class="@(isActive ? "active" : "")">
+                            <a asp-controller="@item.ControllerName" asp-action="@item.ActionName">
+                                <i class="fas fa-@(item.Icon ?? "file")"></i>
+                                <span>@item.DisplayName</span>
+                            </a>
+                        </li>
+                    }
+                }
+
+                @if (groupedItems.Any())
+                {
+                    @foreach (var group in groupedItems.OrderBy(g => g.Key))
+                    {
+                        <li class="menu-label">@group.Key</li>
+                        @foreach (var item in group.Value.OrderBy(m => m.MenuOrder))
+                        {
+                            var isActive = currentController == item.ControllerName && currentAction == item.ActionName;
+                            <li class="@(isActive ? "active" : "")">
+                                <a asp-controller="@item.ControllerName" asp-action="@item.ActionName">
+                                    <i class="fas fa-@(item.Icon ?? "file")"></i>
+                                    <span>@item.DisplayName</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                }
+
+                <!-- ============================================
+                ADMINISTRATION SECTION - HARDCODED FOR ADMIN/COMPANY
+                ============================================ -->
+                @if (isFullAccess)
+                {
+                    <li class="menu-label">Administration</li>
+
+                    <!-- Users Menu -->
+                    <li class="@(currentController == "Users" ? "active" : "")">
+                        <a asp-controller="Users" asp-action="Index">
+                            <i class="fas fa-users-gear"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+
+                    <!-- Permissions Menu - HARDCODED -->
+                    <li class="@(currentController == "Permissions" ? "active" : "")">
+                        <a asp-controller="Permissions" asp-action="Index">
+                            <i class="fas fa-lock"></i>
+                            <span>Page Access</span>
+                        </a>
+                    </li>
+                }
+
+                <!-- Logout always visible -->
+                <li class="menu-label">Settings</li>
+                <li>
+                    <a asp-controller="Account" asp-action="Logout">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Footer - User Profile -->
+        <div class="sidebar-footer">
+            @{
+                var displayName = loginType == "Company" ? companyName : userName;
+                var displayRole = loginType == "Company" ? "Company Admin" : userRole;
+                var initial = string.IsNullOrEmpty(displayName) ? "U" : displayName.Substring(0, 1).ToUpper();
+                var roleClass = loginType == "Company" ? "company" : (userRole == "Admin" ? "admin" : "user");
+            }
+            <div class="avatar">@initial</div>
+            <div class="user-details">
+                <div class="user-name">@displayName</div>
+                <div class="user-role">
+                    <span class="login-type-badge @roleClass">@displayRole</span>
+                </div>
+            </div>
+            <a asp-controller="Account" asp-action="Logout" class="logout-btn" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div class="page-title">
+                <i class="fas fa-@(ViewData["Icon"]?.ToString() ?? "house")"></i>
+                <div class="title-text">
+                    @ViewData["Title"]
+                    <small>@ViewData["Module"]</small>
+                </div>
+            </div>
+            <div class="user-info">
+                <button class="notification-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
+                <div class="user-profile">
+                    <div class="avatar">@initial</div>
+                    <div class="user-details">
+                        <div class="name">@displayName</div>
+                        <div class="role">@displayRole</div>
+                    </div>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Modal Containers -->
+    <div id="createTaskModalContainer"></div>
+    <div id="createEventModalContainer"></div>
+</body>
+</html> *@
+
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Data.SqlClient
+@using System.Collections.Generic
+@using System.Data
+@inject IConfiguration _configuration
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CRM System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* Your existing styles - keep all your original styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .sidebar {
+            height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #ffffff;
+            border-right: 1px solid #e9ecef;
+            padding-top: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 20px 24px;
+            border-bottom: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .sidebar-brand .brand-icon {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+
+            .sidebar-brand .brand-text {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1a1a2e;
+                letter-spacing: -0.5px;
+            }
+
+                .sidebar-brand .brand-text span {
+                    color: #4f46e5;
+                }
+
+        .sidebar-menu-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px 20px;
+        }
+
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+        }
+
+            .sidebar-menu .menu-label {
+                color: #94a3b8;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                padding: 16px 12px 8px;
+                letter-spacing: 0.8px;
+            }
+
+            .sidebar-menu li {
+                margin: 2px 0;
+                border-radius: 10px;
+                transition: all 0.2s;
+            }
+
+                .sidebar-menu li:hover {
+                    background: #f1f5f9;
+                }
+
+                .sidebar-menu li.active {
+                    background: #eef2ff;
+                }
+
+                    .sidebar-menu li.active a {
+                        color: #4f46e5;
+                        font-weight: 600;
+                    }
+
+                        .sidebar-menu li.active a i {
+                            color: #4f46e5;
+                        }
+
+                .sidebar-menu li a {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px 14px;
+                    color: #475569;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.2s;
+                    border-radius: 10px;
+                    gap: 12px;
+                }
+
+                    .sidebar-menu li a i {
+                        width: 20px;
+                        font-size: 16px;
+                        color: #94a3b8;
+                        text-align: center;
+                        transition: all 0.2s;
+                    }
+
+                    .sidebar-menu li a:hover {
+                        color: #1a1a2e;
+                    }
+
+                        .sidebar-menu li a:hover i {
+                            color: #4f46e5;
+                        }
+
+                    .sidebar-menu li a .badge-count {
+                        margin-left: auto;
+                        background: #eef2ff;
+                        color: #4f46e5;
+                        font-size: 11px;
+                        font-weight: 600;
+                        padding: 2px 10px;
+                        border-radius: 20px;
+                        transition: all 0.2s;
+                    }
+
+                .sidebar-menu li.active a .badge-count {
+                    background: #4f46e5;
+                    color: white;
+                }
+
+            /* ===== HR Dropdown Submenu Styles ===== */
+            .sidebar-menu .has-submenu > div {
+                display: flex;
+                align-items: center;
+                border-radius: 10px;
+                transition: background 0.2s;
+            }
+
+                .sidebar-menu .has-submenu > div:hover {
+                    background: #f1f5f9;
+                }
+
+            .sidebar-menu .has-submenu.active > div {
+                background: #eef2ff;
+            }
+
+            .sidebar-menu .has-submenu .submenu-toggle {
+                padding: 10px 14px;
+                color: #94a3b8;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }
+
+                .sidebar-menu .has-submenu .submenu-toggle .submenu-arrow {
+                    font-size: 11px;
+                    transition: transform 0.2s ease;
+                    width: auto;
+                }
+
+                .sidebar-menu .has-submenu .submenu-toggle[aria-expanded="true"] .submenu-arrow {
+                    transform: rotate(90deg);
+                }
+
+            .sidebar-menu .submenu {
+                list-style: none;
+                padding-left: 0;
+                margin: 2px 0 0;
+            }
+
+                .sidebar-menu .submenu li {
+                    margin: 2px 0;
+                }
+
+                    .sidebar-menu .submenu li a {
+                        padding: 8px 14px 8px 46px;
+                        font-size: 13px;
+                        color: #64748b;
+                        display: block;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        transition: all 0.2s;
+                    }
+
+                        .sidebar-menu .submenu li a:hover {
+                            background: #f1f5f9;
+                            color: #1a1a2e;
+                        }
+
+                        .sidebar-menu .submenu li a.active {
+                            background: #eef2ff;
+                            color: #4f46e5;
+                            font-weight: 600;
+                        }
+        /* ===== End HR Dropdown Submenu Styles ===== */
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .sidebar-footer .avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                font-size: 14px;
+                flex-shrink: 0;
+            }
+
+            .sidebar-footer .user-name {
+                font-size: 13px;
+                font-weight: 600;
+                color: #1a1a2e;
+                line-height: 1.2;
+            }
+
+            .sidebar-footer .user-role {
+                font-size: 11px;
+                color: #94a3b8;
+            }
+
+            .sidebar-footer .logout-btn {
+                margin-left: auto;
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 18px;
+                transition: all 0.2s;
+                padding: 4px 8px;
+                border-radius: 8px;
+            }
+
+                .sidebar-footer .logout-btn:hover {
+                    color: #dc2626;
+                    background: #fee2e2;
+                }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 24px 32px 32px;
+            min-height: 100vh;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f0f2f5;
+        }
+
+            .top-navbar .page-title {
+                font-size: 20px;
+                font-weight: 600;
+                color: #1a1a2e;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+                .top-navbar .page-title i {
+                    color: #4f46e5;
+                    font-size: 20px;
+                    background: #eef2ff;
+                    padding: 8px;
+                    border-radius: 12px;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .top-navbar .page-title .title-text {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                    .top-navbar .page-title .title-text small {
+                        font-size: 12px;
+                        font-weight: 400;
+                        color: #94a3b8;
+                    }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+            .user-info .notification-btn {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: 1px solid #f0f2f5;
+                background: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #64748b;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-size: 16px;
+            }
+
+                .user-info .notification-btn:hover {
+                    background: #f8fafc;
+                    border-color: #e2e8f0;
+                }
+
+                .user-info .notification-btn .badge-dot {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    width: 8px;
+                    height: 8px;
+                    background: #ef4444;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                }
+
+            .user-info .user-profile {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 4px 12px 4px 4px;
+                border-radius: 50px;
+                border: 1px solid #f0f2f5;
+                cursor: pointer;
+                transition: all 0.2s;
+                background: white;
+            }
+
+                .user-info .user-profile:hover {
+                    border-color: #e2e8f0;
+                    background: #fafafa;
+                }
+
+                .user-info .user-profile .avatar {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 13px;
+                }
+
+                .user-info .user-profile .user-details {
+                    line-height: 1.3;
+                }
+
+                    .user-info .user-profile .user-details .name {
+                        font-size: 13px;
+                        font-weight: 600;
+                        color: #1a1a2e;
+                    }
+
+                    .user-info .user-profile .user-details .role {
+                        font-size: 11px;
+                        color: #94a3b8;
+                    }
+
+                .user-info .user-profile .chevron {
+                    color: #94a3b8;
+                    font-size: 12px;
+                    margin-left: 4px;
+                }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid #f0f2f5;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+                border-color: #e2e8f0;
+            }
+
+            .stat-card .stat-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+
+            .stat-card .stat-info {
+                flex: 1;
+            }
+
+            .stat-card .stat-number {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1a1a2e;
+                line-height: 1.2;
+            }
+
+            .stat-card .stat-label {
+                font-size: 13px;
+                color: #94a3b8;
+                font-weight: 500;
+            }
+
+            .stat-card .stat-change {
+                font-size: 12px;
+                font-weight: 600;
+                padding: 2px 10px;
+                border-radius: 20px;
+                margin-top: 4px;
+                display: inline-block;
+            }
+
+        .stat-change.up {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-change.down {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-icon.blue {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .stat-icon.green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-icon.orange {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .stat-icon.red {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-icon.purple {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #f0f2f5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+            .content-card .card-header-custom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #f0f2f5;
+            }
+
+                .content-card .card-header-custom h5 {
+                    margin: 0;
+                    font-weight: 600;
+                    color: #1a1a2e;
+                    font-size: 16px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                    .content-card .card-header-custom h5 i {
+                        color: #4f46e5;
+                    }
+
+        .btn-primary {
+            background: #4f46e5;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+            .btn-primary:hover {
+                background: #4338ca;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            border: none;
+            color: #475569;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+            .btn-secondary:hover {
+                background: #e2e8f0;
+                color: #1a1a2e;
+            }
+
+        .btn-customer {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 10px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+            .btn-customer:hover {
+                background: #6d28d9;
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            }
+
+        .badge-customer {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .login-type-badge {
+            font-size: 9px;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+            .login-type-badge.company {
+                background: #dbeafe;
+                color: #2563eb;
+            }
+
+            .login-type-badge.admin {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+
+            .login-type-badge.user {
+                background: #dcfce7;
+                color: #16a34a;
+            }
+
+        @@media (max-width: 992px) {
+            .sidebar
+
+        {
+            width: 72px;
+        }
+
+        .sidebar-brand .brand-text,
+        .sidebar-brand span,
+        .sidebar-menu li a span,
+        .sidebar-menu li a .badge-count,
+        .menu-label,
+        .sidebar-footer .user-details,
+        .sidebar-footer .logout-btn {
+            display: none;
+        }
+
+        .sidebar-brand {
+            padding: 16px;
+            justify-content: center;
+        }
+
+            .sidebar-brand .brand-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+        .sidebar-menu li a {
+            padding: 12px;
+            justify-content: center;
+        }
+
+            .sidebar-menu li a i {
+                margin: 0;
+                font-size: 18px;
+            }
+
+        .sidebar-footer {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .main-content {
+            margin-left: 72px;
+            padding: 16px;
+        }
+
+        .top-navbar .page-title .title-text small {
+            display: none;
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .main-content
+
+        {
+            padding: 12px;
+        }
+
+        .top-navbar {
+            padding: 12px 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+            .top-navbar .page-title {
+                font-size: 16px;
+            }
+
+                .top-navbar .page-title i {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 14px;
+                }
+
+        .user-info .user-profile .user-details {
+            display: none;
+        }
+
+        .stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 16px;
+        }
+
+            .stat-card .stat-number {
+                font-size: 20px;
+            }
+
+        .content-card {
+            padding: 16px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="brand-text">CRM<span>System</span></div>
+        </div>
+
+        <!-- Dynamic Menu -->
+        <div class="sidebar-menu-wrapper">
+            <ul class="sidebar-menu">
+                @{
+                    var userId = Context.Session.GetString("UserId");
+                    var loginType = Context.Session.GetString("LoginType") ?? "User";
+                    var userRole = Context.Session.GetString("UserRole") ?? "User";
+                    var userName = Context.Session.GetString("UserName") ?? "User";
+                    var companyName = Context.Session.GetString("CompanyName") ?? "";
+
+                    var menuItems = new Dictionary<string, List<dynamic>>();
+                    var isFullAccess = loginType == "Company" || userRole == "Admin";
+                    var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                    if (!string.IsNullOrEmpty(userId) || loginType == "Company")
+                    {
+                        try
+                        {
+                            using (var conn = new SqlConnection(connectionString))
+                            {
+                                conn.Open();
+                                string query = "";
+
+                                if (isFullAccess)
+                                {
+                                    // Company or Admin - show ALL pages from database
+                                    query = @"
+                                SELECT
+                                Id,
+                                ControllerName,
+                                ActionName,
+                                DisplayName,
+                                Icon,
+                                MenuOrder,
+                                ParentMenu
+                                FROM Permissions
+                                WHERE IsActive = 1
+                                AND MenuOrder IS NOT NULL
+                                AND ParentMenu != 'Administration'  -- Exclude Administration from dynamic menu
+                                ORDER BY MenuOrder";
+
+                                    using (var cmd = new SqlCommand(query, conn))
+                                    {
+                                        using (var reader = cmd.ExecuteReader())
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                var permission = new
+                                                {
+                                                    Id = Convert.ToInt32(reader["Id"]),
+                                                    ControllerName = reader["ControllerName"]?.ToString() ?? "",
+                                                    ActionName = reader["ActionName"]?.ToString() ?? "",
+                                                    DisplayName = reader["DisplayName"]?.ToString() ?? "",
+                                                    Icon = reader["Icon"]?.ToString() ?? "",
+                                                    MenuOrder = reader["MenuOrder"] != DBNull.Value ? Convert.ToInt32(reader["MenuOrder"]) : (int?)null,
+                                                    ParentMenu = reader["ParentMenu"]?.ToString() ?? ""
+                                                };
+
+                                                var parentMenu = permission.ParentMenu ?? "Main";
+
+                                                if (!menuItems.ContainsKey(parentMenu))
+                                                {
+                                                    menuItems[parentMenu] = new List<dynamic>();
+                                                }
+                                                menuItems[parentMenu].Add(permission);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(userId))
+                                {
+                                    // Regular user - show only assigned pages
+                                    query = @"
+                                SELECT
+                                p.Id,
+                                p.ControllerName,
+                                p.ActionName,
+                                p.DisplayName,
+                                p.Icon,
+                                p.MenuOrder,
+                                p.ParentMenu
+                                FROM Permissions p
+                                INNER JOIN UserPermissions up ON p.Id = up.PermissionId
+                                WHERE up.UserId = @UserId
+                                AND up.CanView = 1
+                                AND p.IsActive = 1
+                                AND p.MenuOrder IS NOT NULL
+                                AND p.ParentMenu != 'Administration'  -- Exclude Administration
+                                ORDER BY p.MenuOrder";
+
+                                    using (var cmd = new SqlCommand(query, conn))
+                                    {
+                                        cmd.Parameters.AddWithValue("@UserId", int.Parse(userId));
+                                        using (var reader = cmd.ExecuteReader())
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                var permission = new
+                                                {
+                                                    Id = Convert.ToInt32(reader["Id"]),
+                                                    ControllerName = reader["ControllerName"]?.ToString() ?? "",
+                                                    ActionName = reader["ActionName"]?.ToString() ?? "",
+                                                    DisplayName = reader["DisplayName"]?.ToString() ?? "",
+                                                    Icon = reader["Icon"]?.ToString() ?? "",
+                                                    MenuOrder = reader["MenuOrder"] != DBNull.Value ? Convert.ToInt32(reader["MenuOrder"]) : (int?)null,
+                                                    ParentMenu = reader["ParentMenu"]?.ToString() ?? ""
+                                                };
+
+                                                var parentMenu = permission.ParentMenu ?? "Main";
+
+                                                if (!menuItems.ContainsKey(parentMenu))
+                                                {
+                                                    menuItems[parentMenu] = new List<dynamic>();
+                                                }
+                                                menuItems[parentMenu].Add(permission);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log error
+                        }
+                    }
+
+                    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+                    var mainItems = menuItems.Where(kvp => string.IsNullOrEmpty(kvp.Key) || kvp.Key == "Main").SelectMany(kvp => kvp.Value).ToList();
+                    var groupedItems = menuItems.Where(kvp => !string.IsNullOrEmpty(kvp.Key) && kvp.Key != "Main").ToList();
+                }
+
+                @if (mainItems.Any())
+                {
+                    <li class="menu-label">Main</li>
+                    @foreach (var item in mainItems.OrderBy(m => m.MenuOrder))
+                    {
+                        var isActive = currentController == item.ControllerName && currentAction == item.ActionName;
+                        <li class="@(isActive ? "active" : "")">
+                            <a asp-controller="@item.ControllerName" asp-action="@item.ActionName">
+                                <i class="fas fa-@(item.Icon ?? "file")"></i>
+                                <span>@item.DisplayName</span>
+                            </a>
+                        </li>
+                    }
+                }
+
+                @if (groupedItems.Any())
+                {
+                    @foreach (var group in groupedItems.OrderBy(g => g.Key))
+                    {
+                        <li class="menu-label">@group.Key</li>
+                        @foreach (var item in group.Value.OrderBy(m => m.MenuOrder))
+                        {
+                            var isActive = currentController == item.ControllerName && currentAction == item.ActionName;
+                            <li class="@(isActive ? "active" : "")">
+                                <a asp-controller="@item.ControllerName" asp-action="@item.ActionName">
+                                    <i class="fas fa-@(item.Icon ?? "file")"></i>
+                                    <span>@item.DisplayName</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                }
+
+                <!-- ============================================
+                ADMINISTRATION SECTION - HARDCODED (ONLY ONCE)
+                ============================================ -->
+                @if (isFullAccess)
+                {
+                    <li class="menu-label">Administration</li>
+
+                    <!-- Users Menu -->
+                    <li class="@(currentController == "Users" ? "active" : "")">
+                        <a asp-controller="Users" asp-action="Index">
+                            <i class="fas fa-users-gear"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="CommunicationSettings" asp-action="Index">
+                            <i class="fas fa-cog"></i> <span>Communication Settings</span>
+                        </a>
+                    </li>
+
+                    var isHrActive = currentController == "HR";
+                    <li class="has-submenu @(isHrActive ? "active open" : "")">
+                        <div>
+                            <a asp-controller="HR" asp-action="Index" class="flex-grow-1 @(isHrActive && string.IsNullOrEmpty(currentAction) ? "active" : "")" style="flex:1;">
+                                <i class="fas fa-users"></i>
+                                <span>HR</span>
+                            </a>
+                            <a href="#hrSubmenu" data-bs-toggle="collapse" role="button"
+                               aria-expanded="@(isHrActive ? "true" : "false")" aria-controls="hrSubmenu"
+                               class="submenu-toggle">
+                                <i class="fas fa-chevron-right submenu-arrow"></i>
+                            </a>
+                        </div>
+                        <ul class="collapse submenu @(isHrActive ? "show" : "")" id="hrSubmenu">
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="Recruitment"
+                                   class="@(currentAction == "Recruitment" ? "active" : "")">
+                                    Recruitment
+                                </a>
+                            </li>
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="EmployeeLifecycle"
+                                   class="@(currentAction == "EmployeeLifecycle" ? "active" : "")">
+                                    Employee Lifecycle
+                                </a>
+                            </li>
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="Performance"
+                                   class="@(currentAction == "Performance" ? "active" : "")">
+                                    Performance
+                                </a>
+                            </li>
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="ShiftAndAttendance"
+                                   class="@(currentAction == "ShiftAndAttendance" ? "active" : "")">
+                                    Shift &amp; Attendance
+                                </a>
+                            </li>
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="ExpenseClaims"
+                                   class="@((currentAction == "ExpenseClaims" || currentAction == "ExpenseClaimList") ? "active" : "")">
+                                    Expense Claims
+                                </a>
+                            </li>
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="Leaves"
+                                   class="@(currentAction == "Leaves" ? "active" : "")">
+                                    Leaves
+                                </a>
+                            </li>
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="Payroll"
+                                   class="@(currentAction == "Payroll" || currentAction == "SalaryPayout" || currentAction == "TaxBenefits" ? "active" : "")">
+                                    Payroll
+                                </a>
+                            </li>
+
+                            @if (currentAction == "Payroll" || currentAction == "SalaryPayout" || currentAction == "TaxBenefits")
+                            {
+                                <li class="ms-3">
+                                    <a asp-controller="HR"
+                                       asp-action="SalaryPayout"
+                                       class="@(currentAction == "SalaryPayout" ? "active" : "")">
+                                        Salary Payout
+                                    </a>
+                                </li>
+
+                                <li class="ms-3">
+                                    <a asp-controller="HR"
+                                       asp-action="TaxBenefits"
+                                       class="@(currentAction == "TaxBenefits" ? "active" : "")">
+                                        Tax &amp; Benefits
+                                    </a>
+                                </li>
+                            }
+
+                            <li>
+                                <a asp-controller="HR"
+                                   asp-action="SmartATS"
+                                   class="@(currentAction == "SmartATS" ? "active" : "")">
+                                    Smart ATS
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Permissions Menu - Page Access -->
+                    <li class="@(currentController == "Permissions" ? "active" : "")">
+                        <a asp-controller="Permissions" asp-action="Index">
+                            <i class="fas fa-lock"></i>
+                            <span>Page Access</span>
+                        </a>
+                    </li>
+                }
+                <!-- Logout always visible -->
+                <li class="menu-label">Settings</li>
+                <li>
+                    <a asp-controller="Account" asp-action="Logout">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Footer - User Profile -->
+        <div class="sidebar-footer">
+            @{
+                var displayName = loginType == "Company" ? companyName : userName;
+                var displayRole = loginType == "Company" ? "Company Admin" : userRole;
+                var initial = string.IsNullOrEmpty(displayName) ? "U" : displayName.Substring(0, 1).ToUpper();
+                var roleClass = loginType == "Company" ? "company" : (userRole == "Admin" ? "admin" : "user");
+            }
+            <div class="avatar">@initial</div>
+            <div class="user-details">
+                <div class="user-name">@displayName</div>
+                <div class="user-role">
+                    <span class="login-type-badge @roleClass">@displayRole</span>
+                </div>
+            </div>
+            <a asp-controller="Account" asp-action="Logout" class="logout-btn" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div class="page-title">
+                <i class="fas fa-@(ViewData["Icon"]?.ToString() ?? "house")"></i>
+                <div class="title-text">
+                    @ViewData["Title"]
+                    <small>@ViewData["Module"]</small>
+                </div>
+            </div>
+            <div class="user-info">
+                <button class="notification-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
+                <div class="user-profile">
+                    <div class="avatar">@initial</div>
+                    <div class="user-details">
+                        <div class="name">@displayName</div>
+                        <div class="role">@displayRole</div>
+                    </div>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Modal Containers -->
+    <div id="createTaskModalContainer"></div>
+    <div id="createEventModalContainer"></div>
+</body>
+</html>

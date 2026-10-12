@@ -1,0 +1,155 @@
+﻿@* @model List<Erp_Aits.Models.Designation>
+@{
+    ViewBag.Title = "Designation";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Designation</h4>
+    <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newDesignationModal">
+        + Add Designation
+    </button>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Appraisal Template</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.DesignationName</td>
+                <td>@d.AppraisalTemplate</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No designations found.</p>
+}
+
+<!-- New Designation Modal -->
+<div class="modal fade" id="newDesignationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateDesignation" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Designation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Designation *</label>
+                        <input type="text" name="DesignationName" class="form-control" required autofocus />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Appraisal Template</label>
+                        <input type="text" name="AppraisalTemplate" class="form-control" />
+                    </div>
+                </div>
+                @* <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
+                </div> *@
+@*                 <div class="modal-footer justify-content-between">
+                    <a href="@Url.Action("CreateDesignation", "HR")" class="btn btn-light btn-sm">Edit Full Form</a>
+                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> *@ 
+
+
+
+
+
+
+@model List<Erp_Aits.Models.Designation>
+@{
+    ViewBag.Title = "Designation";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Designation</h4>
+    <div class="d-flex gap-2">
+        <form action="@Url.Action("SyncDesignationsFromErpNext", "HR")" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-outline-primary btn-sm">⚡ Sync from ERPNext</button>
+        </form>
+        <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newDesignationModal">
+            + Add Designation
+        </button>
+    </div>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Designation Name</th>
+            <th>Appraisal Template</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.DesignationName</td>
+                <td>@d.AppraisalTemplate</td>
+                <td>@d.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No designations found.</p>
+}
+
+<!-- New Designation Modal -->
+<div class="modal fade" id="newDesignationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="@Url.Action("CreateDesignation", "HR")" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Designation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Designation *</label>
+                        <input type="text" name="DesignationName" class="form-control" required autofocus placeholder="e.g. Software Engineer" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Appraisal Template</label>
+                        <input type="text" name="AppraisalTemplate" class="form-control" placeholder="Select or type template..." />
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <a href="@Url.Action("CreateDesignation", "HR")" class="btn btn-light btn-sm">Edit Full Form</a>
+                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

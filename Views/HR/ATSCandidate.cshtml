@@ -1,0 +1,56 @@
+﻿@model List<Erp_Aits.Models.ATSCandidate>
+@{
+    ViewBag.Title = "ATS Candidate";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">ATS Candidate</h4>
+    <a href="@Url.Action("CreateATSCandidate", "HR")" class="btn btn-dark btn-sm">+ Add ATS Candidate</a>
+</div>
+
+<form method="get" asp-action="ATSCandidate" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="candidateName" class="form-control form-control-sm" placeholder="Candidate Name" value="@ViewBag.CandidateNameFilter" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-dark">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Candidate Name</th>
+            <th>Status</th>
+            <th>Email</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr style="cursor:pointer;" onclick="location.href='@Url.Action("ATSCandidateDetails", "HR", new { id = c.Id })'">
+                <td>@c.CandidateName</td>
+                <td>
+                    @if (c.CandidateStatus == "High Match" || c.ATSScore >= 70)
+                    {
+                        <span class="badge bg-success-subtle text-success">High Match</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger-subtle text-danger">Low Match</span>
+                    }
+                </td>
+                <td>@c.Email</td>
+                <td>@c.ATSCandidateCode</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (!Model.Any())
+{
+    <p class="text-muted">No ATS candidates found.</p>
+}

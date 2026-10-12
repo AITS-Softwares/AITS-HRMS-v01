@@ -1,0 +1,135 @@
+﻿@model Erp_Aits.Models.RosterViewModel
+@{
+    ViewBag.Title = "Roster";
+    var current = new DateTime(Model.Year, Model.Month, 1);
+    var prevMonth = current.AddMonths(-1);
+    var nextMonth = current.AddMonths(1);
+    var monthNames = new[] { "", "January", "February", "March", "April", "May", "June",
+                              "July", "August", "September", "October", "November", "December" };
+    var dayAbbr = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+}
+
+<style>
+    .roster-wrapper {
+        overflow-x: auto;
+    }
+
+    .roster-table {
+        border-collapse: collapse;
+        min-width: 100%;
+    }
+
+        .roster-table th, .roster-table td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            white-space: nowrap;
+            vertical-align: top;
+        }
+
+        .roster-table th {
+            background: #fafafa;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+    .roster-emp-col {
+        position: sticky;
+        left: 0;
+        background: #fff;
+        z-index: 2;
+        min-width: 220px;
+    }
+
+    .roster-shift-pill {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 8px;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.78rem;
+    }
+
+        .roster-shift-pill .shift-name {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+    .roster-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+</style>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <span style="font-size:1.3rem;">&#128197;</span>
+    <span class="text-muted">Roster:</span>
+    <strong>Month View</strong>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-3">
+        <a href="@Url.Action("Roster", "HR", new { month = prevMonth.Month, year = prevMonth.Year, employee = ViewBag.Employee })" class="btn btn-sm btn-outline-secondary">&lt;</a>
+        <strong>@monthNames[Model.Month], @Model.Year</strong>
+        <a href="@Url.Action("Roster", "HR", new { month = nextMonth.Month, year = nextMonth.Year, employee = ViewBag.Employee })" class="btn btn-sm btn-outline-secondary">&gt;</a>
+    </div>
+    <form method="get" asp-action="Roster" class="d-flex gap-2">
+        <input type="hidden" name="month" value="@Model.Month" />
+        <input type="hidden" name="year" value="@Model.Year" />
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Search Employee" value="@ViewBag.Employee" style="width:220px;" />
+        <button type="submit" class="btn btn-sm btn-outline-dark">Search</button>
+    </form>
+</div>
+
+<div class="roster-wrapper">
+    <table class="roster-table">
+        <thead>
+            <tr>
+                <th class="roster-emp-col"></th>
+                @for (int d = 1; d <= Model.DaysInMonth; d++)
+                {
+                    var date = new DateTime(Model.Year, Model.Month, d);
+                    <th>@dayAbbr[(int)date.DayOfWeek] @d.ToString("00")</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in Model.Employees)
+            {
+                <tr>
+                    <td class="roster-emp-col">
+                        <span class="roster-avatar">@(emp.EmployeeName.Length > 0 ? emp.EmployeeName.Substring(0, 1).ToUpper() : "?")</span>
+                        @emp.EmployeeName
+                    </td>
+                    @for (int d = 1; d <= Model.DaysInMonth; d++)
+                    {
+                        if (emp.ShiftsByDay.ContainsKey(d))
+                        {
+                            var shift = emp.ShiftsByDay[d];
+                            <td>
+                                <div class="roster-shift-pill">
+                                    <span class="shift-name">@shift.ShiftType</span>
+                                    @if (shift.FromTime.HasValue && shift.ToTime.HasValue)
+                                    {
+                                        <span>&#128337; @shift.FromTime.Value.ToString(@"hh\:mm") - @shift.ToTime.Value.ToString(@"hh\:mm")</span>
+                                    }
+                                </div>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

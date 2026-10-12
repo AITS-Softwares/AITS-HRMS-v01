@@ -1,0 +1,62 @@
+﻿@model Erp_Aits.Models.EnergyPointRule
+@{
+    ViewBag.Title = "Energy Point Rule " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Energy Point Rule - @Model.Id</h4>
+</div>
+
+<div class="form-check mb-4">
+    <input class="form-check-input" type="checkbox" checked="@Model.Enabled" disabled />
+    <label class="form-check-label">Enabled</label>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label">Rule Name</label>
+            <input class="form-control" value="@Model.RuleName" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Reference Document Type</label>
+            <input class="form-control" value="@Model.ReferenceDocumentType" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">For Document Event</label>
+            <input class="form-control" value="@Model.ForDocumentEvent" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Points</label>
+            <input class="form-control" value="@Model.Points" readonly />
+        </div>
+
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" checked="@Model.AllotPointsToAssignedUsers" disabled />
+            <label class="form-check-label">Allot Points To Assigned Users</label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">User Field</label>
+            <input class="form-control" value="@Model.UserField" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Multiplier Field</label>
+            <input class="form-control" value="@Model.MultiplierField" readonly />
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" checked="@Model.ApplyOnlyOnce" disabled />
+            <label class="form-check-label">Apply Only Once</label>
+        </div>
+
+        <label class="form-label">Condition</label>
+        <textarea class="form-control" rows="12" style="font-family: monospace;" readonly>@Model.Condition</textarea>
+    </div>
+</div>

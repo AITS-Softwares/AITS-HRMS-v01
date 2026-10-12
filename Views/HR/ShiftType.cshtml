@@ -1,0 +1,71 @@
+﻿@model List<Erp_Aits.Models.ShiftType>
+
+@{
+    ViewBag.Title = "Shift Type";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Shift Type</h4>
+        <a href="@Url.Action("CreateShiftType", "HR")" class="btn btn-dark btn-sm">+ Add Shift Type</a>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="text"
+                   name="id"
+                   value="@ViewBag.IdFilter"
+                   class="form-control form-control-sm"
+                   placeholder="Filter by Shift Type / Holiday List..." />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+        </div>
+    </form>
+
+    <div class="card p-3 shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Shift Type</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Holiday List</th>
+                    <th>Auto Attendance</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var s in Model)
+                    {
+                        <tr style="cursor:pointer"
+                            onclick="location.href='@Url.Action("ShiftTypeDetails", "HR", new { id = s.Id })'">
+                            <td><strong>@s.Name</strong></td>
+                            <td>@s.StartTime</td>
+                            <td>@s.EndTime</td>
+                            <td>@s.HolidayList</td>
+                            <td>@(s.EnableAutoAttendance ? "Yes" : "No")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No shift types found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

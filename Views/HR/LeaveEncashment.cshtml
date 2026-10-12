@@ -1,0 +1,129 @@
+﻿@* @model List<Erp_Aits.Models.LeaveEncashment>
+@{
+    ViewBag.Title = "Leave Encashment";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Encashment</h4>
+    <a href="@Url.Action("CreateLeaveEncashment", "HR")" class="btn btn-dark btn-sm">+ Add Leave Encashment</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee Name" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Leave Type</th>
+            <th>Encashment Days</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr style="cursor:pointer" onclick="location.href='@Url.Action("LeaveEncashmentDetails", "HR", new { id = e.Id })'">
+                <td>@e.Id</td>
+                <td>@e.Employee</td>
+                <td>@e.EmployeeName</td>
+                <td>@e.LeaveType</td>
+                <td>@e.EncashmentDays</td>
+                <td>@e.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No leave encashments found.</p>
+} *@
+
+
+
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.LeaveEncashment>
+@{
+    ViewBag.Title = "Leave Encashment";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Encashment</h4>
+    <div>
+        <a href="@Url.Action("SyncLeaveEncashmentsFromErpNext", "HR")" class="btn btn-outline-secondary btn-sm me-2">Sync from ERPNext</a>
+        <a href="@Url.Action("CreateLeaveEncashment", "HR")" class="btn btn-dark btn-sm">+ Add Leave Encashment</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee Name" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Leave Type</th>
+            <th>Encashment Days</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var e in Model)
+            {
+                <tr style="cursor:pointer" onclick="location.href='@Url.Action("LeaveEncashmentDetails", "HR", new { id = e.Id })'">
+                    <td>@e.Id</td>
+                    <td>@e.Employee</td>
+                    <td>@e.EmployeeName</td>
+                    <td>@e.LeaveType</td>
+                    <td>@e.EncashmentDays</td>
+                    <td>@e.Status</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-muted text-center py-3">No leave encashments found.</td>
+            </tr>
+        }
+    </tbody>
+</table>

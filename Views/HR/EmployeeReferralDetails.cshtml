@@ -1,0 +1,65 @@
+﻿@model Erp_Aits.Models.EmployeeReferral
+@{
+    ViewBag.Title = "Employee Referral " + Model.Id;
+}
+
+<h4 class="mb-3">@Model.FirstName @Model.LastName</h4>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">First Name</label><input class="form-control" value="@Model.FirstName" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Date</label><input type="date" class="form-control" value="@Model.ReferralDate.ToString("yyyy-MM-dd")" readonly /></div>
+
+        <div class="col-md-6"><label class="form-label">Last Name</label><input class="form-control" value="@Model.LastName" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Status</label><input class="form-control" value="@Model.Status" readonly /></div>
+
+        <div class="col-md-6 offset-md-6"><label class="form-label">For Designation</label><input class="form-control" value="@Model.ForDesignation" readonly /></div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Referral Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" value="@Model.Email" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Current Employer</label><input class="form-control" value="@Model.CurrentEmployer" readonly /></div>
+
+        <div class="col-md-6"><label class="form-label">Contact No.</label><input class="form-control" value="@Model.ContactNo" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Current Job Title</label><input class="form-control" value="@Model.CurrentJobTitle" readonly /></div>
+
+        <div class="col-md-6"><label class="form-label">Resume Link</label><input class="form-control" value="@Model.ResumeLink" readonly /></div>
+        <div class="col-md-6">
+            <label class="form-label d-block">Resume</label>
+            @if (!string.IsNullOrEmpty(Model.ResumeAttachment))
+            {
+                <a href="@Model.ResumeAttachment" target="_blank" class="btn btn-outline-secondary btn-sm">@Model.ResumeAttachmentName</a>
+            }
+            else
+            {
+                <span class="text-muted">No file attached</span>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Referrer Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Referrer</label><input class="form-control" value="@Model.Referrer" readonly /></div>
+        <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" checked="@Model.IsApplicableForReferralBonus" disabled />
+                <label class="form-check-label">Is Applicable for Referral Bonus</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Why is this Candidate Qualified for this Position?</h6>
+    <div class="border rounded p-2">@Html.Raw(Model.QualifiedReason)</div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Work References</h6>
+    <div class="border rounded p-2">@Html.Raw(Model.WorkReferences)</div>
+</div>

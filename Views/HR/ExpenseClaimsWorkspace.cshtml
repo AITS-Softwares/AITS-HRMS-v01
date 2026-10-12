@@ -1,0 +1,92 @@
+﻿@{
+    ViewBag.Title = "Expense Claims";
+}
+<h4 class="mb-4">Expense Claims</h4>
+
+<h5 class="mb-3">Your Shortcuts</h5>
+<div class="d-flex flex-wrap gap-4 mb-4">
+    @* <a href="@Url.Action("ExpenseClaimList", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Expense Claim</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.PendingExpenseClaimCount Pending</span>
+    </a> *@
+    @* <a href="@Url.Action("CreateExpenseClaim", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Expense Claim</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.PendingExpenseClaimCount Pending</span>
+    </a> *@
+
+
+    <a href="@Url.Action("ExpenseClaimList", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Expense Claim</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.PendingExpenseClaimCount Pending</span>
+    </a>
+    <a href="@Url.Action("EmployeeAdvance", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Employee Advance</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.UnclaimedAdvanceCount Unclaimed</span>
+    </a>
+    <a href="@Url.Action("ExpenseClaimsDashboard", "HR")" class="text-decoration-none text-dark">
+        Dashboard
+    </a>
+</div>
+
+<h5 class="mb-3">Masters &amp; Reports</h5>
+<div class="row g-4">
+    <div class="col-md-3">
+        <h6>Claims</h6>
+        <ul class="list-unstyled">
+            @* <li><a href="@Url.Action("ExpenseClaimList", "HR")">Expense Claim</a></li> *@
+            @* <li><a href="@Url.Action("CreateExpenseClaim", "HR")">Expense Claim</a></li> *@
+
+
+            <li><a href="@Url.Action("ExpenseClaimList", "HR")">Expense Claim</a></li>
+            <li><a href="@Url.Action("ExpenseClaimType", "HR")">Expense Claim Type</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Advances</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("EmployeeAdvance", "HR")">Employee Advance</a></li>
+            @* <li><a href="@Url.Action("PaymentEntry", "HR")">Payment Entry</a></li> *@
+            <li><a href="@Url.Action("PaymentEntry", "HR")">Payment Entry</a></li>
+            @* <li><a href="@Url.Action("JournalEntry", "HR")">Journal Entry</a></li> *@
+            <li><a href="@Url.Action("JournalEntry", "HR")">Journal Entry</a></li>
+            <li><a href="@Url.Action("AdditionalSalary", "HR")">Additional Salary</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Fleet Management</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("Vehicle", "HR")">Vehicle</a></li>
+            <li><a href="@Url.Action("Driver", "HR")">Driver</a></li>
+            <li><a href="@Url.Action("VehicleServiceItem", "HR")">Vehicle Service Item</a></li>
+            <li><a href="@Url.Action("VehicleLog", "HR")">Vehicle Log</a></li>
+            <li><a href="@Url.Action("VehicleExpenses", "HR")">Vehicle Expenses</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-md-3">
+        <h6>Travel</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("TravelRequest", "HR")">Travel Request</a></li>
+            <li><a href="@Url.Action("PurposeOfTravel", "HR")">Purpose of Travel</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Reports</h6>
+        <ul class="list-unstyled">
+            @* <li><a href="@Url.Action("EmployeeAdvanceSummaryReport", "HR")">Employee Advance Summary</a></li> *@
+            <li><a href="@Url.Action("EmployeeAdvanceSummary", "HR")">Employee Advance Summary</a></li>
+            <li><a href="@Url.Action("UnpaidExpenseClaim", "HR")">Unpaid Expense Claim</a></li>
+            <li><a href="@Url.Action("VehicleExpenses", "HR")">Vehicle Expenses</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Accounting Reports</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("AccountsReceivable", "HR")">Accounts Receivable</a></li>
+            <li><a href="@Url.Action("AccountsPayable", "HR")">Accounts Payable</a></li>
+            <li><a href="@Url.Action("GeneralLedger", "HR")">General Ledger</a></li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,435 @@
+﻿@model Erp_Aits.Models.LeavePolicyAssignment
+
+@{
+    ViewBag.Title = "New Leave Policy Assignment";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+    </div>
+}
+
+
+<form asp-controller="HR"
+      asp-action="CreateLeavePolicyAssignment"
+      method="post"
+      id="assignmentForm">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h4 class="mb-0 d-inline">
+                New Leave Policy Assignment
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning ms-2">
+                Not Saved
+            </span>
+        </div>
+
+        <button type="submit"
+                class="btn btn-dark btn-sm">
+            Save
+        </button>
+
+    </div>
+
+
+    <div class="card border rounded-3 p-4">
+
+        <div class="row g-3">
+
+            <!-- EMPLOYEE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Employee"
+                        id="Employee"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Employee --
+                    </option>
+
+                    @if (ViewBag.EmployeesList != null)
+                    {
+                        foreach (var emp in ViewBag.EmployeesList)
+                        {
+                            <option value="@emp.name"
+                                    data-name="@emp.employee_name"
+                                    data-company="@emp.company"
+                                    data-joining="@emp.date_of_joining">
+
+                                @emp.name - @emp.employee_name
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- EMPLOYEE NAME -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee Name
+                </label>
+
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- LEAVE POLICY -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Leave Policy
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="LeavePolicy"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Leave Policy --
+                    </option>
+
+                    @if (ViewBag.LeavePolicies != null)
+                    {
+                        foreach (var policy in ViewBag.LeavePolicies)
+                        {
+                            <option value="@policy.name">
+                                @policy.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- COMPANY -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company
+                </label>
+
+                <input asp-for="Company"
+                       id="Company"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- CARRY FORWARD -->
+            <div class="col-md-6">
+
+                <div class="form-check mt-4">
+
+                    <input asp-for="AddUnusedLeaves"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label class="form-check-label">
+                        Add unused leaves from previous allocations
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- ASSIGNMENT BASED ON -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Assignment based on
+                </label>
+
+                <select asp-for="AssignmentBasedOn"
+                        id="AssignmentBasedOn"
+                        class="form-select">
+
+                    <option value="">
+                        -- Select --
+                    </option>
+
+                    <option value="Leave Period">
+                        Leave Period
+                    </option>
+
+                    <option value="Joining Date">
+                        Joining Date
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- LEAVE PERIOD -->
+            <div class="col-md-6"
+                 id="LeavePeriodContainer"
+                 style="display:none;">
+
+                <label class="form-label">
+                    Leave Period
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="LeavePeriod"
+                        id="LeavePeriod"
+                        class="form-select">
+
+                    <option value="">
+                        -- Select Leave Period --
+                    </option>
+
+                    @if (ViewBag.LeavePeriods != null)
+                    {
+                        foreach (var period in ViewBag.LeavePeriods)
+                        {
+                            <option value="@period.name">
+                                @period.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- EFFECTIVE FROM -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Effective From
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="EffectiveFrom"
+                       id="EffectiveFrom"
+                       type="date"
+                       class="form-control"
+                       required />
+
+            </div>
+
+
+            <!-- EFFECTIVE TO -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Effective To
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="EffectiveTo"
+                       id="EffectiveTo"
+                       type="date"
+                       class="form-control"
+                       required />
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        const employee =
+            document.getElementById("Employee");
+
+        const assignmentBasedOn =
+            document.getElementById("AssignmentBasedOn");
+
+        const leavePeriod =
+            document.getElementById("LeavePeriod");
+
+        const leavePeriodContainer =
+            document.getElementById("LeavePeriodContainer");
+
+        const effectiveFrom =
+            document.getElementById("EffectiveFrom");
+
+        const effectiveTo =
+            document.getElementById("EffectiveTo");
+
+
+        // ============================================================
+        // EMPLOYEE
+        // ============================================================
+
+        employee.addEventListener(
+            "change",
+            function()
+            {
+                const option =
+                    this.options[
+                        this.selectedIndex
+                    ];
+
+
+                document.getElementById(
+                    "EmployeeName"
+                ).value =
+                    option && this.value
+                        ? option.getAttribute(
+                            "data-name"
+                        ) || ""
+                        : "";
+
+
+                document.getElementById(
+                    "Company"
+                ).value =
+                    option && this.value
+                        ? option.getAttribute(
+                            "data-company"
+                        ) || ""
+                        : "";
+
+
+                if (
+                    assignmentBasedOn.value ===
+                    "Joining Date"
+                )
+                {
+                    const joining =
+                        option.getAttribute(
+                            "data-joining"
+                        );
+
+
+                    if (joining)
+                    {
+                        effectiveFrom.value =
+                            joining.substring(0, 10);
+
+                        effectiveFrom.readOnly =
+                            true;
+                    }
+                }
+            }
+        );
+
+
+        // ============================================================
+        // ASSIGNMENT BASED ON
+        // ============================================================
+
+        assignmentBasedOn.addEventListener(
+            "change",
+            function()
+            {
+                const value =
+                    this.value;
+
+
+                if (value === "Leave Period")
+                {
+                    leavePeriodContainer.style.display =
+                        "";
+
+                    leavePeriod.required =
+                        true;
+
+
+                    // ERP derives both dates from Leave Period
+                    effectiveFrom.readOnly =
+                        true;
+
+                    effectiveTo.readOnly =
+                        true;
+                }
+                else if (value === "Joining Date")
+                {
+                    leavePeriodContainer.style.display =
+                        "none";
+
+                    leavePeriod.required =
+                        false;
+
+                    leavePeriod.value =
+                        "";
+
+
+                    effectiveFrom.readOnly =
+                        true;
+
+                    effectiveTo.readOnly =
+                        false;
+
+
+                    const option =
+                        employee.options[
+                            employee.selectedIndex
+                        ];
+
+
+                    if (option)
+                    {
+                        const joining =
+                            option.getAttribute(
+                                "data-joining"
+                            );
+
+
+                        if (joining)
+                        {
+                            effectiveFrom.value =
+                                joining.substring(
+                                    0,
+                                    10
+                                );
+                        }
+                    }
+                }
+                else
+                {
+                    leavePeriodContainer.style.display =
+                        "none";
+
+                    leavePeriod.required =
+                        false;
+
+                    leavePeriod.value =
+                        "";
+
+                    effectiveFrom.readOnly =
+                        false;
+
+                    effectiveTo.readOnly =
+                        false;
+                }
+            }
+        );
+
+    </script>
+}

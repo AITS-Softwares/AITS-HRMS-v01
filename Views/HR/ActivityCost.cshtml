@@ -1,0 +1,71 @@
+﻿@model List<Erp_Aits.Models.ActivityCost>
+@{
+    ViewBag.Title = "Activity Cost";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Activity Cost</h4>
+
+    <a href="/HR/CreateActivityCost" class="btn btn-dark btn-sm">+ Add Activity Cost</a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form method="get" action="/HR/ActivityCost" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="activityType" class="form-control form-control-sm" placeholder="Activity Type" value="@ViewBag.ActivityTypeFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.EmployeeFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="title" class="form-control form-control-sm" placeholder="title" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Activity Type</th>
+                <th>Employee</th>
+                <th>Billing Rate</th>
+                <th>Costing Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr style="cursor:pointer" onclick="window.location='/HR/ActivityCostDetails/@c.Id'">
+                    <td>@c.Id</td>
+                    <td>@c.ActivityType</td>
+                    <td>@c.Employee</td>
+                    <td>@c.BillingRate.ToString("0.00")</td>
+                    <td>@c.CostingRate.ToString("0.00")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="text-center py-5">
+        <p class="text-muted mb-3">You haven't created an Activity Cost yet</p>
+        <a href="/HR/CreateActivityCost" class="btn btn-dark btn-sm">Create your first Activity Cost</a>
+    </div>
+}

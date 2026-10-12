@@ -1,0 +1,516 @@
+﻿@* @{
+    ViewBag.Title = "Employee Attendance Tool";
+    DateTime today = ViewBag.Today;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0 d-inline">Employee Attendance Tool</h4>
+        <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+    </div>
+    <button type="button" class="btn btn-dark btn-sm" onclick="markAttendance()">Mark Attendance</button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Date</label>
+        <input type="date" id="attDate" class="form-control" value="@today.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-3">
+        <div class="form-check mt-4">
+            <input type="checkbox" id="lateEntry" class="form-check-input" />
+            <label class="form-check-label" for="lateEntry">Late Entry</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-check mt-4">
+            <input type="checkbox" id="earlyExit" class="form-check-input" />
+            <label class="form-check-label" for="earlyExit">Early Exit</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Shift</label>
+        <input type="text" id="attShift" class="form-control" />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-1">Get Employees</h6>
+<p class="text-muted small mb-3">Set filters to fetch employees</p>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Company</label>
+        <input type="text" id="filterCompany" class="form-control" value="AITS" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Employment Type</label>
+        <input type="text" id="filterEmploymentType" class="form-control" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Branch</label>
+        <input type="text" id="filterBranch" class="form-control" />
+        <div class="form-text">Not linked to a filter yet — Employees table has no Branch column.</div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Designation</label>
+        <input type="text" id="filterDesignation" class="form-control" />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Department</label>
+        <input type="text" id="filterDepartment" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Employee Grade</label>
+        <input type="text" id="filterGrade" class="form-control" />
+    </div>
+</div>
+
+<button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="getEmployees()">Get Employees</button>
+
+<div id="selectEmployeesSection" style="display:none;">
+    <hr />
+    <h6 class="mb-3">Select Employees</h6>
+    <h6 class="mb-2">Unmarked Employees</h6>
+
+    <div class="mb-3" style="max-width:300px;">
+        <label class="form-label">Status</label>
+        <select id="attStatus" class="form-select">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Half Day">Half Day</option>
+            <option value="Work From Home">Work From Home</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(true)">Select All</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">Unselect All</button>
+    </div>
+
+    <div id="employeeCheckboxList" class="row g-2"></div>
+</div>
+
+<div id="noEmployeesMessage" class="text-muted text-center py-4" style="display:none;">
+    All employees are already marked for this date, or no employees matched the filters.
+</div>
+
+<div id="markedAttendanceSection" style="display:none;">
+    <hr class="mt-4" />
+    <h6 class="mb-3">Marked Attendance</h6>
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Status</th>
+                <th>Shift</th>
+                <th>Leave Type</th>
+            </tr>
+        </thead>
+        <tbody id="markedAttendanceBody"></tbody>
+    </table>
+</div>
+
+<script>
+    function getFilterParams() {
+        return new URLSearchParams({
+            date: document.getElementById('attDate').value,
+            company: document.getElementById('filterCompany').value,
+            employmentType: document.getElementById('filterEmploymentType').value,
+            designation: document.getElementById('filterDesignation').value,
+            department: document.getElementById('filterDepartment').value,
+            employeeGrade: document.getElementById('filterGrade').value
+        });
+    }
+
+    function getEmployees() {
+        var params = getFilterParams();
+
+        // Fetch unmarked employees
+        fetch('@Url.Action("GetUnmarkedEmployeesForTool", "HR")?' + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var listDiv = document.getElementById('employeeCheckboxList');
+                listDiv.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(function (emp) {
+                        var col = document.createElement('div');
+                        col.className = 'col-md-4';
+                        col.innerHTML =
+                            '<div class="form-check">' +
+                                '<input type="checkbox" class="form-check-input emp-checkbox" ' +
+                                       'data-code="' + emp.employeeCode + '" data-name="' + emp.fullName + '" />' +
+                                '<label class="form-check-label">' + emp.employeeCode + ' : ' + emp.fullName + '</label>' +
+                            '</div>';
+                        listDiv.appendChild(col);
+                    });
+
+                    document.getElementById('selectEmployeesSection').style.display = 'block';
+                    document.getElementById('noEmployeesMessage').style.display = 'none';
+                } else {
+                    document.getElementById('selectEmployeesSection').style.display = 'none';
+                    document.getElementById('noEmployeesMessage').style.display = 'block';
+                }
+            });
+
+        // Fetch already-marked attendance
+        fetch('@Url.Action("GetMarkedAttendanceForTool", "HR")?' + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var tbody = document.getElementById('markedAttendanceBody');
+                tbody.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(function (row) {
+                        var tr = document.createElement('tr');
+                        var statusColor = row.status === 'Absent' ? 'text-danger' :
+                                           row.status === 'Present' ? 'text-success' : 'text-secondary';
+
+                        tr.innerHTML =
+                            '<td>' + row.employee + ' : ' + row.employeeName + '</td>' +
+                            '<td class="' + statusColor + ' fw-semibold">' + row.status + '</td>' +
+                            '<td>' + (row.shift || '') + '</td>' +
+                            '<td></td>';
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('markedAttendanceSection').style.display = 'block';
+                } else {
+                    document.getElementById('markedAttendanceSection').style.display = 'none';
+                }
+            });
+    }
+
+    function toggleAll(check) {
+        document.querySelectorAll('.emp-checkbox').forEach(function (cb) { cb.checked = check; });
+    }
+
+    function markAttendance() {
+        var selected = document.querySelectorAll('.emp-checkbox:checked');
+        if (selected.length === 0) {
+            alert('Please select at least one employee.');
+            return;
+        }
+
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = '@Url.Action("MarkAttendance", "HR")';
+
+        function addField(name, value) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        }
+
+        addField('date', document.getElementById('attDate').value);
+        addField('shift', document.getElementById('attShift').value);
+        addField('lateEntry', document.getElementById('lateEntry').checked);
+        addField('earlyExit', document.getElementById('earlyExit').checked);
+        addField('company', document.getElementById('filterCompany').value);
+        addField('status', document.getElementById('attStatus').value);
+
+        selected.forEach(function (cb) {
+            addField('employeeCodes', cb.getAttribute('data-code'));
+            addField('employeeNames', cb.getAttribute('data-name'));
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@{
+    ViewBag.Title = "Employee Attendance Tool";
+    DateTime today = ViewBag.Today ?? DateTime.Now;
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var branches = ViewBag.Branches as List<string> ?? new List<string>();
+    var departments = ViewBag.Departments as List<string> ?? new List<string>();
+    var designations = ViewBag.Designations as List<string> ?? new List<string>();
+    var grades = ViewBag.Grades as List<string> ?? new List<string>();
+    var employmentTypes = ViewBag.EmploymentTypes as List<string> ?? new List<string>();
+    var shifts = ViewBag.Shifts as List<string> ?? new List<string>();
+}
+
+<!-- Notification at the top -->
+<div id="noEmployeesMessage" class="alert alert-warning mb-3" style="display:none;">
+    <strong>Attendance Marked:</strong> Attendance for all the employees under this criteria has been marked already.
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0 d-inline">Employee Attendance Tool</h4>
+        <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+    </div>
+    <button type="button" class="btn btn-dark btn-sm" onclick="markAttendance()">Mark Attendance</button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Date *</label>
+        <input type="date" id="attDate" class="form-control" value="@today.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="col-md-3">
+        <div class="form-check mt-4">
+            <input type="checkbox" id="lateEntry" class="form-check-input" />
+            <label class="form-check-label" for="lateEntry">Late Entry</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-check mt-4">
+            <input type="checkbox" id="earlyExit" class="form-check-input" />
+            <label class="form-check-label" for="earlyExit">Early Exit</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Shift</label>
+        <select id="attShift" class="form-select" onchange="if(this.value==='__CREATE_NEW__') { this.value=''; location.href='/HR/CreateShiftType'; }">
+            <option value="">-- Select Shift --</option>
+            @foreach (var sh in shifts)
+            {
+                <option value="@sh">@sh</option>
+            }
+            <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Shift Type</option>
+        </select>
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-1">Get Employees</h6>
+<p class="text-muted small mb-3">Set filters to fetch employees</p>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Company *</label>
+        <select id="filterCompany" class="form-select" required>
+            <option value="">-- Select Company --</option>
+            @foreach (var c in companies)
+            {
+                <option value="@c" selected="@(c == "AITS")">@c</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Employment Type</label>
+        <select id="filterEmploymentType" class="form-select">
+            <option value="">-- Select Employment Type --</option>
+            @foreach (var et in employmentTypes)
+            {
+                <option value="@et">@et</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Branch</label>
+        <select id="filterBranch" class="form-select">
+            <option value="">-- Select Branch --</option>
+            @foreach (var b in branches)
+            {
+                <option value="@b">@b</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Designation</label>
+        <select id="filterDesignation" class="form-select">
+            <option value="">-- Select Designation --</option>
+            @foreach (var des in designations)
+            {
+                <option value="@des">@des</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Department</label>
+        <select id="filterDepartment" class="form-select">
+            <option value="">-- Select Department --</option>
+            @foreach (var d in departments)
+            {
+                <option value="@d">@d</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Employee Grade</label>
+        <select id="filterGrade" class="form-select">
+            <option value="">-- Select Grade --</option>
+            @foreach (var g in grades)
+            {
+                <option value="@g">@g</option>
+            }
+        </select>
+    </div>
+</div>
+
+<button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="getEmployees()">Get Employees</button>
+
+<div id="selectEmployeesSection" style="display:none;">
+    <hr />
+    <h6 class="mb-3">Select Employees</h6>
+    <h6 class="mb-2">Unmarked Employees</h6>
+
+    <div class="mb-3" style="max-width:300px;">
+        <label class="form-label">Status</label>
+        <select id="attStatus" class="form-select">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Half Day">Half Day</option>
+            <option value="Work From Home">Work From Home</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(true)">Select All</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAll(false)">Unselect All</button>
+    </div>
+
+    <div id="employeeCheckboxList" class="row g-2"></div>
+</div>
+
+<div id="markedAttendanceSection" style="display:none;">
+    <hr class="mt-4" />
+    <h6 class="mb-3">Marked Attendance</h6>
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Status</th>
+                <th>Shift</th>
+                <th>Leave Type</th>
+            </tr>
+        </thead>
+        <tbody id="markedAttendanceBody"></tbody>
+    </table>
+</div>
+
+<script>
+    function getFilterParams() {
+        return new URLSearchParams({
+            date: document.getElementById('attDate').value,
+            company: document.getElementById('filterCompany').value,
+            employmentType: document.getElementById('filterEmploymentType').value,
+            designation: document.getElementById('filterDesignation').value,
+            department: document.getElementById('filterDepartment').value,
+            employeeGrade: document.getElementById('filterGrade').value,
+            branch: document.getElementById('filterBranch').value
+        });
+    }
+
+    function getEmployees() {
+        var params = getFilterParams();
+
+        fetch('@Url.Action("GetUnmarkedEmployeesForTool", "HR")?' + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var listDiv = document.getElementById('employeeCheckboxList');
+                listDiv.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(function (emp) {
+                        var col = document.createElement('div');
+                        col.className = 'col-md-4';
+                        col.innerHTML =
+                            '<div class="form-check">' +
+                                '<input type="checkbox" class="form-check-input emp-checkbox" ' +
+                                       'data-code="' + emp.employeeCode + '" data-name="' + emp.fullName + '" />' +
+                                '<label class="form-check-label">' + emp.employeeCode + ' : ' + emp.fullName + '</label>' +
+                            '</div>';
+                        listDiv.appendChild(col);
+                    });
+
+                    document.getElementById('selectEmployeesSection').style.display = 'block';
+                    document.getElementById('noEmployeesMessage').style.display = 'none';
+                } else {
+                    document.getElementById('selectEmployeesSection').style.display = 'none';
+                    document.getElementById('noEmployeesMessage').style.display = 'block';
+                }
+            });
+
+        fetch('@Url.Action("GetMarkedAttendanceForTool", "HR")?' + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var tbody = document.getElementById('markedAttendanceBody');
+                tbody.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(function (row) {
+                        var tr = document.createElement('tr');
+                        var statusColor = row.status === 'Absent' ? 'text-danger' :
+                                          row.status === 'Present' ? 'text-success' : 'text-secondary';
+
+                        tr.innerHTML =
+                            '<td>' + row.employee + ' : ' + row.employeeName + '</td>' +
+                            '<td class="' + statusColor + ' fw-semibold">' + row.status + '</td>' +
+                            '<td>' + (row.shift || '') + '</td>' +
+                            '<td></td>';
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('markedAttendanceSection').style.display = 'block';
+                } else {
+                    document.getElementById('markedAttendanceSection').style.display = 'none';
+                }
+            });
+    }
+
+    function toggleAll(check) {
+        document.querySelectorAll('.emp-checkbox').forEach(function (cb) { cb.checked = check; });
+    }
+
+    function markAttendance() {
+        var selected = document.querySelectorAll('.emp-checkbox:checked');
+        if (selected.length === 0) {
+            alert('Please select at least one employee.');
+            return;
+        }
+
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = '@Url.Action("MarkAttendance", "HR")';
+
+        function addField(name, value) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        }
+
+        addField('date', document.getElementById('attDate').value);
+        addField('shift', document.getElementById('attShift').value);
+        addField('lateEntry', document.getElementById('lateEntry').checked);
+        addField('earlyExit', document.getElementById('earlyExit').checked);
+        addField('company', document.getElementById('filterCompany').value);
+        addField('status', document.getElementById('attStatus').value);
+
+        selected.forEach(function (cb) {
+            addField('employeeCodes', cb.getAttribute('data-code'));
+            addField('employeeNames', cb.getAttribute('data-name'));
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>

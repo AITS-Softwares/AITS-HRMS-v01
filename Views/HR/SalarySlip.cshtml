@@ -1,0 +1,197 @@
+﻿@{
+    ViewBag.Title = "Salary Slip";
+}
+
+<style>
+    .erp-list-page {
+        max-width: 945px;
+        margin: 0 auto;
+    }
+
+    .erp-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .erp-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .erp-menu-icon {
+        border: 0;
+        background: transparent;
+        font-size: 22px;
+        color: #64748b;
+    }
+
+    .erp-title {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .erp-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .erp-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 7px 13px;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .erp-btn-dark {
+        background: #111;
+        color: #fff;
+    }
+
+    .erp-btn-light {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .list-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        min-height: 690px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .list-filter-row {
+        display: grid;
+        grid-template-columns: 105px 105px 105px 105px 1fr auto auto auto;
+        gap: 8px;
+        padding: 10px 12px 6px;
+        border-bottom: 1px solid #e5e7eb;
+        align-items: center;
+    }
+
+    .list-filter-row-second {
+        display: grid;
+        grid-template-columns: 105px 105px 105px 1fr;
+        gap: 8px;
+        padding: 0 12px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        align-items: center;
+    }
+
+    .erp-input {
+        height: 28px;
+        border: 1px solid #e5e7eb;
+        border-radius: 7px;
+        background: #f3f4f6;
+        padding: 5px 9px;
+        font-size: 12px;
+    }
+
+    .empty-state {
+        position: absolute;
+        top: 48%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #374151;
+    }
+
+    .empty-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 14px;
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 25px;
+    }
+
+    .empty-text {
+        margin-bottom: 12px;
+        font-size: 12px;
+    }
+
+    .pagination-row {
+        position: absolute;
+        left: 16px;
+        bottom: 12px;
+        display: flex;
+        border: 1px solid #e5e7eb;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+
+        .pagination-row span {
+            padding: 5px 9px;
+            background: #fff;
+            border-right: 1px solid #e5e7eb;
+            font-size: 12px;
+        }
+
+            .pagination-row span:last-child {
+                border-right: 0;
+            }
+</style>
+
+<div class="erp-list-page">
+    <div class="erp-title-row">
+        <div class="erp-title-left">
+            <button type="button" class="erp-menu-icon">≡</button>
+            <div class="erp-title">Salary Slip</div>
+        </div>
+
+        <div class="erp-toolbar">
+            <button type="button" class="erp-btn erp-btn-light">☷ List View</button>
+            <button type="button" class="erp-btn erp-btn-light">↻</button>
+            <button type="button" class="erp-btn erp-btn-light">...</button>
+            <a href="@Url.Action("CreateSalarySlip", "HR")" class="erp-btn erp-btn-dark">+ Add Salary Slip</a>
+        </div>
+    </div>
+
+    <main class="list-card">
+        <form method="get">
+            <div class="list-filter-row">
+                <input type="text" name="id" class="erp-input" placeholder="ID" value="@Context.Request.Query["id"]" />
+                <input type="text" name="employee" class="erp-input" placeholder="Employee" value="@Context.Request.Query["employee"]" />
+                <input type="text" name="employeeName" class="erp-input" placeholder="Employee Name" value="@Context.Request.Query["employeeName"]" />
+                <input type="text" name="company" class="erp-input" placeholder="Company" value="@Context.Request.Query["company"]" />
+                <div></div>
+                <button type="submit" class="erp-btn erp-btn-light">Filter</button>
+                <button type="button" class="erp-btn erp-btn-light">Last Updated On</button>
+                <button type="button" class="erp-btn erp-btn-light">⊘</button>
+            </div>
+
+            <div class="list-filter-row-second">
+                <input type="text" name="department" class="erp-input" placeholder="Department" value="@Context.Request.Query["department"]" />
+                <input type="text" name="branch" class="erp-input" placeholder="Branch" value="@Context.Request.Query["branch"]" />
+                <input type="text" name="salaryStructure" class="erp-input" placeholder="Salary Structure" value="@Context.Request.Query["salaryStructure"]" />
+                <div></div>
+            </div>
+        </form>
+
+        <div class="empty-state">
+            <div class="empty-icon">☷</div>
+            <div class="empty-text">You haven't created a Salary Slip yet</div>
+            <a href="@Url.Action("CreateSalarySlip", "HR")" class="erp-btn erp-btn-light">
+                Create your first Salary Slip
+            </a>
+        </div>
+
+        <div class="pagination-row">
+            <span>20</span>
+            <span>100</span>
+            <span>500</span>
+            <span>2500</span>
+        </div>
+    </main>
+</div>

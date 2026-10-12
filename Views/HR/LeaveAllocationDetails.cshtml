@@ -1,0 +1,166 @@
+@model Erp_Aits.Models.LeaveAllocation
+@{
+    ViewBag.Title = "Leave Allocation " + Model.Id;
+    var leaveTypes = ViewBag.LeaveTypes as List<string> ?? new List<string>();
+    var leavePeriods = ViewBag.LeavePeriods as List<string> ?? new List<string>();
+    bool isDraft = Model.DocStatus == 0;
+    bool isSubmitted = Model.DocStatus == 1;
+    bool isCancelled = Model.DocStatus == 2;
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">
+        <strong>ERPNext Validation:</strong> @TempData["ErpNextError"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+
+<form method="post"
+      action="@Url.Action("UpdateLeaveAllocation", "HR", new { id = Model.Id })"
+      id="leaveAllocationForm">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ErpNextId" value="@Model.ErpNextId" />
+    <input type="hidden" name="DocStatus" value="@Model.DocStatus" />
+    <input type="hidden" name="Status" value="@Model.Status" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline-block me-2">Leave Allocation @(!string.IsNullOrWhiteSpace(Model.ErpNextId) ? Model.ErpNextId : "#" + Model.Id)</h4>
+            @if (isSubmitted)
+            {
+                <span class="badge bg-secondary">Submitted</span>
+            }
+            else if (isCancelled)
+            {
+                <span class="badge bg-danger">Cancelled</span>
+            }
+            else
+            {
+                <span class="badge bg-warning-subtle text-warning">Draft</span>
+            }
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("LeaveAllocation", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            @if (isDraft)
+            {
+                <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+                <button type="submit"
+                        class="btn btn-success btn-sm px-4"
+                        formaction="@Url.Action("SubmitLeaveAllocation", "HR", new { id = Model.Id })">
+                    Submit
+                </button>
+            }
+            else if (isSubmitted)
+            {
+                <button type="submit"
+                        class="btn btn-danger btn-sm px-4"
+                        formaction="@Url.Action("CancelLeaveAllocation", "HR", new { id = Model.Id })"
+                        onclick="return confirm('Cancel this Leave Allocation in ERPNext and HRMS?');">
+                    Cancel
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series *</label>
+                <input name="Series" value="@Model.Series" class="form-control" readonly="@(!isDraft)" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Leave Type *</label>
+                <select name="LeaveType" class="form-control" disabled="@(!isDraft)" required>
+                    <option value="">-- Select Leave Type --</option>
+                    @if (!leaveTypes.Contains(Model.LeaveType) && !string.IsNullOrWhiteSpace(Model.LeaveType))
+                    {
+                        <option value="@Model.LeaveType" selected>@Model.LeaveType</option>
+                    }
+                    @foreach (var lt in leaveTypes)
+                    {
+                        <!option value="@lt" @(Model.LeaveType == lt ? "selected" : "")>@lt</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <input name="Employee" value="@Model.Employee" class="form-control" readonly="@(!isDraft)" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee Name</label>
+                <input name="EmployeeName" value="@Model.EmployeeName" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input name="Company" value="@Model.Company" class="form-control" readonly="@(!isDraft)" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Document Status</label>
+                <input class="form-control" value="@Model.Status" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">From Date *</label>
+                <input name="FromDate" type="date" value="@Model.FromDate.ToString("yyyy-MM-dd")" class="form-control" readonly="@(!isDraft)" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">To Date *</label>
+                <input name="ToDate" type="date" value="@Model.ToDate.ToString("yyyy-MM-dd")" class="form-control" readonly="@(!isDraft)" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Leave Period</label>
+                <select name="LeavePeriod" class="form-control" disabled="@(!isDraft)">
+                    <option value="">-- Select Leave Period --</option>
+                    @if (!leavePeriods.Contains(Model.LeavePeriod) && !string.IsNullOrWhiteSpace(Model.LeavePeriod))
+                    {
+                        <option value="@Model.LeavePeriod" selected>@Model.LeavePeriod</option>
+                    }
+                    @foreach (var period in leavePeriods)
+                    {
+                        <!option value="@period" @(Model.LeavePeriod == period ? "selected" : "")>@period</!option>
+                    }
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Allocation</h6>
+        <label class="form-label">New Leaves Allocated</label>
+        <input name="NewLeavesAllocated"
+               type="number"
+               step="0.001"
+               value="@Model.NewLeavesAllocated"
+               class="form-control mb-3"
+               readonly="@(!isDraft)" />
+
+        <div class="form-check">
+            <input type="checkbox"
+                   name="AddUnusedLeaves"
+                   value="true"
+                   class="form-check-input"
+                   id="unusedCheck"
+                   disabled="@(!isDraft)"
+                   checked="@Model.AddUnusedLeaves" />
+            <label class="form-check-label" for="unusedCheck">Add unused leaves from previous allocations</label>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Notes</h6>
+        <label class="form-label">Description</label>
+        <textarea name="Description" class="form-control" rows="5" readonly="@(!isDraft)">@Model.Description</textarea>
+    </div>
+</form>

@@ -1,0 +1,118 @@
+﻿@model List<Erp_Aits.Models.Driver>
+@{
+    ViewBag.Title = "Driver";
+}
+<style>
+    .quick-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+    }
+
+    .quick-modal-box {
+        background: #fff;
+        border-radius: 10px;
+        width: 480px;
+        max-width: 92%;
+        padding: 28px 34px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    }
+
+    .quick-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .quick-modal-close {
+        cursor: pointer;
+        font-size: 26px;
+        line-height: 1;
+        color: #888;
+        border: none;
+        background: none;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Driver</h4>
+    <a href="/HR/CreateDriver" class="btn btn-dark btn-sm">+ Add Driver</a>
+</div>
+
+<form method="get" action="/HR/Driver" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="fullName" class="form-control form-control-sm" placeholder="Full Name" value="@ViewBag.FullNameFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Status</th>
+                <th>Cell Number</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model)
+            {
+                <tr style="cursor:pointer" onclick="window.location='/HR/DriverDetails/@d.Id'">
+                    <td>@d.DriverCode</td>
+                    <td>@d.FullName</td>
+                    <td>@d.Status</td>
+                    <td>@d.CellNumber</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted text-center py-5">No drivers found.</p>
+}
+
+<!-- Quick Add Modal -->
+<div id="quickModalOverlay" class="quick-modal-overlay">
+    <div class="quick-modal-box">
+        <div class="quick-modal-header">
+            <h5 class="mb-0">New Driver</h5>
+            <button type="button" class="quick-modal-close" onclick="closeQuickModal()">&times;</button>
+        </div>
+        <hr />
+        <form method="post" action="/HR/QuickCreateDriver">
+            <div class="mb-3">
+                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                <input type="text" name="FullName" class="form-control" required autofocus />
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <a href="/HR/CreateDriver" class="btn btn-outline-secondary btn-sm">Edit Full Form</a>
+                <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openQuickModal() {
+        document.getElementById('quickModalOverlay').style.display = 'flex';
+    }
+    function closeQuickModal() {
+        document.getElementById('quickModalOverlay').style.display = 'none';
+    }
+</script>

@@ -1,0 +1,503 @@
+﻿@model Erp_Aits.Models.AttendanceRequest
+
+@{
+    ViewBag.Title = "Attendance Request Details";
+
+    bool isDraft = Model.DocStatus == 0;
+    bool isSubmitted = Model.DocStatus == 1;
+    bool isCancelled = Model.DocStatus == 2;
+    bool editMode = isDraft;
+
+    var shifts = ViewBag.Shifts as List<string> ?? new List<string>();
+}
+
+<style>
+    .ar-wrapper {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 16px 40px;
+    }
+
+    .ar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .ar-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #111827;
+        margin: 0;
+    }
+
+    .ar-subtitle {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .ar-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
+        padding: 22px;
+        margin-bottom: 18px;
+    }
+
+    .ar-card-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .ar-card-title::before {
+            content: "";
+            width: 4px;
+            height: 18px;
+            border-radius: 999px;
+            background: #2563eb;
+            display: inline-block;
+        }
+
+    .form-label {
+        font-weight: 700;
+        color: #334155;
+        font-size: 13px;
+        margin-bottom: 7px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        min-height: 44px;
+        font-size: 14px;
+        color: #111827;
+        box-shadow: none;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+        }
+
+        .form-control[readonly],
+        .form-select:disabled {
+            background: #f8fafc;
+            color: #475569;
+        }
+
+    .ar-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .btn-ar {
+        font-weight: 800;
+        font-size: 13px;
+        padding: 10px 20px;
+        border-radius: 999px;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-ar-submit {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+        .btn-ar-submit:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+    .btn-ar-save {
+        background: #111827;
+        color: #ffffff;
+    }
+
+        .btn-ar-save:hover {
+            background: #0f766e;
+            color: #ffffff;
+        }
+
+    .btn-ar-danger {
+        background: #dc3545;
+        color: #ffffff;
+    }
+
+        .btn-ar-danger:hover {
+            background: #bb2d3b;
+            color: #ffffff;
+        }
+
+    .btn-ar-back {
+        color: #64748b;
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+        padding: 10px 14px;
+        display: inline-block;
+    }
+
+        .btn-ar-back:hover {
+            color: #111827;
+        }
+
+    .ar-toggle-panel {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .doc-badge {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 800;
+    }
+</style>
+
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var e in ViewBag.Employees)
+        {
+            <option value="@e.name">@e.name - @e.employee_name</option>
+        }
+    }
+</datalist>
+
+<datalist id="companyList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.name"></option>
+        }
+    }
+</datalist>
+
+<div class="ar-wrapper">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="ar-header">
+        <div>
+            <h4 class="ar-title">Attendance Request: @Model.AttendanceRequestCode</h4>
+
+            <div class="ar-subtitle">
+                @(isDraft ? "Draft request can be edited until submitted." : isSubmitted ? "Submitted request is read-only until cancelled." : "Cancelled request is locked.")
+            </div>
+
+            @if (isDraft)
+            {
+                <span class="badge bg-secondary mt-2 doc-badge">Draft</span>
+            }
+            else if (isSubmitted)
+            {
+                <span class="badge bg-primary mt-2 doc-badge">Submitted</span>
+            }
+            else
+            {
+                <span class="badge bg-danger mt-2 doc-badge">Cancelled</span>
+            }
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+            <a href="@Url.Action("AttendanceRequest", "HR")" class="btn-ar-back">← Back to List</a>
+
+            <form action="@Url.Action("DeleteAttendanceRequest", "HR", new { id = Model.Id })"
+                  method="post"
+                  style="display:inline;"
+                  onsubmit="return confirm('Delete this Attendance Request from HRMS and ERPNext?');">
+                <button type="submit" class="btn-ar btn-ar-danger">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <form asp-action="ProcessAttendanceRequestAction" asp-controller="HR" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="AttendanceRequestCode" />
+        <input type="hidden" asp-for="ErpNextId" />
+        <input type="hidden" asp-for="DocStatus" />
+
+        @if (!editMode)
+        {
+            <input type="hidden" asp-for="Employee" />
+            <input type="hidden" asp-for="EmployeeName" />
+            <input type="hidden" asp-for="Company" />
+            <input type="hidden" name="FromDate" value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")" />
+            <input type="hidden" name="ToDate" value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")" />
+            <input type="hidden" name="HalfDay" value="@(Model.HalfDay ? "true" : "false")" />
+            <input type="hidden" name="IncludeHolidays" value="@(Model.IncludeHolidays ? "true" : "false")" />
+            <input type="hidden" asp-for="Shift" />
+            <input type="hidden" asp-for="Reason" />
+            <input type="hidden" asp-for="Explanation" />
+        }
+
+        <div class="ar-card">
+            <div class="ar-card-title">Request Details</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Employee *</label>
+
+                    @if (editMode)
+                    {
+                        <input name="Employee" class="form-control" list="employeeList" required value="@Model.Employee" />
+                    }
+                    else
+                    {
+                        <input value="@Model.Employee" class="form-control" readonly />
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Name</label>
+
+                    @if (editMode)
+                    {
+                        <input name="EmployeeName" class="form-control" value="@Model.EmployeeName" />
+                    }
+                    else
+                    {
+                        <input value="@Model.EmployeeName" class="form-control" readonly />
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company *</label>
+
+                    @if (editMode)
+                    {
+                        <input name="Company" class="form-control" list="companyList" required value="@Model.Company" />
+                    }
+                    else
+                    {
+                        <input value="@Model.Company" class="form-control" readonly />
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">From Date *</label>
+
+                    @if (editMode)
+                    {
+                        <input name="FromDate"
+                               type="date"
+                               class="form-control"
+                               required
+                               value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")" />
+                    }
+                    else
+                    {
+                        <input type="date"
+                               class="form-control"
+                               readonly
+                               value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")" />
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">To Date *</label>
+
+                    @if (editMode)
+                    {
+                        <input name="ToDate"
+                               type="date"
+                               class="form-control"
+                               required
+                               value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")" />
+                    }
+                    else
+                    {
+                        <input type="date"
+                               class="form-control"
+                               readonly
+                               value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")" />
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <div class="ar-toggle-panel">
+                        <div class="form-check mb-3">
+                            @if (editMode)
+                            {
+                                <input type="checkbox" name="HalfDay" value="true" class="form-check-input" id="halfDay" @(Model.HalfDay ? "checked" : "") />
+                                <input type="hidden" name="HalfDay" value="false" />
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="form-check-input" id="halfDay" @(Model.HalfDay ? "checked" : "") disabled />
+                            }
+
+                            <label class="form-check-label fw-bold" for="halfDay">Half Day</label>
+                        </div>
+
+                        <div class="form-check">
+                            @if (editMode)
+                            {
+                                <input type="checkbox" name="IncludeHolidays" value="true" class="form-check-input" id="includeHolidays" @(Model.IncludeHolidays ? "checked" : "") />
+                                <input type="hidden" name="IncludeHolidays" value="false" />
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="form-check-input" id="includeHolidays" @(Model.IncludeHolidays ? "checked" : "") disabled />
+                            }
+
+                            <label class="form-check-label fw-bold" for="includeHolidays">Include Holidays</label>
+                        </div>
+
+                        <small class="text-muted d-block mt-2">Select if any selected request days are holidays</small>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Shift</label>
+
+                    @if (editMode)
+                    {
+                        <select name="Shift" class="form-select">
+                            <option value="">-- Select Shift --</option>
+
+                            @foreach (var sh in shifts)
+                            {
+                                if (Model.Shift == sh)
+                                {
+                                    <option value="@sh" selected>@sh</option>
+                                }
+                                else
+                                {
+                                    <option value="@sh">@sh</option>
+                                }
+                            }
+                        </select>
+
+                        <small class="text-muted">Note: Shift will not be overwritten in existing attendance records</small>
+                    }
+                    else
+                    {
+                        <input value="@Model.Shift" class="form-control" readonly />
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="ar-card">
+            <div class="ar-card-title">Reason</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Reason *</label>
+
+                    @if (editMode)
+                    {
+                        <select name="Reason" class="form-select" required>
+                            <option value="Work From Home" selected="@(Model.Reason == "Work From Home")">Work From Home</option>
+                            <option value="On Duty" selected="@(Model.Reason == "On Duty")">On Duty</option>
+                            <option value="Sick" selected="@(Model.Reason == "Sick")">Sick</option>
+                            <option value="Other" selected="@(Model.Reason == "Other")">Other</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <input value="@Model.Reason" class="form-control" readonly />
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Explanation</label>
+
+                    @if (editMode)
+                    {
+                        <textarea name="Explanation" class="form-control" rows="5">@Model.Explanation</textarea>
+                    }
+                    else
+                    {
+                        <textarea class="form-control" rows="5" readonly>@Model.Explanation</textarea>
+                    }
+                </div>
+            </div>
+
+            <div class="ar-actions border-top pt-3">
+                @if (isDraft)
+                {
+                    <button type="submit"
+                            id="draftActionButton"
+                            name="actionCommand"
+                            value="Submit"
+                            class="btn-ar btn-ar-submit">
+                        Submit
+                    </button>
+                }
+
+                @if (isSubmitted)
+                {
+                    <button type="submit"
+                            name="actionCommand"
+                            value="Cancel"
+                            class="btn-ar btn-ar-danger"
+                            onclick="return confirm('Cancel this Attendance Request and linked Attendance records?');">
+                        Cancel
+                    </button>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const draftActionButton = document.getElementById("draftActionButton");
+
+    function markDraftDirty() {
+        if (!draftActionButton) return;
+
+        draftActionButton.value = "Save";
+        draftActionButton.textContent = "Save";
+        draftActionButton.classList.remove("btn-ar-submit");
+        draftActionButton.classList.add("btn-ar-save");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!draftActionButton) return;
+
+        const editableFields = document.querySelectorAll(
+            "input:not([type='hidden']):not([readonly]):not([disabled]), select:not([disabled]), textarea:not([readonly]):not([disabled])"
+        );
+
+        editableFields.forEach(function (field) {
+            field.addEventListener("change", markDraftDirty);
+            field.addEventListener("input", markDraftDirty);
+        });
+    });
+</script>

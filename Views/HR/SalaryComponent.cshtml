@@ -1,0 +1,154 @@
+﻿@{
+    ViewBag.Title = "Salary Component";
+}
+
+<style>
+    .erp-page {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .erp-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .erp-title {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .erp-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .erp-filter-row {
+        display: grid;
+        grid-template-columns: 150px 150px 1fr auto auto;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        align-items: center;
+    }
+
+    .erp-input,
+    .erp-select {
+        height: 34px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f5f5f5;
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+
+    .erp-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 7px 13px;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .erp-btn-dark {
+        background: #111;
+        color: #fff;
+    }
+
+    .erp-btn-light {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .erp-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .erp-table th {
+            background: #f5f5f5;
+            color: #6b7280;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 9px 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .erp-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+    .badge-enabled {
+        color: #0068d9;
+        background: #e7f1ff;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .empty-row {
+        text-align: center;
+        color: #6b7280;
+        padding: 35px !important;
+    }
+</style>
+
+<div class="erp-page">
+    <div class="erp-title-row">
+        <div class="erp-title">Salary Component</div>
+
+        <div class="d-flex gap-2">
+            <button type="button" class="erp-btn erp-btn-light">☷ List View</button>
+            <button type="button" class="erp-btn erp-btn-light">↻</button>
+            <button type="button" class="erp-btn erp-btn-light">...</button>
+            <a href="@Url.Action("CreateSalaryComponent", "HR")" class="erp-btn erp-btn-dark">+ Add Salary Component</a>
+        </div>
+    </div>
+
+    <div class="erp-card">
+        <form method="get" class="erp-filter-row">
+            <input type="text" name="id" class="erp-input" placeholder="ID" value="@Context.Request.Query["id"]" />
+
+            <select name="type" class="erp-select">
+                <option value="">Type</option>
+                <option value="Earning" selected="@(Context.Request.Query["type"] == "Earning")">Earning</option>
+                <option value="Deduction" selected="@(Context.Request.Query["type"] == "Deduction")">Deduction</option>
+            </select>
+
+            <div></div>
+
+            <button type="submit" class="erp-btn erp-btn-light">Filter</button>
+            <button type="button" class="erp-btn erp-btn-light">Created On</button>
+        </form>
+
+        <table class="erp-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;"><input type="checkbox" /></th>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Name</th>
+                    <th>Abbr</th>
+                    <th>Description</th>
+                    <th style="width:120px;">Modified</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="7" class="empty-row">
+                        No Salary Component found. Click <strong>+ Add Salary Component</strong> to create new.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

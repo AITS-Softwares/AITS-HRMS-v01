@@ -1,0 +1,17 @@
+﻿@model Erp_Aits.Models.InterviewType
+@{
+    ViewBag.Title = "Interview Type " + Model.Id;
+}
+
+<h4 class="mb-3">@Model.Name</h4>
+
+<div class="card p-4">
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input class="form-control" value="@Model.Name" readonly />
+    </div>
+    <div>
+        <label class="form-label">Description</label>
+        <textarea class="form-control" rows="6" readonly>@Model.Description</textarea>
+    </div>
+</div>

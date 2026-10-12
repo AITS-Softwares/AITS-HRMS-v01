@@ -1,0 +1,104 @@
+﻿@model List<Erp_Aits.Models.EmployeePromotionListRow>
+@{
+    ViewBag.Title = "Employee Promotion";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Promotion</h4>
+
+    <div class="d-flex gap-2">
+        <form method="post" asp-action="SyncEmployeePromotionsFromErpNext" asp-controller="HR">
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+                Sync From ERPNext
+            </button>
+        </form>
+
+        <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+            + Add Employee Promotion
+        </button>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+
+    <div class="col-auto">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ERPNext ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+            <th>Promotion Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='@Url.Action("EmployeePromotionDetails", "HR", new { id = p.Id })'">
+                <td>@p.Id</td>
+                <td>@(string.IsNullOrWhiteSpace(p.ErpNextId) ? "-" : p.ErpNextId)</td>
+                <td>@p.Employee</td>
+                <td>@p.EmployeeName</td>
+                <td>@p.PromotionDate.ToString("dd-MM-yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No Employee Promotion found with matching filters.</p>
+}
+
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateEmployeePromotion" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Employee Promotion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Employee <span class="text-danger">*</span></label>
+                        <input type="text" name="Employee" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Promotion Date <span class="text-danger">*</span></label>
+                        <input type="date" name="PromotionDate" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-between">
+                    <a href="@Url.Action("CreateEmployeePromotion", "HR")" class="btn btn-link">Edit Full Form</a>
+                    <button type="submit" class="btn btn-dark">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

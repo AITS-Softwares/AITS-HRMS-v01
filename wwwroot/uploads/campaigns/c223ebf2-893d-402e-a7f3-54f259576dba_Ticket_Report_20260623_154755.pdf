@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset='utf-8' />
+                            <style>
+                                body { font-family: Arial, sans-serif; padding: 20px; }
+                                h1 { color: #4472C4; }
+                                .header { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+                                .sub-header { font-size: 12px; color: #666; margin-bottom: 15px; }
+                                table { border-collapse: collapse; width: 100%; font-size: 11px; }
+                                th { background-color: #4472C4; color: white; padding: 8px; border: 1px solid #000; text-align: left; }
+                                td { padding: 6px; border: 1px solid #ccc; }
+                                .footer { margin-top: 20px; font-size: 11px; color: #666; text-align: center; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class='header'>Ticket Report</div>
+                            <div class='sub-header'>Generated: 23 Jun 2026 15:47</div>
+                            <div class='sub-header'>Customer: avdhut</div>
+                            <br/>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ticket No</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Agent</th>
+                                        <th>Created Date</th>
+                                        <th>Closed Date</th>
+                                        <th>Time Open</th>
+                                        <th>Resolved</th>
+                                    </tr>
+                                </thead>
+                                <tbody><tr>
+                            <td>TKT-20260623-0003</td>
+                            <td>TEST</td>
+                            <td>Closed</td>
+                            <td>medium</td>
+                            <td>Vaishali Kale</td>
+                            <td>23 Jun 2026 07:50</td>
+                            <td>-</td>
+                            <td>2h 27m</td>
+                            <td>Resolved</td>
+                        </tr><tr>
+                            <td>TKT-20260623-0002</td>
+                            <td>Test</td>
+                            <td>Closed</td>
+                            <td>medium</td>
+                            <td>Vaishali Kale</td>
+                            <td>23 Jun 2026 07:43</td>
+                            <td>-</td>
+                            <td>2h 34m</td>
+                            <td>Resolved</td>
+                        </tr><tr>
+                            <td>TKT-20260623-0001</td>
+                            <td>Testing Purpose 3</td>
+                            <td>Closed</td>
+                            <td>medium</td>
+                            <td>Vaishali Kale</td>
+                            <td>23 Jun 2026 07:39</td>
+                            <td>-</td>
+                            <td>2h 38m</td>
+                            <td>Resolved</td>
+                        </tr><tr>
+                            <td>TKT-20260622-0005</td>
+                            <td>test</td>
+                            <td>In Progress</td>
+                            <td>medium</td>
+                            <td>Vaishali Kale</td>
+                            <td>22 Jun 2026 12:40</td>
+                            <td>-</td>
+                            <td>21h 36m</td>
+                            <td>Not Resolved</td>
+                        </tr><tr>
+                            <td>TKT-20260622-0002</td>
+                            <td>Testing</td>
+                            <td>Closed</td>
+                            <td>medium</td>
+                            <td>Vaishali Kale</td>
+                            <td>22 Jun 2026 11:43</td>
+                            <td>-</td>
+                            <td>22h 33m</td>
+                            <td>Resolved</td>
+                        </tr><tr>
+                            <td>TKT-20260622-0001</td>
+                            <td>Testing</td>
+                            <td>Closed</td>
+                            <td>medium</td>
+                            <td>Vaishali Kale</td>
+                            <td>22 Jun 2026 11:43</td>
+                            <td>-</td>
+                            <td>22h 33m</td>
+                            <td>Resolved</td>
+                        </tr></tbody></table>
+                        <div class='footer'>Generated from HelpDesk System</div>
+                    </body></html>

@@ -1,0 +1,178 @@
+﻿@* @model Erp_Aits.Models.LeavePolicy
+@{
+    ViewBag.Title = "New Leave Policy";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">New Leave Policy</h4>
+</div>
+
+<form asp-action="CreateLeavePolicy" method="post" id="leavePolicyForm">
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Title <span class="text-danger">*</span></label>
+            <input type="text" name="Title" class="form-control" value="@Model.Title" required />
+            <span class="text-danger">@ViewData.ModelState["Title"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+        </div>
+    </div>
+
+    <hr />
+    <h6 class="mb-1">Leave Allocations</h6>
+    <p class="text-muted small mb-2">Leave Policy Details</p>
+
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th style="width:40px">No.</th>
+                <th>Leave Type <span class="text-danger">*</span></th>
+                <th style="width:200px">Annual Allocation <span class="text-danger">*</span></th>
+                <th style="width:40px"></th>
+            </tr>
+        </thead>
+        <tbody id="detailsBody">
+            <!-- rows added by JS -->
+        </tbody>
+    </table>
+
+    <button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="addRow()">Add Row</button>
+    <br />
+
+    <button type="submit" class="btn btn-dark">Save</button>
+</form>
+
+@section Scripts {
+    <script>
+        // const leaveTypes = @Html.Raw(Json.Serialize(((List<Erp_Aits.Models.LeaveType>)ViewBag.LeaveTypes).Select(lt => lt.LeaveTypeName)));
+        let rowCount = 0;
+
+        // function addRow() {
+        //     rowCount++;
+        //     const tbody = document.getElementById('detailsBody');
+        //     const tr = document.createElement('tr');
+
+        //     let options = '<option value="">-- Select --</option>';
+        //     leaveTypes.forEach(lt => {
+        //         options += `<option value="${lt}">${lt}</option>`;
+        //     });
+
+        //     tr.innerHTML = `
+        //         <td class="row-no">${rowCount}</td>
+        //         <td>
+        //             <select name="LeaveTypes" class="form-select form-select-sm" required>
+        //                 ${options}
+        //             </select>
+        //         </td>
+        //         <td><input type="number" step="0.001" name="AnnualAllocations" class="form-control form-control-sm" value="0.000" required /></td>
+        //         <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">&times;</button></td>
+        //     `;
+        //     tbody.appendChild(tr);
+        // }
+
+                function addRow() {
+            rowCount++;
+            const tbody = document.getElementById('detailsBody');
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td class="row-no">${rowCount}</td>
+                <td><input type="text" name="LeaveTypes" class="form-control form-control-sm" placeholder="Type leave type name" required /></td>
+                <td><input type="number" step="0.001" name="AnnualAllocations" class="form-control form-control-sm" value="0.000" required /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removeRow(btn) {
+            btn.closest('tr').remove();
+            renumberRows();
+        }
+
+        function renumberRows() {
+            const rows = document.querySelectorAll('#detailsBody tr');
+            rowCount = rows.length;
+            rows.forEach((row, i) => row.querySelector('.row-no').innerText = i + 1);
+        }
+
+        // start with one blank row
+        addRow();
+    </script>
+} *@
+
+@model Erp_Aits.Models.LeavePolicy
+@{
+    ViewBag.Title = "New Leave Policy";
+    var leaveTypes = ViewBag.LeaveTypes as List<Erp_Aits.Models.LeaveType> ?? new List<Erp_Aits.Models.LeaveType>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">New Leave Policy</h4>
+</div>
+
+<form asp-controller="HR" asp-action="CreateLeavePolicy" method="post">
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Policy Title <span class="text-danger">*</span></label>
+            <input type="text" name="Title" class="form-control" value="@Model?.Title" required placeholder="e.g. Standard Leave Policy" />
+        </div>
+    </div>
+
+    <hr />
+    <h6 class="mb-2">Leave Allocations</h6>
+
+    <table class="table table-bordered align-middle" id="detailsTable">
+        <thead>
+            <tr>
+                <th>Leave Type</th>
+                <th>Annual Allocation</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Details != null && Model.Details.Any())
+            {
+                for (int i = 0; i < Model.Details.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <select name="Details[@i].LeaveType" class="form-select" required>
+                                <option value="">-- Select Leave Type --</option>
+                                @if (!string.IsNullOrWhiteSpace(Model.Details[i].LeaveType) && !leaveTypes.Any(lt => lt.LeaveTypeName == Model.Details[i].LeaveType))
+                                {
+                                    <option value="@Model.Details[i].LeaveType" selected>@Model.Details[i].LeaveType</option>
+                                }
+                                @foreach (var leaveType in leaveTypes)
+                                {
+                                    <option value="@leaveType.LeaveTypeName" selected="@(Model.Details[i].LeaveType == leaveType.LeaveTypeName)">
+                                        @leaveType.LeaveTypeName
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="Details[@i].AnnualAllocation" class="form-control" value="@Model.Details[i].AnnualAllocation" required />
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td>
+                        <select name="Details[0].LeaveType" class="form-select" required>
+                            <option value="">-- Select Leave Type --</option>
+                            @foreach (var leaveType in leaveTypes)
+                            {
+                                <option value="@leaveType.LeaveTypeName">@leaveType.LeaveTypeName</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="Details[0].AnnualAllocation" class="form-control" value="0" required />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-dark mt-3">Save Leave Policy</button>
+</form>

@@ -1,0 +1,276 @@
+﻿@model Erp_Aits.Models.HolidayList
+@{
+    ViewBag.Title = "New Holiday List";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">New Holiday List</h4>
+        <a href="@Url.Action("HolidayList", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form action="@Url.Action("CreateHolidayList", "HR")" method="post" id="holidayListForm">
+        @Html.AntiForgeryToken()
+
+        <div class="card p-4 mb-3 shadow-sm">
+            <h6 class="mb-3 font-weight-bold">General Details</h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Holiday List Name <span class="text-danger">*</span></label>
+                    <input type="text"
+                           name="HolidayListName"
+                           class="form-control"
+                           value="@Model.HolidayListName"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Total Holidays</label>
+                    <input type="number"
+                           class="form-control"
+                           id="totalHolidaysDisplay"
+                           name="TotalHolidays"
+                           value="@(Model.Holidays?.Count ?? Model.TotalHolidays)"
+                           readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">From Date <span class="text-danger">*</span></label>
+                    <input type="date"
+                           name="FromDate"
+                           class="form-control"
+                           value="@Model.FromDate.ToString("yyyy-MM-dd")"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">To Date <span class="text-danger">*</span></label>
+                    <input type="date"
+                           name="ToDate"
+                           class="form-control"
+                           value="@Model.ToDate.ToString("yyyy-MM-dd")"
+                           required />
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3 shadow-sm">
+            <h6 class="mb-3 font-weight-bold">Add Local Holidays</h6>
+
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label">Country</label>
+                    <input type="text"
+                           name="Country"
+                           class="form-control"
+                           value="@(string.IsNullOrWhiteSpace(Model.Country) ? "IN" : Model.Country)"
+                           placeholder="e.g. IN" />
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label">Subdivision</label>
+                    <input type="text"
+                           name="Subdivision"
+                           class="form-control"
+                           value="@Model.Subdivision"
+                           placeholder="Enter subdivision e.g. MH" />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit"
+                            formaction="@Url.Action("FetchHolidaysBySubdivision", "HR")"
+                            formmethod="post"
+                            class="btn btn-outline-secondary w-100">
+                        Add to Holidays
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 font-weight-bold">Holidays</h6>
+
+                <button type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        onclick="addHolidayRow()">
+                    Add Row
+                </button>
+            </div>
+
+            <table class="table table-bordered align-middle mb-0" id="holidaysTable">
+                <thead>
+                    <tr>
+                        <th style="width:60px">No.</th>
+                        <th style="width:260px">Date <span class="text-danger">*</span></th>
+                        <th>Description <span class="text-danger">*</span></th>
+                        <th style="width:110px">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="holidaysBody">
+                    @if (Model.Holidays != null && Model.Holidays.Any())
+                    {
+                        for (int i = 0; i < Model.Holidays.Count; i++)
+                        {
+                            <tr>
+                                <td class="row-no">@(i + 1)</td>
+
+                                <td>
+                                    <input type="date"
+                                           name="Holidays[@i].HolidayDate"
+                                           class="form-control form-control-sm"
+                                           value="@Model.Holidays[i].HolidayDate.ToString("yyyy-MM-dd")"
+                                           required />
+                                </td>
+
+                                <td>
+                                    <input type="text"
+                                           name="Holidays[@i].Description"
+                                           class="form-control form-control-sm"
+                                           value="@Model.Holidays[i].Description"
+                                           required />
+                                </td>
+
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="removeHolidayRow(this)">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="emptyHolidayRow">
+                            <td colspan="4" class="text-muted text-center py-3">
+                                No holidays loaded yet. Enter subdivision like MH and click Add to Holidays, or add rows manually.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card p-4 mb-3 shadow-sm">
+            <h6 class="mb-3 font-weight-bold">Appearance</h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Color</label>
+                    <input type="color"
+                           name="Color"
+                           class="form-control form-control-color"
+                           value="@(string.IsNullOrWhiteSpace(Model.Color) ? "#3788d8" : Model.Color)" />
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 py-2 font-weight-bold">
+            Save Holiday List
+        </button>
+    </form>
+</div>
+
+<script>
+    function updateHolidayIndexes() {
+        const rows = document.querySelectorAll("#holidaysBody tr:not(#emptyHolidayRow)");
+
+        rows.forEach(function (row, index) {
+            const noCell = row.querySelector(".row-no");
+            const dateInput = row.querySelector("input[type='date']");
+            const descInput = row.querySelector("input[type='text']");
+
+            if (noCell) {
+                noCell.innerText = index + 1;
+            }
+
+            if (dateInput) {
+                dateInput.name = `Holidays[${index}].HolidayDate`;
+            }
+
+            if (descInput) {
+                descInput.name = `Holidays[${index}].Description`;
+            }
+        });
+
+        const totalInput = document.getElementById("totalHolidaysDisplay");
+        if (totalInput) {
+            totalInput.value = rows.length;
+        }
+    }
+
+    function addHolidayRow() {
+        const tbody = document.getElementById("holidaysBody");
+        const emptyRow = document.getElementById("emptyHolidayRow");
+
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+
+        const index = tbody.querySelectorAll("tr").length;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="row-no">${index + 1}</td>
+            <td>
+                <input type="date"
+                       name="Holidays[${index}].HolidayDate"
+                       class="form-control form-control-sm"
+                       required />
+            </td>
+            <td>
+                <input type="text"
+                       name="Holidays[${index}].Description"
+                       class="form-control form-control-sm"
+                       required />
+            </td>
+            <td>
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        onclick="removeHolidayRow(this)">
+                    Remove
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+        updateHolidayIndexes();
+    }
+
+    function removeHolidayRow(button) {
+        button.closest("tr").remove();
+
+        const tbody = document.getElementById("holidaysBody");
+
+        if (tbody.querySelectorAll("tr").length === 0) {
+            const tr = document.createElement("tr");
+            tr.id = "emptyHolidayRow";
+            tr.innerHTML = `
+                <td colspan="4" class="text-muted text-center py-3">
+                    No holidays loaded yet. Enter subdivision like MH and click Add to Holidays, or add rows manually.
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        updateHolidayIndexes();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        updateHolidayIndexes();
+    });
+</script>

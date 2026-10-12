@@ -1,0 +1,157 @@
+﻿@model Erp_Aits.Models.Vehicle
+
+@{
+    ViewBag.Title = "New Vehicle";
+    var employees = ViewBag.Employees as List<string> ?? new List<string>();
+    var uoms = ViewBag.Uoms as List<string> ?? new List<string>();
+}
+
+<form asp-action="CreateVehicle" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Vehicle</h4>
+
+        <div>
+            <a href="@Url.Action("Vehicle", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+    }
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">License Plate *</label>
+                <input asp-for="LicensePlate" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Model *</label>
+                <input asp-for="Model" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Make *</label>
+                <input asp-for="Make" class="form-control" required />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Details</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Odometer Value (Last) *</label>
+                <input asp-for="OdometerValueLast" type="number" step="0.01" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Chassis No</label>
+                <input asp-for="ChassisNo" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Acquisition Date</label>
+                <input asp-for="AcquisitionDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Vehicle Value</label>
+                <input asp-for="VehicleValue" type="number" step="0.01" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Location</label>
+                <input asp-for="Location" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee</label>
+                <select asp-for="Employee" class="form-select">
+                    <option value="">Select Employee</option>
+                    @foreach (var emp in employees)
+                    {
+                        <option value="@emp" selected="@(Model.Employee == emp ? "selected" : null)">@emp</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Insurance Details</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Insurance Company</label>
+                <input asp-for="InsuranceCompany" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Start Date</label>
+                <input asp-for="InsuranceStartDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Policy No</label>
+                <input asp-for="PolicyNo" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input asp-for="InsuranceEndDate" type="date" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Additional Details</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Fuel Type *</label>
+                <select asp-for="FuelType" class="form-select" required>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Natural Gas">Natural Gas</option>
+                    <option value="Electric">Electric</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Color</label>
+                <input asp-for="Color" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Fuel UOM *</label>
+                <select asp-for="FuelUOM" class="form-select" required>
+                    <option value="">Select Fuel UOM</option>
+                    @foreach (var uom in uoms)
+                    {
+                        <option value="@uom" selected="@(Model.FuelUOM == uom ? "selected" : null)">@uom</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Wheels</label>
+                <input asp-for="Wheels" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Last Carbon Check</label>
+                <input asp-for="LastCarbonCheck" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Doors</label>
+                <input asp-for="Doors" type="number" class="form-control" />
+            </div>
+        </div>
+    </div>
+</form>

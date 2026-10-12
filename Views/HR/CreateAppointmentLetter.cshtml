@@ -1,0 +1,84 @@
+﻿@model Erp_Aits.Models.AppointmentLetter
+@{
+    ViewBag.Title = "New Appointment Letter";
+}
+
+<form asp-action="CreateAppointmentLetter" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Appointment Letter</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Job Applicant *</label>
+                <input asp-for="JobApplicant" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input asp-for="Company" class="form-control" value="AITS" required />
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <label class="form-label">Appointment Date *</label>
+                <input asp-for="AppointmentDate" type="date" class="form-control" required />
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <label class="form-label">Appointment Letter Template *</label>
+                <input asp-for="AppointmentLetterTemplate" class="form-control" required />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Body</h6>
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label">Introduction *</label>
+                <textarea asp-for="Introduction" class="form-control" rows="8" required></textarea>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label">Terms</label>
+                <table class="table table-bordered" id="termsTable">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">No.</th>
+                            <th>Title *</th>
+                            <th>Description *</th>
+                            <th style="width:50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="termsBody"></tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-outline-dark mb-3" onclick="addTermRow()">Add Row</button>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label">Closing Notes</label>
+                <textarea asp-for="ClosingNotes" class="form-control" rows="8"></textarea>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        let termIdx = 0;
+
+        function addTermRow() {
+            const i = termIdx++;
+            const row = `<tr>
+                <td>${i + 1}</td>
+                <td><input name="Terms[${i}].Title" class="form-control form-control-sm" required /></td>
+                <td><input name="Terms[${i}].Description" class="form-control form-control-sm" required /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">&times;</button></td>
+            </tr>`;
+            document.getElementById('termsBody').insertAdjacentHTML('beforeend', row);
+        }
+
+        addTermRow();
+    </script>
+}

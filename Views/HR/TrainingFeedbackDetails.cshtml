@@ -1,0 +1,24 @@
+﻿@model Erp_Aits.Models.TrainingFeedback
+@{
+    ViewBag.Title = "Training Feedback - " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Training Feedback - @Model.Employee</h4>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Employee</label>
+        <input class="form-control" value="@Model.Employee" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Training Event</label>
+        <input class="form-control" value="@Model.TrainingEvent" readonly />
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Feedback</label>
+    <textarea class="form-control" rows="10" readonly>@Model.Feedback</textarea>
+</div>
