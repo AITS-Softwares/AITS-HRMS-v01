@@ -1,0 +1,83 @@
+﻿@model Erp_Aits.Models.JobRequisition
+@{
+    ViewBag.Title = "Job Requisition " + Model.Code;
+}
+
+<h4 class="mb-3">@Model.Code</h4>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#jobDescTab">Job Description</a></li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane fade show active" id="detailsTab">
+        <div class="card p-4 mb-3">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Naming Series</label>
+                    <input class="form-control" value="HR-HIREQ-" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">No of. Positions</label>
+                    <input class="form-control" value="@Model.NoOfPositions" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Company</label>
+                    <input class="form-control" value="@Model.Company" readonly />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Designation</label>
+                    <input class="form-control" value="@Model.Designation" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Expected Compensation</label>
+                    <input class="form-control" value="@Model.ExpectedCompensation" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <input class="form-control" value="@Model.Status" readonly />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Department</label>
+                    <input class="form-control" value="@Model.Department" readonly />
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Requested By</h6>
+            <label class="form-label">Requested By</label>
+            <input class="form-control" value="@Model.RequestedBy" readonly />
+        </div>
+
+        <div class="card p-4">
+            <h6 class="mb-3">Timelines</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Posting Date</label>
+                    <input type="date" class="form-control" value="@Model.PostingDate.ToString("yyyy-MM-dd")" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Expected By</label>
+                    <input type="date" class="form-control" value="@(Model.ExpectedBy?.ToString("yyyy-MM-dd"))" readonly />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="jobDescTab">
+        <div class="card p-4 mb-3">
+            <label class="form-label">Job Description</label>
+            <textarea class="form-control" rows="8" readonly>@Model.JobDescription</textarea>
+        </div>
+        <div class="card p-4">
+            <label class="form-label">Reason for Requesting</label>
+            <textarea class="form-control" rows="8" readonly>@Model.ReasonForRequesting</textarea>
+        </div>
+    </div>
+
+</div>

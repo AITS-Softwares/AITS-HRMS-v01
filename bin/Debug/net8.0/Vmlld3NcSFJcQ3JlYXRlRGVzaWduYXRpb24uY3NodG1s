@@ -1,0 +1,78 @@
+﻿@model Erp_Aits.Models.Designation
+@{
+    ViewBag.Title = "New Designation";
+}
+
+<datalist id="templateList">
+    @if (ViewBag.AppraisalTemplates != null)
+    {
+        foreach (var at in ViewBag.AppraisalTemplates)
+        {
+            <option value="@at.name"></option>
+        }
+    }
+</datalist>
+
+<datalist id="skillList">
+    @if (ViewBag.Skills != null)
+    {
+        foreach (var sk in ViewBag.Skills)
+        {
+            <option value="@sk.name"></option>
+        }
+    }
+</datalist>
+
+<form action="@Url.Action("CreateDesignation", "HR")" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Designation</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="mb-3">
+            <label class="form-label">Designation *</label>
+            <input asp-for="DesignationName" class="form-control" required autofocus placeholder="e.g. Software Engineer" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div>
+            <label class="form-label">Appraisal Template</label>
+            <input asp-for="AppraisalTemplate" class="form-control" list="templateList" placeholder="Select or type appraisal template..." />
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Required Skills</h6>
+        <table class="table table-bordered align-middle mb-1" id="skillsTable">
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" disabled /></th>
+                    <th style="width:60px">No.</th>
+                    <th>Skill</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSkillRow('skillsTable')">+ Add Row</button>
+    </div>
+</form>
+
+<script>
+    function addSkillRow(tableId) {
+        var tbody = document.getElementById(tableId).querySelector('tbody');
+        var rowNum = tbody.rows.length + 1;
+
+        var row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td>${rowNum}</td>
+            <td><input type="text" name="Skills" list="skillList" class="form-control form-control-sm border-0" placeholder="Type skill..." required /></td>
+        `;
+        tbody.appendChild(row);
+    }
+</script>

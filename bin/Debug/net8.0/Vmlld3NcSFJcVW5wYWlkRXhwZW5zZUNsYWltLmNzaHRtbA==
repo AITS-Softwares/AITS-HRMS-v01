@@ -1,0 +1,65 @@
+﻿@model List<Erp_Aits.Models.ExpenseClaim>
+@{
+    ViewBag.Title = "Unpaid Expense Claim";
+    bool hasSearched = !string.IsNullOrEmpty(ViewBag.Employee);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Unpaid Expense Claim</h4>
+    <button class="btn btn-sm btn-outline-secondary" title="Reload" onclick="location.reload()">
+        &#x21bb;
+    </button>
+</div>
+
+<form method="get" asp-action="UnpaidExpenseClaim" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.Employee" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-dark">Search</button>
+    </div>
+</form>
+
+<div class="card p-0">
+    @if (!hasSearched)
+    {
+        <div class="text-center py-5">
+            <p class="text-muted mb-0">Please set filters</p>
+        </div>
+    }
+    else if (Model != null && Model.Any())
+    {
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Company</th>
+                    <th>Posting Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>@c.ExpenseClaimCode</td>
+                        <td>@c.Employee</td>
+                        <td>@c.EmployeeName</td>
+                        <td>@c.Company</td>
+                        <td>@(c.PostingDate?.ToString("dd-MM-yyyy"))</td>
+                        <td><span class="badge bg-secondary-subtle text-secondary">@c.ApprovalStatus</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-2" style="font-size:2rem;">&#128196;</div>
+            <p class="text-muted mb-0">Nothing to show</p>
+        </div>
+    }
+</div>

@@ -1,11 +1,20 @@
 ﻿@{
     ViewBag.Title = "New Salary Slip";
+    var employees = ViewBag.SalarySlipEmployees as List<Erp_Aits.Models.PayrollEmployeeOption> ?? new List<Erp_Aits.Models.PayrollEmployeeOption>();
+    var companies = ViewBag.SalarySlipCompanies as List<string> ?? new List<string>();
+    var letterHeads = ViewBag.SalarySlipLetterHeads as List<string> ?? new List<string>();
+    var earnings = ViewBag.SalarySlipEarnings as List<string> ?? new List<string>();
+    var deductions = ViewBag.SalarySlipDeductions as List<string> ?? new List<string>();
 }
 
 <style>
     .erp-form-page {
         max-width: 1480px;
         margin: 0 auto;
+        padding: 24px;
+        background: #eaf0f6;
+        border: 1px solid #d4e0eb;
+        border-radius: 8px;
     }
 
     .erp-header {
@@ -13,6 +22,9 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 18px;
+        padding: 20px 24px;
+        background: #14253d;
+        border-radius: 7px;
     }
 
     .erp-title-left {
@@ -31,6 +43,7 @@
     .erp-title {
         font-size: 26px;
         font-weight: 700;
+        color: #fff;
     }
 
     .not-saved {
@@ -43,7 +56,7 @@
     }
 
     .save-btn {
-        background: #111;
+        background: #0f766e;
         color: #fff;
         border: 0;
         border-radius: 8px;
@@ -54,7 +67,7 @@
 
     .erp-card {
         background: #fff;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #cbd8e5;
         border-radius: 8px;
         overflow: hidden;
     }
@@ -62,7 +75,8 @@
     .tab-row {
         display: flex;
         gap: 32px;
-        border-bottom: 1px solid #e5e7eb;
+        background: #f4f8fc;
+        border-bottom: 1px solid #dbe3ec;
         padding: 0 24px;
     }
 
@@ -127,8 +141,8 @@
     .erp-input, .erp-select {
         width: 100%;
         height: 34px;
-        border: 1px solid #e5e7eb;
-        background: #f3f3f3;
+        border: 1px solid #b8c7d7;
+        background: #fbfdff;
         border-radius: 8px;
         padding: 7px 10px;
         font-size: 14px;
@@ -212,10 +226,15 @@
         padding: 7px 14px;
         font-size: 16px;
     }
+
+    .search-select { position: relative; width: 100%; }.search-select input { width: 100%; }.search-select-menu { display:none; position:fixed; z-index:3000; max-height:260px; overflow:auto; background:#fff; border:1px solid #94a3b8; border-radius:6px; box-shadow:0 10px 20px rgba(15,23,42,.18); }.search-select-menu button { display:block; width:100%; padding:8px 10px; border:0; background:#fff; color:#172033; text-align:left; }.search-select-menu button:hover { background:#e8f3f3; color:#0f766e; }.search-select-menu span { display:block; padding:9px 10px; color:#64748b; }
+    .salary-component-picker { min-width: 100%; }.salary-component-picker .erp-input { min-width: 100%; height: 38px; padding: 8px 12px; }.earnings-table td:nth-child(2), .deductions-table td:nth-child(2) { min-width: 280px; }
 </style>
 
 <div class="erp-form-page">
   <form method="post" action="@Url.Action("CreateSalarySlip", "HR")">
+        @Html.AntiForgeryToken()
+        @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
         <div class="erp-header">
             <div class="erp-title-left">
                 <button type="button" class="menu-icon">≡</button>
@@ -241,18 +260,18 @@
                     <div class="form-grid-3">
                         <div>
                             <label class="field-label">Employee <span class="required">*</span></label>
-                            <input type="text" name="Employee" class="erp-input" />
+                            <select name="Employee" id="salarySlipEmployee" class="erp-select"><option value="">Select employee</option>@foreach (var option in employees) { <option value="@option.Id">@option.Id - @option.EmployeeName</option> }</select>
 
                             <label class="field-label mt-3">Company <span class="required">*</span></label>
-                            <input type="text" name="Company" class="erp-input" />
+                            <select name="Company" id="salarySlipCompany" class="erp-select"><option value="">Select company</option>@foreach (var option in companies) { <option value="@option">@option</option> }</select>
                         </div>
 
                         <div>
                             <label class="field-label">Posting Date <span class="required">*</span></label>
-                            <input type="text" name="PostingDate" class="erp-input" value="25-09-2026" />
+                            <input type="date" name="PostingDate" class="erp-input" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
 
                             <label class="field-label mt-3">Letter Head</label>
-                            <input type="text" name="LetterHead" class="erp-input" value="ttc" />
+                            <select name="LetterHead" class="erp-select"><option value="">Select letter head</option>@foreach (var option in letterHeads) { <option value="@option">@option</option> }</select>
                         </div>
 
                         <div>
@@ -316,11 +335,7 @@
                     <div style="max-width:760px;">
 
                         <label class="field-label">Leave Without Pay</label>
-
-                        <input type="number"
-                               step="0.01"
-                               name="LeaveWithoutPay"
-                               class="erp-input" />
+                        <input type="number" step="0.01" name="LeaveWithoutPay" class="erp-input" />
 
                     </div>
                 </div>
@@ -516,13 +531,86 @@
 
         const row = document.createElement('tr');
 
+        const options = bodyId === 'earningsBody' ? earnings : deductions;
+        const fieldName = bodyId === 'earningsBody' ? 'EarningsComponents' : 'DeductionsComponents';
         row.innerHTML = `
             <td><input type="checkbox" /></td>
-            <td><input type="text" name="${bodyId}Components" /></td>
-            <td><input type="number" step="0.01" name="${bodyId}Amounts" /></td>
+            <td class="component-picker-cell"></td>
+            <td><input type="number" step="0.01" name="${bodyId === 'earningsBody' ? 'EarningsAmounts' : 'DeductionsAmounts'}" /></td>
             <td>⚙</td>
         `;
 
         body.appendChild(row);
+        row.querySelector('.component-picker-cell').appendChild(createComponentPicker(fieldName, options));
     }
+
+    function createComponentPicker(fieldName, values) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'search-select salary-component-picker';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'erp-input';
+        input.autocomplete = 'off';
+        input.placeholder = 'Select component';
+        input.setAttribute('aria-label', 'Select component');
+        const value = document.createElement('input');
+        value.type = 'hidden';
+        value.name = fieldName;
+        const menu = document.createElement('div');
+        menu.className = 'search-select-menu';
+        wrapper.append(input, value, menu);
+
+        const render = () => {
+            const term = input.value.trim().toLowerCase();
+            const matches = values.filter(item => item.toLowerCase().startsWith(term)).slice(0, 10);
+            menu.innerHTML = matches.map(item => '<button type="button" data-value="' + escapeHtml(item) + '">' + escapeHtml(item) + '</button>').join('') || '<span>No matching component</span>';
+            const box = input.getBoundingClientRect();
+            menu.style.left = box.left + 'px';
+            menu.style.top = (box.bottom + 4) + 'px';
+            menu.style.width = box.width + 'px';
+            menu.style.display = 'block';
+        };
+
+        input.addEventListener('focus', render);
+        input.addEventListener('input', render);
+        menu.addEventListener('click', event => {
+            const selected = event.target.dataset.value;
+            if (!selected) return;
+            value.value = selected;
+            input.value = selected;
+            menu.style.display = 'none';
+        });
+        document.addEventListener('click', event => {
+            if (!wrapper.contains(event.target) && !menu.contains(event.target)) menu.style.display = 'none';
+        });
+        return wrapper;
+    }
+
+    (function () {
+        const employees = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(employees));
+        window.earnings = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(earnings));
+        window.deductions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(deductions));
+        window.escapeHtml = function (value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+        const employeeSelect = document.getElementById('salarySlipEmployee');
+        employeeSelect.addEventListener('change', function () {
+            const employee = employees.find(item => item.Id === employeeSelect.value);
+        });
+
+        function enhanceLargeSelects(scope) {
+            scope.querySelectorAll('select').forEach(function (select) {
+                if (select.dataset.searchSelectReady || select.options.length <= 11) return;
+                select.dataset.searchSelectReady = 'true';
+                const wrapper = document.createElement('div'); wrapper.className = 'search-select';
+                const input = document.createElement('input'); input.type = 'text'; input.className = 'erp-input'; input.placeholder = select.options[0].text;
+                const menu = document.createElement('div'); menu.className = 'search-select-menu';
+                select.parentNode.insertBefore(wrapper, select); wrapper.appendChild(input); wrapper.appendChild(menu); wrapper.appendChild(select); select.style.display = 'none';
+                const values = Array.from(select.options).slice(1).map(option => ({ value: option.value, text: option.text }));
+                function render(term) { const matches = values.filter(value => value.text.toLowerCase().startsWith(term.toLowerCase())).slice(0, 10); menu.innerHTML = matches.map(value => '<button type="button" data-value="' + value.value.replace(/"/g, '&quot;') + '">' + value.text + '</button>').join('') || '<span>No matching option</span>'; const box = input.getBoundingClientRect(); menu.style.left = box.left + 'px'; menu.style.top = (box.bottom + 4) + 'px'; menu.style.width = box.width + 'px'; menu.style.display = 'block'; }
+                input.addEventListener('focus', () => render(input.value)); input.addEventListener('input', () => render(input.value));
+                menu.addEventListener('click', event => { const value = event.target.dataset.value; if (!value) return; select.value = value; input.value = event.target.textContent; menu.style.display = 'none'; select.dispatchEvent(new Event('change')); });
+                document.addEventListener('click', event => { if (!wrapper.contains(event.target)) menu.style.display = 'none'; });
+            });
+        }
+        enhanceLargeSelects(document);
+    })();
 </script>

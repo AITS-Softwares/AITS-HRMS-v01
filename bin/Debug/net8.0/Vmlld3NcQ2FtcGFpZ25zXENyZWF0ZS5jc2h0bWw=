@@ -1,0 +1,2409 @@
+﻿@* @model Erp_Aits.Models.Campaign
+@{
+    ViewData["Title"] = "Campaign Studio";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "plus";
+    var customers = ViewBag.Customers as List<Erp_Aits.Models.Customer>;
+    var leads = ViewBag.Leads as List<Erp_Aits.Models.Lead>;
+    var emailMasters = ViewBag.EmailMasters as List<Erp_Aits.Models.EmailMaster>;
+}
+
+<div class="container-fluid p-4" style="background-color: #f8fafc; min-height: 100vh;">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <div>
+                <h1 class="display-4 fw-bold text-dark">
+                    Campaign <span class="text-primary">Studio</span>
+                </h1>
+                <p class="text-muted fw-medium">Design and schedule your next big outreach</p>
+            </div>
+            <div class="d-flex bg-white p-1 rounded-3 shadow-sm border">
+                <button type="button" onclick="setChannel('email')" id="channelEmailBtn"
+                        class="btn btn-primary px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2">
+                    <i class="fas fa-envelope"></i> Email
+                </button>
+                <button type="button" onclick="setChannel('whatsapp')" id="channelWhatsappBtn"
+                        class="btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button type="button" onclick="setChannel('both')" id="channelBothBtn"
+                        class="btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary">
+                    <i class="fas fa-envelope"></i> <i class="fab fa-whatsapp"></i> Both
+                </button>
+            </div>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Display ModelState Errors -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Please correct the following errors:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data" id="campaignForm">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- Form -->
+                <div class="col-lg-8">
+
+                    <!-- 1. Identity & Timing -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-4">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                                 style="width: 40px; height: 40px;">
+                                1
+                            </div>
+                            <h5 class="fw-bold text-uppercase mb-0">Identity & Timing</h5>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-uppercase text-secondary">Campaign Name <span class="text-danger">*</span></label>
+                                <input asp-for="CampaignName" type="text" required
+                                       class="form-control bg-light border-0 rounded-3 py-3"
+                                       placeholder="Diwali Promo 2026" />
+                                <span asp-validation-for="CampaignName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-uppercase text-secondary">Execution Time <span class="text-danger">*</span></label>
+                                <input asp-for="ScheduledTime" type="datetime-local" required
+                                       class="form-control bg-light border-0 rounded-3 py-3" />
+                                <span asp-validation-for="ScheduledTime" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Sender field always visible -->
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-uppercase text-secondary">Sender Brand <span class="text-danger">*</span></label>
+                                <input asp-for="Sender" type="text" required
+                                       class="form-control bg-light border-0 rounded-3 py-3"
+                                       placeholder="Marketing Team" />
+                                <span asp-validation-for="Sender" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6" id="emailMasterField">
+                                <label class="small fw-bold text-uppercase text-secondary">Email Master Preset</label>
+                                <select asp-for="EmailMasterId" class="form-select bg-light border-0 rounded-3 py-3">
+                                    <option value="">Start from Scratch</option>
+                                    @if (emailMasters != null)
+                                    {
+                                        foreach (var master in emailMasters)
+                                        {
+                                            <option value="@master.Id">@master.Email</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Audience -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 40px; height: 40px;">
+                                    2
+                                </div>
+                                <h5 class="fw-bold text-uppercase mb-0">Target Audience</h5>
+                            </div>
+                            <div class="d-flex bg-light p-1 rounded-2 gap-1">
+                                <button type="button" onclick="setRecipientSource('segment')" id="srcSegment"
+                                        class="btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm">
+                                    Segment
+                                </button>
+                                <button type="button" onclick="setRecipientSource('excel')" id="srcExcel"
+                                        class="btn btn-sm px-3 py-1 fw-bold text-uppercase text-secondary">
+                                    Excel
+                                </button>
+                                <button type="button" onclick="setRecipientSource('manual')" id="srcManual"
+                                        class="btn btn-sm px-3 py-1 fw-bold text-uppercase text-secondary">
+                                    Manual
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Segment Section -->
+                        <div id="segmentSection">
+                            <div class="row g-3">
+                                <!-- Customers -->
+                                <div class="col-md-6">
+                                    <div id="segmentCustomers" class="p-4 rounded-3 border-2 cursor-pointer border-primary bg-primary bg-opacity-10">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="fw-bold fs-5">All Customers</span>
+                                            <span class="badge bg-primary rounded-pill">@(customers?.Count ?? 0)</span>
+                                        </div>
+                                        <p class="small text-secondary fw-bold mt-1" id="customerCount">@(customers?.Count ?? 0) Contacts Found</p>
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="d-flex gap-2 mb-2">
+                                                <button type="button" onclick="selectAllCustomers()"
+                                                        class="btn btn-sm btn-outline-primary fw-bold text-uppercase">
+                                                    Select All
+                                                </button>
+                                                <button type="button" onclick="deselectAllCustomers()"
+                                                        class="btn btn-sm btn-outline-secondary fw-bold text-uppercase">
+                                                    Clear
+                                                </button>
+                                            </div>
+                                            <div class="overflow-auto" style="max-height: 200px;" id="customersList">
+                                                @if (customers != null && customers.Any())
+                                                {
+                                                    foreach (var customer in customers)
+                                                    {
+                                                        <label class="d-flex align-items-center gap-2 p-2 hover-bg-light rounded-2 cursor-pointer">
+                                                            <input type="checkbox" class="customer-check form-check-input"
+                                                                   value="@customer.Id" onchange="updateSelectedIds()" />
+                                                            <div class="small fw-bold text-truncate">
+                                                                @customer.CustomerName
+                                                                <span class="text-secondary fw-normal" data-type="email">@customer.PrimaryEmail</span>
+                                                                <span class="text-secondary fw-normal d-none" data-type="phone">@customer.MobileNumber</span>
+                                                            </div>
+                                                        </label>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-center text-muted py-3">
+                                                        <i class="fas fa-users fa-2x d-block mb-2"></i>
+                                                        <span>No customers found.</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Leads -->
+                                <div class="col-md-6">
+                                    <div id="segmentLeads" class="p-4 rounded-3 border-2 cursor-pointer border-light bg-light hover-border-secondary">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="fw-bold fs-5">New Leads</span>
+                                            <span class="badge bg-primary rounded-pill">@(leads?.Count ?? 0)</span>
+                                        </div>
+                                        <p class="small text-secondary fw-bold mt-1" id="leadCount">@(leads?.Count ?? 0) Contacts Found</p>
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="d-flex gap-2 mb-2">
+                                                <button type="button" onclick="selectAllLeads()"
+                                                        class="btn btn-sm btn-outline-primary fw-bold text-uppercase">
+                                                    Select All
+                                                </button>
+                                                <button type="button" onclick="deselectAllLeads()"
+                                                        class="btn btn-sm btn-outline-secondary fw-bold text-uppercase">
+                                                    Clear
+                                                </button>
+                                            </div>
+                                            <div class="overflow-auto" style="max-height: 200px;" id="leadsList">
+                                                @if (leads != null && leads.Any())
+                                                {
+                                                    foreach (var lead in leads)
+                                                    {
+                                                        <label class="d-flex align-items-center gap-2 p-2 hover-bg-light rounded-2 cursor-pointer">
+                                                            <input type="checkbox" class="lead-check form-check-input"
+                                                                   value="@lead.Id" onchange="updateSelectedIds()" />
+                                                            <div class="small fw-bold text-truncate">
+                                                                @lead.FirstName @lead.LastName
+                                                                <span class="text-secondary fw-normal" data-type="email">@lead.Email</span>
+                                                                <span class="text-secondary fw-normal d-none" data-type="phone">@lead.MobileNo</span>
+                                                            </div>
+                                                        </label>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-center text-muted py-3">
+                                                        <i class="fas fa-user-graduate fa-2x d-block mb-2"></i>
+                                                        <span>No leads found.</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- HIDDEN FIELDS FOR SEGMENT -->
+                            <input type="hidden" id="selectedCustomers" name="selectedCustomers" value="" />
+                            <input type="hidden" id="selectedLeads" name="selectedLeads" value="" />
+                        </div>
+
+                        <!-- Excel Section -->
+                        <div id="excelSection" style="display:none;">
+                            <div class="space-y-4">
+                                <!-- Download Template Buttons -->
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <div>
+                                        <i class="fas fa-file-excel text-success fs-4"></i>
+                                        <span class="fw-bold ms-2">Upload List</span>
+                                    </div>
+                                    <div class="d-flex gap-2" id="templateButtons">
+                                        <a href="@Url.Action("DownloadEmailTemplate", "Campaigns")" class="btn btn-success btn-sm" id="emailTemplateBtn">
+                                            <i class="fas fa-file-excel"></i> Email Template
+                                        </a>
+                                        <a href="@Url.Action("DownloadWhatsAppTemplate", "Campaigns")" class="btn btn-success btn-sm d-none" id="whatsappTemplateBtn">
+                                            <i class="fas fa-file-excel"></i> WhatsApp Template
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="border-4 border-dashed border-light rounded-4 p-5 text-center position-relative"
+                                     style="border-color: #dee2e6 !important; background-color: #f8f9fa;">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-secondary mb-3"></i>
+                                    <p class="fw-bold text-secondary">Drop your Excel file or click to browse</p>
+                                    <p class="small text-muted" id="uploadInstruction">Download the template above to get started</p>
+                                    <p class="small text-muted">Supports unlimited rows</p>
+                                    <input type="file" name="attachments" accept=".xlsx,.xls"
+                                           class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
+                                           id="excelFileInput" />
+                                </div>
+
+                                <div id="excelPreview" style="display:none;" class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center bg-dark p-3 rounded-3 text-white">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-file-excel text-success"></i>
+                                            <span class="fw-bold" id="excelValidCount">0 Valid Entries Detected</span>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" onclick="clearExcel()" class="btn btn-sm btn-light">
+                                                <i class="fas fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="border rounded-3 overflow-hidden mt-2">
+                                        <div class="bg-light px-3 py-2 d-flex justify-content-between fw-bold small">
+                                            <span>Preview (<span id="excelTotalRows">0</span>)</span>
+                                            <div class="d-flex gap-3">
+                                                <span class="text-success">Valid: <span id="excelValid">0</span></span>
+                                                <span class="text-danger">Invalid: <span id="excelInvalid">0</span></span>
+                                            </div>
+                                        </div>
+                                        <div class="overflow-auto" style="max-height: 220px;" id="excelPreviewBody">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Section -->
+                        <div id="manualSection" style="display:none;">
+                            <div class="space-y-2">
+                                <textarea id="manualEmailsTextarea" rows="6"
+                                          class="form-control bg-light border-0 rounded-3 py-3 font-monospace"
+                                          placeholder="john@example.com, sara@test.com..."></textarea>
+                                <p class="small fw-bold text-uppercase text-secondary text-end mt-1" id="manualCount">
+                                    0 Entries Parsed
+                                </p>
+                                <div class="alert alert-info small" id="manualInstruction">
+                                    <i class="fas fa-info-circle"></i>
+                                    Separate multiple entries with commas or new lines
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Content - FIXED -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 40px; height: 40px;">
+                                    3
+                                </div>
+                                <h5 class="fw-bold text-uppercase mb-0">Creative Content</h5>
+                            </div>
+                            <select class="form-select form-select-sm bg-light border-0 rounded-2 w-auto">
+                                <option value="">Select a Template</option>
+                            </select>
+                        </div>
+
+                        <!-- Email Content -->
+                        <div id="emailContentFields">
+                            <div class="mb-3">
+                                <label class="small fw-bold text-uppercase text-secondary">Subject Line</label>
+                                <input asp-for="EmailSubject" type="text"
+                                       class="form-control bg-light border-0 rounded-3 py-3 fw-bold"
+                                       placeholder="e.g., Don't miss your special gift!" />
+                            </div>
+                            <div class="border rounded-3 overflow-hidden bg-light" style="min-height: 400px;">
+                                <textarea asp-for="Content" class="form-control border-0" rows="12" id="contentEditor"></textarea>
+                                <span asp-validation-for="Content" class="text-danger small"></span>
+                                <small class="text-muted ms-2">Content is required. Please add your message above.</small>
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <input asp-for="CtaText" type="text"
+                                           class="form-control bg-light border-0 rounded-3 py-3 fw-bold"
+                                           placeholder="CTA Button Text (Shop Now)" />
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center justify-content-center gap-2 bg-light rounded-3 py-3 small fw-bold text-uppercase text-secondary">
+                                        <i class="fas fa-download"></i> <span id="wordCount">0</span> Words Written
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Content - Uses different name -->
+                        <div id="whatsappContentFields" style="display:none;">
+                            <label class="small fw-bold text-uppercase text-secondary">WhatsApp Message <span class="text-danger">*</span></label>
+                            <textarea name="whatsappContent" rows="8"
+                                      class="form-control bg-success bg-opacity-10 border-success rounded-4 py-3"
+                                      placeholder="Write your WhatsApp blast here..."
+                                      id="whatsappContentTextarea"></textarea>
+                            <div class="d-flex justify-content-between small fw-bold text-uppercase text-secondary mt-2">
+                                <span>Supports *bold* _italic_ ~strike~</span>
+                                <span id="whatsappCharCount">0 Characters</span>
+                            </div>
+                            <div class="alert alert-info small mt-2">
+                                <i class="fas fa-info-circle"></i>
+                                WhatsApp messages support emojis and basic formatting
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attachments -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <i class="fas fa-paperclip text-secondary"></i>
+                            <h6 class="fw-bold mb-0">Attachments</h6>
+                            <span class="badge bg-light text-secondary">Optional</span>
+                        </div>
+                        <input type="file" id="file-upload" name="attachments" multiple accept="image/*,video/*,.pdf,.doc,.docx"
+                               class="d-none" />
+                        <label for="file-upload"
+                               class="btn btn-light d-inline-flex align-items-center gap-2 rounded-3 border">
+                            <i class="fas fa-plus-circle"></i> Add Files
+                        </label>
+                        <div id="attachmentPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" id="submitBtn"
+                            class="btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg">
+                        <i class="fas fa-calendar-alt"></i> Schedule CAMPAIGN
+                    </button>
+                </div>
+
+                <!-- Device Preview -->
+                <div class="col-lg-4 sticky-top" style="top: 20px;">
+                    <div class="bg-dark rounded-5 p-3 shadow-lg position-relative mx-auto" style="max-width: 340px;">
+                        <div class="bg-white rounded-4 overflow-hidden">
+                            <div class="bg-light p-3 pt-4 text-center border-bottom">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-3 mx-auto d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 48px; height: 48px; font-size: 24px;" id="previewSenderInitial">
+                                    M
+                                </div>
+                                <p class="small fw-bold text-uppercase text-secondary mb-0" id="previewSender">Marketing Team</p>
+                            </div>
+                            <div class="p-3 overflow-auto" style="height: 400px;">
+                                <div id="emailPreview">
+                                    <h5 class="fw-bold" id="previewSubject">Your Subject Line Preview</h5>
+                                    <div class="small text-secondary" id="previewContent">
+                                        <p>Your email content will appear here...</p>
+                                    </div>
+                                    <div class="mt-3 py-2 bg-primary text-white rounded-2 text-center small fw-bold text-uppercase" id="previewCta">
+                                        Shop Now
+                                    </div>
+                                </div>
+                                <div id="whatsappPreview" style="display:none;">
+                                    <div class="bg-success bg-opacity-10 p-3 rounded-3 border border-success">
+                                        <p class="small text-secondary" id="previewWhatsappContent">
+                                            Type a message to see the preview...
+                                        </p>
+                                        <p class="small text-success fw-bold text-end mb-0">12:00 PM ✓✓</p>
+                                    </div>
+                                </div>
+                                <div id="bothPreview" style="display:none;">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded-3 border border-primary">
+                                        <p class="small text-secondary fw-bold">📧 Email + 💬 WhatsApp</p>
+                                        <hr />
+                                        <p class="small text-secondary" id="previewBothContent">
+                                            Your message will be sent via both channels...
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center text-white-50 small mt-2">
+                            <i class="fas fa-mobile-alt"></i> Live Preview
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Hidden Fields -->
+            <input type="hidden" id="RecipientSource" name="RecipientSource" value="segment" />
+            <input type="hidden" id="manualEmails" name="manualEmails" value="" />
+            <input type="hidden" id="CampaignChannel" name="CampaignChannel" value="email" />
+
+        </form>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .hover-bg-light:hover {
+        background-color: #f8f9fa;
+    }
+
+    .hover-border-secondary:hover {
+        border-color: #6c757d !important;
+    }
+
+    .rounded-4 {
+        border-radius: 2rem;
+    }
+
+    .rounded-5 {
+        border-radius: 3.5rem;
+    }
+
+    .bg-opacity-10 {
+        --bs-bg-opacity: 0.1;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 20px;
+    }
+
+    .form-control.bg-light, .form-select.bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    .btn-primary {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+            border-color: #4338ca;
+        }
+
+    .btn-success:hover {
+        background-color: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .text-primary {
+        color: #4f46e5 !important;
+    }
+
+    .bg-primary.bg-opacity-10 {
+        background-color: rgba(79, 70, 229, 0.1) !important;
+    }
+
+    .border-primary {
+        border-color: #4f46e5 !important;
+    }
+
+    .font-monospace {
+        font-family: monospace;
+    }
+
+    .opacity-0 {
+        opacity: 0;
+    }
+
+    .position-absolute {
+        position: absolute;
+    }
+
+    .top-0 {
+        top: 0;
+    }
+
+    .start-0 {
+        left: 0;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .h-100 {
+        height: 100%;
+    }
+
+    .border-dashed:hover {
+        background-color: #e9ecef !important;
+        border-color: #4f46e5 !important;
+        transition: all 0.3s ease;
+    }
+
+    .attachment-item {
+        position: relative;
+        width: 96px;
+        height: 96px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
+
+        .attachment-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .attachment-item .file-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            font-size: 12px;
+            text-align: center;
+            padding: 4px;
+            word-break: break-all;
+        }
+
+        .attachment-item .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            padding: 0;
+        }
+
+            .attachment-item .remove-btn:hover {
+                background-color: #c82333;
+            }
+
+    .d-none {
+        display: none !important;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"></script>
+
+    <script>
+        // ============================================================
+        // RECIPIENT SOURCE TOGGLE
+        // ============================================================
+        function setRecipientSource(source) {
+            console.log('Setting recipient source to:', source);
+
+            var segment = document.getElementById('segmentSection');
+            var excel = document.getElementById('excelSection');
+            var manual = document.getElementById('manualSection');
+            var srcSegment = document.getElementById('srcSegment');
+            var srcExcel = document.getElementById('srcExcel');
+            var srcManual = document.getElementById('srcManual');
+
+            var recipientSourceField = document.getElementById('RecipientSource');
+            if (recipientSourceField) {
+                recipientSourceField.value = source;
+                console.log('RecipientSource updated to:', source);
+            }
+
+            var elements = [srcSegment, srcExcel, srcManual];
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase text-secondary';
+            }
+
+            if (source === 'segment') {
+                segment.style.display = 'block';
+                excel.style.display = 'none';
+                manual.style.display = 'none';
+                srcSegment.className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm';
+            } else if (source === 'excel') {
+                segment.style.display = 'none';
+                excel.style.display = 'block';
+                manual.style.display = 'none';
+                srcExcel.className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm';
+            } else {
+                segment.style.display = 'none';
+                excel.style.display = 'none';
+                manual.style.display = 'block';
+                srcManual.className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm';
+            }
+        }
+
+        // ============================================================
+        // CHANNEL TOGGLE - FIXED
+        // ============================================================
+        function setChannel(channel) {
+            var emailBtn = document.getElementById('channelEmailBtn');
+            var whatsappBtn = document.getElementById('channelWhatsappBtn');
+            var bothBtn = document.getElementById('channelBothBtn');
+
+            var emailContent = document.getElementById('emailContentFields');
+            var whatsappContent = document.getElementById('whatsappContentFields');
+            var emailPreview = document.getElementById('emailPreview');
+            var whatsappPreview = document.getElementById('whatsappPreview');
+            var bothPreview = document.getElementById('bothPreview');
+            var submitBtn = document.getElementById('submitBtn');
+            var channelField = document.getElementById('CampaignChannel');
+            var emailMasterField = document.getElementById('emailMasterField');
+
+            var emailTemplateBtn = document.getElementById('emailTemplateBtn');
+            var whatsappTemplateBtn = document.getElementById('whatsappTemplateBtn');
+            var uploadInstruction = document.getElementById('uploadInstruction');
+
+            if (channelField) {
+                channelField.value = channel;
+            }
+
+            // Reset all buttons
+            emailBtn.className = 'btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary';
+            whatsappBtn.className = 'btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary';
+            bothBtn.className = 'btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary';
+
+            // Hide all content sections
+            emailContent.style.display = 'none';
+            whatsappContent.style.display = 'none';
+            emailPreview.style.display = 'none';
+            whatsappPreview.style.display = 'none';
+            bothPreview.style.display = 'none';
+
+            // Show/hide contact information based on channel
+            var showPhone = (channel === 'whatsapp' || channel === 'both');
+            var showEmail = (channel === 'email' || channel === 'both');
+
+            // Toggle email/phone display in customer and lead lists
+            document.querySelectorAll('.customer-check, .lead-check').forEach(function(checkbox) {
+                var label = checkbox.closest('label');
+                if (label) {
+                    var emailSpan = label.querySelector('[data-type="email"]');
+                    var phoneSpan = label.querySelector('[data-type="phone"]');
+                    if (emailSpan) emailSpan.classList.toggle('d-none', !showEmail);
+                    if (phoneSpan) phoneSpan.classList.toggle('d-none', !showPhone);
+                }
+            });
+
+            // Update contact count labels
+            var customerCount = document.getElementById('customerCount');
+            var leadCount = document.getElementById('leadCount');
+            if (customerCount) {
+                customerCount.textContent = showPhone ? '📱 Phone Numbers' : '📧 Email Addresses';
+            }
+            if (leadCount) {
+                leadCount.textContent = showPhone ? '📱 Phone Numbers' : '📧 Email Addresses';
+            }
+
+            // Update template buttons
+            if (channel === 'whatsapp' || channel === 'both') {
+                emailTemplateBtn.classList.add('d-none');
+                whatsappTemplateBtn.classList.remove('d-none');
+                if (uploadInstruction) uploadInstruction.textContent = 'Download the WhatsApp template above';
+                if (emailMasterField) emailMasterField.style.display = 'none';
+            } else {
+                emailTemplateBtn.classList.remove('d-none');
+                whatsappTemplateBtn.classList.add('d-none');
+                if (uploadInstruction) uploadInstruction.textContent = 'Download the email template above';
+                if (emailMasterField) emailMasterField.style.display = 'block';
+            }
+
+            // Update manual entry placeholder and instruction
+            var manualTextarea = document.getElementById('manualEmailsTextarea');
+            var manualInstruction = document.getElementById('manualInstruction');
+            var manualCount = document.getElementById('manualCount');
+
+            if (manualTextarea) {
+                if (showPhone) {
+                    manualTextarea.placeholder = '9876543210, 9876543211...';
+                    if (manualInstruction) {
+                        manualInstruction.innerHTML = '<i class="fas fa-info-circle"></i> Separate multiple phone numbers with commas or new lines (10+ digits)';
+                    }
+                    if (manualCount) {
+                        manualCount.textContent = '0 Phone Numbers';
+                    }
+                } else {
+                    manualTextarea.placeholder = 'john@example.com, sara@test.com...';
+                    if (manualInstruction) {
+                        manualInstruction.innerHTML = '<i class="fas fa-info-circle"></i> Separate multiple emails with commas or new lines';
+                    }
+                    if (manualCount) {
+                        manualCount.textContent = '0 Emails';
+                    }
+                }
+            }
+
+            if (channel === 'email') {
+                emailBtn.className = 'btn btn-primary px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2';
+                emailContent.style.display = 'block';
+                emailPreview.style.display = 'block';
+                submitBtn.className = 'btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg';
+                submitBtn.innerHTML = '<i class="fas fa-envelope"></i> Schedule EMAIL Campaign';
+            } else if (channel === 'whatsapp') {
+                whatsappBtn.className = 'btn btn-success px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2';
+                whatsappContent.style.display = 'block';
+                whatsappPreview.style.display = 'block';
+                submitBtn.className = 'btn btn-success btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg';
+                submitBtn.innerHTML = '<i class="fab fa-whatsapp"></i> Schedule WHATSAPP Campaign';
+            } else if (channel === 'both') {
+                bothBtn.className = 'btn btn-primary px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2';
+                emailContent.style.display = 'block';
+                whatsappContent.style.display = 'block';
+                emailPreview.style.display = 'block';
+                whatsappPreview.style.display = 'block';
+                bothPreview.style.display = 'block';
+                submitBtn.className = 'btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg';
+                submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <i class="fab fa-whatsapp"></i> Schedule BOTH Campaign';
+            }
+        }
+
+        // ============================================================
+        // SELECT ALL FUNCTIONS
+        // ============================================================
+        function selectAllCustomers() {
+            document.querySelectorAll('.customer-check').forEach(function(cb) { cb.checked = true; });
+            updateSelectedIds();
+        }
+
+        function deselectAllCustomers() {
+            document.querySelectorAll('.customer-check').forEach(function(cb) { cb.checked = false; });
+            updateSelectedIds();
+        }
+
+        function selectAllLeads() {
+            document.querySelectorAll('.lead-check').forEach(function(cb) { cb.checked = true; });
+            updateSelectedIds();
+        }
+
+        function deselectAllLeads() {
+            document.querySelectorAll('.lead-check').forEach(function(cb) { cb.checked = false; });
+            updateSelectedIds();
+        }
+
+        // ============================================================
+        // UPDATE SELECTED IDs
+        // ============================================================
+        function updateSelectedIds() {
+            var customerIds = [];
+            var leadIds = [];
+
+            document.querySelectorAll('.customer-check:checked').forEach(function(cb) {
+                customerIds.push(cb.value);
+            });
+
+            document.querySelectorAll('.lead-check:checked').forEach(function(cb) {
+                leadIds.push(cb.value);
+            });
+
+            document.getElementById('selectedCustomers').value = customerIds.join(',');
+            document.getElementById('selectedLeads').value = leadIds.join(',');
+
+            console.log('Selected Customers:', document.getElementById('selectedCustomers').value);
+            console.log('Selected Leads:', document.getElementById('selectedLeads').value);
+        }
+
+        // ============================================================
+        // MANUAL ENTRIES
+        // ============================================================
+        document.getElementById('manualEmailsTextarea').addEventListener('input', function() {
+            var text = this.value;
+            var channel = document.getElementById('CampaignChannel').value;
+            var isWhatsApp = (channel === 'whatsapp' || channel === 'both');
+
+            var entries = text.split(/[,;\n]/).filter(function(e) {
+                return e.trim() && e.trim().length > 0;
+            });
+
+            var validEntries = [];
+            if (isWhatsApp) {
+                validEntries = entries.filter(function(e) {
+                    var cleaned = e.trim().replace(/\D/g, '');
+                    return cleaned.length >= 10;
+                });
+                document.getElementById('manualCount').textContent = validEntries.length + ' Phone Numbers';
+            } else {
+                validEntries = entries.filter(function(e) {
+                    return e.trim().indexOf('@@') > -1;
+                });
+                document.getElementById('manualCount').textContent = validEntries.length + ' Emails';
+            }
+        });
+
+        // ============================================================
+        // EXCEL FILE PREVIEW
+        // ============================================================
+        document.getElementById('excelFileInput').addEventListener('change', function() {
+            var file = this.files[0];
+            if (file) {
+                document.getElementById('excelPreview').style.display = 'block';
+
+                var fileNameSpan = document.getElementById('excelValidCount');
+                fileNameSpan.textContent = '📄 ' + file.name;
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var text = e.target.result;
+                    var lines = text.split('\n');
+                    var channel = document.getElementById('CampaignChannel').value;
+                    var isWhatsApp = (channel === 'whatsapp' || channel === 'both');
+
+                    var valid = 0;
+                    var invalid = 0;
+                    var html = '<table class="table table-sm table-bordered mb-0"><thead class="table-light"><tr>';
+                    if (isWhatsApp) {
+                        html += '<th>#</th><th>Phone Number</th><th>Name</th><th>Company</th><th>Status</th>';
+                    } else {
+                        html += '<th>#</th><th>Email</th><th>Name</th><th>Company</th><th>Status</th>';
+                    }
+                    html += '</tr></thead><tbody>';
+
+                    var startRow = 0;
+                    if (lines.length > 0) {
+                        var firstLine = lines[0].toLowerCase();
+                        if (firstLine.includes('email') || firstLine.includes('phone') || firstLine.includes('mobile')) {
+                            startRow = 1;
+                        }
+                    }
+
+                    for (var i = startRow; i < lines.length; i++) {
+                        if (!lines[i].trim()) continue;
+
+                        var parts = lines[i].split(/[,;\t]/);
+                        var firstCol = parts[0] ? parts[0].trim() : '';
+                        var name = parts[1] ? parts[1].trim() : '';
+                        var company = parts[2] ? parts[2].trim() : '';
+
+                        if (firstCol) {
+                            var isValid = false;
+                            if (isWhatsApp) {
+                                var cleaned = firstCol.replace(/\D/g, '');
+                                isValid = cleaned.length >= 10;
+                            } else {
+                                isValid = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(firstCol);
+                            }
+
+                            if (isValid) {
+                                valid++;
+                                html += '<tr><td>' + (i - startRow + 1) + '</td><td>' + firstCol + '</td><td>' + name + '</td><td>' + company + '</td>';
+                                html += '<td><span class="badge bg-success">Valid</span></td></tr>';
+                            } else {
+                                invalid++;
+                                html += '<tr><td>' + (i - startRow + 1) + '</td><td>' + firstCol + '</td><td>' + name + '</td><td>' + company + '</td>';
+                                html += '<td><span class="badge bg-danger">Invalid</span></td></tr>';
+                            }
+                        }
+                    }
+
+                    html += '</tbody></table>';
+
+                    if (valid === 0 && invalid === 0) {
+                        html = '<div class="text-center text-muted py-4"><i class="fas fa-exclamation-triangle fa-2x d-block mb-2"></i>No entries found. Please check your file format.</div>';
+                    }
+
+                    document.getElementById('excelPreviewBody').innerHTML = html;
+                    document.getElementById('excelValid').textContent = valid;
+                    document.getElementById('excelInvalid').textContent = invalid;
+                    document.getElementById('excelTotalRows').textContent = valid + invalid;
+                    document.getElementById('excelValidCount').textContent = '✅ ' + valid + ' Valid Entries Detected';
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function clearExcel() {
+            document.getElementById('excelPreview').style.display = 'none';
+            document.getElementById('excelFileInput').value = '';
+            document.getElementById('excelValidCount').textContent = '0 Valid Entries Detected';
+            document.getElementById('excelValid').textContent = '0';
+            document.getElementById('excelInvalid').textContent = '0';
+            document.getElementById('excelTotalRows').textContent = '0';
+        }
+
+        // ============================================================
+        // PREVIEW UPDATE
+        // ============================================================
+        function updatePreview() {
+            var sender = document.getElementById('Sender')?.value || 'Marketing Team';
+            document.getElementById('previewSender').textContent = sender;
+            document.getElementById('previewSenderInitial').textContent = sender.charAt(0).toUpperCase();
+
+            var subject = document.getElementById('EmailSubject')?.value || 'Your Subject Line Preview';
+            document.getElementById('previewSubject').textContent = subject;
+
+            // Get content from email or WhatsApp
+            var channel = document.getElementById('CampaignChannel').value;
+            var content = '';
+
+            if (channel === 'whatsapp' || channel === 'both') {
+                var whatsappContent = document.getElementById('whatsappContentTextarea')?.value || '';
+                content = whatsappContent;
+            } else {
+                content = document.getElementById('contentEditor')?.value || '<p>Your email content will appear here...</p>';
+            }
+
+            document.getElementById('previewContent').innerHTML = content;
+
+            var cta = document.getElementById('CtaText')?.value || 'Shop Now';
+            document.getElementById('previewCta').textContent = cta;
+
+            var textOnly = content.replace(/<[^>]*>/g, ' ').trim();
+            var wordCount = textOnly ? textOnly.split(/\s+/).length : 0;
+            document.getElementById('wordCount').textContent = wordCount;
+
+            var whatsappContent = document.querySelector('#whatsappContentFields textarea')?.value || '';
+            document.getElementById('whatsappCharCount').textContent = whatsappContent.length + ' Characters';
+            document.getElementById('previewWhatsappContent').textContent = whatsappContent || 'Type a message to see the preview...';
+            document.getElementById('previewBothContent').textContent = whatsappContent || 'Your message will be sent via both channels...';
+        }
+
+        // ============================================================
+        // FORM SUBMIT HANDLER - FIXED
+        // ============================================================
+        document.getElementById('campaignForm').addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+
+            // 1. Save TinyMCE content (Email)
+            if (tinymce.activeEditor) {
+                tinymce.activeEditor.save();
+                console.log('TinyMCE content saved');
+            }
+
+            // 2. Sync WhatsApp content to the Content field
+            var channel = document.getElementById('CampaignChannel').value;
+            var whatsappContent = document.getElementById('whatsappContentTextarea');
+            var contentEditor = document.getElementById('contentEditor');
+
+            if (channel === 'whatsapp' || channel === 'both') {
+                if (whatsappContent && contentEditor) {
+                    // Copy WhatsApp content to the hidden email editor
+                    contentEditor.value = whatsappContent.value;
+                    console.log('WhatsApp content synced to Content field:', whatsappContent.value);
+                }
+            }
+
+            // 3. Update manual emails hidden field
+            var manualTextarea = document.getElementById('manualEmailsTextarea');
+            var manualHidden = document.getElementById('manualEmails');
+            if (manualTextarea && manualHidden) {
+                manualHidden.value = manualTextarea.value;
+                console.log('Manual entries updated:', manualHidden.value);
+            }
+
+            var source = document.getElementById('RecipientSource').value;
+            var isValid = true;
+            var errorMsg = '';
+
+            // Validate Content - check both sources
+            var contentValue = contentEditor ? contentEditor.value : '';
+            var whatsappValue = whatsappContent ? whatsappContent.value : '';
+
+            // For WhatsApp or Both, check WhatsApp content
+            if (channel === 'whatsapp' || channel === 'both') {
+                if (!whatsappValue || whatsappValue.trim() === '') {
+                    errorMsg = 'Content is required. Please add your WhatsApp message.';
+                    isValid = false;
+                }
+            } else {
+                // For Email, check email content
+                if (!contentValue || contentValue.trim() === '' || contentValue === '<p><br></p>') {
+                    errorMsg = 'Content is required. Please add your email message.';
+                    isValid = false;
+                }
+            }
+
+            if (source === 'segment') {
+                var customerIds = document.getElementById('selectedCustomers').value;
+                var leadIds = document.getElementById('selectedLeads').value;
+                if (!customerIds && !leadIds) {
+                    errorMsg = 'Please select at least one customer or lead.';
+                    isValid = false;
+                }
+            } else if (source === 'manual') {
+                var manualValue = manualTextarea ? manualTextarea.value.trim() : '';
+                if (!manualValue) {
+                    errorMsg = 'Please enter at least one entry.';
+                    isValid = false;
+                } else {
+                    var isWhatsApp = (channel === 'whatsapp' || channel === 'both');
+                    var entries = manualValue.split(/[,;\n]/).filter(function(e) {
+                        return e.trim() && e.trim().length > 0;
+                    });
+
+                    if (isWhatsApp) {
+                        var validPhones = entries.filter(function(e) {
+                            var cleaned = e.trim().replace(/\D/g, '');
+                            return cleaned.length >= 10;
+                        });
+                        if (validPhones.length === 0) {
+                            errorMsg = 'Please enter at least one valid phone number (10+ digits).';
+                            isValid = false;
+                        }
+                    } else {
+                        var validEmails = entries.filter(function(e) {
+                            return e.trim().indexOf('@@') > -1;
+                        });
+                        if (validEmails.length === 0) {
+                            errorMsg = 'Please enter at least one valid email address.';
+                            isValid = false;
+                        }
+                    }
+                }
+            } else if (source === 'excel') {
+                var excelFile = document.getElementById('excelFileInput');
+                if (!excelFile || excelFile.files.length === 0) {
+                    errorMsg = 'Please upload an Excel file.';
+                    isValid = false;
+                }
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                var errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger alert-dismissible fade show rounded-3';
+                errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + errorMsg +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                var form = document.getElementById('campaignForm');
+                form.insertBefore(errorDiv, form.firstChild);
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+
+            var submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Campaign...';
+
+            console.log('Form submission validated successfully!');
+            return true;
+        });
+
+        // ============================================================
+        // FILE ATTACHMENTS
+        // ============================================================
+        document.getElementById('file-upload').addEventListener('change', function() {
+            var container = document.getElementById('attachmentPreview');
+            container.innerHTML = '';
+
+            var files = this.files;
+            for (var i = 0; i < files.length; i++) {
+                var div = document.createElement('div');
+                div.className = 'attachment-item';
+
+                if (files[i].type.startsWith('image/')) {
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(files[i]);
+                    img.alt = files[i].name;
+                    div.appendChild(img);
+                } else {
+                    var divFile = document.createElement('div');
+                    divFile.className = 'file-icon';
+                    divFile.innerHTML = '<i class="fas fa-file fa-2x d-block mb-1"></i>' + files[i].name.substring(0, 10) + '...';
+                    div.appendChild(divFile);
+                }
+
+                var btn = document.createElement('button');
+                btn.className = 'remove-btn';
+                btn.innerHTML = '×';
+                btn.type = 'button';
+                btn.onclick = function() {
+                    this.parentElement.remove();
+                };
+                div.appendChild(btn);
+                container.appendChild(div);
+            }
+        });
+
+        // ============================================================
+        // INPUT EVENT LISTENERS FOR PREVIEW
+        // ============================================================
+        document.getElementById('Sender')?.addEventListener('input', updatePreview);
+        document.getElementById('EmailSubject')?.addEventListener('input', updatePreview);
+        document.getElementById('CtaText')?.addEventListener('input', updatePreview);
+        document.getElementById('manualEmailsTextarea')?.addEventListener('input', updatePreview);
+        document.querySelector('#whatsappContentFields textarea')?.addEventListener('input', updatePreview);
+
+        // ============================================================
+        // INITIALIZE
+        // ============================================================
+        setChannel('email');
+        setRecipientSource('segment');
+        updateSelectedIds();
+
+        tinymce.init({
+            selector: '#contentEditor',
+            height: 300,
+            menubar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic backcolor | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | help',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; padding: 10px; }',
+            setup: function(editor) {
+                editor.on('keyup', updatePreview);
+                editor.on('change', updatePreview);
+                editor.on('init', function() {
+                    updatePreview();
+                });
+            }
+        });
+
+        setTimeout(updatePreview, 1000);
+
+        console.log('Campaign Studio initialized');
+        console.log('Customers count:', @(customers?.Count ?? 0));
+        console.log('Leads count:', @(leads?.Count ?? 0));
+        console.log('Email Masters count:', @(emailMasters?.Count ?? 0));
+    </script>
+} *@
+
+
+
+
+
+
+@model Erp_Aits.Models.Campaign
+@{
+    ViewData["Title"] = "Campaign Studio";
+    ViewData["Module"] = "CRM";
+    ViewData["Icon"] = "plus";
+    var customers = ViewBag.Customers as List<Erp_Aits.Models.Customer>;
+    var leads = ViewBag.Leads as List<Erp_Aits.Models.Lead>;
+    var emailMasters = ViewBag.EmailMasters as List<Erp_Aits.Models.EmailMaster>;
+}
+
+<div class="container-fluid p-4" style="background-color: #f8fafc; min-height: 100vh;">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <div>
+                <h1 class="display-4 fw-bold text-dark">
+                    Campaign <span class="text-primary">Studio</span>
+                </h1>
+                <p class="text-muted fw-medium">Design and schedule your next big outreach</p>
+            </div>
+            <div class="d-flex bg-white p-1 rounded-3 shadow-sm border">
+                <button type="button" onclick="setChannel('email')" id="channelEmailBtn"
+                        class="btn btn-primary px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2">
+                    <i class="fas fa-envelope"></i> Email
+                </button>
+                <button type="button" onclick="setChannel('whatsapp')" id="channelWhatsappBtn"
+                        class="btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button type="button" onclick="setChannel('both')" id="channelBothBtn"
+                        class="btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary">
+                    <i class="fas fa-envelope"></i> <i class="fab fa-whatsapp"></i> Both
+                </button>
+            </div>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Display ModelState Errors -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Please correct the following errors:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data" id="campaignForm">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- Form -->
+                <div class="col-lg-8">
+
+                    <!-- 1. Identity & Timing -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-4">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                                 style="width: 40px; height: 40px;">
+                                1
+                            </div>
+                            <h5 class="fw-bold text-uppercase mb-0">Identity & Timing</h5>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-uppercase text-secondary">Campaign Name <span class="text-danger">*</span></label>
+                                <input asp-for="CampaignName" type="text" required
+                                       class="form-control bg-light border-0 rounded-3 py-3"
+                                       placeholder="Diwali Promo 2026" />
+                                <span asp-validation-for="CampaignName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-uppercase text-secondary">Execution Time <span class="text-danger">*</span></label>
+                                <input asp-for="ScheduledTime" type="datetime-local" required
+                                       class="form-control bg-light border-0 rounded-3 py-3" />
+                                <span asp-validation-for="ScheduledTime" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Sender field always visible -->
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-uppercase text-secondary">Sender Brand <span class="text-danger">*</span></label>
+                                <input asp-for="Sender" type="text" required
+                                       class="form-control bg-light border-0 rounded-3 py-3"
+                                       placeholder="Marketing Team" />
+                                <span asp-validation-for="Sender" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6" id="emailMasterField">
+                                <label class="small fw-bold text-uppercase text-secondary">Email Master Preset</label>
+                                <select asp-for="EmailMasterId" class="form-select bg-light border-0 rounded-3 py-3">
+                                    <option value="">Start from Scratch</option>
+                                    @if (emailMasters != null)
+                                    {
+                                        foreach (var master in emailMasters)
+                                        {
+                                            <option value="@master.Id">@master.Email</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Audience -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 40px; height: 40px;">
+                                    2
+                                </div>
+                                <h5 class="fw-bold text-uppercase mb-0">Target Audience</h5>
+                            </div>
+                            <div class="d-flex bg-light p-1 rounded-2 gap-1">
+                                <button type="button" onclick="setRecipientSource('segment')" id="srcSegment"
+                                        class="btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm">
+                                    Segment
+                                </button>
+                                <button type="button" onclick="setRecipientSource('excel')" id="srcExcel"
+                                        class="btn btn-sm px-3 py-1 fw-bold text-uppercase text-secondary">
+                                    Excel
+                                </button>
+                                <button type="button" onclick="setRecipientSource('manual')" id="srcManual"
+                                        class="btn btn-sm px-3 py-1 fw-bold text-uppercase text-secondary">
+                                    Manual
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Segment Section -->
+                        <div id="segmentSection">
+                            <div class="row g-3">
+                                <!-- Customers -->
+                                <div class="col-md-6">
+                                    <div id="segmentCustomers" class="p-4 rounded-3 border-2 cursor-pointer border-primary bg-primary bg-opacity-10">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="fw-bold fs-5">All Customers</span>
+                                            <span class="badge bg-primary rounded-pill">@(customers?.Count ?? 0)</span>
+                                        </div>
+                                        <p class="small text-secondary fw-bold mt-1" id="customerCount">@(customers?.Count ?? 0) Contacts Found</p>
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="d-flex gap-2 mb-2">
+                                                <button type="button" onclick="selectAllCustomers()"
+                                                        class="btn btn-sm btn-outline-primary fw-bold text-uppercase">
+                                                    Select All
+                                                </button>
+                                                <button type="button" onclick="deselectAllCustomers()"
+                                                        class="btn btn-sm btn-outline-secondary fw-bold text-uppercase">
+                                                    Clear
+                                                </button>
+                                            </div>
+                                            <div class="overflow-auto" style="max-height: 200px;" id="customersList">
+                                                @if (customers != null && customers.Any())
+                                                {
+                                                    foreach (var customer in customers)
+                                                    {
+                                                        <label class="d-flex align-items-center gap-2 p-2 hover-bg-light rounded-2 cursor-pointer">
+                                                            <input type="checkbox" class="customer-check form-check-input"
+                                                                   value="@customer.Id" onchange="updateSelectedIds()" />
+                                                            <div class="small fw-bold text-truncate">
+                                                                @customer.CustomerName
+                                                                <span class="text-secondary fw-normal" data-type="email">@customer.PrimaryEmail</span>
+                                                                <span class="text-secondary fw-normal d-none" data-type="phone">@customer.MobileNumber</span>
+                                                            </div>
+                                                        </label>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-center text-muted py-3">
+                                                        <i class="fas fa-users fa-2x d-block mb-2"></i>
+                                                        <span>No customers found.</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Leads -->
+                                <div class="col-md-6">
+                                    <div id="segmentLeads" class="p-4 rounded-3 border-2 cursor-pointer border-light bg-light hover-border-secondary">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="fw-bold fs-5">New Leads</span>
+                                            <span class="badge bg-primary rounded-pill">@(leads?.Count ?? 0)</span>
+                                        </div>
+                                        <p class="small text-secondary fw-bold mt-1" id="leadCount">@(leads?.Count ?? 0) Contacts Found</p>
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="d-flex gap-2 mb-2">
+                                                <button type="button" onclick="selectAllLeads()"
+                                                        class="btn btn-sm btn-outline-primary fw-bold text-uppercase">
+                                                    Select All
+                                                </button>
+                                                <button type="button" onclick="deselectAllLeads()"
+                                                        class="btn btn-sm btn-outline-secondary fw-bold text-uppercase">
+                                                    Clear
+                                                </button>
+                                            </div>
+                                            <div class="overflow-auto" style="max-height: 200px;" id="leadsList">
+                                                @if (leads != null && leads.Any())
+                                                {
+                                                    foreach (var lead in leads)
+                                                    {
+                                                        <label class="d-flex align-items-center gap-2 p-2 hover-bg-light rounded-2 cursor-pointer">
+                                                            <input type="checkbox" class="lead-check form-check-input"
+                                                                   value="@lead.Id" onchange="updateSelectedIds()" />
+                                                            <div class="small fw-bold text-truncate">
+                                                                @lead.FirstName @lead.LastName
+                                                                <span class="text-secondary fw-normal" data-type="email">@lead.Email</span>
+                                                                <span class="text-secondary fw-normal d-none" data-type="phone">@lead.MobileNo</span>
+                                                            </div>
+                                                        </label>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-center text-muted py-3">
+                                                        <i class="fas fa-user-graduate fa-2x d-block mb-2"></i>
+                                                        <span>No leads found.</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- HIDDEN FIELDS FOR SEGMENT -->
+                            <input type="hidden" id="selectedCustomers" name="selectedCustomers" value="" />
+                            <input type="hidden" id="selectedLeads" name="selectedLeads" value="" />
+                        </div>
+
+                        <!-- Excel Section - FIXED -->
+                        <div id="excelSection" style="display:none;">
+                            <div class="space-y-4">
+                                <!-- Download Template Buttons -->
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <div>
+                                        <i class="fas fa-file-excel text-success fs-4"></i>
+                                        <span class="fw-bold ms-2">Upload List</span>
+                                    </div>
+                                    <div class="d-flex gap-2" id="templateButtons">
+                                        <a href="@Url.Action("DownloadEmailTemplate", "Campaigns")" class="btn btn-success btn-sm" id="emailTemplateBtn">
+                                            <i class="fas fa-file-excel"></i> Email Template
+                                        </a>
+                                        <a href="@Url.Action("DownloadWhatsAppTemplate", "Campaigns")" class="btn btn-success btn-sm d-none" id="whatsappTemplateBtn">
+                                            <i class="fas fa-file-excel"></i> WhatsApp Template
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- File Upload Area -->
+                                <div class="border-4 border-dashed border-light rounded-4 p-5 text-center position-relative"
+                                     style="border-color: #dee2e6 !important; background-color: #f8f9fa;"
+                                     id="dropZone">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-secondary mb-3"></i>
+                                    <p class="fw-bold text-secondary">Drop your Excel file or click to browse</p>
+                                    <p class="small text-muted" id="uploadInstruction">Download the template above to get started</p>
+                                    <p class="small text-muted">Supports .xlsx, .xls, and .csv files</p>
+                                    <input type="file" name="attachments" accept=".xlsx,.xls,.csv"
+                                           class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
+                                           id="excelFileInput" />
+                                </div>
+
+                                <!-- Excel Preview - FIXED -->
+                                <div id="excelPreview" style="display:none;" class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center bg-dark p-3 rounded-3 text-white">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-file-excel text-success"></i>
+                                            <span class="fw-bold" id="excelFileName">File Loaded</span>
+                                            <span class="badge bg-info" id="excelValidCount">0 Valid</span>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" onclick="clearExcel()" class="btn btn-sm btn-light">
+                                                <i class="fas fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="border rounded-3 overflow-hidden mt-2">
+                                        <div class="bg-light px-3 py-2 d-flex justify-content-between fw-bold small">
+                                            <span>Preview (<span id="excelTotalRows">0</span> rows)</span>
+                                            <div class="d-flex gap-3">
+                                                <span class="text-success">Valid: <span id="excelValid">0</span></span>
+                                                <span class="text-danger">Invalid: <span id="excelInvalid">0</span></span>
+                                            </div>
+                                        </div>
+                                        <div class="overflow-auto" style="max-height: 300px;" id="excelPreviewBody">
+                                            <div class="text-center text-muted py-4">
+                                                <i class="fas fa-spinner fa-spin fa-2x d-block mb-2"></i>
+                                                Processing file...
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="excelError" class="alert alert-danger d-none mt-2">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span id="excelErrorMessage">Error processing file</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Section -->
+                        <div id="manualSection" style="display:none;">
+                            <div class="space-y-2">
+                                <textarea id="manualEmailsTextarea" rows="6"
+                                          class="form-control bg-light border-0 rounded-3 py-3 font-monospace"
+                                          placeholder="john@example.com, sara@test.com..."></textarea>
+                                <p class="small fw-bold text-uppercase text-secondary text-end mt-1" id="manualCount">
+                                    0 Entries Parsed
+                                </p>
+                                <div class="alert alert-info small" id="manualInstruction">
+                                    <i class="fas fa-info-circle"></i>
+                                    Separate multiple entries with commas or new lines
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Content -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 40px; height: 40px;">
+                                    3
+                                </div>
+                                <h5 class="fw-bold text-uppercase mb-0">Creative Content</h5>
+                            </div>
+                            <select class="form-select form-select-sm bg-light border-0 rounded-2 w-auto">
+                                <option value="">Select a Template</option>
+                            </select>
+                        </div>
+
+                        <!-- Email Content -->
+                        <div id="emailContentFields">
+                            <div class="mb-3">
+                                <label class="small fw-bold text-uppercase text-secondary">Subject Line</label>
+                                <input asp-for="EmailSubject" type="text"
+                                       class="form-control bg-light border-0 rounded-3 py-3 fw-bold"
+                                       placeholder="e.g., Don't miss your special gift!" />
+                            </div>
+                            <div class="border rounded-3 overflow-hidden bg-light" style="min-height: 400px;">
+                                <textarea asp-for="Content" class="form-control border-0" rows="12" id="contentEditor"></textarea>
+                                <span asp-validation-for="Content" class="text-danger small"></span>
+                                <small class="text-muted ms-2">Content is required. Please add your message above.</small>
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <input asp-for="CtaText" type="text"
+                                           class="form-control bg-light border-0 rounded-3 py-3 fw-bold"
+                                           placeholder="CTA Button Text (Shop Now)" />
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center justify-content-center gap-2 bg-light rounded-3 py-3 small fw-bold text-uppercase text-secondary">
+                                        <i class="fas fa-download"></i> <span id="wordCount">0</span> Words Written
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Content -->
+                        <div id="whatsappContentFields" style="display:none;">
+                            <label class="small fw-bold text-uppercase text-secondary">WhatsApp Message <span class="text-danger">*</span></label>
+                            <textarea name="whatsappContent" rows="8"
+                                      class="form-control bg-success bg-opacity-10 border-success rounded-4 py-3"
+                                      placeholder="Write your WhatsApp blast here..."
+                                      id="whatsappContentTextarea"></textarea>
+                            <div class="d-flex justify-content-between small fw-bold text-uppercase text-secondary mt-2">
+                                <span>Supports *bold* _italic_ ~strike~</span>
+                                <span id="whatsappCharCount">0 Characters</span>
+                            </div>
+                            <div class="alert alert-info small mt-2">
+                                <i class="fas fa-info-circle"></i>
+                                WhatsApp messages support emojis and basic formatting
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attachments -->
+                    <div class="bg-white rounded-4 p-4 shadow-sm border mb-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <i class="fas fa-paperclip text-secondary"></i>
+                            <h6 class="fw-bold mb-0">Attachments</h6>
+                            <span class="badge bg-light text-secondary">Optional</span>
+                        </div>
+                        <input type="file" id="file-upload" name="attachments" multiple accept="image/*,video/*,.pdf,.doc,.docx"
+                               class="d-none" />
+                        <label for="file-upload"
+                               class="btn btn-light d-inline-flex align-items-center gap-2 rounded-3 border">
+                            <i class="fas fa-plus-circle"></i> Add Files
+                        </label>
+                        <div id="attachmentPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" id="submitBtn"
+                            class="btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg">
+                        <i class="fas fa-calendar-alt"></i> Schedule CAMPAIGN
+                    </button>
+                </div>
+
+                <!-- Device Preview -->
+                <div class="col-lg-4 sticky-top" style="top: 20px;">
+                    <div class="bg-dark rounded-5 p-3 shadow-lg position-relative mx-auto" style="max-width: 340px;">
+                        <div class="bg-white rounded-4 overflow-hidden">
+                            <div class="bg-light p-3 pt-4 text-center border-bottom">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-3 mx-auto d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 48px; height: 48px; font-size: 24px;" id="previewSenderInitial">
+                                    M
+                                </div>
+                                <p class="small fw-bold text-uppercase text-secondary mb-0" id="previewSender">Marketing Team</p>
+                            </div>
+                            <div class="p-3 overflow-auto" style="height: 400px;">
+                                <div id="emailPreview">
+                                    <h5 class="fw-bold" id="previewSubject">Your Subject Line Preview</h5>
+                                    <div class="small text-secondary" id="previewContent">
+                                        <p>Your email content will appear here...</p>
+                                    </div>
+                                    <div class="mt-3 py-2 bg-primary text-white rounded-2 text-center small fw-bold text-uppercase" id="previewCta">
+                                        Shop Now
+                                    </div>
+                                </div>
+                                <div id="whatsappPreview" style="display:none;">
+                                    <div class="bg-success bg-opacity-10 p-3 rounded-3 border border-success">
+                                        <p class="small text-secondary" id="previewWhatsappContent">
+                                            Type a message to see the preview...
+                                        </p>
+                                        <p class="small text-success fw-bold text-end mb-0">12:00 PM ✓✓</p>
+                                    </div>
+                                </div>
+                                <div id="bothPreview" style="display:none;">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded-3 border border-primary">
+                                        <p class="small text-secondary fw-bold">📧 Email + 💬 WhatsApp</p>
+                                        <hr />
+                                        <p class="small text-secondary" id="previewBothContent">
+                                            Your message will be sent via both channels...
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center text-white-50 small mt-2">
+                            <i class="fas fa-mobile-alt"></i> Live Preview
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Hidden Fields -->
+            <input type="hidden" id="RecipientSource" name="RecipientSource" value="segment" />
+            <input type="hidden" id="manualEmails" name="manualEmails" value="" />
+            <input type="hidden" id="CampaignChannel" name="CampaignChannel" value="email" />
+
+        </form>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .hover-bg-light:hover {
+        background-color: #f8f9fa;
+    }
+
+    .hover-border-secondary:hover {
+        border-color: #6c757d !important;
+    }
+
+    .rounded-4 {
+        border-radius: 2rem;
+    }
+
+    .rounded-5 {
+        border-radius: 3.5rem;
+    }
+
+    .bg-opacity-10 {
+        --bs-bg-opacity: 0.1;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 20px;
+    }
+
+    .form-control.bg-light, .form-select.bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    .btn-primary {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+            border-color: #4338ca;
+        }
+
+    .btn-success:hover {
+        background-color: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .text-primary {
+        color: #4f46e5 !important;
+    }
+
+    .bg-primary.bg-opacity-10 {
+        background-color: rgba(79, 70, 229, 0.1) !important;
+    }
+
+    .border-primary {
+        border-color: #4f46e5 !important;
+    }
+
+    .font-monospace {
+        font-family: monospace;
+    }
+
+    .opacity-0 {
+        opacity: 0;
+    }
+
+    .position-absolute {
+        position: absolute;
+    }
+
+    .top-0 {
+        top: 0;
+    }
+
+    .start-0 {
+        left: 0;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .h-100 {
+        height: 100%;
+    }
+
+    .border-dashed:hover {
+        background-color: #e9ecef !important;
+        border-color: #4f46e5 !important;
+        transition: all 0.3s ease;
+    }
+
+    .attachment-item {
+        position: relative;
+        width: 96px;
+        height: 96px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
+
+        .attachment-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .attachment-item .file-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            font-size: 12px;
+            text-align: center;
+            padding: 4px;
+            word-break: break-all;
+        }
+
+        .attachment-item .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            padding: 0;
+        }
+
+            .attachment-item .remove-btn:hover {
+                background-color: #c82333;
+            }
+
+    .d-none {
+        display: none !important;
+    }
+
+    /* Excel Preview Table Styles */
+    #excelPreviewBody table {
+        font-size: 13px;
+    }
+
+        #excelPreviewBody table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #excelPreviewBody table td {
+            vertical-align: middle;
+        }
+
+    .badge-valid {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .badge-invalid {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    /* Drag and Drop Highlight */
+    .dragover {
+        border-color: #4f46e5 !important;
+        background-color: #eef2ff !important;
+    }
+
+    .file-info {
+        font-size: 12px;
+        color: #6c757d;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"></script>
+
+    <script>
+        // ============================================================
+        // RECIPIENT SOURCE TOGGLE
+        // ============================================================
+        function setRecipientSource(source) {
+            console.log('Setting recipient source to:', source);
+
+            var segment = document.getElementById('segmentSection');
+            var excel = document.getElementById('excelSection');
+            var manual = document.getElementById('manualSection');
+            var srcSegment = document.getElementById('srcSegment');
+            var srcExcel = document.getElementById('srcExcel');
+            var srcManual = document.getElementById('srcManual');
+
+            var recipientSourceField = document.getElementById('RecipientSource');
+            if (recipientSourceField) {
+                recipientSourceField.value = source;
+                console.log('RecipientSource updated to:', source);
+            }
+
+            var elements = [srcSegment, srcExcel, srcManual];
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase text-secondary';
+            }
+
+            if (source === 'segment') {
+                segment.style.display = 'block';
+                excel.style.display = 'none';
+                manual.style.display = 'none';
+                srcSegment.className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm';
+            } else if (source === 'excel') {
+                segment.style.display = 'none';
+                excel.style.display = 'block';
+                manual.style.display = 'none';
+                srcExcel.className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm';
+            } else {
+                segment.style.display = 'none';
+                excel.style.display = 'none';
+                manual.style.display = 'block';
+                srcManual.className = 'btn btn-sm px-3 py-1 fw-bold text-uppercase bg-white text-primary shadow-sm';
+            }
+        }
+
+        // ============================================================
+        // CHANNEL TOGGLE
+        // ============================================================
+        function setChannel(channel) {
+            var emailBtn = document.getElementById('channelEmailBtn');
+            var whatsappBtn = document.getElementById('channelWhatsappBtn');
+            var bothBtn = document.getElementById('channelBothBtn');
+
+            var emailContent = document.getElementById('emailContentFields');
+            var whatsappContent = document.getElementById('whatsappContentFields');
+            var emailPreview = document.getElementById('emailPreview');
+            var whatsappPreview = document.getElementById('whatsappPreview');
+            var bothPreview = document.getElementById('bothPreview');
+            var submitBtn = document.getElementById('submitBtn');
+            var channelField = document.getElementById('CampaignChannel');
+            var emailMasterField = document.getElementById('emailMasterField');
+
+            var emailTemplateBtn = document.getElementById('emailTemplateBtn');
+            var whatsappTemplateBtn = document.getElementById('whatsappTemplateBtn');
+            var uploadInstruction = document.getElementById('uploadInstruction');
+
+            if (channelField) {
+                channelField.value = channel;
+            }
+
+            // Reset all buttons
+            emailBtn.className = 'btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary';
+            whatsappBtn.className = 'btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary';
+            bothBtn.className = 'btn btn-light px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2 text-secondary';
+
+            // Hide all content sections
+            emailContent.style.display = 'none';
+            whatsappContent.style.display = 'none';
+            emailPreview.style.display = 'none';
+            whatsappPreview.style.display = 'none';
+            bothPreview.style.display = 'none';
+
+            // Show/hide contact information based on channel
+            var showPhone = (channel === 'whatsapp' || channel === 'both');
+            var showEmail = (channel === 'email' || channel === 'both');
+
+            // Toggle email/phone display in customer and lead lists
+            document.querySelectorAll('.customer-check, .lead-check').forEach(function(checkbox) {
+                var label = checkbox.closest('label');
+                if (label) {
+                    var emailSpan = label.querySelector('[data-type="email"]');
+                    var phoneSpan = label.querySelector('[data-type="phone"]');
+                    if (emailSpan) emailSpan.classList.toggle('d-none', !showEmail);
+                    if (phoneSpan) phoneSpan.classList.toggle('d-none', !showPhone);
+                }
+            });
+
+            // Update contact count labels
+            var customerCount = document.getElementById('customerCount');
+            var leadCount = document.getElementById('leadCount');
+            if (customerCount) {
+                customerCount.textContent = showPhone ? '📱 Phone Numbers' : '📧 Email Addresses';
+            }
+            if (leadCount) {
+                leadCount.textContent = showPhone ? '📱 Phone Numbers' : '📧 Email Addresses';
+            }
+
+            // Update template buttons
+            if (channel === 'whatsapp' || channel === 'both') {
+                emailTemplateBtn.classList.add('d-none');
+                whatsappTemplateBtn.classList.remove('d-none');
+                if (uploadInstruction) uploadInstruction.textContent = 'Download the WhatsApp template above';
+                if (emailMasterField) emailMasterField.style.display = 'none';
+            } else {
+                emailTemplateBtn.classList.remove('d-none');
+                whatsappTemplateBtn.classList.add('d-none');
+                if (uploadInstruction) uploadInstruction.textContent = 'Download the email template above';
+                if (emailMasterField) emailMasterField.style.display = 'block';
+            }
+
+            // Update manual entry placeholder and instruction
+            var manualTextarea = document.getElementById('manualEmailsTextarea');
+            var manualInstruction = document.getElementById('manualInstruction');
+            var manualCount = document.getElementById('manualCount');
+
+            if (manualTextarea) {
+                if (showPhone) {
+                    manualTextarea.placeholder = '9876543210, 9876543211...';
+                    if (manualInstruction) {
+                        manualInstruction.innerHTML = '<i class="fas fa-info-circle"></i> Separate multiple phone numbers with commas or new lines (10+ digits)';
+                    }
+                    if (manualCount) {
+                        manualCount.textContent = '0 Phone Numbers';
+                    }
+                } else {
+                    manualTextarea.placeholder = 'john@example.com, sara@test.com...';
+                    if (manualInstruction) {
+                        manualInstruction.innerHTML = '<i class="fas fa-info-circle"></i> Separate multiple emails with commas or new lines';
+                    }
+                    if (manualCount) {
+                        manualCount.textContent = '0 Emails';
+                    }
+                }
+            }
+
+            if (channel === 'email') {
+                emailBtn.className = 'btn btn-primary px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2';
+                emailContent.style.display = 'block';
+                emailPreview.style.display = 'block';
+                submitBtn.className = 'btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg';
+                submitBtn.innerHTML = '<i class="fas fa-envelope"></i> Schedule EMAIL Campaign';
+            } else if (channel === 'whatsapp') {
+                whatsappBtn.className = 'btn btn-success px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2';
+                whatsappContent.style.display = 'block';
+                whatsappPreview.style.display = 'block';
+                submitBtn.className = 'btn btn-success btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg';
+                submitBtn.innerHTML = '<i class="fab fa-whatsapp"></i> Schedule WHATSAPP Campaign';
+            } else if (channel === 'both') {
+                bothBtn.className = 'btn btn-primary px-4 py-2 rounded-2 fw-bold d-flex align-items-center gap-2';
+                emailContent.style.display = 'block';
+                whatsappContent.style.display = 'block';
+                emailPreview.style.display = 'block';
+                whatsappPreview.style.display = 'block';
+                bothPreview.style.display = 'block';
+                submitBtn.className = 'btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold shadow-lg';
+                submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <i class="fab fa-whatsapp"></i> Schedule BOTH Campaign';
+            }
+        }
+
+        // ============================================================
+        // SELECT ALL FUNCTIONS
+        // ============================================================
+        function selectAllCustomers() {
+            document.querySelectorAll('.customer-check').forEach(function(cb) { cb.checked = true; });
+            updateSelectedIds();
+        }
+
+        function deselectAllCustomers() {
+            document.querySelectorAll('.customer-check').forEach(function(cb) { cb.checked = false; });
+            updateSelectedIds();
+        }
+
+        function selectAllLeads() {
+            document.querySelectorAll('.lead-check').forEach(function(cb) { cb.checked = true; });
+            updateSelectedIds();
+        }
+
+        function deselectAllLeads() {
+            document.querySelectorAll('.lead-check').forEach(function(cb) { cb.checked = false; });
+            updateSelectedIds();
+        }
+
+        // ============================================================
+        // UPDATE SELECTED IDs
+        // ============================================================
+        function updateSelectedIds() {
+            var customerIds = [];
+            var leadIds = [];
+
+            document.querySelectorAll('.customer-check:checked').forEach(function(cb) {
+                customerIds.push(cb.value);
+            });
+
+            document.querySelectorAll('.lead-check:checked').forEach(function(cb) {
+                leadIds.push(cb.value);
+            });
+
+            document.getElementById('selectedCustomers').value = customerIds.join(',');
+            document.getElementById('selectedLeads').value = leadIds.join(',');
+
+            console.log('Selected Customers:', document.getElementById('selectedCustomers').value);
+            console.log('Selected Leads:', document.getElementById('selectedLeads').value);
+        }
+
+        // ============================================================
+        // MANUAL ENTRIES
+        // ============================================================
+        document.getElementById('manualEmailsTextarea').addEventListener('input', function() {
+            var text = this.value;
+            var channel = document.getElementById('CampaignChannel').value;
+            var isWhatsApp = (channel === 'whatsapp' || channel === 'both');
+
+            var entries = text.split(/[,;\n]/).filter(function(e) {
+                return e.trim() && e.trim().length > 0;
+            });
+
+            var validEntries = [];
+            if (isWhatsApp) {
+                validEntries = entries.filter(function(e) {
+                    var cleaned = e.trim().replace(/\D/g, '');
+                    return cleaned.length >= 10;
+                });
+                document.getElementById('manualCount').textContent = validEntries.length + ' Phone Numbers';
+            } else {
+                validEntries = entries.filter(function(e) {
+                    return e.trim().indexOf('@@') > -1;
+                });
+                document.getElementById('manualCount').textContent = validEntries.length + ' Emails';
+            }
+        });
+
+        // ============================================================
+        // EXCEL FILE PROCESSING - FIXED
+        // ============================================================
+        document.getElementById('excelFileInput').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            // Show preview container
+            var preview = document.getElementById('excelPreview');
+            preview.style.display = 'block';
+
+            // Update file name
+            document.getElementById('excelFileName').textContent = '📄 ' + file.name;
+            document.getElementById('excelValidCount').textContent = 'Processing...';
+
+            // Show loading state
+            document.getElementById('excelPreviewBody').innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x d-block mb-2"></i>
+                    Processing file...
+                </div>
+            `;
+
+            // Hide any previous errors
+            document.getElementById('excelError').classList.add('d-none');
+
+            // Since we can't read Excel files client-side without a library,
+            // we'll show a message that the file was uploaded successfully
+            // and the server will process it on form submission
+            setTimeout(function() {
+                var previewBody = document.getElementById('excelPreviewBody');
+                previewBody.innerHTML = `
+                    <div class="text-center text-success py-4">
+                        <i class="fas fa-check-circle fa-3x d-block mb-3"></i>
+                        <h5>File uploaded successfully!</h5>
+                        <p class="text-muted">${file.name}</p>
+                        <p class="text-muted small">Size: ${(file.size / 1024).toFixed(2)} KB</p>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            The file will be processed when you submit the form.
+                        </div>
+                    </div>
+                `;
+                document.getElementById('excelValidCount').textContent = '✅ Ready';
+                document.getElementById('excelValid').textContent = 'Pending';
+                document.getElementById('excelInvalid').textContent = 'Pending';
+                document.getElementById('excelTotalRows').textContent = 'Pending';
+            }, 500);
+        });
+
+        // ============================================================
+        // DRAG AND DROP SUPPORT
+        // ============================================================
+        var dropZone = document.getElementById('dropZone');
+
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('excelFileInput').files = files;
+                document.getElementById('excelFileInput').dispatchEvent(new Event('change'));
+            }
+        });
+
+        function clearExcel() {
+            document.getElementById('excelPreview').style.display = 'none';
+            document.getElementById('excelFileInput').value = '';
+            document.getElementById('excelValidCount').textContent = '0 Valid';
+            document.getElementById('excelValid').textContent = '0';
+            document.getElementById('excelInvalid').textContent = '0';
+            document.getElementById('excelTotalRows').textContent = '0';
+            document.getElementById('excelError').classList.add('d-none');
+        }
+
+        // ============================================================
+        // PREVIEW UPDATE
+        // ============================================================
+        function updatePreview() {
+            var sender = document.getElementById('Sender')?.value || 'Marketing Team';
+            document.getElementById('previewSender').textContent = sender;
+            document.getElementById('previewSenderInitial').textContent = sender.charAt(0).toUpperCase();
+
+            var subject = document.getElementById('EmailSubject')?.value || 'Your Subject Line Preview';
+            document.getElementById('previewSubject').textContent = subject;
+
+            var channel = document.getElementById('CampaignChannel').value;
+            var content = '';
+
+            if (channel === 'whatsapp' || channel === 'both') {
+                var whatsappContent = document.getElementById('whatsappContentTextarea')?.value || '';
+                content = whatsappContent;
+            } else {
+                content = document.getElementById('contentEditor')?.value || '<p>Your email content will appear here...</p>';
+            }
+
+            document.getElementById('previewContent').innerHTML = content;
+
+            var cta = document.getElementById('CtaText')?.value || 'Shop Now';
+            document.getElementById('previewCta').textContent = cta;
+
+            var textOnly = content.replace(/<[^>]*>/g, ' ').trim();
+            var wordCount = textOnly ? textOnly.split(/\s+/).length : 0;
+            document.getElementById('wordCount').textContent = wordCount;
+
+            var whatsappContent = document.querySelector('#whatsappContentFields textarea')?.value || '';
+            document.getElementById('whatsappCharCount').textContent = whatsappContent.length + ' Characters';
+            document.getElementById('previewWhatsappContent').textContent = whatsappContent || 'Type a message to see the preview...';
+            document.getElementById('previewBothContent').textContent = whatsappContent || 'Your message will be sent via both channels...';
+        }
+
+        // ============================================================
+        // FORM SUBMIT HANDLER
+        // ============================================================
+        document.getElementById('campaignForm').addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+
+            // 1. Save TinyMCE content
+            if (tinymce.activeEditor) {
+                tinymce.activeEditor.save();
+                console.log('TinyMCE content saved');
+            }
+
+            // 2. Sync WhatsApp content
+            var channel = document.getElementById('CampaignChannel').value;
+            var whatsappContent = document.getElementById('whatsappContentTextarea');
+            var contentEditor = document.getElementById('contentEditor');
+
+            if (channel === 'whatsapp' || channel === 'both') {
+                if (whatsappContent && contentEditor) {
+                    contentEditor.value = whatsappContent.value;
+                    console.log('WhatsApp content synced');
+                }
+            }
+
+            // 3. Update manual emails
+            var manualTextarea = document.getElementById('manualEmailsTextarea');
+            var manualHidden = document.getElementById('manualEmails');
+            if (manualTextarea && manualHidden) {
+                manualHidden.value = manualTextarea.value;
+                console.log('Manual entries updated');
+            }
+
+            // 4. Validate Excel file
+            var source = document.getElementById('RecipientSource').value;
+            if (source === 'excel') {
+                var excelFile = document.getElementById('excelFileInput');
+                if (!excelFile || excelFile.files.length === 0) {
+                    e.preventDefault();
+                    showError('Please upload an Excel file.');
+                    return false;
+                }
+            }
+
+            // 5. Validate content
+            var contentValue = contentEditor ? contentEditor.value : '';
+            if (channel === 'whatsapp' || channel === 'both') {
+                if (!whatsappContent || !whatsappContent.value || whatsappContent.value.trim() === '') {
+                    e.preventDefault();
+                    showError('Content is required. Please add your WhatsApp message.');
+                    return false;
+                }
+            } else {
+                if (!contentValue || contentValue.trim() === '' || contentValue === '<p><br></p>') {
+                    e.preventDefault();
+                    showError('Content is required. Please add your email message.');
+                    return false;
+                }
+            }
+
+            // Show loading
+            var submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Campaign...';
+
+            console.log('Form submission validated successfully!');
+            return true;
+        });
+
+        function showError(message) {
+            var errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show rounded-3';
+            errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            var form = document.getElementById('campaignForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ============================================================
+        // FILE ATTACHMENTS
+        // ============================================================
+        document.getElementById('file-upload').addEventListener('change', function() {
+            var container = document.getElementById('attachmentPreview');
+            container.innerHTML = '';
+
+            var files = this.files;
+            for (var i = 0; i < files.length; i++) {
+                var div = document.createElement('div');
+                div.className = 'attachment-item';
+
+                if (files[i].type.startsWith('image/')) {
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(files[i]);
+                    img.alt = files[i].name;
+                    div.appendChild(img);
+                } else {
+                    var divFile = document.createElement('div');
+                    divFile.className = 'file-icon';
+                    divFile.innerHTML = '<i class="fas fa-file fa-2x d-block mb-1"></i>' + files[i].name.substring(0, 10) + '...';
+                    div.appendChild(divFile);
+                }
+
+                var btn = document.createElement('button');
+                btn.className = 'remove-btn';
+                btn.innerHTML = '×';
+                btn.type = 'button';
+                btn.onclick = function() {
+                    this.parentElement.remove();
+                };
+                div.appendChild(btn);
+                container.appendChild(div);
+            }
+        });
+
+        // ============================================================
+        // INPUT EVENT LISTENERS
+        // ============================================================
+        document.getElementById('Sender')?.addEventListener('input', updatePreview);
+        document.getElementById('EmailSubject')?.addEventListener('input', updatePreview);
+        document.getElementById('CtaText')?.addEventListener('input', updatePreview);
+        document.getElementById('manualEmailsTextarea')?.addEventListener('input', updatePreview);
+        document.querySelector('#whatsappContentFields textarea')?.addEventListener('input', updatePreview);
+
+        // ============================================================
+        // INITIALIZE
+        // ============================================================
+        setChannel('email');
+        setRecipientSource('segment');
+        updateSelectedIds();
+
+        tinymce.init({
+            selector: '#contentEditor',
+            height: 300,
+            menubar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic backcolor | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | help',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; padding: 10px; }',
+            setup: function(editor) {
+                editor.on('keyup', updatePreview);
+                editor.on('change', updatePreview);
+                editor.on('init', function() {
+                    updatePreview();
+                });
+            }
+        });
+
+        setTimeout(updatePreview, 1000);
+
+        console.log('Campaign Studio initialized');
+        console.log('Customers count:', @(customers?.Count ?? 0));
+        console.log('Leads count:', @(leads?.Count ?? 0));
+        console.log('Email Masters count:', @(emailMasters?.Count ?? 0));
+
+        // ============================================================
+        // EXCEL FILE VALIDATION ON SUBMIT
+        // ============================================================
+        function validateExcelFile() {
+            var source = document.getElementById('RecipientSource').value;
+            if (source === 'excel') {
+                var excelFile = document.getElementById('excelFileInput');
+                if (!excelFile || excelFile.files.length === 0) {
+                    showError('Please upload an Excel file.');
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+}

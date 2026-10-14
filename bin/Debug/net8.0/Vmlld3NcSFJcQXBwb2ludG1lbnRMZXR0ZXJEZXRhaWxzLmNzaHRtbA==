@@ -1,0 +1,76 @@
+﻿@model Erp_Aits.Models.AppointmentLetter
+@{
+    ViewBag.Title = Model.AppointmentLetterCode;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">@Model.JobApplicant</h4>
+        <small class="text-muted">@Model.AppointmentLetterCode</small>
+    </div>
+    <a href="@Url.Action("AppointmentLetter", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+</div>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Job Applicant</label>
+            <div class="form-control bg-light">@Model.JobApplicant</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <div class="form-control bg-light">@Model.Company</div>
+        </div>
+        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <label class="form-label">Appointment Date</label>
+            <div class="form-control bg-light">@(Model.AppointmentDate?.ToString("dd-MM-yyyy"))</div>
+        </div>
+        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <label class="form-label">Appointment Letter Template</label>
+            <div class="form-control bg-light">@Model.AppointmentLetterTemplate</div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Body</h6>
+    <div class="row g-3">
+        <div class="col-md-12">
+            <label class="form-label">Introduction</label>
+            <div class="form-control bg-light" style="min-height:180px; white-space:pre-wrap;">@Model.Introduction</div>
+        </div>
+
+        <div class="col-md-12">
+            <label class="form-label">Terms</label>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 1;
+                    }
+                    @foreach (var term in Model.Terms)
+                    {
+                        <tr>
+                            <td>@(i++)</td>
+                            <td>@term.Title</td>
+                            <td>@term.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-12">
+            <label class="form-label">Closing Notes</label>
+            <div class="form-control bg-light" style="min-height:180px; white-space:pre-wrap;">@Model.ClosingNotes</div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,227 @@
+﻿@model Erp_Aits.Models.MonthlyAttendanceSheetViewModel
+@{
+    ViewBag.Title = "Monthly Attendance Sheet";
+    var monthNames = new[] { "", "January", "February", "March", "April", "May", "June",
+                              "July", "August", "September", "October", "November", "December" };
+    var dayAbbr = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+}
+
+<h4 class="mb-3">Monthly Attendance Sheet</h4>
+
+<!-- Filters -->
+<form method="get" asp-action="MonthlyAttendanceSheet" class="card p-3 mb-3">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-2">
+            <select name="month" class="form-select form-select-sm">
+                @for (int mo = 1; mo <= 12; mo++)
+                {
+                    <option value="@mo" selected="@(mo == Model.Month)">@monthNames[mo]</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="year" class="form-select form-select-sm">
+                @for (int yr = DateTime.Now.Year - 3; yr <= DateTime.Now.Year + 1; yr++)
+                {
+                    <option value="@yr" selected="@(yr == Model.Year)">@yr</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="employee" class="form-control form-control-sm" placeholder="Employee" value="@ViewBag.Employee" />
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="company" class="form-control form-control-sm" placeholder="Company" value="@ViewBag.Company" />
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="department" class="form-control form-control-sm" placeholder="Department" value="@ViewBag.Department" />
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="branch" class="form-control form-control-sm" placeholder="Branch" value="@ViewBag.Branch" />
+        </div>
+    </div>
+    <div class="row g-2 align-items-center mt-2">
+        <div class="col-md-2">
+            <select class="form-select form-select-sm">
+                <option>Group By</option>
+                <option>Employee</option>
+                <option>Department</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" checked disabled id="includeDescendants" />
+                <label class="form-check-label small" for="includeDescendants">Include Company Descendants</label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="summarizedView" />
+                <label class="form-check-label small" for="summarizedView">Summarized View</label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-sm btn-dark">Apply</button>
+        </div>
+    </div>
+</form>
+
+<!-- Legend -->
+<div class="d-flex flex-wrap gap-3 small mb-3">
+    <span><span style="color:#e03131;">|</span> Present - P</span>
+    <span><span style="color:#e03131;">|</span> Absent - A</span>
+    <span><span style="color:#e03131;">|</span> Half Day/Other Half Absent - HD/A</span>
+    <span><span style="color:#e03131;">|</span> Half Day/Other Half Present - HD/P</span>
+    <span><span style="color:#1971c2;">|</span> Work From Home - WFH</span>
+    <span><span style="color:#1971c2;">|</span> On Leave - L</span>
+    <span><span style="color:#1971c2;">|</span> Holiday - H</span>
+    <span><span style="color:#1971c2;">|</span> Weekly Off - WO</span>
+</div>
+
+<!-- Chart -->
+<div class="card p-3 mb-3">
+    <canvas id="attendanceChart" height="90"></canvas>
+    <div class="d-flex gap-4 mt-2 small">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#e8590c;border-radius:50%;"></span> Absent</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#2f9e44;border-radius:50%;"></span> Present</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#1971c2;border-radius:50%;"></span> Leave</span>
+    </div>
+</div>
+
+<!-- Grid -->
+<div class="card p-0" style="overflow-x:auto;">
+    <table class="table table-bordered table-sm mb-0" id="attendanceTable">
+        <thead>
+            <tr>
+                <th class="sortable-col" data-col="employee">Employee</th>
+                <th class="sortable-col" data-col="employeeName">Employee N...</th>
+                <th class="sortable-col" data-col="shift">Shift</th>
+                @for (int d = 1; d <= Model.DaysInMonth; d++)
+                {
+                    var date = new DateTime(Model.Year, Model.Month, d);
+                    <th class="sortable-col" data-col="day@(d)">@d @dayAbbr[(int)date.DayOfWeek]</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr>
+                    <td>@row.Employee</td>
+                    <td>@row.EmployeeName</td>
+                    <td>@row.Shift</td>
+                    @for (int d = 1; d <= Model.DaysInMonth; d++)
+                    {
+                        var status = row.DayStatus.ContainsKey(d) ? row.DayStatus[d] : "";
+                        <td class="text-center @(status == "P" || status == "WFH" ? "text-success" : status == "A" ? "text-danger" : "")">@status</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Rows.Any())
+    {
+        <p class="text-muted p-3 mb-0">No attendance records found for this period.</p>
+    }
+</div>
+
+<p class="text-muted small mt-2">For comparison, use &gt;5, &lt;10 or =324. For ranges, use 5:10 (for values between 5 &amp; 10).</p>
+
+<!-- Column context menu -->
+<div id="colMenu" class="dropdown-menu show" style="display:none; position:absolute; z-index:2000;">
+    <a class="dropdown-item" href="#" data-action="asc">Sort Ascending</a>
+    <a class="dropdown-item" href="#" data-action="desc">Sort Descending</a>
+    <a class="dropdown-item" href="#" data-action="reset">Reset Sorting</a>
+    <a class="dropdown-item" href="#" data-action="remove">Remove Column</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+@section Scripts {
+    <script>
+        // ---- Chart ----
+        const days = [@Html.Raw(string.Join(",", Enumerable.Range(1, Model.DaysInMonth)))];
+        const presentData = [@Html.Raw(string.Join(",", Model.DailySummaries.OrderBy(k => k.Key).Select(k => k.Value.Present)))];
+        const absentData = [@Html.Raw(string.Join(",", Model.DailySummaries.OrderBy(k => k.Key).Select(k => k.Value.Absent)))];
+        const leaveData = [@Html.Raw(string.Join(",", Model.DailySummaries.OrderBy(k => k.Key).Select(k => k.Value.Leave)))];
+
+        new Chart(document.getElementById('attendanceChart'), {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [
+                    { label: 'Present', data: presentData, borderColor: '#2f9e44', tension: 0.3, pointRadius: 0 },
+                    { label: 'Absent', data: absentData, borderColor: '#e8590c', tension: 0.3, pointRadius: 0 },
+                    { label: 'Leave', data: leaveData, borderColor: '#1971c2', tension: 0.3, pointRadius: 0 }
+                ]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // ---- Column header context menu: sort asc/desc/reset/remove ----
+        const table = document.getElementById('attendanceTable');
+        const menu = document.getElementById('colMenu');
+        let activeColIndex = null;
+        let originalRows = null;
+
+        table.querySelectorAll('th.sortable-col').forEach((th, index) => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', (e) => {
+                activeColIndex = index;
+                menu.style.display = 'block';
+                menu.style.left = e.pageX + 'px';
+                menu.style.top = e.pageY + 'px';
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && e.target.tagName !== 'TH') {
+                menu.style.display = 'none';
+            }
+        });
+
+        menu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = item.getAttribute('data-action');
+                const tbody = table.querySelector('tbody');
+
+                if (action === 'remove') {
+                    table.querySelectorAll('tr').forEach(tr => {
+                        if (tr.children[activeColIndex]) tr.children[activeColIndex].style.display = 'none';
+                    });
+                } else if (action === 'reset') {
+                    if (originalRows) {
+                        tbody.innerHTML = '';
+                        originalRows.forEach(r => tbody.appendChild(r.cloneNode(true)));
+                    }
+                    table.querySelectorAll('tr').forEach(tr => {
+                        Array.from(tr.children).forEach(td => td.style.display = '');
+                    });
+                } else {
+                    if (!originalRows) {
+                        originalRows = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.cloneNode(true));
+                    }
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    rows.sort((a, b) => {
+                        const aText = a.children[activeColIndex].innerText.trim();
+                        const bText = b.children[activeColIndex].innerText.trim();
+                        const aNum = parseFloat(aText), bNum = parseFloat(bText);
+                        let cmp;
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            cmp = aNum - bNum;
+                        } else {
+                            cmp = aText.localeCompare(bText);
+                        }
+                        return action === 'asc' ? cmp : -cmp;
+                    });
+                    rows.forEach(r => tbody.appendChild(r));
+                }
+
+                menu.style.display = 'none';
+            });
+        });
+    </script>
+}

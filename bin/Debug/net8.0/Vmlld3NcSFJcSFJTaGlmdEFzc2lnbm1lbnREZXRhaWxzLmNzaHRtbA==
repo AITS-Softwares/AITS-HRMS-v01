@@ -1,0 +1,158 @@
+@model Erp_Aits.Models.HRShiftAssignment
+@{
+    ViewBag.Title = "Shift Assignment " + Model.Id;
+    var employees = ViewBag.EmployeesList as List<object> ?? new List<object>();
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var shiftTypes = ViewBag.ShiftTypes as List<string> ?? new List<string>();
+    var shiftLocations = ViewBag.ShiftLocations as List<string> ?? new List<string>();
+    bool isSubmitted = string.Equals(Model.Status, "Submitted", StringComparison.OrdinalIgnoreCase);
+    bool isCancelled = string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool canEdit = !isSubmitted && !isCancelled;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Assignment - @Model.Employee</h4>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("ShiftAssignment", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+        @if (canEdit)
+        {
+            <button type="submit" form="shiftAssignmentForm" name="actionCommand" value="Submit" class="btn btn-success btn-sm">Submit</button>
+            <form method="post" action="@Url.Action("DeleteShiftAssignment", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Shift Assignment from ERPNext and HRMS?');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+            </form>
+        }
+        @if (isSubmitted)
+        {
+            <form method="post" action="@Url.Action("UpdateShiftAssignment", "HR", new { id = Model.Id })" onsubmit="return confirm('Cancel this submitted Shift Assignment in ERPNext and HRMS?');">
+                <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-danger btn-sm">Cancel</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+
+<form id="shiftAssignmentForm" method="post" action="@Url.Action("UpdateShiftAssignment", "HR", new { id = Model.Id })">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ErpNextId" value="@Model.ErpNextId" />
+    <input type="hidden" name="EmployeeName" id="employeeNameInput" value="@Model.EmployeeName" />
+
+    <div class="card p-4">
+        <h6 class="mb-3">Employee Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                @if (canEdit)
+                {
+                    <select name="Employee" id="employeeSelect" class="form-select" required onchange="updateEmployeeName(this)">
+                        <option value="">-- Select Employee --</option>
+                        @foreach (var emp in employees)
+                        {
+                            var empId = emp.GetType().GetProperty("EmployeeId")?.GetValue(emp, null)?.ToString();
+                            var empName = emp.GetType().GetProperty("EmployeeName")?.GetValue(emp, null)?.ToString();
+                            <option value="@empId" data-empname="@empName" selected="@(Model.Employee == empId)">@empId - @empName</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Employee" readonly />
+                }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                @if (canEdit)
+                {
+                    <select name="Company" class="form-select" required>
+                        <option value="">-- Select Company --</option>
+                        @foreach (var comp in companies)
+                        {
+                            <option value="@comp" selected="@(Model.Company == comp)">@comp</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Company" readonly />
+                }
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Shift Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                @if (canEdit)
+                {
+                    <select name="ShiftType" class="form-select" required>
+                        <option value="">-- Select Shift Type --</option>
+                        @foreach (var st in shiftTypes)
+                        {
+                            <option value="@st" selected="@(Model.ShiftType == st)">@st</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.ShiftType" readonly />
+                }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Start Date *</label>
+                <input name="StartDate" type="date" class="form-control" required value="@Model.StartDate.ToString("yyyy-MM-dd")" readonly="@(!canEdit)" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                @if (canEdit)
+                {
+                    <select name="ShiftLocation" class="form-select">
+                        <option value="">-- Select Shift Location --</option>
+                        @foreach (var loc in shiftLocations)
+                        {
+                            <option value="@loc" selected="@(Model.ShiftLocation == loc)">@loc</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.ShiftLocation" readonly />
+                }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input name="EndDate" type="date" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" readonly="@(!canEdit)" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                @if (canEdit)
+                {
+                    <select name="Status" class="form-select">
+                        <option value="Active" selected="@(Model.Status == "Active")">Active</option>
+                        <option value="Inactive" selected="@(Model.Status == "Inactive")">Inactive</option>
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Status" readonly />
+                }
+            </div>
+        </div>
+
+        @if (canEdit)
+        {
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" name="actionCommand" value="Save" class="btn btn-dark btn-sm">Save</button>
+            </div>
+        }
+    </div>
+</form>
+
+<script>
+    function updateEmployeeName(selectElement) {
+        var selectedOption = selectElement.options[selectElement.selectedIndex];
+        var empName = selectedOption.getAttribute("data-empname");
+        document.getElementById("employeeNameInput").value = empName || "";
+    }
+</script>

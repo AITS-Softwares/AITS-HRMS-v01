@@ -1,0 +1,139 @@
+﻿@model Erp_Aits.Models.JournalEntry
+@{
+    ViewBag.Title = "Journal Entry " + Model.Id;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Journal Entry - @Model.Id</h4>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Entry Type</label>
+        <input class="form-control" value="@Model.EntryType" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">From Template</label>
+        <input class="form-control" value="@Model.FromTemplate" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Series</label>
+        <input class="form-control" value="@Model.Series" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Company</label>
+        <input class="form-control" value="@Model.Company" readonly />
+    </div>
+
+    <div class="col-md-6"></div>
+    <div class="col-md-6">
+        <label class="form-label">Posting Date</label>
+        <input class="form-control" value="@Model.PostingDate.ToString("dd-MM-yyyy")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Title</label>
+        <input class="form-control" value="@Model.Title" readonly />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-3">Accounting Entries</h6>
+<table class="table table-bordered align-middle mb-4">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>Account</th>
+            <th>Party Type</th>
+            <th>Party</th>
+            <th>Debit</th>
+            <th>Credit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Accounts != null && Model.Accounts.Any())
+        {
+            int i = 1;
+            foreach (var a in Model.Accounts)
+            {
+                <tr>
+                    <td>@(i++)</td>
+                    <td>@a.Account</td>
+                    <td>@a.PartyType</td>
+                    <td>@a.Party</td>
+                    <td class="text-end">@a.Debit.ToString("N2")</td>
+                    <td class="text-end">@a.Credit.ToString("N2")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="6" class="text-muted text-center py-3">No Data</td></tr>
+        }
+    </tbody>
+</table>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Reference Number</label>
+        <input class="form-control" value="@Model.ReferenceNumber" readonly />
+
+        <label class="form-label mt-3">Reference Date</label>
+        <input class="form-control" value="@(Model.ReferenceDate?.ToString("dd-MM-yyyy"))" readonly />
+
+        <label class="form-label mt-3">User Remark</label>
+        <textarea class="form-control" rows="5" readonly>@Model.UserRemark</textarea>
+    </div>
+    <div class="col-md-6">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" checked="@Model.MultiCurrency" disabled />
+            <label class="form-check-label">Multi Currency</label>
+        </div>
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-3">Reference</h6>
+<div class="row g-3 mb-4">
+    <div class="col-md-6"></div>
+    <div class="col-md-6">
+        <label class="form-label">Bill No</label>
+        <input class="form-control" value="@Model.BillNo" readonly />
+
+        <label class="form-label mt-3">Bill Date</label>
+        <input class="form-control" value="@(Model.BillDate?.ToString("dd-MM-yyyy"))" readonly />
+
+        <label class="form-label mt-3">Due Date</label>
+        <input class="form-control" value="@(Model.DueDate?.ToString("dd-MM-yyyy"))" readonly />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-3">Printing Settings</h6>
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Pay To / Recd From</label>
+        <input class="form-control" value="@Model.PayToRecdFrom" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Letter Head</label>
+        <input class="form-control" value="@Model.LetterHead" readonly />
+
+        <label class="form-label mt-3">Print Heading</label>
+        <input class="form-control" value="@Model.PrintHeading" readonly />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-3">More Information</h6>
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Mode of Payment</label>
+        <input class="form-control" value="@Model.ModeOfPayment" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Is Opening</label>
+        <input class="form-control" value="@Model.IsOpening" readonly />
+    </div>
+</div>

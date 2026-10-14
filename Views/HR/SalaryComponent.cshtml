@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Salary Component";
+    var salaryComponents = ViewBag.SalaryComponents as List<Erp_Aits.Models.SalaryComponentListItem> ?? new List<Erp_Aits.Models.SalaryComponentListItem>();
 }
 
 <style>
@@ -143,11 +144,17 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td colspan="7" class="empty-row">
-                        No Salary Component found. Click <strong>+ Add Salary Component</strong> to create new.
-                    </td>
-                </tr>
+                @if (salaryComponents.Any())
+                {
+                    foreach (var item in salaryComponents)
+                    {
+                        <tr><td><input type="checkbox" /></td><td><a href="@Url.Action("SalaryComponentDetails", "HR", new { id = item.Name })">@item.Name</a></td><td><span class="badge-enabled">@(item.Disabled ? "Disabled" : "Enabled")</span></td><td>@item.Name</td><td>@item.Abbreviation</td><td>@item.Description</td><td>@item.Modified</td></tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="empty-row">No Salary Component found.</td></tr>
+                }
             </tbody>
         </table>
     </div>

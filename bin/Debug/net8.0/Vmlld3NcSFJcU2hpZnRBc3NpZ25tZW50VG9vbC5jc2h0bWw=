@@ -1,0 +1,370 @@
+﻿@* @{
+    ViewBag.Title = "New Shift Assignment Tool";
+}
+
+<form id="shiftToolForm" method="post" action="/HR/ProcessShiftAssignmentTool">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Assignment Tool</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Assign Shift Schedule</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Action *</label>
+                <select name="Action" id="actionSelect" class="form-select">
+                    <option>Assign Shift</option>
+                    <option selected>Assign Shift Schedule</option>
+                    <option>Process Shift Request</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input name="Company" class="form-control" required value="AITS" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Shift Assignment Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Schedule *</label>
+                <input name="ShiftSchedule" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Start Date *</label>
+                <input name="StartDate" type="date" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <input name="ShiftLocation" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input name="EndDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select name="Status" class="form-select">
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+                <small class="text-muted">When set to 'Inactive', employees with conflicting active shifts will not be excluded.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Quick Filters</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Branch</label>
+                <input id="filterBranch" class="form-control" />
+                <small class="text-muted">Not yet linked to Employee data — filtering by Branch isn't functional.</small>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Employee Grade</label>
+                <input id="filterGrade" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Department</label>
+                <input id="filterDepartment" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Employment Type</label>
+                <input id="filterEmploymentType" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Designation</label>
+                <input id="filterDesignation" class="form-control" />
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-3" onclick="loadEmployees()">Apply Filters</button>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Select Employees</h6>
+        <table class="table table-bordered align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" id="selectAllEmp" onclick="toggleAll(this)" /></th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Department</th>
+                    <th>Default Shift</th>
+                </tr>
+            </thead>
+            <tbody id="employeeResultsBody">
+                <tr><td colspan="5" class="text-center text-muted py-5">Please select Shift Schedule and assignment date(s).</td></tr>
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<script>
+    function loadEmployees() {
+        var department = document.getElementById('filterDepartment').value;
+        var designation = document.getElementById('filterDesignation').value;
+        var employmentType = document.getElementById('filterEmploymentType').value;
+        var grade = document.getElementById('filterGrade').value;
+
+        var url = '/HR/SearchEmployeesForShiftTool?department=' + encodeURIComponent(department)
+            + '&designation=' + encodeURIComponent(designation)
+            + '&employmentType=' + encodeURIComponent(employmentType)
+            + '&grade=' + encodeURIComponent(grade);
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                var body = document.getElementById('employeeResultsBody');
+                body.innerHTML = '';
+
+                if (data.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">No employees found matching filters.</td></tr>';
+                    return;
+                }
+
+                data.forEach(emp => {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <input type="checkbox" class="empCheck" />
+                            <input type="hidden" name="SelectedEmployees" class="empHidden" value="${emp.employee}" disabled />
+                            <input type="hidden" name="SelectedEmployeeNames" class="empNameHidden" value="${emp.employeeName}" disabled />
+                        </td>
+                        <td>${emp.employee}</td>
+                        <td>${emp.employeeName}</td>
+                        <td>${emp.department}</td>
+                        <td>${emp.defaultShift}</td>
+                    `;
+                    body.appendChild(row);
+                });
+
+                document.querySelectorAll('.empCheck').forEach(cb => {
+                    cb.addEventListener('change', function () {
+                        var row = this.closest('tr');
+                        row.querySelector('.empHidden').disabled = !this.checked;
+                        row.querySelector('.empNameHidden').disabled = !this.checked;
+                    });
+                });
+            });
+    }
+
+    function toggleAll(source) {
+        document.querySelectorAll('.empCheck').forEach(cb => {
+            cb.checked = source.checked;
+            cb.dispatchEvent(new Event('change'));
+        });
+    }
+</script> *@
+
+
+
+
+
+
+@{
+    ViewBag.Title = "New Shift Assignment Tool";
+    var shiftTypes = ViewBag.ShiftTypes as List<string> ?? new List<string>();
+    var shiftLocations = ViewBag.ShiftLocations as List<string> ?? new List<string>();
+    var branches = ViewBag.Branches as List<string> ?? new List<string>();
+    var departments = ViewBag.Departments as List<string> ?? new List<string>();
+    var designations = ViewBag.Designations as List<string> ?? new List<string>();
+    var grades = ViewBag.Grades as List<string> ?? new List<string>();
+    var employmentTypes = ViewBag.EmploymentTypes as List<string> ?? new List<string>();
+
+    var employees = ViewBag.EmployeesList as List<object> ?? new List<object>();
+
+    // Safely parse query string values using .ToString() to prevent StringValues errors
+    string selShiftType = Context.Request.Query["shiftType"].ToString();
+    string selStartDate = Context.Request.Query["startDate"].ToString();
+    if (string.IsNullOrEmpty(selStartDate)) { selStartDate = DateTime.Now.ToString("yyyy-MM-dd"); }
+    string selEndDate = Context.Request.Query["endDate"].ToString();
+    string selLocation = Context.Request.Query["shiftLocation"].ToString();
+    string selStatus = Context.Request.Query["status"].ToString();
+    if (string.IsNullOrEmpty(selStatus)) { selStatus = "Active"; }
+    string selBranch = Context.Request.Query["branch"].ToString();
+    string selDept = Context.Request.Query["department"].ToString();
+    string selDesig = Context.Request.Query["designation"].ToString();
+    string selGrade = Context.Request.Query["grade"].ToString();
+    string selEmpType = Context.Request.Query["employmentType"].ToString();
+}
+
+<!-- Main form submits final shift assignments -->
+<form id="shiftAssignmentToolForm" method="post" action="/HR/ProcessShiftAssignmentTool">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Assignment Tool</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Assign Shift Schedule</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Action *</label>
+                <select name="Action" class="form-select">
+                    <option>Assign Shift</option>
+                    <option selected>Assign Shift Schedule</option>
+                    <option>Process Shift Request</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input name="Company" class="form-control" required value="AITS" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Shift Assignment Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                <select name="ShiftType" class="form-select" required onchange="if(this.value==='__CREATE_NEW__') location.href='/HR/CreateShiftType';">
+                    <option value="">-- Select Shift Type --</option>
+                    @foreach (var st in shiftTypes)
+                    {
+                        <option value="@st" selected="@(selShiftType == st)">@st</option>
+                    }
+                    <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Shift Type</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Start Date *</label>
+                <input name="StartDate" type="date" class="form-control" required value="@selStartDate" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <select name="ShiftLocation" class="form-select">
+                    <option value="">-- Select Shift Location --</option>
+                    @foreach (var loc in shiftLocations)
+                    {
+                        <option value="@loc" selected="@(selLocation == loc)">@loc</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input name="EndDate" type="date" class="form-control" value="@selEndDate" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select name="Status" class="form-select">
+                    <option selected="@(selStatus == "Active")">Active</option>
+                    <option selected="@(selStatus == "Inactive")">Inactive</option>
+                </select>
+                <small class="text-muted">When set to 'Inactive', employees with conflicting active shifts will not be excluded.</small>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Filter Form via native GET reload -->
+<form method="get" action="/HR/ShiftAssignmentTool" class="card p-4 mb-3">
+    <h6 class="mb-3">Quick Filters</h6>
+    <input type="hidden" name="shiftType" value="@selShiftType" />
+    <input type="hidden" name="startDate" value="@selStartDate" />
+    <input type="hidden" name="endDate" value="@selEndDate" />
+    <input type="hidden" name="shiftLocation" value="@selLocation" />
+    <input type="hidden" name="status" value="@selStatus" />
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select">
+                <option value="">-- Select Branch --</option>
+                @foreach (var b in branches)
+                {
+                    <option value="@b" selected="@(selBranch == b)">@b</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employee Grade</label>
+            <select name="grade" class="form-select">
+                <option value="">-- Select Grade --</option>
+                @foreach (var g in grades)
+                {
+                    <option value="@g" selected="@(selGrade == g)">@g</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Department</label>
+            <select name="department" class="form-select">
+                <option value="">-- Select Department --</option>
+                @foreach (var d in departments)
+                {
+                    <option value="@d" selected="@(selDept == d)">@d</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employment Type</label>
+            <select name="employmentType" class="form-select">
+                <option value="">-- Select Employment Type --</option>
+                @foreach (var et in employmentTypes)
+                {
+                    <option value="@et" selected="@(selEmpType == et)">@et</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Designation</label>
+            <select name="designation" class="form-select">
+                <option value="">-- Select Designation --</option>
+                @foreach (var des in designations)
+                {
+                    <option value="@des" selected="@(selDesig == des)">@des</option>
+                }
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-sm btn-outline-secondary mt-3 w-auto">Apply Filters</button>
+</form>
+
+<div class="card p-4">
+    <h6 class="mb-3">Select Employees</h6>
+    <table class="table table-bordered align-middle mb-0">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" disabled /></th>
+                <th>Employee</th>
+                <th>Employee Name</th>
+                <th>Branch</th>
+                <th>Department</th>
+                <th>Default Shift</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (employees.Any())
+            {
+                foreach (dynamic emp in employees)
+                {
+                    <tr>
+                        <td>
+                            <input form="shiftAssignmentToolForm" type="checkbox" name="SelectedEmployees" value="@emp.EmployeeId" />
+                        </td>
+                        <td>@emp.EmployeeId</td>
+                        <td>@emp.EmployeeName</td>
+                        <td>@emp.Branch</td>
+                        <td>@emp.Department</td>
+                        <td>@emp.DefaultShift</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center text-muted py-5">No employees found matching selected filters. Click Apply Filters to load.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

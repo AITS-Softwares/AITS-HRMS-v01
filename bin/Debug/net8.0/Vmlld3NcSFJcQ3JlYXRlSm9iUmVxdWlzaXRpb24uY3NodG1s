@@ -1,0 +1,93 @@
+﻿@model Erp_Aits.Models.JobRequisition
+@{
+    ViewBag.Title = "New Job Requisition";
+}
+
+<form asp-action="CreateJobRequisition" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Job Requisition</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#jobDescTab">Job Description</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="detailsTab">
+            <div class="card p-4 mb-3">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Naming Series</label>
+                        <input class="form-control" value="HR-HIREQ-" disabled />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">No of. Positions *</label>
+                        <input asp-for="NoOfPositions" type="number" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Company *</label>
+                        <input asp-for="Company" class="form-control" required value="@Model.Company" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Designation *</label>
+                        <input asp-for="Designation" class="form-control" required autofocus />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Expected Compensation *</label>
+                        <input asp-for="ExpectedCompensation" type="number" step="0.01" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Status *</label>
+                        <select asp-for="Status" class="form-select">
+                            <option>Pending</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Filled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Department</label>
+                        <input asp-for="Department" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-4 mb-3">
+                <h6 class="mb-3">Requested By</h6>
+                <label class="form-label">Requested By *</label>
+                <input asp-for="RequestedBy" class="form-control" required />
+            </div>
+
+            <div class="card p-4">
+                <h6 class="mb-3">Timelines</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Posting Date *</label>
+                        <input asp-for="PostingDate" type="date" class="form-control" required value="@Model.PostingDate.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Expected By</label>
+                        <input asp-for="ExpectedBy" type="date" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="jobDescTab">
+            <div class="card p-4 mb-3">
+                <label class="form-label">Job Description *</label>
+                <textarea asp-for="JobDescription" class="form-control" rows="8" required></textarea>
+            </div>
+            <div class="card p-4">
+                <label class="form-label">Reason for Requesting</label>
+                <textarea asp-for="ReasonForRequesting" class="form-control" rows="8"></textarea>
+            </div>
+        </div>
+
+    </div>
+</form>

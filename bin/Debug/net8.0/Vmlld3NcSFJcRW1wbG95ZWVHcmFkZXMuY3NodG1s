@@ -1,0 +1,136 @@
+﻿@model List<Erp_Aits.Models.EmployeeGrade>
+@{
+    ViewBag.Title = "Employee Grade";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Grade</h4>
+
+    <button type="button"
+            class="btn btn-dark btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#newGradeModal">
+        + Add Employee Grade
+    </button>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Grade Name</th>
+            <th>Default Salary Structure</th>
+            <th>Default Base Pay</th>
+            <th>ERPNext Ref</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var g in Model)
+            {
+                <tr style="cursor:pointer"
+                    onclick="window.location='@Url.Action("EmployeeGradeDetails", "HR", new { id = g.Id })'">
+                    <td><strong>@g.GradeName</strong></td>
+
+                    <td>@(string.IsNullOrWhiteSpace(g.DefaultSalaryStructure) ? "-" : g.DefaultSalaryStructure)</td>
+
+                    <td>@(g.DefaultBasePay.HasValue? g.DefaultBasePay.Value.ToString("0.##") : "-")</td>
+
+                    <td>
+                        <small class="text-muted">
+                            @(string.IsNullOrWhiteSpace(g.ErpNextId) ? "-" : g.ErpNextId)
+                        </small>
+                    </td>
+
+                    <td class="text-center">
+                        <a href="@Url.Action("EmployeeGradeDetails", "HR", new { id = g.Id })"
+                           class="btn btn-sm btn-outline-dark"
+                           onclick="event.stopPropagation();">
+                            View
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted py-3">
+                    No employee grades found.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="newGradeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateEmployeeGrade" asp-controller="HR" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title">New Employee Grade</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name *</label>
+                        <input type="text"
+                               name="GradeName"
+                               class="form-control"
+                               required
+                               autofocus />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Default Salary Structure</label>
+                        <input type="text"
+                               name="DefaultSalaryStructure"
+                               class="form-control" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Default Base Pay</label>
+                        <input type="number"
+                               name="DefaultBasePay"
+                               class="form-control"
+                               step="0.01" />
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-between">
+                    <a href="@Url.Action("CreateEmployeeGrade", "HR")"
+                       class="btn btn-light btn-sm">
+                        Edit Full Form
+                    </a>
+
+                    <button type="submit" class="btn btn-dark btn-sm">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

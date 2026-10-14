@@ -1,0 +1,770 @@
+﻿@* @model List<Erp_Aits.Models.Department>
+
+@{
+    ViewBag.Title = "Department";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: radial-gradient(circle at top left, #f0fdfa 0%, #eef2f3 45%, #f4f7f6 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .dept-list-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 28px 16px 60px;
+    }
+
+    .dept-accent-bar {
+        height: 5px;
+        width: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #0f766e 0%, #14b8a6 45%, #f59e0b 100%);
+        margin-bottom: 22px;
+        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.2);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        padding: 22px 28px;
+        background: linear-gradient(120deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(15, 118, 110, 0.28);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .page-header::after {
+            content: "";
+            position: absolute;
+            top: -60%;
+            right: -8%;
+            width: 220px;
+            height: 220px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+    .page-title {
+        position: relative;
+        z-index: 1;
+    }
+
+        .page-title .eyebrow {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 2px;
+        }
+
+        .page-title h2 {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+            font-size: 24px;
+        }
+
+        .page-title p {
+            color: rgba(255, 255, 255, 0.85);
+            margin: 0;
+            font-size: 13.5px;
+        }
+
+    .btn-add {
+        background: #ffffff;
+        color: #0f766e;
+        border-radius: 9px;
+        padding: 10px 24px;
+        font-weight: 700;
+        font-size: 13.5px;
+        border: none;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+        .btn-add:hover {
+            background: #f59e0b;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+        }
+
+    .table-card {
+        background: linear-gradient(160deg, #ffffff 0%, #f4fbfa 100%);
+        border: 1px solid #e6f5f3;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(20, 40, 40, 0.08);
+        padding: 26px;
+    }
+
+    .table-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        width: 300px;
+        max-width: 100%;
+        border-radius: 9px;
+        border: 1.5px solid #d9ece9;
+        padding: 10px 16px;
+        font-size: 13.5px;
+        background-color: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .search-box:focus {
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.14);
+            outline: none;
+        }
+
+    .btn-filter {
+        border: 1.5px solid #14b8a6;
+        color: #0f766e;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 9px;
+        padding: 9px 20px;
+        background: #ffffff;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-filter:hover {
+            background-color: #0f766e;
+            border-color: #0f766e;
+            color: #ffffff;
+        }
+
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+        .table thead th {
+            background-color: #e6f8f5;
+            border: none;
+            color: #0f766e;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 13px 14px;
+            border-bottom: 2px solid #99f6e4;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+
+            .table tbody tr:hover {
+                background: #f4fbfa;
+            }
+
+        .table td {
+            vertical-align: middle;
+            padding: 13px 14px;
+            font-size: 13.5px;
+            color: #334155;
+            border-bottom: 1px solid #eef2f1;
+        }
+
+            .table td.fw-semibold {
+                color: #134e4a;
+                font-weight: 700;
+            }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #047857;
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+        display: inline-block;
+    }
+
+    .badge-disabled {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+        display: inline-block;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        cursor: default;
+    }
+
+        .form-check-input:checked {
+            background-color: #0f766e;
+            border-color: #0f766e;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #7fa8a2;
+    }
+
+        .empty-state .empty-icon {
+            font-size: 34px;
+            color: #99f6e4;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h5 {
+            color: #134e4a;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 0;
+        }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+        outline: 2px solid #14b8a6;
+        outline-offset: 2px;
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .table-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="dept-list-wrapper">
+    <div class="dept-accent-bar"></div>
+
+    <div class="page-header">
+
+        <div class="page-title">
+            <div class="eyebrow">HR &middot; Organization Setup</div>
+            <h2>Department</h2>
+            <p>Manage all departments in your organization</p>
+        </div>
+
+        <a href="@Url.Action("CreateDepartment", "HR")" class="btn-add">
+            <i class="bi bi-plus-circle"></i> Add Department
+        </a>
+
+    </div>
+
+    <div class="table-card">
+
+        <div class="table-toolbar">
+
+            <input type="text"
+                   class="form-control search-box"
+                   placeholder="🔍 Search Department">
+
+            <button class="btn-filter">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+
+        </div>
+
+        <table class="table table-hover align-middle">
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Department</th>
+                    <th>Parent Department</th>
+                    <th>Is Group</th>
+                    <th>Leave Block List</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model.Any())
+                {
+                    foreach (var dep in Model)
+                    {
+                        <tr>
+
+                            <td class="fw-semibold">
+                                @dep.DepartmentName
+                            </td>
+
+                            <td>
+
+                                @if (dep.Status == "Active")
+                                {
+                                    <span class="badge-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-disabled">@dep.Status</span>
+                                }
+
+                            </td>
+
+                            <td>@dep.DepartmentName</td>
+
+                            <td>@dep.ParentDepartment</td>
+
+                            <td>
+
+                                @if (dep.IsGroup)
+                                {
+                                    <input type="checkbox" class="form-check-input" checked disabled />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input" disabled />
+                                }
+
+                            </td>
+
+                            <td>@dep.LeaveBlockList</td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                                <h5>No Departments Found</h5>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div> *@
+
+
+@model List<Erp_Aits.Models.Department>
+
+@{
+    ViewBag.Title = "Department";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: radial-gradient(circle at top left, #f0fdfa 0%, #eef2f3 45%, #f4f7f6 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .dept-list-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 28px 16px 60px;
+    }
+
+    .dept-accent-bar {
+        height: 5px;
+        width: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #0f766e 0%, #14b8a6 45%, #f59e0b 100%);
+        margin-bottom: 22px;
+        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.2);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        padding: 22px 28px;
+        background: linear-gradient(120deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(15, 118, 110, 0.28);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .page-header::after {
+            content: "";
+            position: absolute;
+            top: -60%;
+            right: -8%;
+            width: 220px;
+            height: 220px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+    .page-title {
+        position: relative;
+        z-index: 1;
+    }
+
+        .page-title .eyebrow {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 2px;
+        }
+
+        .page-title h2 {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+            font-size: 24px;
+        }
+
+        .page-title p {
+            color: rgba(255, 255, 255, 0.85);
+            margin: 0;
+            font-size: 13.5px;
+        }
+
+    .btn-add {
+        background: #ffffff;
+        color: #0f766e;
+        border-radius: 9px;
+        padding: 10px 24px;
+        font-weight: 700;
+        font-size: 13.5px;
+        border: none;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+        .btn-add:hover {
+            background: #f59e0b;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+        }
+
+    .table-card {
+        background: linear-gradient(160deg, #ffffff 0%, #f4fbfa 100%);
+        border: 1px solid #e6f5f3;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(20, 40, 40, 0.08);
+        padding: 26px;
+    }
+
+    .table-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        width: 300px;
+        max-width: 100%;
+        border-radius: 99px;
+        border: 1.5px solid #d9ece9;
+        padding: 10px 16px;
+        font-size: 13.5px;
+        background-color: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .search-box:focus {
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.14);
+            outline: none;
+        }
+
+    .btn-filter {
+        border: 1.5px solid #14b8a6;
+        color: #0f766e;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 9px;
+        padding: 9px 20px;
+        background: #ffffff;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-filter:hover {
+            background-color: #0f766e;
+            border-color: #0f766e;
+            color: #ffffff;
+        }
+
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+        .table thead th {
+            background-color: #e6f8f5;
+            border: none;
+            color: #0f766e;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 13px 14px;
+            border-bottom: 2px solid #99f6e4;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+
+            .table tbody tr:hover {
+                background: #f4fbfa;
+            }
+
+        .table td {
+            vertical-align: middle;
+            padding: 13px 14px;
+            font-size: 13.5px;
+            color: #334155;
+            border-bottom: 1px solid #eef2f1;
+        }
+
+            .table td.fw-semibold {
+                color: #134e4a;
+                font-weight: 700;
+            }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #047857;
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+        display: inline-block;
+    }
+
+    .badge-disabled {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+        display: inline-block;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        cursor: default;
+    }
+
+        .form-check-input:checked {
+            background-color: #0f766e;
+            border-color: #0f766e;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #7fa8a2;
+    }
+
+        .empty-state .empty-icon {
+            font-size: 34px;
+            color: #99f6e4;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h5 {
+            color: #134e4a;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 0;
+        }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+        outline: 2px solid #14b8a6;
+        outline-offset: 2px;
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .table-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="dept-list-wrapper">
+    <div class="dept-accent-bar"></div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="page-header">
+        <div class="page-title">
+            <div class="eyebrow">HR &middot; Organization Setup</div>
+            <h2>Department</h2>
+            <p>Manage all departments in your organization</p>
+        </div>
+
+        <div>
+            @* <form asp-action="SyncDepartmentsFromErpNext" asp-controller="HR" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm me-2" style="font-weight: 700; padding: 10px 18px; border-radius: 9px;">⚡ Sync from ERPNext</button>
+            </form> *@
+            <a href="@Url.Action("CreateDepartment", "HR")" class="btn-add">
+                <i class="bi bi-plus-circle"></i> Add Department
+            </a>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-toolbar">
+            <input type="text" class="form-control search-box" placeholder="🔍 Search Department">
+            <button class="btn-filter">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+        </div>
+
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID / Code</th>
+                    <th>Status</th>
+                    <th>Department</th>
+                    <th>Parent Department</th>
+                    <th>Is Group</th>
+                    <th>Leave Block List</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var dep in Model)
+                    {
+                        <tr style="cursor:pointer;" onclick="location.href='@Url.Action("DepartmentDetails", "HR", new { id = dep.Id })'">
+                            <td class="fw-semibold">
+                                @(string.IsNullOrEmpty(dep.DepartmentCode) ? dep.Id.ToString() : dep.DepartmentCode)
+                            </td>
+
+                            <td>
+                                @if (dep.Status == "Active")
+                                {
+                                    <span class="badge-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-disabled">@dep.Status</span>
+                                }
+                            </td>
+
+                            <td>@dep.DepartmentName</td>
+                            <td>@dep.ParentDepartment</td>
+
+                            <td>
+                                @if (dep.IsGroup)
+                                {
+                                    <input type="checkbox" class="form-check-input" checked disabled />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input" disabled />
+                                }
+                            </td>
+
+                            <td>@dep.LeaveBlockList</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                                <h5>No Departments Found</h5>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

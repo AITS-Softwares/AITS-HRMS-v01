@@ -1,0 +1,119 @@
+﻿@* @model List<Erp_Aits.Models.ExpenseClaimType>
+@{
+    ViewBag.Title = "Expense Claim Type";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Expense Claim Type</h4>
+    <a href="/HR/CreateExpenseClaimType" class="btn btn-dark btn-sm">+ Add Expense Claim Type</a>
+</div>
+
+<form method="get" action="/HR/ExpenseClaimType" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Expense Claim Type</th>
+                <th>Deferred Expense Account</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr style="cursor:pointer" onclick="window.location='/HR/ExpenseClaimTypeDetails/@t.Id'">
+                    <td>@t.Name</td>
+                    <td>@t.Name</td>
+                    <td>@(t.DeferredExpenseAccount ? "Yes" : "")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted text-center py-5">No expense claim types found.</p>
+} *@
+
+
+
+
+@model List<Erp_Aits.Models.ExpenseClaimType>
+@{
+    ViewBag.Title = "Expense Claim Type";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Expense Claim Type</h4>
+    <div class="d-flex gap-2">
+        <a href="/HR/CreateExpenseClaimType" class="btn btn-dark btn-sm">+ Add Expense Claim Type</a>
+    </div>
+</div>
+
+<form method="get" action="/HR/ExpenseClaimType" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID or Name" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ERPNext Ref</th>
+                <th>Expense Claim Type</th>
+                <th>Deferred Expense Account</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr style="cursor:pointer" onclick="window.location='/HR/ExpenseClaimTypeDetails/@t.Id'">
+                    <td>
+                        @if (!string.IsNullOrEmpty(t.ErpNextId))
+                        {
+                            <span class="badge bg-success-subtle text-success">@t.ErpNextId</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-muted">Local</span>
+                        }
+                    </td>
+                    <td><strong>@t.Name</strong></td>
+                    <td>@(t.DeferredExpenseAccount ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted text-center py-5">No expense claim types found.</p>
+}

@@ -1,0 +1,17 @@
+﻿@model Erp_Aits.Models.VehicleServiceItem
+@{
+    ViewBag.Title = "Vehicle Service Item " + Model.ServiceItem;
+}
+<h4 class="mb-3">@Model.ServiceItem</h4>
+<div class="card p-4">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Service Item</label>
+            <input class="form-control" value="@Model.ServiceItem" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Rate</label>
+            <input class="form-control" value="@(Model.Rate.HasValue? Model.Rate.Value.ToString("0.00") : "")" readonly />
+        </div>
+    </div>
+</div>

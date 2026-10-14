@@ -1,0 +1,198 @@
+﻿@* @model List<Erp_Aits.Models.ShiftRequest>
+@{
+    ViewBag.Title = "Shift Request";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Request</h4>
+    <a href="@Url.Action("CreateShiftRequest", "HR")" class="btn btn-dark btn-sm">+ Add Shift Request</a>
+</div>
+
+<form method="get" asp-action="ShiftRequest" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-dark">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr style="cursor:pointer;" onclick="location.href='@Url.Action("ShiftRequestDetails", "HR", new { id = s.Id })'">
+                <td>@s.ShiftRequestCode</td>
+                <td>@s.Employee</td>
+                <td>@s.EmployeeName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (!Model.Any())
+{
+    <p class="text-muted">No shift requests found.</p>
+}
+
+
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.ShiftRequest>
+@{
+    ViewBag.Title = "Shift Request";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Request</h4>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("CreateShiftRequest", "HR")" class="btn btn-dark btn-sm">+ Add Shift Request</a>
+    </div>
+</div>
+
+<form method="get" asp-action="ShiftRequest" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmployeeNameFilter" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-dark">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Employee</th>
+            <th>Employee Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr style="cursor:pointer;" onclick="location.href='@Url.Action("ShiftRequestDetails", "HR", new { id = s.Id })'">
+                <td>@s.ShiftRequestCode</td>
+                <td>@s.Employee</td>
+                <td>@s.EmployeeName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No shift requests found.</p>
+} *@
+
+
+
+
+
+
+@model List<Erp_Aits.Models.ShiftRequest>
+@{
+    ViewBag.Title = "Shift Request";
+}
+
+<div class="container-fluid px-4 py-3">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-dark font-weight-bold">Shift Request</h3>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("NewShiftRequest", "HR")" class="btn btn-dark btn-sm">+ Add Shift Request</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm p-3 mb-4 bg-white rounded">
+        <form method="get" asp-action="ShiftRequest" class="row g-2">
+            <div class="col-md-3">
+                <input type="text" name="id" class="form-control form-control-sm" placeholder="Filter by ID" value="@ViewBag.IdFilter" />
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="employeeName" class="form-control form-control-sm" placeholder="Filter by Employee Name" value="@ViewBag.EmployeeNameFilter" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-dark">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card shadow-sm bg-white rounded p-3">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var s in Model)
+                    {
+                        <tr style="cursor:pointer;" onclick="location.href='@Url.Action("ShiftRequestDetails", "HR", new { id = s.Id })'">
+                            <td>@s.ShiftRequestCode</td>
+                            <td>@s.Employee</td>
+                            <td>@s.EmployeeName</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-center py-4">
+                <p class="text-muted mb-0">No shift requests found. ERPNext data refreshes automatically when this page opens.</p>
+            </div>
+        }
+    </div>
+</div>

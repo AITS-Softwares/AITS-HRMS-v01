@@ -1,0 +1,101 @@
+﻿@model Erp_Aits.Models.InterviewRound
+@{
+    ViewBag.Title = "New Interview Round";
+}
+
+<form asp-action="CreateInterviewRound" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Interview Round</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Round Name *</label>
+                <input asp-for="RoundName" class="form-control" required autofocus />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Expected Average Rating</label>
+                <div id="starRating">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fa-star star-icon far text-secondary" data-value="@i" style="cursor:pointer; font-size:20px; margin-right:4px;"></i>
+                    }
+                </div>
+                <input asp-for="ExpectedAverageRating" type="hidden" id="ratingValue" value="0" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Interview Type</label>
+                <input asp-for="InterviewType" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Interviewers</label>
+                <input asp-for="Interviewers" class="form-control" />
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Designation</label>
+                <input asp-for="Designation" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Expected Skillset</h6>
+        <table class="table table-bordered align-middle mb-1" id="skillTable">
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" disabled /></th>
+                    <th style="width:60px">No.</th>
+                    <th>Skill *</th>
+                    <th>Description</th>
+                    <th style="width:50px"></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSkillRow()">+ Add Row</button>
+    </div>
+</form>
+
+<script>
+    // Star rating: click sets rating, fills stars up to clicked one only
+    document.querySelectorAll('.star-icon').forEach(function (star) {
+        star.addEventListener('click', function () {
+            var value = parseInt(this.getAttribute('data-value'));
+            document.getElementById('ratingValue').value = value;
+
+            document.querySelectorAll('.star-icon').forEach(function (s) {
+                var sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= value) {
+                    s.classList.remove('far', 'text-secondary');
+                    s.classList.add('fas', 'text-warning');
+                } else {
+                    s.classList.remove('fas', 'text-warning');
+                    s.classList.add('far', 'text-secondary');
+                }
+            });
+        });
+    });
+
+    function addSkillRow() {
+        var tbody = document.getElementById('skillTable').querySelector('tbody');
+        var rowNum = tbody.rows.length + 1;
+
+        var row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td>${rowNum}</td>
+            <td><input name="SkillNames" class="form-control form-control-sm border-0" /></td>
+            <td><input name="SkillDescriptions" class="form-control form-control-sm border-0" /></td>
+            <td><i class="fas fa-pen text-muted" style="cursor:pointer"></i></td>
+        `;
+        tbody.appendChild(row);
+    }
+</script>

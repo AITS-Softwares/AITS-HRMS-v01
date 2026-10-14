@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "Bulk Leave Policy Assignment";
+    var employees = (List<Erp_Aits.Models.Employee>)ViewBag.Employees;
+    var leavePolicies = (List<Erp_Aits.Models.LeavePolicy>)ViewBag.LeavePolicies;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Bulk Leave Policy Assignment</h4>
+    <button type="submit" form="bulkForm" class="btn btn-dark btn-sm">Assign</button>
+</div>
+
+<form id="bulkForm" asp-action="BulkLeavePolicyAssignment" method="post">
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Leave Policy <span class="text-danger">*</span></label>
+            <select name="leavePolicyId" class="form-select" required>
+                <option value="">-- Select --</option>
+                @foreach (var lp in leavePolicies)
+                {
+                    <option value="@lp.Id">@lp.Title</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Assignment based on</label>
+            <select name="assignmentBasedOn" class="form-select">
+                <option value="Leave Period">Leave Period</option>
+                <option value="Joining Date">Joining Date</option>
+                <option value="Custom Range">Custom Range</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Company <span class="text-danger">*</span></label>
+            <input type="text" name="company" class="form-control" value="AITS" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Effective From <span class="text-danger">*</span></label>
+            <input type="date" name="effectiveFrom" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Effective To <span class="text-danger">*</span></label>
+            <input type="date" name="effectiveTo" class="form-control" value="@DateTime.Now.AddYears(1).ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="col-md-12">
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="addUnusedLeaves" value="true" id="addUnusedLeaves" />
+                <label class="form-check-label" for="addUnusedLeaves">Add unused leaves from previous allocations</label>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <h6 class="mb-3">Select Employees</h6>
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" id="selectAll" onchange="toggleAll(this)" /></th>
+                <th>Employee</th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Department</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (employees != null && employees.Any())
+            {
+                foreach (var e in employees)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="emp-check" name="SelectedEmployees" value="@e.EmployeeCode" />
+                            <input type="hidden" name="SelectedEmployeeNames" value="@e.FullName" />
+                        </td>
+                        <td>@e.EmployeeCode</td>
+                        <td>@e.FullName</td>
+                        <td>@e.Company</td>
+                        <td>@e.Department</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="5" class="text-muted text-center py-3">No Data</td></tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+@section Scripts {
+    <script>
+        function toggleAll(source) {
+            document.querySelectorAll('.emp-check').forEach(cb => cb.checked = source.checked);
+        }
+    </script>
+}

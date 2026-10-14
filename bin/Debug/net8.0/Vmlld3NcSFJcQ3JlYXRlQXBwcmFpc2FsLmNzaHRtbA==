@@ -1,0 +1,958 @@
+﻿@model Erp_Aits.Models.Appraisal
+@{
+    ViewBag.Title = "New Appraisal";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger"
+         role="alert"
+         style="margin-bottom:15px;">
+
+        <div style="font-weight:600;">
+            @(TempData["ErpNextErrorTitle"]
+                    ?? "ERPNext Validation")
+    </div>
+
+        <div>
+            @TempData["ErpNextError"]
+        </div>
+
+    </div>
+}
+
+      
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success"
+         role="alert"
+         style="margin-bottom:15px;">
+
+        @TempData["Success"]
+
+    </div>
+}
+
+<form asp-action="CreateAppraisal"
+      method="post"
+      id="CreateAppraisalForm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Appraisal</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overviewTab">Overview</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#kraTab">KRAs</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#selfTab">Self Appraisal</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overviewTab">
+            <div class="card p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Series *</label>
+                        <input class="form-control" value="HR-APR-.YYYY.-" disabled />
+                    </div>
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Company *
+                        </label>
+
+                        @Html.DropDownListFor(
+                        m => m.Company,
+                                                (IEnumerable<SelectListItem>)
+                                                ViewBag.CompanyList
+                                                ?? new List<SelectListItem>(),
+                                                "-- Select Company --",
+                                                new
+                                                {
+                                                    @class = "form-control",
+                                                    @required = "required",
+                                                    @id = "Company"
+                                                }
+                                                )
+
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Employee *</label>
+                        @Html.DropDownListFor(m => m.Employee, (IEnumerable<SelectListItem>)ViewBag.EmployeeList ?? new List<SelectListItem>(), "-- Select Employee --", new { @class = "form-control", @required = "required", @id = "Employee" })
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Appraisal Cycle *</label>
+                        @Html.DropDownListFor(m => m.AppraisalCycle, (IEnumerable<SelectListItem>)ViewBag.AppraisalCycleList ?? new List<SelectListItem>(), "-- Select Appraisal Cycle --", new { @class = "form-control", @required = "required" })
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Employee Name
+                        </label>
+
+                        <input asp-for="EmployeeName"
+                               id="EmployeeName"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KRAs Tab -->
+        <div class="tab-pane fade" id="kraTab">
+            <div class="card p-4">
+                <label class="form-label">Appraisal Template *</label>
+                @Html.DropDownListFor(m => m.AppraisalTemplate, (IEnumerable<SelectListItem>)ViewBag.AppraisalTemplateList ?? new List<SelectListItem>(), "-- Select Appraisal Template --", new { @class = "form-control mb-3", @id = "AppraisalTemplate", @required = "required" })
+
+                <div class="form-check mb-3">
+                    <input asp-for="RateGoalsManually"
+                           id="RateGoalsManually"
+                           class="form-check-input"
+                           type="checkbox"
+                           onclick="return false;" />
+
+                    <label class="form-check-label">
+                        Rate Goals Manually
+                    </label>
+
+                    <small class="text-muted d-block">
+                        Controlled by ERPNext Appraisal Cycle
+                    </small>
+                    @* <label class="form-check-label">Rate Goals Manually</label> *@
+                </div>
+
+                <h6 class="mb-2">KRA vs Goals</h6>
+                <table class="table table-bordered align-middle mb-1" id="kraTable">
+                    <thead>
+                        <tr>
+                            <th style="width:40px"><input type="checkbox" disabled /></th>
+                            <th style="width:60px">No.</th>
+                            <th>KRA *</th>
+                            <th>Weightage (%) *</th>
+                            <th>Goal Completion (%)</th>
+                            <th>Goal Score (weighted)</th>
+                            <th style="width:50px"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                @* <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addKraRow()">+ Add Row</button> *@
+                <button type="button"
+                        id="btnAddKraRow"
+                        class="btn btn-sm btn-outline-secondary">
+                    + Add Row
+                </button>
+            </div>
+        </div>
+
+        <!-- Feedback Tab -->
+        <div class="tab-pane fade" id="feedbackTab">
+
+            <div class="card p-4">
+
+                <h6 class="mb-3">
+                    Employee Performance Feedback
+                </h6>
+
+                <div class="alert alert-info mb-0">
+
+                    <strong>Note:</strong>
+
+                    Feedback score will be calculated from
+                    submitted Employee Performance Feedback
+                    records linked with this Appraisal.
+
+                    You do not need to manually enter an
+                    overall feedback score while creating
+                    the Appraisal.
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Self Appraisal Tab -->
+        <div class="tab-pane fade" id="selfTab">
+            <div class="card p-4 mb-3">
+                <h6 class="mb-2">Ratings & Criteria</h6>
+                <table class="table table-bordered align-middle mb-1" id="selfRatingTable">
+                    <thead>
+                        <tr>
+                            <th style="width:40px"><input type="checkbox" disabled /></th>
+                            <th style="width:60px">No.</th>
+                            <th>Criteria *</th>
+                            <th>Weightage (%) *</th>
+                            <th>Rating</th>
+                            <th style="width:50px"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                @* <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSelfRatingRow()">+ Add Row</button> *@
+                <button type="button"
+                        id="btnAddSelfRatingRow"
+                        class="btn btn-sm btn-outline-secondary">
+                    + Add Row
+                </button>
+            </div>
+
+            <div class="card p-4">
+                <h6 class="mb-3">Reflections</h6>
+                @await Html.PartialAsync("_RichTextEditor", new ViewDataDictionary(ViewData) { { "FieldName", "Reflections" }, { "Content", Model.Reflections } })
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // ============================================================
+        // ELEMENTS
+        // ============================================================
+
+        const employeeSelect =
+            document.getElementById('Employee');
+
+        const employeeNameInput =
+            document.getElementById('EmployeeName');
+
+        const companySelect =
+            document.getElementById('Company');
+
+        const templateSelect =
+            document.getElementById('AppraisalTemplate');
+
+        const kraTable =
+            document.getElementById('kraTable');
+
+        const selfRatingTable =
+            document.getElementById('selfRatingTable');
+
+        const btnAddKraRow =
+            document.getElementById('btnAddKraRow');
+
+        const btnAddSelfRatingRow =
+            document.getElementById('btnAddSelfRatingRow');
+
+
+        let globalKraList = [];
+        let globalCriteriaList = [];
+
+
+        // ============================================================
+        // LOAD KRA MASTER
+        // ============================================================
+
+        async function loadKraMaster() {
+
+            try {
+
+                const response = await fetch(
+                    '@Url.Action("GetMasterKras", "HR")'
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Unable to load KRA master.'
+                    );
+                }
+
+                const data =
+                    await response.json();
+
+                globalKraList =
+                    Array.isArray(data)
+                        ? data
+                        : [];
+
+            }
+            catch (error) {
+
+                console.error(
+                    'KRA Master Error:',
+                    error
+                );
+
+                globalKraList = [];
+            }
+        }
+
+
+        // ============================================================
+        // LOAD CRITERIA MASTER
+        // ============================================================
+
+        async function loadCriteriaMaster() {
+
+            try {
+
+                const response = await fetch(
+                    '@Url.Action("GetMasterCriteria", "HR")'
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Unable to load Criteria master.'
+                    );
+                }
+
+                const data =
+                    await response.json();
+
+                globalCriteriaList =
+                    Array.isArray(data)
+                        ? data
+                        : [];
+
+            }
+            catch (error) {
+
+                console.error(
+                    'Criteria Master Error:',
+                    error
+                );
+
+                globalCriteriaList = [];
+            }
+        }
+
+
+        // ============================================================
+        // LOAD BOTH MASTERS
+        // ============================================================
+
+        async function loadMasters() {
+
+            await Promise.all([
+                loadKraMaster(),
+                loadCriteriaMaster()
+            ]);
+        }
+
+
+        // ============================================================
+        // HTML ENCODE
+        // ============================================================
+
+        function htmlEncode(value) {
+
+            const div =
+                document.createElement('div');
+
+            div.textContent =
+                value == null
+                    ? ''
+                    : String(value);
+
+            return div.innerHTML;
+        }
+
+
+        // ============================================================
+        // ADD KRA ROW
+        // ============================================================
+
+        function addKraRow(
+            selectedKra = '',
+            weightage = 0,
+            completion = 0,
+            score = 0
+        ) {
+
+            if (!kraTable) {
+                return;
+            }
+
+            const tbody =
+                kraTable.querySelector('tbody');
+
+            const row =
+                document.createElement('tr');
+
+
+            let options =
+                '<option value="">-- Select KRA --</option>';
+
+
+            globalKraList.forEach(function (item) {
+
+                const name =
+                    item.name || '';
+
+                const selected =
+                    name === selectedKra
+                        ? 'selected'
+                        : '';
+
+                options +=
+                    '<option value="' +
+                    htmlEncode(name) +
+                    '" ' +
+                    selected +
+                    '>' +
+                    htmlEncode(name) +
+                    '</option>';
+            });
+
+
+            row.innerHTML = `
+                <td>
+                    <input type="checkbox" />
+                </td>
+
+                <td class="row-number"></td>
+
+                <td>
+                    <select name="KraNames"
+                            class="form-control form-control-sm"
+                            required>
+                        ${options}
+                    </select>
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="KraWeightages"
+                           value="${weightage}"
+                           step="0.01"
+                           min="0"
+                           max="100"
+                           class="form-control form-control-sm"
+                           required />
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="KraGoalCompletions"
+                           value="${completion}"
+                           step="0.01"
+                           min="0"
+                           max="100"
+                           class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="KraGoalScores"
+                           value="${score}"
+                           step="0.01"
+                           min="0"
+                           max="5"
+                           class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger btn-remove-row">
+                        ×
+                    </button>
+                </td>
+            `;
+
+
+            tbody.appendChild(row);
+
+            renumberKraRows();
+        }
+
+
+        // ============================================================
+        // ADD SELF RATING ROW
+        // ============================================================
+
+        function addSelfRatingRow(
+            selectedCriteria = '',
+            weightage = 0,
+            rating = 0
+        ) {
+
+            if (!selfRatingTable) {
+                return;
+            }
+
+            const tbody =
+                selfRatingTable.querySelector('tbody');
+
+            const row =
+                document.createElement('tr');
+
+
+            let options =
+                '<option value="">-- Select Criteria --</option>';
+
+
+            globalCriteriaList.forEach(function (item) {
+
+                const name =
+                    item.name || '';
+
+                const selected =
+                    name === selectedCriteria
+                        ? 'selected'
+                        : '';
+
+                options +=
+                    '<option value="' +
+                    htmlEncode(name) +
+                    '" ' +
+                    selected +
+                    '>' +
+                    htmlEncode(name) +
+                    '</option>';
+            });
+
+
+            row.innerHTML = `
+                <td>
+                    <input type="checkbox" />
+                </td>
+
+                <td class="row-number"></td>
+
+                <td>
+                    <select name="RatingCriteria"
+                            class="form-control form-control-sm"
+                            required>
+                        ${options}
+                    </select>
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="RatingWeightages"
+                           value="${weightage}"
+                           step="0.01"
+                           min="0"
+                           max="100"
+                           class="form-control form-control-sm"
+                           required />
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="RatingValues"
+                           value="${rating}"
+                           step="0.01"
+                           min="0"
+                           max="5"
+                           class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger btn-remove-row">
+                        ×
+                    </button>
+                </td>
+            `;
+
+
+            tbody.appendChild(row);
+
+            renumberSelfRatingRows();
+        }
+
+
+        // ============================================================
+        // RENUMBER KRA
+        // ============================================================
+
+        function renumberKraRows() {
+
+            if (!kraTable) {
+                return;
+            }
+
+            const rows =
+                kraTable.querySelectorAll(
+                    'tbody tr'
+                );
+
+            rows.forEach(function (row, index) {
+
+                const numberCell =
+                    row.querySelector(
+                        '.row-number'
+                    );
+
+                if (numberCell) {
+                    numberCell.textContent =
+                        index + 1;
+                }
+            });
+        }
+
+
+        // ============================================================
+        // RENUMBER SELF RATINGS
+        // ============================================================
+
+        function renumberSelfRatingRows() {
+
+            if (!selfRatingTable) {
+                return;
+            }
+
+            const rows =
+                selfRatingTable.querySelectorAll(
+                    'tbody tr'
+                );
+
+            rows.forEach(function (row, index) {
+
+                const numberCell =
+                    row.querySelector(
+                        '.row-number'
+                    );
+
+                if (numberCell) {
+                    numberCell.textContent =
+                        index + 1;
+                }
+            });
+        }
+
+
+        // ============================================================
+        // REMOVE ROW
+        // ============================================================
+
+        document.addEventListener(
+            'click',
+            function (event) {
+
+                const button =
+                    event.target.closest(
+                        '.btn-remove-row'
+                    );
+
+                if (!button) {
+                    return;
+                }
+
+                const row =
+                    button.closest('tr');
+
+                if (row) {
+                    row.remove();
+                }
+
+                renumberKraRows();
+                renumberSelfRatingRows();
+            }
+        );
+
+
+        // ============================================================
+        // MANUAL ADD KRA BUTTON
+        // ============================================================
+
+        if (btnAddKraRow) {
+
+            btnAddKraRow.addEventListener(
+                'click',
+                function () {
+
+                    addKraRow();
+                }
+            );
+        }
+
+
+        // ============================================================
+        // MANUAL ADD SELF RATING BUTTON
+        // ============================================================
+
+        if (btnAddSelfRatingRow) {
+
+            btnAddSelfRatingRow.addEventListener(
+                'click',
+                function () {
+
+                    addSelfRatingRow();
+                }
+            );
+        }
+
+
+        // ============================================================
+        // EMPLOYEE CHANGE
+        //
+        // Employee ->
+        // Employee Name
+        // Company
+        // ============================================================
+
+        if (employeeSelect) {
+
+            employeeSelect.addEventListener(
+                'change',
+                async function () {
+
+                    const employeeId =
+                        employeeSelect.value;
+
+
+                    if (employeeNameInput) {
+                        employeeNameInput.value = '';
+                    }
+
+
+                    if (!employeeId) {
+                        return;
+                    }
+
+
+                    try {
+
+                        const url =
+                            '@Url.Action("GetEmployeeName", "HR")'
+                            + '?employeeId='
+                            + encodeURIComponent(employeeId);
+
+
+                        const response =
+                            await fetch(url);
+
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                'Unable to load Employee.'
+                            );
+                        }
+
+
+                        const data =
+                            await response.json();
+
+
+                        if (!data ||
+                            data.success === false) {
+
+                            console.error(
+                                data && data.message
+                                    ? data.message
+                                    : 'Employee could not be loaded.'
+                            );
+
+                            return;
+                        }
+
+
+                        // ============================================
+                        // EMPLOYEE NAME
+                        // ============================================
+
+                        if (employeeNameInput) {
+
+                            employeeNameInput.value =
+                                data.employeeName || '';
+                        }
+
+
+                        // ============================================
+                        // COMPANY
+                        // ============================================
+
+                        if (companySelect &&
+                            data.company) {
+
+                            companySelect.value =
+                                data.company;
+                        }
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            'Employee load error:',
+                            error
+                        );
+                    }
+                }
+            );
+        }
+
+
+        // ============================================================
+        // APPRAISAL TEMPLATE CHANGE
+        //
+        // Template ->
+        // KRA Rows
+        // Self Rating Rows
+        // ============================================================
+
+        if (templateSelect) {
+
+            templateSelect.addEventListener(
+                'change',
+                async function () {
+
+                    const templateName =
+                        templateSelect.value;
+
+
+                    if (!templateName) {
+
+                        if (kraTable) {
+                            kraTable
+                                .querySelector('tbody')
+                                .innerHTML = '';
+                        }
+
+                        if (selfRatingTable) {
+                            selfRatingTable
+                                .querySelector('tbody')
+                                .innerHTML = '';
+                        }
+
+                        return;
+                    }
+
+
+                    try {
+
+                        // Ensure dropdown masters
+                        // are already available.
+                        if (
+                            globalKraList.length === 0 ||
+                            globalCriteriaList.length === 0
+                        ) {
+
+                            await loadMasters();
+                        }
+
+
+                        const url =
+                            '@Url.Action("GetAppraisalTemplateDetails", "HR")'
+                            + '?templateName='
+                            + encodeURIComponent(
+                                templateName
+                            );
+
+
+                        const response =
+                            await fetch(url);
+
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                'Unable to load Appraisal Template.'
+                            );
+                        }
+
+
+                        const data =
+                            await response.json();
+
+
+                        if (!data ||
+                            data.success !== true) {
+
+                            console.error(
+                                data && data.message
+                                    ? data.message
+                                    : 'Template details could not be loaded.'
+                            );
+
+                            return;
+                        }
+
+
+                        // ============================================
+                        // CLEAR PREVIOUS ROWS
+                        // ============================================
+
+                        if (kraTable) {
+
+                            kraTable
+                                .querySelector('tbody')
+                                .innerHTML = '';
+                        }
+
+
+                        if (selfRatingTable) {
+
+                            selfRatingTable
+                                .querySelector('tbody')
+                                .innerHTML = '';
+                        }
+
+
+                        // ============================================
+                        // POPULATE KRA
+                        // ============================================
+
+                        if (
+                            Array.isArray(data.kras)
+                        ) {
+
+                            data.kras.forEach(
+                                function (item) {
+
+                                    addKraRow(
+                                        item.kra || '',
+                                        item.weightage || 0,
+                                        0,
+                                        0
+                                    );
+                                }
+                            );
+                        }
+
+
+                        // ============================================
+                        // POPULATE SELF RATINGS
+                        // ============================================
+
+                        if (
+                            Array.isArray(
+                                data.criteria
+                            )
+                        ) {
+
+                            data.criteria.forEach(
+                                function (item) {
+
+                                    addSelfRatingRow(
+                                        item.criteria || '',
+                                        item.weightage || 0,
+                                        0
+                                    );
+                                }
+                            );
+                        }
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            'Template load error:',
+                            error
+                        );
+                    }
+                }
+            );
+        }
+
+
+        // ============================================================
+        // INITIAL LOAD
+        // ============================================================
+
+        loadMasters();
+
+    });
+</script>

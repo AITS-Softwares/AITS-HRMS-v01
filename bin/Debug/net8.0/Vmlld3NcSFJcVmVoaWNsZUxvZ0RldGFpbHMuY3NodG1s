@@ -1,0 +1,87 @@
+﻿@model Erp_Aits.Models.VehicleLog
+@{
+    ViewBag.Title = "Vehicle Log " + Model.Id;
+}
+<h4 class="mb-3">Vehicle Log #@Model.Id</h4>
+
+<div class="card p-4 mb-3">
+    <label class="form-label">Series</label>
+    <input class="form-control mb-3" value="@Model.Series" readonly />
+
+    <label class="form-label">License Plate</label>
+    <input class="form-control mb-3" value="@Model.LicensePlate" readonly />
+
+    <label class="form-label">Employee</label>
+    <input class="form-control" value="@Model.Employee" readonly />
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Odometer Reading</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Date</label>
+            <input class="form-control" value="@(Model.OdometerDate.HasValue? Model.OdometerDate.Value.ToString("yyyy-MM-dd") : "")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Current Odometer value</label>
+            <input class="form-control" value="@(Model.CurrentOdometerValue.HasValue? Model.CurrentOdometerValue.Value.ToString("0.00") : "")" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Refuelling Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Fuel Qty</label>
+            <input class="form-control" value="@(Model.FuelQty.HasValue? Model.FuelQty.Value.ToString("0.00") : "")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Supplier</label>
+            <input class="form-control" value="@Model.Supplier" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Fuel Price</label>
+            <input class="form-control" value="@(Model.FuelPrice.HasValue? Model.FuelPrice.Value.ToString("0.00") : "")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Invoice Ref</label>
+            <input class="form-control" value="@Model.InvoiceRef" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Service Details</h6>
+    <table class="table table-bordered align-middle mb-0">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Service Item</th>
+                <th>Type</th>
+                <th>Frequency</th>
+                <th>Expense</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int rowNo = 0;
+            }
+            @foreach (var s in Model.ServiceDetails)
+            {
+                rowNo++;
+                <tr>
+                    <td>@rowNo</td>
+                    <td>@s.ServiceItem</td>
+                    <td>@s.Type</td>
+                    <td>@s.Frequency</td>
+                    <td>@(s.Expense.HasValue? s.Expense.Value.ToString("0.00") : "")</td>
+                </tr>
+            }
+            @if (!Model.ServiceDetails.Any())
+            {
+                <tr><td colspan="5" class="text-center text-muted py-3">No Data</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,128 @@
+﻿@model Erp_Aits.Models.EmployeeReferral
+@{
+    ViewBag.Title = "New Employee Referral";
+}
+
+<form asp-action="CreateEmployeeReferral" method="post" id="referralForm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee Referral</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">First Name *</label>
+                <input asp-for="FirstName" class="form-control" required autofocus />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Date *</label>
+                <input asp-for="ReferralDate" type="date" class="form-control" required value="@Model.ReferralDate.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Last Name *</label>
+                <input asp-for="LastName" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status *</label>
+                <select asp-for="Status" class="form-select">
+                    <option>Pending</option>
+                    <option>Accepted</option>
+                    <option>Rejected</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 offset-md-6">
+                <label class="form-label">For Designation *</label>
+                <input asp-for="ForDesignation" class="form-control" required />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Referral Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Email *</label>
+                <input asp-for="Email" type="email" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Current Employer</label>
+                <input asp-for="CurrentEmployer" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Contact No.</label>
+                <input asp-for="ContactNo" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Current Job Title</label>
+                <input asp-for="CurrentJobTitle" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Resume Link</label>
+                <input asp-for="ResumeLink" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">Resume</label>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('referralResumeFile').click()">Attach</button>
+                <input type="file" id="referralResumeFile" style="display:none" />
+                <input type="hidden" asp-for="ResumeAttachment" id="referralAttachmentPath" />
+                <input type="hidden" asp-for="ResumeAttachmentName" id="referralAttachmentName" />
+                <div id="referralFileLabel" class="small text-muted mt-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Referrer Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Referrer *</label>
+                <input asp-for="Referrer" class="form-control" required />
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                    <input asp-for="IsApplicableForReferralBonus" class="form-check-input" type="checkbox" checked />
+                    <label class="form-check-label">Is Applicable for Referral Bonus</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Additional Information</h6>
+        <label class="form-label">Why is this Candidate Qualified for this Position?</label>
+        @await Html.PartialAsync("_RichTextEditor", new ViewDataDictionary(ViewData) { { "FieldName", "QualifiedReason" }, { "Content", Model.QualifiedReason } })
+    </div>
+
+    <div class="card p-4">
+        <label class="form-label">Work References</label>
+        @await Html.PartialAsync("_RichTextEditor", new ViewDataDictionary(ViewData) { { "FieldName", "WorkReferences" }, { "Content", Model.WorkReferences } })
+    </div>
+</form>
+
+<script>
+    document.getElementById('referralResumeFile').addEventListener('change', function () {
+        var file = this.files[0];
+        if (!file) return;
+
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('@Url.Action("UploadReferralResume", "HR")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.fileUrl) {
+                document.getElementById('referralAttachmentPath').value = data.fileUrl;
+                document.getElementById('referralAttachmentName').value = data.fileName;
+                document.getElementById('referralFileLabel').innerText = 'Attached: ' + data.fileName;
+            }
+        });
+    });
+</script>

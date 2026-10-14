@@ -1,0 +1,1210 @@
+﻿@model Erp_Aits.Models.EmployeeSeparation
+
+@using System.Net
+@using System.Text.RegularExpressions
+
+@{
+    ViewBag.Title =
+        "Employee Separation " +
+        Model.Id;
+
+    string rawExitSummary =
+        Model.ExitInterviewSummary ?? "";
+
+    string decodedSummary =
+        WebUtility.HtmlDecode(rawExitSummary);
+
+    string plainExitSummary =
+        Regex.Replace(
+            decodedSummary,
+            "<[^>]*>",
+            " "
+        );
+
+    plainExitSummary =
+        Regex.Replace(
+            plainExitSummary,
+            @"\s+",
+            " "
+        ).Trim();
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show"
+         role="alert">
+
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show"
+         role="alert">
+
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+}
+
+@if (ViewBag.SyncWarning != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.SyncWarning
+    </div>
+}
+
+@if (ViewBag.LookupWarning != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.LookupWarning
+    </div>
+}
+
+<!-- ========================================================= -->
+<!-- HEADER -->
+<!-- ========================================================= -->
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0">
+
+        Employee Separation
+
+        @(string.IsNullOrWhiteSpace(
+                Model.EmployeeSeparationCode)
+                ? "#" + Model.Id
+                : Model.EmployeeSeparationCode)
+
+    </h4>
+
+    <div class="d-flex gap-2 align-items-center">
+
+        <a href="@Url.Action(
+                           "EmployeeSeparation",
+                           "HR")"
+           class="btn btn-outline-secondary btn-sm">
+
+            Back
+
+        </a>
+
+        <button type="button"
+                id="btnEditSeparation"
+                class="btn btn-primary btn-sm px-3">
+
+            Edit
+
+        </button>
+
+        <button type="submit"
+                form="deleteSeparationForm"
+                class="btn btn-danger btn-sm px-3"
+                onclick="return confirm('Are you sure? This Employee Separation will be deleted from both ERPNext and HRMS.');">
+
+            <i class="fa fa-trash me-1"></i>
+            Delete
+
+        </button>
+
+        <button type="submit"
+                form="updateSeparationForm"
+                id="btnSaveChanges"
+                class="btn btn-dark btn-sm px-4 fw-bold"
+                style="display:none;">
+
+            Update Changes
+
+        </button>
+
+        <button type="button"
+                id="btnCancelEdit"
+                class="btn btn-outline-secondary btn-sm"
+                style="display:none;">
+
+            Cancel Edit
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- UPDATE FORM -->
+<!-- ========================================================= -->
+
+<form asp-controller="HR"
+      asp-action="UpdateEmployeeSeparation"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="updateSeparationForm">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden"
+           asp-for="Id" />
+
+    <input type="hidden"
+           asp-for="EmployeeSeparationCode" />
+
+
+    <!-- ===================================================== -->
+    <!-- BASIC DETAILS -->
+    <!-- ===================================================== -->
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+
+        <div class="row g-3">
+
+            <!-- Employee -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Employee"
+                        id="Employee"
+                        class="form-select editable-field"
+                        disabled
+                        required>
+
+                    <option value="">
+                        -- Select Employee --
+                    </option>
+
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            string empId =
+                            emp.name?.ToString() ?? "";
+
+                            string empName =
+                            emp.employee_name?.ToString() ?? "";
+
+                            string company =
+                            emp.company?.ToString() ?? "";
+
+                            if (empId == Model.Employee)
+                            {
+                                <option value="@empId"
+                                        data-employee-name="@empName"
+                                        data-company="@company"
+                                        selected>
+                                    @empId - @empName
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@empId"
+                                        data-employee-name="@empName"
+                                        data-company="@company">
+                                    @empId - @empName
+                                </option>
+                            }
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- Company -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company
+                </label>
+
+                <input asp-for="Company"
+                       id="Company"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- Employee Name -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee Name
+                </label>
+
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- Status -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Status
+                </label>
+
+                <input asp-for="Status"
+                       id="Status"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- Separation Begins On -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Separation Begins On
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="SeparationBeginsOn"
+                       id="SeparationBeginsOn"
+                       type="date"
+                       value="@Model.SeparationBeginsOn.ToString("yyyy-MM-dd")"
+                       class="form-control editable-field"
+                       readonly
+                       required />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- SEPARATION ACTIVITIES -->
+    <!-- ===================================================== -->
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <h6 class="fw-bold mb-1">
+                    Separation Activities
+                </h6>
+
+                <small class="text-muted">
+                    Employee separation activity list
+                </small>
+
+            </div>
+
+            <button type="button"
+                    id="btnAddActivity"
+                    class="btn btn-sm btn-outline-primary"
+                    style="display:none;">
+
+                + Add Row
+
+            </button>
+
+        </div>
+
+
+        <!-- Template -->
+        <div class="mb-4">
+
+            <label class="form-label">
+                Employee Separation Template
+            </label>
+
+            <select asp-for="EmployeeSeparationTemplate"
+                    id="EmployeeSeparationTemplate"
+                    class="form-select editable-field"
+                    disabled>
+
+                <option value="">
+                    -- Select Employee Separation Template --
+                </option>
+
+                @if (ViewBag.Templates != null)
+                {
+                    foreach (var template in ViewBag.Templates)
+                    {
+                        string templateName =
+                        template.name?.ToString() ?? "";
+
+                        if (templateName ==
+                        Model.EmployeeSeparationTemplate)
+                        {
+                            <option value="@templateName"
+                                    selected>
+                                @templateName
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@templateName">
+                                @templateName
+                            </option>
+                        }
+                    }
+                }
+
+            </select>
+
+        </div>
+
+
+        <label class="form-label">
+            Activities
+        </label>
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered align-middle mb-3"
+                   id="activitiesTable">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th style="width:60px;">
+                            No.
+                        </th>
+
+                        <th>
+                            Activity Name
+                        </th>
+
+                        <th>
+                            User
+                        </th>
+
+                        <th style="width:150px;">
+                            Begin On (Days)
+                        </th>
+
+                        <th style="width:150px;">
+                            Duration (Days)
+                        </th>
+
+                        <th style="width:70px;"
+                            class="activity-action-column"
+                            hidden>
+
+                            Action
+
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="activitiesBody">
+
+                    @if (Model.Activities != null &&
+                                        Model.Activities.Any())
+                    {
+                        for (int i = 0;
+                        i < Model.Activities.Count;
+                        i++)
+                        {
+                            var activity =
+                            Model.Activities[i];
+
+                            <tr>
+
+                                <td class="row-number text-center">
+                                    @(i + 1)
+                                </td>
+
+                                <td>
+
+                                    <input type="text"
+                                           name="ActivityNames"
+                                           value="@activity.ActivityName"
+                                           class="form-control form-control-sm activity-editable"
+                                           readonly
+                                           required />
+
+                                </td>
+
+                                <td>
+
+                                    <select name="Users"
+                                            class="form-select form-select-sm activity-user activity-editable"
+                                            disabled>
+
+                                        <option value="">
+                                            -- Select User --
+                                        </option>
+
+                                        @if (ViewBag.Users != null)
+                                        {
+                                            foreach (var user in ViewBag.Users)
+                                            {
+                                                string userId =
+                                                user.name?.ToString() ?? "";
+
+                                                string userName =
+                                                user.full_name?.ToString() ?? "";
+
+                                                if (userId ==
+                                                activity.UserName)
+                                                {
+                                                    <option value="@userId"
+                                                            selected>
+                                                        @userName (@userId)
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@userId">
+                                                        @userName (@userId)
+                                                    </option>
+                                                }
+                                            }
+                                        }
+
+                                    </select>
+
+                                </td>
+
+                                <td>
+
+                                    <input type="number"
+                                           name="BeginOnDaysArr"
+                                           value="@activity.BeginOnDays"
+                                           class="form-control form-control-sm activity-editable"
+                                           min="0"
+                                           readonly />
+
+                                </td>
+
+                                <td>
+
+                                    <input type="number"
+                                           name="DurationDaysArr"
+                                           value="@activity.DurationDays"
+                                           class="form-control form-control-sm activity-editable"
+                                           min="0"
+                                           readonly />
+
+                                </td>
+
+                                <td class="text-center activity-action"
+                                    hidden>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger remove-activity">
+
+                                        ×
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noActivityRow">
+
+                            <td colspan="6"
+                                class="text-center text-muted py-3">
+
+                                No Activities
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Notify -->
+        <div class="form-check">
+
+            <input asp-for="NotifyUsersByEmail"
+                   id="NotifyUsersByEmail"
+                   class="form-check-input editable-field"
+                   type="checkbox"
+                   disabled />
+
+            <label class="form-check-label"
+                   for="NotifyUsersByEmail">
+
+                Notify users by email
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- EXIT INTERVIEW -->
+    <!-- ===================================================== -->
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+
+        <label class="form-label mb-2">
+            Exit Interview Summary
+        </label>
+
+        <textarea asp-for="ExitInterviewSummary"
+                  id="ExitInterviewSummary"
+                  class="form-control editable-field"
+                  rows="6"
+                  readonly
+                  placeholder="Exit Interview Summary"></textarea>
+
+    </div>
+
+</form>
+
+
+<!-- ========================================================= -->
+<!-- DELETE FORM - MUST STAY OUTSIDE UPDATE FORM -->
+<!-- ========================================================= -->
+
+<form asp-controller="HR"
+      asp-action="DeleteEmployeeSeparation"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteSeparationForm"
+      class="d-none">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+
+<!-- ========================================================= -->
+<!-- USER MASTER FOR NEW ACTIVITY ROWS -->
+<!-- ========================================================= -->
+
+<select id="erpUserMaster"
+        style="display:none;">
+
+    <option value="">
+        -- Select User --
+    </option>
+
+    @if (ViewBag.Users != null)
+    {
+        foreach (var user in ViewBag.Users)
+        {
+            <option value="@user.name">
+                @user.full_name (@user.name)
+            </option>
+        }
+    }
+
+</select>
+
+
+@section Scripts
+{
+    <script>
+
+        let editMode = false;
+
+
+        // =====================================================
+        // USER OPTIONS
+        // =====================================================
+
+        function getUserOptionsHtml() {
+
+            const master =
+                document.getElementById("erpUserMaster");
+
+            return master
+                ? master.innerHTML
+                : "";
+        }
+
+
+        // =====================================================
+        // ESCAPE HTML
+        // =====================================================
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value == null
+                    ? ""
+                    : String(value);
+
+            return div.innerHTML;
+        }
+
+
+        // =====================================================
+        // EDIT MODE
+        // =====================================================
+
+        function enableEditMode() {
+
+            editMode = true;
+
+            const editButton =
+                document.getElementById(
+                    "btnEditSeparation"
+                );
+
+            const saveButton =
+                document.getElementById(
+                    "btnSaveChanges"
+                );
+
+            const cancelButton =
+                document.getElementById(
+                    "btnCancelEdit"
+                );
+
+            const addActivityButton =
+                document.getElementById(
+                    "btnAddActivity"
+                );
+
+
+            if (editButton)
+                editButton.style.display = "none";
+
+            if (saveButton)
+                saveButton.style.display = "inline-block";
+
+            if (cancelButton)
+                cancelButton.style.display = "inline-block";
+
+            if (addActivityButton)
+                addActivityButton.style.display = "inline-block";
+
+
+            // Main editable fields
+            document.querySelectorAll(
+                ".editable-field"
+            ).forEach(function (element) {
+
+                element.disabled = false;
+
+                if (
+                    element.id ===
+                        "SeparationBeginsOn" ||
+                    element.id ===
+                        "ExitInterviewSummary"
+                ) {
+                    element.readOnly = false;
+                }
+
+            });
+
+
+            // Activity fields
+            document.querySelectorAll(
+                ".activity-editable"
+            ).forEach(function (element) {
+
+                element.disabled = false;
+                element.readOnly = false;
+
+            });
+
+
+            // Show action column
+            document.querySelectorAll(
+                ".activity-action-column, .activity-action"
+            ).forEach(function (element) {
+
+                element.hidden = false;
+
+            });
+
+        }
+
+
+        // =====================================================
+        // EMPLOYEE CHANGE
+        // =====================================================
+
+        function updateEmployeeInformation() {
+
+            const employee =
+                document.getElementById("Employee");
+
+            if (!employee)
+                return;
+
+            const option =
+                employee.options[
+                    employee.selectedIndex
+                ];
+
+            const employeeName =
+                document.getElementById(
+                    "EmployeeName"
+                );
+
+            const company =
+                document.getElementById(
+                    "Company"
+                );
+
+
+            if (!employee.value || !option) {
+
+                if (employeeName)
+                    employeeName.value = "";
+
+                if (company)
+                    company.value = "";
+
+                return;
+            }
+
+
+            if (employeeName) {
+
+                employeeName.value =
+                    option.dataset.employeeName || "";
+
+            }
+
+
+            if (company) {
+
+                company.value =
+                    option.dataset.company || "";
+
+            }
+
+        }
+
+
+        // =====================================================
+        // ADD ACTIVITY
+        // =====================================================
+
+        function addActivityRow(
+            activityName = "",
+            user = "",
+            beginOn = 0,
+            duration = 1)
+        {
+            const tbody =
+                document.getElementById(
+                    "activitiesBody"
+                );
+
+            if (!tbody)
+                return;
+
+
+            const noActivity =
+                document.getElementById(
+                    "noActivityRow"
+                );
+
+            if (noActivity)
+                noActivity.remove();
+
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td class="row-number text-center"></td>
+
+                <td>
+
+                    <input type="text"
+                           name="ActivityNames"
+                           value="${escapeHtml(activityName)}"
+                           class="form-control form-control-sm activity-editable"
+                           required />
+
+                </td>
+
+                <td>
+
+                    <select name="Users"
+                            class="form-select form-select-sm activity-user activity-editable">
+
+                        ${getUserOptionsHtml()}
+
+                    </select>
+
+                </td>
+
+                <td>
+
+                    <input type="number"
+                           name="BeginOnDaysArr"
+                           value="${beginOn ?? 0}"
+                           class="form-control form-control-sm activity-editable"
+                           min="0" />
+
+                </td>
+
+                <td>
+
+                    <input type="number"
+                           name="DurationDaysArr"
+                           value="${duration ?? 1}"
+                           class="form-control form-control-sm activity-editable"
+                           min="0" />
+
+                </td>
+
+                <td class="text-center activity-action">
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-activity">
+
+                        ×
+
+                    </button>
+
+                </td>
+            `;
+
+
+            tbody.appendChild(row);
+
+
+            if (user) {
+
+                const userSelect =
+                    row.querySelector(
+                        ".activity-user"
+                    );
+
+                if (userSelect)
+                    userSelect.value = user;
+
+            }
+
+
+            renumberActivities();
+        }
+
+
+        // =====================================================
+        // RENUMBER ACTIVITIES
+        // =====================================================
+
+        function renumberActivities() {
+
+            const rows =
+                document.querySelectorAll(
+                    "#activitiesBody tr:not(#noActivityRow)"
+                );
+
+
+            rows.forEach(
+                function (row, index) {
+
+                    const number =
+                        row.querySelector(
+                            ".row-number"
+                        );
+
+                    if (number)
+                        number.textContent =
+                            index + 1;
+
+                }
+            );
+        }
+
+
+        // =====================================================
+        // LOAD TEMPLATE ACTIVITIES
+        // =====================================================
+
+        async function loadTemplateDetails() {
+
+            if (!editMode)
+                return;
+
+            const template =
+                document.getElementById(
+                    "EmployeeSeparationTemplate"
+                );
+
+            if (!template)
+                return;
+
+
+            const templateName =
+                template.value;
+
+
+            if (!templateName)
+                return;
+
+
+            try {
+
+                const url =
+                    '@Url.Action(
+                                            "GetEmployeeSeparationTemplateDetails",
+                                            "HR")'
+                + "?templateName="
+                + encodeURIComponent(
+                    templateName
+                );
+
+
+                const response =
+                    await fetch(url);
+
+
+                if (!response.ok)
+                    throw new Error(
+                        "Unable to load template."
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data ||
+                    data.success !== true)
+                {
+                    return;
+                }
+
+
+                const tbody =
+                    document.getElementById(
+                        "activitiesBody"
+                    );
+
+
+                if (tbody)
+                    tbody.innerHTML = "";
+
+
+                if (
+                    Array.isArray(
+                        data.activities
+                    )
+                ) {
+
+                    data.activities.forEach(
+                        function (activity) {
+
+                            addActivityRow(
+                                activity.activityName || "",
+                                activity.user || "",
+                                activity.beginOn ?? 0,
+                                activity.duration ?? 1
+                            );
+
+                        }
+                    );
+
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Template error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // DOM READY
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const editButton =
+                    document.getElementById(
+                        "btnEditSeparation"
+                    );
+
+                const cancelButton =
+                    document.getElementById(
+                        "btnCancelEdit"
+                    );
+
+                const employee =
+                    document.getElementById(
+                        "Employee"
+                    );
+
+                const template =
+                    document.getElementById(
+                        "EmployeeSeparationTemplate"
+                    );
+
+                const addActivity =
+                    document.getElementById(
+                        "btnAddActivity"
+                    );
+
+
+                if (editButton) {
+
+                    editButton.addEventListener(
+                        "click",
+                        enableEditMode
+                    );
+
+                }
+
+
+                if (cancelButton) {
+
+                    cancelButton.addEventListener(
+                        "click",
+                        function () {
+
+                            window.location.reload();
+
+                        }
+                    );
+
+                }
+
+
+                if (employee) {
+
+                    employee.addEventListener(
+                        "change",
+                        updateEmployeeInformation
+                    );
+
+                }
+
+
+                if (template) {
+
+                    template.addEventListener(
+                        "change",
+                        loadTemplateDetails
+                    );
+
+                }
+
+
+                if (addActivity) {
+
+                    addActivity.addEventListener(
+                        "click",
+                        function () {
+
+                            addActivityRow(
+                                "",
+                                "",
+                                0,
+                                1
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                document.addEventListener(
+                    "click",
+                    function (event) {
+
+                        const button =
+                            event.target.closest(
+                                ".remove-activity"
+                            );
+
+                        if (!button)
+                            return;
+
+
+                        const row =
+                            button.closest("tr");
+
+                        if (row)
+                            row.remove();
+
+
+                        renumberActivities();
+
+
+                        const remaining =
+                            document.querySelectorAll(
+                                "#activitiesBody tr"
+                            );
+
+
+                        if (remaining.length === 0) {
+
+                            document.getElementById(
+                                "activitiesBody"
+                            ).innerHTML = `
+
+                                <tr id="noActivityRow">
+
+                                    <td colspan="6"
+                                        class="text-center text-muted py-3">
+
+                                        No Activities
+
+                                    </td>
+
+                                </tr>
+                            `;
+
+                        }
+
+                    }
+                );
+
+
+                renumberActivities();
+
+            }
+        );
+
+    </script>
+}

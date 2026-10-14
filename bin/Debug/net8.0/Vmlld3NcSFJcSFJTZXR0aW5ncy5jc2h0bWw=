@@ -1,0 +1,354 @@
+﻿@model Erp_Aits.Models.HRSettings
+@{
+    ViewBag.Title = "HR Settings";
+}
+
+<style>
+    body {
+        background: #eef1f8;
+        min-height: 100vh;
+    }
+
+    .hr-settings-wrapper {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1rem 3rem;
+    }
+
+    /* Headline banner with background color */
+    .hr-settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+    }
+
+        .hr-settings-header h4 {
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .hr-settings-header h4::before {
+                content: "";
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #f59e0b;
+                box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+            }
+
+        .hr-settings-header .btn-save {
+            background: #f59e0b;
+            border: none;
+            color: #1a1a1a;
+            font-weight: 700;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+            letter-spacing: 0.3px;
+        }
+
+            .hr-settings-header .btn-save:hover {
+                transform: translateY(-1px);
+                background: #d97706;
+                box-shadow: 0 6px 14px rgba(217, 119, 6, 0.45);
+                color: #1a1a1a;
+            }
+
+    /* Sections now sit tight, almost stacked, no big gap */
+    .settings-card {
+        background: #ffffff;
+        border: 1px solid #e3e7f1;
+        border-radius: 0;
+        padding: 1.4rem 1.75rem 1.2rem;
+        margin-bottom: 0;
+        box-shadow: none;
+        border-left: 4px solid #1e293b;
+        border-top: none;
+        position: relative;
+    }
+
+        .settings-card:first-of-type {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border-top: 1px solid #e3e7f1;
+        }
+
+        .settings-card:last-of-type {
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            margin-bottom: 0;
+        }
+
+        .settings-card:not(:last-of-type) {
+            border-bottom: 1px dashed #e3e7f1;
+        }
+
+        .settings-card:hover {
+            background: #fafbfe;
+            border-left-color: #f59e0b;
+        }
+
+        .settings-card h6 {
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            font-size: 0.76rem;
+            letter-spacing: 0.7px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f59e0b;
+            display: inline-block;
+        }
+
+        .settings-card .form-label {
+            font-weight: 600;
+            font-size: 0.83rem;
+            color: #3f4a5e;
+            margin-bottom: 0.3rem;
+        }
+
+        .settings-card .form-control,
+        .settings-card .form-select {
+            border: 1px solid #d7dbe5;
+            border-radius: 7px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            background-color: #f9fafc;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+
+            .settings-card .form-control:focus,
+            .settings-card .form-select:focus {
+                border-color: #1e293b;
+                box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.12);
+                background-color: #fff;
+            }
+
+        .settings-card small.text-muted {
+            display: block;
+            font-size: 0.76rem;
+            color: #94a3b8 !important;
+            margin-top: 0.25rem;
+        }
+
+        .settings-card .form-check {
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-card .form-check-input {
+            border-radius: 5px;
+            border: 1px solid #c7cddb;
+            margin-top: 0.25rem;
+        }
+
+            .settings-card .form-check-input:checked {
+                background-color: #1e293b;
+                border-color: #1e293b;
+            }
+
+        .settings-card .form-check-label {
+            font-size: 0.87rem;
+            color: #3f4a5e;
+            margin-left: 0.15rem;
+        }
+
+    /* Wrap all cards in one shared shadow/border container */
+    form {
+        display: block;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06), 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+</style>
+
+<div class="hr-settings-wrapper">
+    <form asp-action="HRSettings" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="hr-settings-header">
+            <h4>HR Settings</h4>
+            <button type="submit" class="btn btn-save">Save</button>
+        </div>
+
+        <div class="settings-card">
+            <h6>Employee Settings</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Employee Naming By</label>
+                    <select asp-for="EmployeeNamingBy" class="form-select">
+                        <option>Naming Series</option>
+                        <option>Employee Number</option>
+                    </select>
+                    <small class="text-muted">Employee records are created using the selected option</small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Retirement Age (In Years)</label>
+                    <input asp-for="RetirementAge" type="number" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Standard Working Hours</label>
+                    <input asp-for="StandardWorkingHours" type="number" step="0.01" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h6>Reminders</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input asp-for="RemindWorkAnniversaries" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Work Anniversaries</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="RemindBirthdays" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Birthdays</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="RemindHolidays" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Holidays</label>
+                    </div>
+
+                    <label class="form-label">Set the frequency for holiday reminders *</label>
+                    <select asp-for="HolidayReminderFrequency" class="form-select">
+                        <option>Daily</option>
+                        <option>Weekly</option>
+                        <option>Monthly</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Sender</label>
+                    <input class="form-control" name="ReminderSender" />
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h6>Leave and Expense Claim Settings</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input asp-for="SendLeaveNotification" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Send Leave Notification</label>
+                    </div>
+
+                    <label class="form-label mt-2">Leave Approval Notification Template *</label>
+                    <input asp-for="LeaveApprovalNotificationTemplate" class="form-control mb-3" required />
+
+                    <label class="form-label">Leave Status Notification Template *</label>
+                    <input asp-for="LeaveStatusNotificationTemplate" class="form-control mb-3" required />
+
+                    <div class="form-check">
+                        <input asp-for="LeaveApproverMandatoryInLeaveApplication" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Leave Approver Mandatory In Leave Application</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="RestrictBackdatedLeaveApplication" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Restrict Backdated Leave Application</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="PreventSelfApprovalForLeaves" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Prevent self approval for leaves even if user has permissions</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="PreventSelfApprovalForExpenseClaims" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Prevent self approval for expense claims even if user has permissions</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input asp-for="ExpenseApproverMandatoryInExpenseClaim" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Expense Approver Mandatory In Expense Claim</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="ShowLeavesOfAllDepartmentMembersInCalendar" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Show Leaves Of All Department Members In Calendar</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="AutoLeaveEncashment" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Auto Leave Encashment</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h6>Shift Settings</h6>
+            <div class="form-check">
+                <input asp-for="AllowMultipleShiftAssignmentsForSameDate" class="form-check-input" type="checkbox" />
+                <label class="form-check-label">Allow Multiple Shift Assignments for Same Date</label>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h6>Hiring Settings</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input asp-for="CheckVacanciesOnJobOfferCreation" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Check Vacancies On Job Offer Creation</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="SendInterviewReminder" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Send Interview Reminder</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="SendInterviewFeedbackReminder" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Send Interview Feedback Reminder</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Sender</label>
+                    <input asp-for="Sender" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h6>Employee Exit Settings</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Exit Questionnaire Web Form</label>
+                    <input asp-for="ExitQuestionnaireWebForm" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Exit Questionnaire Notification Template</label>
+                    <input asp-for="ExitQuestionnaireNotificationTemplate" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h6>Attendance Settings</h6>
+            <div class="form-check">
+                <input asp-for="AllowEmployeeCheckinFromMobileApp" class="form-check-input" type="checkbox" />
+                <label class="form-check-label">Allow Employee Checkin from Mobile App</label>
+            </div>
+            <div class="form-check">
+                <input asp-for="AllowGeolocationTracking" class="form-check-input" type="checkbox" />
+                <label class="form-check-label">Allow Geolocation Tracking</label>
+            </div>
+        </div>
+
+        <div class="settings-card mb-0">
+            <h6>Unlink Payment</h6>
+            <div class="form-check">
+                <input asp-for="UnlinkPaymentOnCancellationOfEmployeeAdvance" class="form-check-input" type="checkbox" />
+                <label class="form-check-label">Unlink Payment on Cancellation of Employee Advance</label>
+            </div>
+        </div>
+    </form>
+</div>

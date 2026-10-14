@@ -1,0 +1,88 @@
+﻿@model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee Information";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Information</h4>
+    <div class="d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Actions
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#" onclick="setChart(); return false;">Set Chart</a></li>
+                <li><a class="dropdown-item" href="#" onclick="addChartToDashboard(); return false;">Add Chart to Dashboard</a></li>
+                <li><a class="dropdown-item" href="#" onclick="createCard(); return false;">Create Card</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" title="Reload Report" onclick="reloadReport()">
+            &#x21bb;
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" title="More options">&#8942;</button>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" asp-action="EmployeeInformation" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="empId" class="form-control form-control-sm" placeholder="Employee ID" value="@ViewBag.EmpId" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="empName" class="form-control form-control-sm" placeholder="Employee Name" value="@ViewBag.EmpName" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-dark">Filter</button>
+    </div>
+</form>
+
+<!-- Report grid -->
+<div class="card p-0">
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model)
+                {
+                    <tr>
+                        <td>@emp.EmployeeCode</td>
+                        <td>@emp.FullName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-2" style="font-size:2rem;">&#128196;</div>
+            <p class="text-muted mb-0">Nothing to show</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function reloadReport() {
+            window.location.reload();
+        }
+
+        function setChart() {
+            alert('Set Chart clicked - wire this up to your charting logic.');
+        }
+
+        function addChartToDashboard() {
+            alert('Add Chart to Dashboard clicked - wire this up to your dashboard logic.');
+        }
+
+        function createCard() {
+            alert('Create Card clicked - wire this up to your card creation logic.');
+        }
+    </script>
+}

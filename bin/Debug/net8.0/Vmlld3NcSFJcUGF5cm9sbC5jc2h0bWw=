@@ -1,0 +1,499 @@
+﻿@{
+    ViewBag.Title = "Payroll";
+}
+
+<style>
+    .payroll-page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 18px 8px 40px;
+        color: #111827;
+    }
+
+    .payroll-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .payroll-menu-icon {
+        width: 22px;
+        height: 22px;
+        border: 0;
+        background: transparent;
+        font-size: 22px;
+        line-height: 1;
+        color: #64748b;
+    }
+
+    .payroll-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .setup-card {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 6px 10px 34px;
+        margin-bottom: 28px;
+    }
+
+    .setup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+
+    .setup-heading {
+        font-size: 17px;
+        font-weight: 700;
+        margin: 0 0 4px;
+    }
+
+    .setup-subtitle {
+        font-size: 13px;
+        color: #475569;
+        margin: 0;
+    }
+
+    .dismiss-btn {
+        border: 0;
+        background: #f3f4f6;
+        border-radius: 6px;
+        font-size: 12px;
+        padding: 7px 12px;
+        color: #111827;
+    }
+
+    .setup-body {
+        display: grid;
+        grid-template-columns: 330px 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+
+    .setup-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .setup-item {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        border-radius: 7px;
+        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        cursor: pointer;
+        color: #111827;
+    }
+
+        .setup-item:hover,
+        .setup-item.active {
+            background: #f3f4f6;
+        }
+
+    .setup-item-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .setup-check {
+        width: 16px;
+        height: 16px;
+        border: 1px solid #9ca3af;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: #475569;
+    }
+
+    .setup-skip {
+        font-size: 12px;
+        color: #111827;
+    }
+
+    .setup-detail {
+        padding-top: 2px;
+    }
+
+    .setup-detail-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 4px;
+    }
+
+    .setup-detail-link {
+        font-size: 13px;
+        color: #111827;
+        text-decoration: underline;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .create-entry-btn {
+        border: 0;
+        background: #f3f4f6;
+        color: #111827;
+        border-radius: 7px;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+
+    .chart-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 14px 16px 18px;
+        margin-bottom: 22px;
+        background: #fff;
+    }
+
+    .chart-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 14px;
+    }
+
+    .chart-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 3px;
+    }
+
+    .chart-sync {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .chart-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .chart-action {
+        border: 0;
+        background: #f3f4f6;
+        border-radius: 6px;
+        padding: 6px 9px;
+        font-size: 12px;
+        color: #111827;
+    }
+
+    .payroll-chart {
+        width: 100%;
+        height: 230px;
+        display: block;
+    }
+
+    .workspace-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 34px 90px;
+        padding: 0 10px;
+    }
+
+    .workspace-section h5 {
+        font-size: 17px;
+        font-weight: 700;
+        margin: 0 0 16px;
+    }
+
+    .workspace-section h6 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 12px;
+    }
+
+    .workspace-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #111827;
+        text-decoration: none;
+        font-size: 14px;
+        margin-right: 54px;
+        margin-bottom: 10px;
+    }
+
+        .workspace-link:hover {
+            text-decoration: underline;
+        }
+
+    .external-arrow {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .bottom-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 36px;
+    }
+
+    .bottom-btn {
+        border: 0;
+        background: #f3f4f6;
+        border-radius: 7px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #111827;
+    }
+
+    @@media (max-width: 900px) {
+        .setup-body {
+            grid-template-columns: 1fr;
+        }
+
+        .workspace-grid {
+            grid-template-columns: 1fr;
+            gap: 22px;
+        }
+    }
+</style>
+
+<div class="payroll-page">
+    <div class="payroll-title-row">
+        <button type="button" class="payroll-menu-icon">≡</button>
+        <h4 class="payroll-title">Payroll</h4>
+    </div>
+
+    <section class="setup-card">
+        <div class="setup-header">
+            <div>
+                <h5 class="setup-heading">Let's Set Up the Payroll Module.</h5>
+                <p class="setup-subtitle">Salary, Compensation, and more.</p>
+            </div>
+
+            <button type="button" class="dismiss-btn">Dismiss</button>
+        </div>
+
+        <div class="setup-body">
+            <div class="setup-list">
+                <button type="button" class="setup-item active"
+                        data-title="Create Salary Component"
+                        data-list-text="Show Salary Component List"
+                        data-list-url="@Url.Action("SalaryComponent", "HR")"
+                        data-create-url="@Url.Action("CreateSalaryComponent", "HR")">
+                    <span class="setup-item-left">
+                        <span class="setup-check">✓</span>
+                        Create Salary Component
+                    </span>
+                </button>
+
+                <button type="button" class="setup-item"
+                        data-title="Create Payroll Period"
+                        data-list-text="Show Payroll Period List"
+                        data-list-url="@Url.Action("PayrollPeriod", "HR")"
+                        data-create-url="@Url.Action("CreatePayrollPeriod", "HR")">
+                    <span class="setup-item-left">
+                        <span class="setup-check">✓</span>
+                        Create Payroll Period
+                    </span>
+                    <span class="setup-skip">Skip</span>
+                </button>
+
+                <button type="button" class="setup-item"
+                        data-title="Create Income Tax Slab"
+                        data-list-text="Show Income Tax Slab List"
+                        data-list-url="@Url.Action("IncomeTaxSlab", "HR")"
+                        data-create-url="@Url.Action("CreateIncomeTaxSlab", "HR")">
+                    <span class="setup-item-left">
+                        <span class="setup-check">✓</span>
+                        Create Income Tax Slab
+                    </span>
+                </button>
+
+                <button type="button" class="setup-item"
+                        data-title="Create & Assign Salary Structure"
+                        data-list-text="Show Salary Structure List"
+                        data-list-url="@Url.Action("SalaryStructure", "HR")"
+                        data-create-url="@Url.Action("CreateSalaryStructure", "HR")">
+                    <span class="setup-item-left">
+                        <span class="setup-check">✓</span>
+                        Create & Assign Salary Structure
+                    </span>
+                </button>
+
+                <button type="button" class="setup-item"
+                        data-title="Create Salary Slip"
+                        data-list-text="Show Salary Slip List"
+                        data-list-url="@Url.Action("SalarySlip", "HR")"
+                        data-create-url="@Url.Action("CreateSalarySlip", "HR")">
+                    <span class="setup-item-left">
+                        <span class="setup-check">✓</span>
+                        Create Salary Slip
+                    </span>
+                </button>
+
+                <button type="button" class="setup-item"
+                        data-title="Payroll Settings"
+                        data-list-text="Review payroll setting"
+                        data-list-url="@Url.Action("PayrollSettings", "HR")">
+                    <span class="setup-item-left">
+                        <span class="setup-check">✓</span>
+                        Payroll Settings
+                    </span>
+                </button>
+            </div>
+
+            <div class="setup-detail">
+                <h5 class="setup-detail-title" id="setupTitle">Create Salary Component</h5>
+                <a class="setup-detail-link"
+                   id="setupListLink"
+                   href="@Url.Action("SalaryComponent", "HR")">
+                    Show Salary Component List
+                </a>
+                <br />
+                <button type="button"
+                        class="create-entry-btn"
+                        id="createEntryBtn"
+                        data-create-url="@Url.Action("CreateSalaryComponent", "HR")">
+                    Create Entry
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="chart-card">
+        <div class="chart-head">
+            <div>
+                <h5 class="chart-title">Outgoing Salary</h5>
+                <p class="chart-sync">Last synced just now</p>
+            </div>
+
+            <div class="chart-actions">
+                <button type="button" class="chart-action">⌄</button>
+                <button type="button" class="chart-action">Last Week</button>
+                <button type="button" class="chart-action">Daily</button>
+                <button type="button" class="chart-action">⋯</button>
+            </div>
+        </div>
+
+        <canvas id="outgoingSalaryChart" class="payroll-chart"></canvas>
+    </section>
+
+    <div class="workspace-grid">
+        <div class="workspace-section">
+            <h5>Your Shortcuts</h5>
+            <a class="workspace-link" href="#">Dashboard <span class="external-arrow">↗</span></a>
+            <a class="workspace-link" href="#">Salary Register <span class="external-arrow">↗</span></a>
+        </div>
+
+        <div></div>
+
+        <div class="workspace-section">
+            <h6>Quick Links</h6>
+            <a class="workspace-link" href="#">Payroll Entry <span class="external-arrow">↗</span></a>
+            <br />
+            <a class="workspace-link" href="#">Salary Slip <span class="external-arrow">↗</span></a>
+        </div>
+
+        <div class="workspace-section">
+            <h6>Settings</h6>
+            @* <a class="workspace-link" href="https://vcipl.frappe.cloud/app/payroll-settings" target="_blank">
+                Payroll Settings <span class="external-arrow">↗</span>
+            </a> *@
+            <a class="workspace-link" href="@Url.Action("PayrollSettings", "HR")">
+                Payroll Settings <span class="external-arrow">↗</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bottom-actions">
+        <button type="button" class="bottom-btn">✎ Edit</button>
+        <button type="button" class="bottom-btn">+ New</button>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.setup-item').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.setup-item').forEach(function (x) {
+                x.classList.remove('active');
+            });
+
+            btn.classList.add('active');
+
+            document.getElementById('setupTitle').textContent = btn.dataset.title;
+            document.getElementById('setupListLink').textContent = btn.dataset.listText;
+            document.getElementById('setupListLink').href = btn.dataset.listUrl;
+
+            const createBtn = document.getElementById('createEntryBtn');
+            createBtn.dataset.createUrl = btn.dataset.createUrl || btn.dataset.listUrl;
+        });
+    });
+
+    document.getElementById('createEntryBtn').addEventListener('click', function () {
+        const url = this.dataset.createUrl;
+        if (url) {
+            window.location.href = url;
+        }
+    });
+
+    (function drawOutgoingSalaryChart() {
+        const canvas = document.getElementById('outgoingSalaryChart');
+        const ctx = canvas.getContext('2d');
+
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        const width = rect.width;
+        const height = rect.height;
+        const left = 42;
+        const right = 18;
+        const top = 18;
+        const bottom = 34;
+        const graphWidth = width - left - right;
+        const graphHeight = height - top - bottom;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.font = '12px Arial';
+        ctx.lineWidth = 1;
+
+        ctx.strokeStyle = '#eef2f7';
+        ctx.fillStyle = '#64748b';
+
+        for (let i = 0; i <= 5; i++) {
+            const y = top + (graphHeight / 5) * i;
+
+            ctx.beginPath();
+            ctx.moveTo(left, y);
+            ctx.lineTo(left + graphWidth, y);
+            ctx.stroke();
+
+            ctx.fillText(String(5 - i), 10, y + 4);
+        }
+
+        const labels = ['18-09-2026', '20-09-2026', '22-09-2026', '24-09-2026', '25-09-2026'];
+
+        labels.forEach(function (label, index) {
+            const x = left + (graphWidth / (labels.length - 1)) * index;
+            ctx.fillText(label, x - 28, height - 10);
+        });
+
+        const yZero = top + graphHeight;
+
+        ctx.strokeStyle = '#ff4f9a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(left + 70, yZero);
+        ctx.lineTo(left + graphWidth - 60, yZero);
+        ctx.stroke();
+    })();
+</script>

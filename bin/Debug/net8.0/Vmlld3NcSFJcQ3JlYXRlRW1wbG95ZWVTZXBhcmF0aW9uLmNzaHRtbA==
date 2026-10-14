@@ -1,0 +1,798 @@
+﻿@model Erp_Aits.Models.EmployeeSeparation
+
+@{
+    ViewBag.Title = "New Employee Separation";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3" role="alert">
+        <strong>ERPNext Validation:</strong>
+        <span class="ms-2">@TempData["ErpNextError"]</span>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3" role="alert">
+        @TempData["Success"]
+    </div>
+}
+
+<form method="post"
+      action="/HR/CreateEmployeeSeparation"
+      id="employeeSeparationForm">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div class="d-flex align-items-center gap-2">
+
+            <h4 class="mb-0">
+                New Employee Separation
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning">
+                Not Saved
+            </span>
+
+        </div>
+
+        <button type="submit"
+                class="btn btn-dark btn-sm px-4">
+            Save
+        </button>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- BASIC DETAILS -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+
+        <div class="row g-3">
+
+            <!-- Employee -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Employee"
+                        id="Employee"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Employee --
+                    </option>
+
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            <option value="@emp.name">
+                                @emp.name - @emp.employee_name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- Company -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="Company"
+                       id="Company"
+                       class="form-control bg-light"
+                       readonly
+                       required />
+
+            </div>
+
+
+            <!-- Employee Name -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee Name
+                </label>
+
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- Status -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Status
+                </label>
+
+                <input asp-for="Status"
+                       id="Status"
+                       class="form-control bg-light"
+                       value="Pending"
+                       readonly />
+
+            </div>
+
+
+            <!-- Separation Begins On -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Separation Begins On
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="SeparationBeginsOn"
+                       id="SeparationBeginsOn"
+                       type="date"
+                       class="form-control"
+                       value="@Model.SeparationBeginsOn.ToString("yyyy-MM-dd")"
+                       required />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SEPARATION ACTIVITIES -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+
+        <h6 class="fw-bold mb-3">
+            Separation Activities
+        </h6>
+
+
+        <div class="mb-4">
+
+            <label class="form-label">
+                Employee Separation Template
+            </label>
+
+            <select asp-for="EmployeeSeparationTemplate"
+                    id="EmployeeSeparationTemplate"
+                    class="form-select">
+
+                <option value="">
+                    -- Select Employee Separation Template --
+                </option>
+
+                @if (ViewBag.Templates != null)
+                {
+                    foreach (var template in ViewBag.Templates)
+                    {
+                        <option value="@template.name">
+                            @template.name
+                        </option>
+                    }
+                }
+
+            </select>
+
+            <small class="text-muted">
+                Activities will load automatically from ERPNext template.
+            </small>
+
+        </div>
+
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+
+            <label class="form-label mb-0">
+                Activities
+            </label>
+
+            <button type="button"
+                    id="btnAddActivity"
+                    class="btn btn-sm btn-outline-secondary">
+                + Add Row
+            </button>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered align-middle mb-3"
+                   id="activitiesTable">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th style="width:60px;">
+                            No.
+                        </th>
+
+                        <th>
+                            Activity Name
+                            <span class="text-danger">*</span>
+                        </th>
+
+                        <th>
+                            User
+                        </th>
+
+                        <th style="width:160px;">
+                            Begin On (Days)
+                        </th>
+
+                        <th style="width:160px;">
+                            Duration (Days)
+                        </th>
+
+                        <th style="width:70px;">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="activitiesBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="form-check">
+
+            <input asp-for="NotifyUsersByEmail"
+                   id="NotifyUsersByEmail"
+                   class="form-check-input"
+                   type="checkbox" />
+
+            <label class="form-check-label"
+                   for="NotifyUsersByEmail">
+                Notify users by email
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- EXIT INTERVIEW -->
+    <!-- ========================================================= -->
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+
+        <label class="form-label">
+            Exit Interview Summary
+        </label>
+
+        <textarea asp-for="ExitInterviewSummary"
+                  class="form-control"
+                  rows="6"
+                  style="text-align:left; vertical-align:top;"
+                  placeholder="Exit Interview Summary"></textarea>
+
+    </div>
+
+</form>
+
+
+<select id="erpUserMaster"
+        style="display:none;">
+
+    <option value="">
+        -- Select User --
+    </option>
+
+    @if (ViewBag.Users != null)
+    {
+        foreach (var user in ViewBag.Users)
+        {
+            <option value="@user.name">
+                @user.full_name (@user.name)
+            </option>
+        }
+    }
+
+</select>
+
+
+@section Scripts
+{
+    <script>
+
+        let activityRowCount = 0;
+
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value == null
+                    ? ""
+                    : String(value);
+
+            return div.innerHTML;
+        }
+
+
+        function getUserOptionsHtml() {
+
+            const master =
+                document.getElementById(
+                    "erpUserMaster"
+                );
+
+            return master
+                ? master.innerHTML
+                : "";
+        }
+
+
+        function addActivityRow(
+            activityName = "",
+            user = "",
+            beginOn = 0,
+            duration = 1
+        ) {
+
+            const tbody =
+                document.getElementById(
+                    "activitiesBody"
+                );
+
+            if (!tbody)
+                return;
+
+
+            activityRowCount++;
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td class="row-number text-center">
+                    ${activityRowCount}
+                </td>
+
+                <td>
+                    <input type="text"
+                           name="ActivityNames"
+                           class="form-control form-control-sm"
+                           value="${escapeHtml(activityName)}"
+                           required />
+                </td>
+
+                <td>
+                    <select name="Users"
+                            class="form-select form-select-sm activity-user">
+
+                        ${getUserOptionsHtml()}
+
+                    </select>
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="BeginOnDaysArr"
+                           class="form-control form-control-sm"
+                           value="${beginOn ?? 0}"
+                           min="0" />
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="DurationDaysArr"
+                           class="form-control form-control-sm"
+                           value="${duration ?? 1}"
+                           min="0" />
+                </td>
+
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-activity">
+                        ×
+                    </button>
+                </td>
+
+            `;
+
+
+            tbody.appendChild(row);
+
+
+            if (user) {
+
+                const userDropdown =
+                    row.querySelector(
+                        ".activity-user"
+                    );
+
+                if (userDropdown) {
+                    userDropdown.value = user;
+                }
+            }
+
+
+            renumberActivities();
+        }
+
+
+        function renumberActivities() {
+
+            const rows =
+                document.querySelectorAll(
+                    "#activitiesBody tr"
+                );
+
+
+            activityRowCount =
+                rows.length;
+
+
+            rows.forEach(
+                function (row, index) {
+
+                    const cell =
+                        row.querySelector(
+                            ".row-number"
+                        );
+
+                    if (cell) {
+                        cell.textContent =
+                            index + 1;
+                    }
+                }
+            );
+        }
+
+
+        function clearEmployeeDetails() {
+
+            const employeeName =
+                document.getElementById(
+                    "EmployeeName"
+                );
+
+            const company =
+                document.getElementById(
+                    "Company"
+                );
+
+
+            if (employeeName)
+                employeeName.value = "";
+
+            if (company)
+                company.value = "";
+        }
+
+
+        async function loadEmployeeDetails() {
+
+            const employeeDropdown =
+                document.getElementById(
+                    "Employee"
+                );
+
+
+            if (!employeeDropdown)
+                return;
+
+
+            const employee =
+                employeeDropdown.value;
+
+
+            clearEmployeeDetails();
+
+
+            if (!employee)
+                return;
+
+
+            try {
+
+                const url =
+                    '@Url.Action("GetEmployeeSeparationEmployeeDetails", "HR")'
+                    + "?employee="
+                    + encodeURIComponent(
+                        employee
+                    );
+
+
+                const response =
+                    await fetch(url);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load Employee details."
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data ||
+                    data.success !== true) {
+
+                    console.error(
+                        data &&
+                        data.message
+                            ? data.message
+                            : "Employee details not found."
+                    );
+
+                    return;
+                }
+
+
+                const employeeName =
+                    document.getElementById(
+                        "EmployeeName"
+                    );
+
+
+                const company =
+                    document.getElementById(
+                        "Company"
+                    );
+
+
+                if (employeeName) {
+
+                    employeeName.value =
+                        data.employeeName || "";
+                }
+
+
+                if (company) {
+
+                    company.value =
+                        data.company || "";
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Employee details error:",
+                    error
+                );
+            }
+        }
+
+
+        async function loadTemplateDetails() {
+
+            const templateDropdown =
+                document.getElementById(
+                    "EmployeeSeparationTemplate"
+                );
+
+
+            if (!templateDropdown)
+                return;
+
+
+            const templateName =
+                templateDropdown.value;
+
+
+            const tbody =
+                document.getElementById(
+                    "activitiesBody"
+                );
+
+
+            if (!templateName) {
+
+                if (tbody) {
+                    tbody.innerHTML = "";
+                }
+
+                activityRowCount = 0;
+
+                return;
+            }
+
+
+            try {
+
+                const url =
+                    '@Url.Action("GetEmployeeSeparationTemplateDetails", "HR")'
+                    + "?templateName="
+                    + encodeURIComponent(
+                        templateName
+                    );
+
+
+                const response =
+                    await fetch(url);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load Employee Separation Template."
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (!data ||
+                    data.success !== true) {
+
+                    console.error(
+                        data &&
+                        data.message
+                            ? data.message
+                            : "Unable to load template."
+                    );
+
+                    return;
+                }
+
+
+                if (tbody) {
+                    tbody.innerHTML = "";
+                }
+
+
+                activityRowCount = 0;
+
+
+                if (
+                    Array.isArray(
+                        data.activities
+                    )
+                ) {
+
+                    data.activities.forEach(
+                        function (activity) {
+
+                            addActivityRow(
+                                activity.activityName || "",
+                                activity.user || "",
+                                activity.beginOn ?? 0,
+                                activity.duration ?? 1
+                            );
+                        }
+                    );
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Template load error:",
+                    error
+                );
+            }
+        }
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const employee =
+                    document.getElementById(
+                        "Employee"
+                    );
+
+
+                const template =
+                    document.getElementById(
+                        "EmployeeSeparationTemplate"
+                    );
+
+
+                const addButton =
+                    document.getElementById(
+                        "btnAddActivity"
+                    );
+
+
+                if (employee) {
+
+                    employee.addEventListener(
+                        "change",
+                        loadEmployeeDetails
+                    );
+                }
+
+
+                if (template) {
+
+                    template.addEventListener(
+                        "change",
+                        loadTemplateDetails
+                    );
+                }
+
+
+                if (addButton) {
+
+                    addButton.addEventListener(
+                        "click",
+                        function () {
+
+                            addActivityRow(
+                                "",
+                                "",
+                                0,
+                                1
+                            );
+                        }
+                    );
+                }
+
+
+                document.addEventListener(
+                    "click",
+                    function (event) {
+
+                        const button =
+                            event.target.closest(
+                                ".remove-activity"
+                            );
+
+
+                        if (!button)
+                            return;
+
+
+                        const row =
+                            button.closest("tr");
+
+
+                        if (row) {
+                            row.remove();
+                        }
+
+
+                        renumberActivities();
+                    }
+                );
+
+            }
+        );
+
+    </script>
+}

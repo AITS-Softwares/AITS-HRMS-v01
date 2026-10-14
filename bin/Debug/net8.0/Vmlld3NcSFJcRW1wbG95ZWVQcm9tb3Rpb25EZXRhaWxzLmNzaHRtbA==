@@ -1,0 +1,113 @@
+@model Erp_Aits.Models.EmployeePromotion
+@{
+    ViewBag.Title = "Employee Promotion " + Model.Id;
+    bool isDraft = Model.DocStatus == 0;
+    bool isSubmitted = Model.DocStatus == 1;
+    string status = isSubmitted ? "Submitted" : Model.DocStatus == 2 ? "Cancelled" : "Draft";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="UpdateEmployeePromotion" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+    <input asp-for="DocStatus" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h4 class="mb-0">Employee Promotion - @Model.Id</h4>
+            <span class="badge @(isSubmitted ? "bg-success" : Model.DocStatus == 2 ? "bg-danger" : "bg-secondary")">@status</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="EmployeePromotion" class="btn btn-outline-secondary btn-sm">Back</a>
+            @if (isDraft)
+            {
+                <button type="submit" class="btn btn-dark btn-sm">Save</button>
+            }
+        </div>
+    </div>
+
+    <fieldset @(isDraft ? "" : "disabled")>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label asp-for="Employee" class="form-label">Employee</label>
+                <input asp-for="Employee" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EmployeeName" class="form-label">Employee Name</label>
+                <input asp-for="EmployeeName" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="PromotionDate" class="form-label">Promotion Date</label>
+                <input asp-for="PromotionDate" type="date" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Company" class="form-label">Company</label>
+                <input asp-for="Company" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="SalaryCurrency" class="form-label">Salary Currency</label>
+                <input asp-for="SalaryCurrency" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CurrentCTC" class="form-label">Current CTC</label>
+                <input asp-for="CurrentCTC" type="number" step="0.01" class="form-control" />
+            </div>
+        </div>
+
+        <h6 class="mb-2">Employee Promotion Details</h6>
+        <table class="table table-bordered align-middle" id="promotionDetails">
+            <thead>
+                <tr><th>Field Name</th><th>Property</th><th>Current</th><th>New</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var detail in Model.Details ?? new List<Erp_Aits.Models.EmployeePromotionDetail>())
+                {
+                    <tr>
+                        <td><input name="PropertyFieldNames" value="@detail.FieldName" class="form-control" /></td>
+                        <td><input name="PropertyNames" value="@detail.Property" class="form-control" /></td>
+                        <td><input name="CurrentValues" value="@detail.CurrentValue" class="form-control" /></td>
+                        <td><input name="NewValues" value="@detail.NewValue" class="form-control" /></td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">Remove</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addPromotionDetail()">Add Property</button>
+    </fieldset>
+</form>
+
+@if (isDraft)
+{
+    <form asp-action="SubmitEmployeePromotion" asp-route-id="@Model.Id" method="post" class="d-inline">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-primary btn-sm mt-3">Submit</button>
+    </form>
+}
+else if (isSubmitted)
+{
+    <form asp-action="CancelEmployeePromotion" asp-route-id="@Model.Id" method="post" class="d-inline" onsubmit="return confirm('Cancel this Employee Promotion?');">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger btn-sm mt-3">Cancel</button>
+    </form>
+}
+
+<script>
+    function addPromotionDetail() {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td><input name="PropertyFieldNames" class="form-control" /></td>'
+            + '<td><input name="PropertyNames" class="form-control" /></td>'
+            + '<td><input name="CurrentValues" class="form-control" /></td>'
+            + '<td><input name="NewValues" class="form-control" /></td>'
+            + '<td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest(\'tr\').remove()">Remove</button></td>';
+        document.querySelector('#promotionDetails tbody').appendChild(row);
+    }
+</script>

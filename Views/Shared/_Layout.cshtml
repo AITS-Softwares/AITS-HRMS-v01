@@ -28,6 +28,42 @@
             background: #f0f2f5;
         }
 
+        /* Search result lists must travel with their input when the page scrolls. */
+        .search-select > .search-menu,
+        .search-select > .search-select-menu,
+        .smart-select > .smart-select__menu,
+        .ss > .sm {
+            position: absolute !important;
+            top: calc(100% + 4px) !important;
+            left: 0 !important;
+            width: 100% !important;
+        }
+
+        /* Let an anchored payroll menu extend over the next form section. */
+        .salary-form__section,
+        .payroll-form .card,
+        .payroll-form .section {
+            overflow: visible !important;
+        }
+
+        /* A focused dropdown's section must paint above later form sections. */
+        .salary-form__section:focus-within,
+        .payroll-form .section:focus-within {
+            position: relative;
+            z-index: 5000;
+        }
+
+        .smart-select:focus-within,
+        .search-select:focus-within,
+        .ss:focus-within {
+            z-index: 5001;
+        }
+
+        .portal-dropdown-menu {
+            position: fixed !important;
+            z-index: 2147483000 !important;
+        }
+
         .sidebar {
             height: 100vh;
             width: 240px;
@@ -924,6 +960,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
+    <script>
+        (function () {
+            const menuSelector = '.smart-select__menu, .search-menu, .search-select-menu, .sm';
+
+            function portalMenu(menu) {
+                if (menu.dataset.dropdownPortal === 'true') return;
+                const owner = menu.parentElement;
+                const input = owner && owner.querySelector('input');
+                if (!owner || !input) return;
+
+                menu.dataset.dropdownPortal = 'true';
+                menu._dropdownInput = input;
+                document.body.appendChild(menu);
+                positionMenu(menu);
+            }
+
+            function positionMenu(menu) {
+                const input = menu._dropdownInput;
+                if (!input || !document.contains(input)) return;
+                const rect = input.getBoundingClientRect();
+                menu.style.left = rect.left + 'px';
+                menu.style.top = (rect.bottom + 4) + 'px';
+                menu.style.width = rect.width + 'px';
+            }
+
+            function portalExistingMenus(root) {
+                root.querySelectorAll(menuSelector).forEach(portalMenu);
+            }
+
+            portalExistingMenus(document);
+            new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => {
+                if (!(node instanceof Element)) return;
+                if (node.matches(menuSelector)) portalMenu(node);
+                portalExistingMenus(node);
+            }))).observe(document.body, { childList: true, subtree: true });
+
+            window.addEventListener('scroll', () => document.querySelectorAll('[data-dropdown-portal="true"]').forEach(positionMenu), true);
+            window.addEventListener('resize', () => document.querySelectorAll('[data-dropdown-portal="true"]').forEach(positionMenu));
+        })();
+    </script>
+
     <!-- Modal Containers -->
     <div id="createTaskModalContainer"></div>
     <div id="createEventModalContainer"></div>
@@ -956,6 +1033,16 @@
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f5;
+        }
+
+        /* Keep searchable result lists anchored to their input during scrolling. */
+        .search-select > .search-menu,
+        .smart-select > .smart-select__menu,
+        .ss > .sm {
+            position: absolute !important;
+            top: calc(100% + 4px) !important;
+            left: 0 !important;
+            width: 100% !important;
         }
 
         .sidebar {
@@ -2030,5 +2117,53 @@
     <!-- Modal Containers -->
     <div id="createTaskModalContainer"></div>
     <div id="createEventModalContainer"></div>
+
+    <style>
+        .portal-dropdown-menu {
+            position: fixed !important;
+            z-index: 2147483000 !important;
+            max-height: 250px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            background: #ffffff !important;
+            border: 1px solid #93a4b8 !important;
+            border-radius: 5px !important;
+            box-shadow: 0 8px 18px rgba(15, 35, 56, .20) !important;
+        }
+    </style>
+    <script>
+        (function () {
+            const selector = '.smart-select__menu, .search-menu, .search-select-menu, .sm';
+            function position(menu) {
+                const input = menu._sourceInput;
+                if (!input || !document.contains(input)) return;
+                const rect = input.getBoundingClientRect();
+                menu.style.left = rect.left + 'px';
+                menu.style.top = (rect.bottom + 4) + 'px';
+                menu.style.width = rect.width + 'px';
+            }
+            function portal(menu) {
+                if (menu.dataset.portalDropdown === 'true') return;
+                const sourceInput = menu.parentElement && menu.parentElement.querySelector('input');
+                if (!sourceInput) return;
+                menu.dataset.portalDropdown = 'true';
+                menu.classList.add('portal-dropdown-menu');
+                menu._sourceInput = sourceInput;
+                document.body.appendChild(menu);
+                position(menu);
+            }
+            function scan(root) {
+                if (root instanceof Element && root.matches(selector)) portal(root);
+                root.querySelectorAll?.(selector).forEach(portal);
+            }
+            scan(document);
+            new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => {
+                if (node instanceof Element) scan(node);
+            }))).observe(document.body, { childList: true, subtree: true });
+            const reposition = () => document.querySelectorAll('[data-portal-dropdown="true"]').forEach(position);
+            window.addEventListener('scroll', reposition, true);
+            window.addEventListener('resize', reposition);
+        })();
+    </script>
 </body>
 </html>

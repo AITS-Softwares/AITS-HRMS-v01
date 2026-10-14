@@ -1,0 +1,362 @@
+﻿@* @model Erp_Aits.Models.EmployeeCheckin
+@{
+    ViewBag.Title = "New Employee Checkin";
+}
+
+<form asp-action="CreateEmployeeCheckin" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee Checkin</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <input asp-for="Employee" class="form-control" required placeholder="Employee code" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Time *</label>
+                <input asp-for="Time" type="datetime-local" class="form-control"
+                       value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" required />
+                <small class="text-muted">Asia/Kolkata</small>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Log Type</label>
+                <select asp-for="LogType" class="form-select">
+                    <option value="">Select</option>
+                    <option value="IN">IN</option>
+                    <option value="OUT">OUT</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Location / Device ID</label>
+                <input asp-for="LocationDeviceId" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input asp-for="SkipAutoAttendance" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label">Skip Auto Attendance</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</form> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.EmployeeCheckin
+@{
+    ViewBag.Title = "New Employee Checkin";
+}
+
+<form asp-action="CreateEmployeeCheckin" method="post">
+    <div class="ea-form-header">
+        <div class="ea-detail-header-left">
+            <a href="@Url.Action("EmployeeCheckin", "HR")" class="ea-back-btn" title="Back to list">←</a>
+            <div>
+                <div class="ea-breadcrumb">Employee Checkin</div>
+                <h4 class="mb-0">New Employee Checkin</h4>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm ea-save-btn">💾 Save</button>
+    </div>
+
+    <div class="ea-section mb-4">
+        <div class="ea-section-title">
+            <span class="ea-section-icon">⏱️</span> Checkin Details
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Employee <span class="ea-required">*</span></label>
+                <input asp-for="Employee" class="form-control ea-input" list="employeeList" required placeholder="Employee code" />
+                <datalist id="employeeList">
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            <option value="@emp.name">@emp.employee_name</option>
+                        }
+                    }
+                </datalist>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Time <span class="ea-required">*</span></label>
+                <input asp-for="Time" type="datetime-local" class="form-control ea-input"
+                       value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" required />
+                <small class="text-muted ea-hint-text">🌐 Asia/Kolkata</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Log Type</label>
+                <div class="ea-segmented" role="group">
+                    <input type="radio" asp-for="LogType" id="logTypeNone" value="" class="ea-segmented-input" checked />
+                    <label for="logTypeNone" class="ea-segmented-label ea-segmented-label-muted">—</label>
+
+                    <input type="radio" asp-for="LogType" id="logTypeIn" value="IN" class="ea-segmented-input" />
+                    <label for="logTypeIn" class="ea-segmented-label ea-segmented-in">🟢 IN</label>
+
+                    <input type="radio" asp-for="LogType" id="logTypeOut" value="OUT" class="ea-segmented-input" />
+                    <label for="logTypeOut" class="ea-segmented-label ea-segmented-out">🔴 OUT</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label ea-form-label">Location / Device ID</label>
+                <input asp-for="LocationDeviceId" class="form-control ea-input" placeholder="e.g. Main Gate Biometric" />
+            </div>
+
+            <div class="col-md-12">
+                <label class="ea-toggle mb-0">
+                    <input asp-for="SkipAutoAttendance" type="checkbox" />
+                    <span class="ea-toggle-slider"></span>
+                    <span class="ea-toggle-label">Skip Auto Attendance</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-mobile-save-bar d-md-none">
+        <button type="submit" class="btn btn-dark w-100">💾 Save</button>
+    </div>
+</form>
+
+<style>
+    .ea-form-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ea-detail-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .ea-back-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #e2e5e9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        text-decoration: none;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        transition: background 0.15s ease;
+    }
+
+        .ea-back-btn:hover {
+            background: #f0f1f3;
+            color: #000;
+        }
+
+    .ea-breadcrumb {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 0.1rem;
+    }
+
+    .ea-save-btn {
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        font-weight: 500;
+    }
+
+    .ea-section {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+    }
+
+    .ea-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 1.1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f0f1f3;
+    }
+
+    .ea-section-icon {
+        font-size: 1.05rem;
+    }
+
+    .ea-form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.35rem;
+    }
+
+    .ea-required {
+        color: #dc3545;
+    }
+
+    .ea-input {
+        border-radius: 8px;
+        border: 1px solid #dfe2e6;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.92rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .ea-input:focus {
+            border-color: #495057;
+            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+            outline: none;
+        }
+
+    .ea-hint-text {
+        display: block;
+        font-size: 0.78rem;
+        margin-top: 0.35rem;
+    }
+
+    /* Segmented IN/OUT control */
+    .ea-segmented {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .ea-segmented-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .ea-segmented-label {
+        flex: 1;
+        text-align: center;
+        padding: 0.55rem 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #dfe2e6;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+    }
+
+    .ea-segmented-label-muted {
+        color: #adb5bd;
+    }
+
+    .ea-segmented-input:checked + .ea-segmented-label {
+        border-color: #212529;
+        box-shadow: 0 0 0 1px #212529 inset;
+    }
+
+    #logTypeIn:checked + .ea-segmented-in {
+        background: #d7f5e3;
+        color: #1b7a43;
+        border-color: #1b7a43;
+    }
+
+    #logTypeOut:checked + .ea-segmented-out {
+        background: #fdecea;
+        color: #b3261e;
+        border-color: #b3261e;
+    }
+
+    #logTypeNone:checked + .ea-segmented-label-muted {
+        background: #f1f3f5;
+        color: #495057;
+    }
+
+    /* Toggle switch */
+    .ea-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .ea-toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .ea-toggle-slider {
+        position: relative;
+        width: 42px;
+        height: 24px;
+        background: #dfe2e6;
+        border-radius: 999px;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .ea-toggle-slider::before {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+    .ea-toggle input:checked + .ea-toggle-slider {
+        background: #212529;
+    }
+
+        .ea-toggle input:checked + .ea-toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+    .ea-toggle-label {
+        font-size: 0.9rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .ea-mobile-save-bar {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding: 0.85rem 0;
+        margin-top: -0.5rem;
+        border-top: 1px solid #eee;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    @@media (max-width: 767px) {
+        .ea-section {
+            padding: 1.1rem;
+        }
+
+        .ea-save-btn {
+            display: none;
+        }
+    }
+</style>

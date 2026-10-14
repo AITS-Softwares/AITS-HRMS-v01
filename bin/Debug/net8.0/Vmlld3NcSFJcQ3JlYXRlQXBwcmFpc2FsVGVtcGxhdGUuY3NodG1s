@@ -1,0 +1,373 @@
+﻿@model Erp_Aits.Models.AppraisalTemplate
+
+@{
+    ViewBag.Title = "New Appraisal Template";
+}
+
+<style>
+    .erp-dropdown {
+        position: relative;
+    }
+
+    .erp-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        max-height: 220px;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0,0,0,.12);
+        display: none;
+    }
+
+    .erp-option {
+        display: block;
+        width: 100%;
+        border: none;
+        background: white;
+        padding: 9px 12px;
+        text-align: left;
+        cursor: pointer;
+    }
+
+        .erp-option:hover {
+            background: #edf3ff;
+        }
+
+        .erp-option small {
+            display: block;
+            color: #777;
+        }
+</style>
+
+<div id="erpError" class="alert alert-danger d-none"></div>
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+}
+
+<form asp-action="CreateAppraisalTemplate"
+      asp-controller="HR"
+      method="post"
+      id="appraisalForm">
+
+    @Html.AntiForgeryToken()
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">New Appraisal Template</h4>
+            <span class="badge bg-danger-subtle text-danger ms-2">
+                Not Saved
+            </span>
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-sm">
+            Save
+        </button>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label">
+            Appraisal Template Title
+            <span class="text-danger">*</span>
+        </label>
+
+        <input asp-for="AppraisalTemplateTitle"
+               class="form-control"
+               required />
+    </div>
+
+    <hr />
+
+    <h6>Description</h6>
+
+    <textarea asp-for="Description"
+              class="form-control mb-4"
+              rows="5"></textarea>
+
+    <hr />
+
+    <h6 class="mb-3">Goals</h6>
+
+    <div class="table-responsive">
+        <table class="table table-bordered" id="kraTable">
+            <thead>
+                <tr>
+                    <th style="width:50px">No.</th>
+                    <th>Key Result Area</th>
+                    <th style="width:170px">Weightage (%)</th>
+                    <th style="width:70px">Action</th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            onclick="addKraRow()">
+        + Add Row
+    </button>
+
+    <hr />
+
+    <h6>Rating Criteria</h6>
+
+    <p class="text-muted small">
+        Criteria based on which an employee should be rated.
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-bordered" id="criteriaTable">
+            <thead>
+                <tr>
+                    <th style="width:50px">No.</th>
+                    <th>Criteria</th>
+                    <th style="width:170px">Weightage (%)</th>
+                    <th style="width:70px">Action</th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            onclick="addCriteriaRow()">
+        + Add Row
+    </button>
+
+</form>
+
+<script>
+    const ERP_URL =
+        '@Url.Action("GetAppraisalDropdown", "HR")';
+
+    const timers = new WeakMap();
+    const versions = new WeakMap();
+
+    function showErpError(message) {
+        const box = document.getElementById('erpError');
+        box.textContent = message;
+        box.classList.remove('d-none');
+    }
+
+    async function loadErpOptions(input) {
+
+        const field = input.dataset.field;
+        const menu = input.parentElement.querySelector('.erp-dropdown-menu');
+
+        const version = (versions.get(input) || 0) + 1;
+        versions.set(input, version);
+
+        menu.style.display = 'block';
+        menu.textContent = 'Loading ERPNext records...';
+
+        try {
+            const url =
+                ERP_URL +
+                '?field=' + encodeURIComponent(field) +
+                '&search=' + encodeURIComponent(input.value.trim());
+
+            const response = await fetch(url, {
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok)
+                throw new Error('HTTP ' + response.status);
+
+            const result = await response.json();
+
+            if (!result.success)
+                throw new Error(result.message || 'ERPNext search failed.');
+
+            if (versions.get(input) !== version)
+                return;
+
+            menu.replaceChildren();
+
+            if (!result.items || result.items.length === 0) {
+                menu.textContent = 'No ERPNext records found.';
+                return;
+            }
+
+            result.items.forEach(item => {
+
+                const button = document.createElement('button');
+
+                button.type = 'button';
+                button.className = 'erp-option';
+
+                const title = document.createElement('span');
+                title.textContent = item.value || '';
+
+                button.appendChild(title);
+
+                if (item.description) {
+                    const description = document.createElement('small');
+                    description.textContent = item.description;
+                    button.appendChild(description);
+                }
+
+                button.addEventListener('click', function () {
+
+                    input.value = item.value || '';
+                    input.dataset.selectedValue = input.value;
+
+                    menu.style.display = 'none';
+                });
+
+                menu.appendChild(button);
+            });
+
+        } catch (error) {
+
+            if (versions.get(input) !== version)
+                return;
+
+            menu.textContent = 'ERPNext error: ' + error.message;
+
+            showErpError(
+                'Unable to fetch ' + field + ': ' + error.message
+            );
+        }
+    }
+
+    document.addEventListener('focusin', function (event) {
+
+        if (!event.target.matches('.erp-link'))
+            return;
+
+        loadErpOptions(event.target);
+    });
+
+    document.addEventListener('input', function (event) {
+
+        const input = event.target;
+
+        if (!input.matches('.erp-link'))
+            return;
+
+        input.dataset.selectedValue = '';
+
+        clearTimeout(timers.get(input));
+
+        timers.set(input, setTimeout(function () {
+            loadErpOptions(input);
+        }, 250));
+    });
+
+    document.addEventListener('click', function (event) {
+
+        if (event.target.closest('.erp-dropdown'))
+            return;
+
+        document.querySelectorAll('.erp-dropdown-menu')
+            .forEach(menu => menu.style.display = 'none');
+    });
+
+    function addRow(tableId, nameField, weightField, erpField) {
+
+        const tbody = document.querySelector(
+            '#' + tableId + ' tbody'
+        );
+
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td class="row-number"></td>
+
+            <td>
+                <div class="erp-dropdown">
+
+                    <input type="text"
+                           name="${nameField}"
+                           data-field="${erpField}"
+                           class="form-control form-control-sm erp-link"
+                           placeholder="Click to load ERPNext dropdown"
+                           autocomplete="off"
+                           required />
+
+                    <div class="erp-dropdown-menu"></div>
+
+                </div>
+            </td>
+
+            <td>
+                <input type="number"
+                       name="${weightField}"
+                       class="form-control form-control-sm"
+                       min="0"
+                       max="100"
+                       step="0.001"
+                       value="0.000"
+                       required />
+            </td>
+
+            <td>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="removeRow(this)">
+                    ×
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+
+        renumberRows(tableId);
+    }
+
+    function addKraRow() {
+
+        addRow(
+            'kraTable',
+            'KraNames',
+            'KraWeightages',
+            'key_result_area'
+        );
+    }
+
+    function addCriteriaRow() {
+
+        addRow(
+            'criteriaTable',
+            'CriteriaNames',
+            'CriteriaWeightages',
+            'criteria'
+        );
+    }
+
+    function removeRow(button) {
+
+        const table = button.closest('table');
+
+        button.closest('tr').remove();
+
+        renumberRows(table.id);
+    }
+
+    function renumberRows(tableId) {
+
+        document.querySelectorAll('#' + tableId + ' tbody tr')
+            .forEach((row, index) => {
+
+                row.querySelector('.row-number').textContent =
+                    index + 1;
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        addKraRow();
+        addCriteriaRow();
+    });
+
+</script>

@@ -1,0 +1,62 @@
+@model Erp_Aits.Models.PurposeOfTravel
+@{
+    ViewBag.Title = "Purpose of Travel " + Model.Id;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="UpdatePurposeOfTravel"
+      asp-controller="HR"
+      method="post">
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ErpNextId" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0">Purpose of Travel - @Model.Id</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.ErpNextId))
+            {
+                <span class="badge bg-success-subtle text-success">@Model.ErpNextId</span>
+            }
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("PurposeOfTravel", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+            <button type="submit"
+                    form="deletePurposeOfTravelForm"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this Purpose of Travel from HRMS and ERPNext?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <div class="mb-3">
+            <label class="form-label">ERPNext ID</label>
+            <input class="form-control" value="@Model.ErpNextId" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Purpose of Travel <span class="text-danger">*</span></label>
+            <input asp-for="Purpose" class="form-control" required />
+        </div>
+    </div>
+</form>
+
+<form id="deletePurposeOfTravelForm"
+      asp-action="DeletePurposeOfTravel"
+      asp-controller="HR"
+      method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>

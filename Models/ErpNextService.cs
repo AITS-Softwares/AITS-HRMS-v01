@@ -376,6 +376,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace Erp_Aits.Services
 {
@@ -624,6 +625,25 @@ namespace Erp_Aits.Services
                 throw new Exception($"ERPNext returned {(int)response.StatusCode}: {responseContent}");
             }
 
+            return responseContent;
+        }
+
+        public async Task<string> UploadFileAsync(IFormFile file, string doctype, string documentName, string fieldName)
+        {
+            using var content = new MultipartFormDataContent();
+            await using var stream = file.OpenReadStream();
+            using var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "application/octet-stream");
+            content.Add(fileContent, "file", file.FileName);
+            content.Add(new StringContent(doctype), "doctype");
+            content.Add(new StringContent(documentName), "docname");
+            content.Add(new StringContent(fieldName), "fieldname");
+            content.Add(new StringContent("0"), "is_private");
+
+            var response = await _httpClient.PostAsync("/api/method/upload_file", content);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"ERPNext returned {(int)response.StatusCode}: {responseContent}");
             return responseContent;
         }
 

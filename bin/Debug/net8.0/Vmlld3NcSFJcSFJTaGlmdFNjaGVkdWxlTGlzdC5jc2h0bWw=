@@ -1,0 +1,111 @@
+﻿@* @model List<Erp_Aits.Models.HRShiftSchedule>
+@{
+    ViewBag.Title = "Shift Schedule";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Schedule</h4>
+    <a href="/HR/CreateShiftSchedule" class="btn btn-dark btn-sm">+ Add Shift Schedule</a>
+</div>
+
+<form method="get" action="/HR/ShiftSchedule" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="shiftType" class="form-control form-control-sm" placeholder="Shift Type" value="@ViewBag.ShiftTypeFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Shift Type</th>
+            <th>Frequency</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='/HR/ShiftScheduleDetails/@s.Id'">
+                <td>@s.Id</td>
+                <td>@s.Name</td>
+                <td>@s.ShiftType</td>
+                <td>@s.Frequency</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No shift schedules found.</p>
+} *@
+
+
+
+
+@model List<Erp_Aits.Models.HRShiftSchedule>
+@{
+    ViewBag.Title = "Shift Schedule";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Shift Schedule</h4>
+    <div>
+        <a href="/HR/CreateShiftSchedule" class="btn btn-dark btn-sm">+ Add Shift Schedule</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+}
+
+<form method="get" action="/HR/ShiftSchedule" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="shiftType" class="form-control form-control-sm" placeholder="Shift Type" value="@ViewBag.ShiftTypeFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Shift Type</th>
+            <th>Frequency</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='/HR/ShiftScheduleDetails/@s.Id'">
+                <td>@s.Id</td>
+                <td>@s.Name</td>
+                <td>@s.ShiftType</td>
+                <td>@s.Frequency</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No shift schedules found.</p>
+}

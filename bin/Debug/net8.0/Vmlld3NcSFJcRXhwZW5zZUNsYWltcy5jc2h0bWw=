@@ -1,0 +1,301 @@
+﻿@model List<Erp_Aits.Models.ExpenseClaim>
+
+@{
+    ViewBag.Title = "Expense Claim";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="ec-page">
+    <div class="ec-toolbar">
+        <div>
+            <div class="ec-breadcrumb">HRMS</div>
+            <h4 class="mb-0">Expense Claim</h4>
+        </div>
+
+        <div class="ec-actions">
+            <a href="@Url.Action("CreateExpenseClaim", "HR")"
+               class="btn btn-dark btn-sm">
+                + Add Expense Claim
+            </a>
+        </div>
+    </div>
+
+    <div class="ec-filter-bar">
+        <input id="claimSearch"
+               class="form-control form-control-sm"
+               placeholder="Search employee, claim id, company, status..."
+               oninput="filterExpenseClaims()" />
+
+        <select id="statusFilter"
+                class="form-select form-select-sm"
+                onchange="filterExpenseClaims()">
+            <option value="">All Status</option>
+            <option value="Draft">Draft</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Submitted">Submitted</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <div class="ec-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="expenseClaimTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ERPNext Ref</th>
+                        <th>From Employee</th>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                        <th>Company</th>
+                        <th>Posting Date</th>
+                        <th>Approval Status</th>
+                        <th>Status</th>
+                        <th>Project</th>
+                        <th>Cost Center</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var ec in Model)
+                        {
+                            var searchText =
+                            $"{ec.ExpenseClaimCode} {ec.ErpNextId} {ec.Employee} {ec.EmployeeName} {ec.Department} {ec.Company} {ec.ApprovalStatus} {ec.Status} {ec.Project} {ec.CostCenter}";
+
+                            <tr data-search="@searchText.ToLower()"
+                                data-status="@((ec.ApprovalStatus ?? ec.Status ?? "").ToLower())">
+                                <td>
+                                    <a href="@Url.Action("ExpenseClaimDetails", "HR", new { id = ec.Id })"
+                                       class="fw-bold text-decoration-none">
+                                        @ec.ExpenseClaimCode
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(ec.ErpNextId))
+                                    {
+                                        <span class="ec-badge synced">@ec.ErpNextId</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ec-badge local">Local</span>
+                                    }
+                                </td>
+
+                                <td>@ec.Employee</td>
+                                <td>@ec.EmployeeName</td>
+                                <td>@ec.Department</td>
+                                <td>@ec.Company</td>
+                                <td>@(ec.PostingDate?.ToString("dd-MM-yyyy"))</td>
+
+                                <td>
+                                    <span class="ec-status @((ec.ApprovalStatus ?? "Draft").ToLower())">
+                                        @(string.IsNullOrWhiteSpace(ec.ApprovalStatus) ? "Draft" : ec.ApprovalStatus)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="ec-status @((ec.Status ?? "Draft").ToLower())">
+                                        @(string.IsNullOrWhiteSpace(ec.Status) ? "Draft" : ec.Status)
+                                    </span>
+                                </td>
+
+                                <td>@ec.Project</td>
+                                <td>@ec.CostCenter</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center text-muted py-4">
+                                No expense claims found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyFilterMessage" class="text-center text-muted py-4 d-none">
+            No matching expense claims found.
+        </div>
+    </div>
+</div>
+
+<style>
+    .ec-page {
+        padding: 6px 0 20px;
+    }
+
+    .ec-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+
+    .ec-breadcrumb {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 2px;
+    }
+
+    .ec-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .ec-filter-bar {
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) 180px;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .ec-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background: #f8fafc;
+        color: #111827;
+        font-size: 13px;
+        white-space: nowrap;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table td {
+        font-size: 14px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .ec-badge {
+        display: inline-block;
+        padding: 4px 9px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+        .ec-badge.synced {
+            background: #d8f3e5;
+            color: #047857;
+        }
+
+        .ec-badge.local {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+    .ec-status {
+        display: inline-block;
+        padding: 4px 9px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+        .ec-status.draft {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .ec-status.approved,
+        .ec-status.submitted {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .ec-status.rejected,
+        .ec-status.cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+    @@media (max-width: 768px) {
+        .ec-toolbar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .ec-actions {
+            width: 100%;
+        }
+
+            .ec-actions .btn,
+            .ec-actions form {
+                width: 100%;
+            }
+
+            .ec-actions .btn {
+                display: block;
+                width: 100%;
+            }
+
+        .ec-filter-bar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    function filterExpenseClaims() {
+        const searchInput = document.getElementById('claimSearch');
+        const statusInput = document.getElementById('statusFilter');
+        const rows = document.querySelectorAll('#expenseClaimTable tbody tr[data-search]');
+        const emptyMessage = document.getElementById('emptyFilterMessage');
+
+        const search = (searchInput?.value || '').toLowerCase().trim();
+        const status = (statusInput?.value || '').toLowerCase().trim();
+
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.getAttribute('data-search') || '';
+            const rowStatus = row.getAttribute('data-status') || '';
+
+            const matchesSearch = !search || text.includes(search);
+            const matchesStatus = !status || rowStatus.includes(status);
+
+            const show = matchesSearch && matchesStatus;
+
+            row.classList.toggle('d-none', !show);
+
+            if (show) visibleCount++;
+        });
+
+        if (emptyMessage) {
+            emptyMessage.classList.toggle('d-none', visibleCount !== 0 || rows.length === 0);
+        }
+    }
+</script>

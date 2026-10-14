@@ -1,0 +1,48 @@
+﻿@* Usage: @await Html.PartialAsync("_RichTextEditor", new ViewDataDictionary(ViewData) { { "FieldName", "QualifiedReason" }, { "Content", Model.QualifiedReason } }) *@
+@{
+    string fieldName = ViewData["FieldName"]?.ToString() ?? "RichText";
+    string content = ViewData["Content"]?.ToString() ?? "";
+    string editorId = "editor_" + fieldName;
+    string syncFn = "syncHidden_" + editorId;
+    string linkFn = "linkPrompt_" + editorId;
+}
+
+<div class="rte-wrap border rounded">
+    <div class="rte-toolbar border-bottom p-1 d-flex flex-wrap gap-1">
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('bold')"><b>B</b></button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('italic')"><i>I</i></button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('underline')"><u>U</u></button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('strikeThrough')"><s>S</s></button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('insertUnorderedList')">• List</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('insertOrderedList')">1. List</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('justifyLeft')">⯇</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('justifyCenter')">≡</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('justifyRight')">⯈</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('indent')">Indent</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="document.execCommand('outdent')">Outdent</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="@(linkFn)()">Link</button>
+    </div>
+    <div id="@editorId" class="rte-body p-2" contenteditable="true" style="min-height:150px;" oninput="@(syncFn)()">@Html.Raw(content)</div>
+    <textarea name="@fieldName" id="hidden_@editorId" style="display:none">@content</textarea>
+</div>
+
+<script>
+    function @(syncFn)() {
+        document.getElementById('hidden_@editorId').value = document.getElementById('@editorId').innerHTML;
+    }
+    function @(linkFn)() {
+        var url = prompt('Enter URL:');
+        if (url) {
+            document.execCommand('createLink', false, url);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var editorEl = document.getElementById('@editorId');
+        var form = editorEl.closest('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                @(syncFn)();
+            });
+        }
+    });
+</script>

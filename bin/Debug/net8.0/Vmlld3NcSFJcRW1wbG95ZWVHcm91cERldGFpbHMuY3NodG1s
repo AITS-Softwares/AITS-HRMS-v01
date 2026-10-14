@@ -1,0 +1,471 @@
+﻿@model Erp_Aits.Models.EmployeeGroup
+@{
+    ViewBag.Title = "Employee Group Details";
+    var employeeList = ViewBag.EmployeeList as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+
+<form asp-action="UpdateEmployeeGroup"
+      asp-controller="HR"
+      asp-route-id="@Model.Id"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <input type="hidden" asp-for="ErpNextId" />
+    <input type="hidden" asp-for="GroupCode" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-muted">Employee Group</span>
+            <span class="text-muted">/</span>
+            <h4 class="mb-0 fw-bold">Edit Employee Group (@Model.ErpNextId)</h4>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+
+            <a href="@Url.Action("EmployeeGroup", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Back
+            </a>
+
+            <!-- Delete Employee Group -->
+            <button type="submit"
+                    form="deleteEmployeeGroupForm"
+                    class="btn btn-danger btn-sm px-3"
+                    onclick="return confirm('Are you sure you want to delete this Employee Group from both HRMS and ERPNext?');">
+
+                <i class="fa fa-trash me-1"></i>
+                Delete
+            </button>
+
+            <!-- Update Employee Group -->
+            <button type="submit"
+                    class="btn btn-dark btn-sm px-4 fw-bold">
+
+                Update Changes
+
+            </button>
+
+        </div>
+
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card border rounded-3 p-4 mb-3 shadow-sm bg-white">
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label text-muted small mb-1">Name <span class="text-danger">*</span></label>
+                <input asp-for="GroupName" class="form-control" required autofocus />
+            </div>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 shadow-sm bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="fw-bold mb-1">Employee</h6>
+                <p class="text-muted small mb-0">Employee Group Members List</p>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addRowBtn">+ Add Employee</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-2" id="employeeTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 40px;" class="text-center">
+                            <input type="checkbox" class="form-check-input" />
+                        </th>
+                        <th style="width: 60px;" class="text-center text-muted small">No.</th>
+                        <th class="text-muted small">Employee ID</th>
+                        <th class="text-muted small">Employee Name</th>
+                        <th class="text-muted small">ERPNext User ID</th>
+                        <th style="width: 60px;" class="text-center text-muted small">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Members != null && Model.Members.Any())
+                    {
+                        for (int i = 0; i < Model.Members.Count; i++)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input" />
+                                </td>
+                                <td class="text-center text-muted small row-index">@(i + 1)</td>
+                                <td>
+                                    <select name="Members[@i].Employee" class="form-select form-select-sm employee-select" required>
+                                        <option value="">-- Select Employee --</option>
+
+                                        @foreach (var emp in employeeList)
+                                        {
+                                            if (emp.Value == Model.Members[i].Employee)
+                                            {
+                                                <option value="@emp.Value"
+                                                        selected="selected">
+                                                    @emp.Text
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@emp.Value">
+                                                    @emp.Text
+                                                </option>
+                                            }
+                                        }
+
+                                    </select>
+                                </td>
+                                <td>
+
+                                    <input name="Members[@i].EmployeeName"
+                                           value="@Model.Members[i].EmployeeName"
+                                           class="form-control form-control-sm employee-name bg-light"
+                                           placeholder="Employee Name"
+                                           readonly />
+                                </td>
+                                <td>
+
+                                    <input name="Members[@i].EmployeeName"
+                                           value="@Model.Members[i].EmployeeName"
+                                           class="form-control form-control-sm employee-name bg-light"
+                                           placeholder="Employee Name"
+                                           readonly />
+
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-row">X</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noDataRow">
+                            <td colspan="6" class="text-center text-muted py-3">No Data</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+
+
+
+<!-- Separate Delete Form -->
+<form asp-controller="HR"
+      asp-action="DeleteEmployeeGroup"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteEmployeeGroupForm"
+      class="d-none">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+
+
+@section Scripts {
+
+    <script>
+
+        // ============================================================
+        // EMPLOYEE OPTIONS FROM HR CONTROLLER
+        // ============================================================
+
+        const employeeOptions = @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                            employeeList.Select(e => new
+                            {
+                                    value = e.Value,
+                                    text = e.Text
+                            })
+                    )
+            );
+
+    const employeeTableBody =
+        document.querySelector("#employeeTable tbody");
+
+
+        // ============================================================
+        // 1. AUTO UPDATE EMPLOYEE NAME ON EMPLOYEE SELECTION
+        // ============================================================
+
+        function updateEmployeeDetails(select) {
+
+            const row = select.closest("tr");
+
+            if (!row) return;
+
+            const nameInput = row.querySelector(".employee-name");
+            const userInput = row.querySelector(".employee-user");
+
+            const selectedOption =
+                select.options[select.selectedIndex];
+
+            // Employee cleared
+            if (!select.value || !selectedOption) {
+
+                if (nameInput) {
+                    nameInput.value = "";
+                }
+
+                if (userInput) {
+                    userInput.value = "";
+                }
+
+                return;
+            }
+
+            const employeeId = select.value.trim();
+
+            // HRController dropdown format:
+            // HR-EMP-00010 - Employee Name
+
+            const fullText =
+                selectedOption.textContent.trim();
+
+            const prefix = employeeId + " - ";
+
+            let employeeName = "";
+
+            if (fullText.startsWith(prefix)) {
+
+                employeeName =
+                    fullText.substring(prefix.length).trim();
+
+            } else {
+
+                employeeName = fullText;
+
+            }
+
+            // Immediately replace previous employee name.
+            if (nameInput) {
+
+                nameInput.value = employeeName;
+
+            }
+
+            // Prevent previous employee's User ID from remaining.
+            // Populate only when data-user-id is available.
+            if (userInput) {
+
+                userInput.value =
+                    selectedOption.dataset.userId || "";
+
+            }
+        }
+
+
+        // ============================================================
+        // 2. HANDLE EMPLOYEE DROPDOWN CHANGE
+        // Works for existing rows and newly created rows.
+        // ============================================================
+
+        document.addEventListener("change", function (event) {
+
+            if (!event.target.matches(".employee-select"))
+                return;
+
+            updateEmployeeDetails(event.target);
+
+        });
+
+
+        // ============================================================
+        // 3. CORRECT SERIAL NUMBER AND MODEL BINDING INDEX
+        // ============================================================
+
+        function renumberEmployeeRows() {
+
+            const rows =
+                employeeTableBody.querySelectorAll(
+                    "tr:not(#noDataRow)"
+                );
+
+            rows.forEach(function (row, index) {
+
+                const numberCell =
+                    row.querySelector(".row-index");
+
+                if (numberCell) {
+                    numberCell.textContent = index + 1;
+                }
+
+                const inputs =
+                    row.querySelectorAll("input[name], select[name]");
+
+                inputs.forEach(function (input) {
+
+                    const oldName =
+                        input.getAttribute("name");
+
+                    if (!oldName) return;
+
+                    const newName = oldName.replace(
+                        /Members\[\d+\]/,
+                        `Members[${index}]`
+                    );
+
+                    input.setAttribute("name", newName);
+
+                });
+
+            });
+
+        }
+
+
+        // ============================================================
+        // 4. ADD NEW EMPLOYEE ROW
+        // ============================================================
+
+        document.getElementById("addRowBtn")
+            .addEventListener("click", function () {
+
+                const noDataRow =
+                    document.getElementById("noDataRow");
+
+                if (noDataRow) {
+                    noDataRow.remove();
+                }
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td class="text-center">
+                        <input type="checkbox"
+                               class="form-check-input" />
+                    </td>
+
+                    <td class="text-center text-muted small row-index">
+                    </td>
+
+                    <td>
+                        <select class="form-select form-select-sm employee-select"
+                                required>
+
+                            <option value="">
+                                -- Select Employee --
+                            </option>
+
+                        </select>
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               class="form-control form-control-sm employee-name bg-light"
+                               placeholder="Employee Name"
+                               readonly />
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               class="form-control form-control-sm employee-user bg-light"
+                               placeholder="ERPNext User ID"
+                               readonly />
+                    </td>
+
+                    <td class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger remove-row">
+                            X
+                        </button>
+                    </td>
+                `;
+
+                employeeTableBody.appendChild(row);
+
+                // Populate dropdown safely from controller data.
+                const select =
+                    row.querySelector(".employee-select");
+
+                employeeOptions.forEach(function (emp) {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value = emp.value || "";
+                    option.textContent = emp.text || "";
+
+                    select.appendChild(option);
+
+                });
+
+                // Assign correct model-binding indexes.
+                const index =
+                    employeeTableBody.querySelectorAll(
+                        "tr:not(#noDataRow)"
+                    ).length - 1;
+
+                select.name =
+                    `Members[${index}].Employee`;
+
+                row.querySelector(".employee-name").name =
+                    `Members[${index}].EmployeeName`;
+
+                row.querySelector(".employee-user").name =
+                    `Members[${index}].ERPNextUserId`;
+
+                renumberEmployeeRows();
+
+            });
+
+
+        // ============================================================
+        // 5. REMOVE EMPLOYEE ROW
+        // ============================================================
+
+        document.addEventListener("click", function (event) {
+
+            const removeButton =
+                event.target.closest(".remove-row");
+
+            if (!removeButton) return;
+
+            const row =
+                removeButton.closest("tr");
+
+            if (row) {
+                row.remove();
+            }
+
+            renumberEmployeeRows();
+
+            const remainingRows =
+                employeeTableBody.querySelectorAll(
+                    "tr:not(#noDataRow)"
+                );
+
+            if (remainingRows.length === 0) {
+
+                employeeTableBody.innerHTML = `
+                    <tr id="noDataRow">
+                        <td colspan="6"
+                            class="text-center text-muted py-3">
+                            No Data
+                        </td>
+                    </tr>
+                `;
+
+            }
+
+        });
+
+    </script>
+
+}

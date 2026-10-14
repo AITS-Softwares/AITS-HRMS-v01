@@ -1,0 +1,55 @@
+﻿@model List<Erp_Aits.Models.LeaveType>
+@{
+    ViewBag.Title = "Leave Type";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Type</h4>
+    <div>
+        <a href="@Url.Action("CreateLeaveType", "HR")" class="btn btn-dark btn-sm">+ Add Leave Type</a>
+    </div>
+</div>
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Max Leaves Allowed</th>
+            <th>Is Carry Forward</th>
+            <th>Is LWP</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var lt in Model)
+        {
+            <tr style="cursor:pointer" onclick="location.href='@Url.Action("LeaveTypeDetails", "HR", new { id = lt.Id })'">
+                <td>@lt.LeaveTypeName</td>
+                <td>@lt.MaxLeavesAllowed</td>
+                <td>@(lt.IsCarryForward ? "Yes" : "No")</td>
+                <td>@(lt.IsLWP ? "Yes" : "No")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No leave types found.</p>
+}

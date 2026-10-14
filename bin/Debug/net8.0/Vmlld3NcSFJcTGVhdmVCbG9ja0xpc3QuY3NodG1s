@@ -1,0 +1,59 @@
+﻿@model List<Erp_Aits.Models.LeaveBlockList>
+@{
+    ViewBag.Title = "Leave Block List";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Block List</h4>
+    <div>
+        <a href="@Url.Action("CreateLeaveBlockList", "HR")" class="btn btn-dark btn-sm">+ Add Leave Block List</a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Leave Block List Name</th>
+            <th>Leave Type</th>
+            <th>Company</th>
+            <th>Applies to Company</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var b in Model)
+            {
+                <tr style="cursor:pointer" onclick="location.href='@Url.Action("LeaveBlockListDetails", "HR", new { id = b.Id })'">
+                    <td>@b.LeaveBlockListName</td>
+                    <td>@b.LeaveType</td>
+                    <td>@b.Company</td>
+                    <td>@(b.AppliesToCompany ? "Yes" : "No")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="text-muted">No leave block lists found.</p>
+}

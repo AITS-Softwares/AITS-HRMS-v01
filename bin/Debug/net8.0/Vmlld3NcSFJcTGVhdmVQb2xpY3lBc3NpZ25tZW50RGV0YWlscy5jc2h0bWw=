@@ -1,0 +1,414 @@
+@model Erp_Aits.Models.LeavePolicyAssignment
+
+@{
+    ViewBag.Title = "Leave Policy Assignment - " + Model.Employee;
+    bool isDraft = Model.DocStatus == 0;
+    bool isSubmitted = Model.DocStatus == 1;
+    bool isCancelled = Model.DocStatus == 2;
+    string effectiveFrom = Model.EffectiveFrom == default(DateTime) ? "" : Model.EffectiveFrom.ToString("yyyy-MM-dd");
+    string effectiveTo = Model.EffectiveTo == default(DateTime) ? "" : Model.EffectiveTo.ToString("yyyy-MM-dd");
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-controller="HR"
+      asp-action="UpdateLeavePolicyAssignment"
+      method="post"
+      id="assignmentForm">
+
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+    <input asp-for="DocStatus" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <h4 class="mb-0">Leave Policy Assignment</h4>
+
+                @if (isDraft)
+                {
+                    <span class="badge bg-secondary">Draft</span>
+                }
+                else if (isSubmitted)
+                {
+                    <span class="badge bg-success">Submitted</span>
+                }
+                else if (isCancelled)
+                {
+                    <span class="badge bg-danger">Cancelled</span>
+                }
+            </div>
+
+            <small class="text-muted">
+                @Model.Employee
+                @if (!string.IsNullOrWhiteSpace(Model.EmployeeName))
+                {
+                    <span>- @Model.EmployeeName</span>
+                }
+            </small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("LeavePolicyAssignment", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Back to List
+            </a>
+
+            @if (isDraft)
+            {
+                <button type="submit" class="btn btn-outline-dark btn-sm">
+                    Save
+                </button>
+            }
+        </div>
+    </div>
+
+    <fieldset @(isDraft ? "" : "disabled")>
+        <div class="card border rounded-3 p-4 mb-3">
+            <h6 class="mb-3">Employee Details</h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Employee
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <select asp-for="Employee"
+                            id="Employee"
+                            class="form-select"
+                            required>
+                        <option value="">-- Select Employee --</option>
+
+                        @if (ViewBag.EmployeesList != null)
+                        {
+                            foreach (var emp in ViewBag.EmployeesList)
+                            {
+                                var empId = emp.name?.ToString();
+                                var empName = emp.employee_name?.ToString();
+                                var empCompany = emp.company?.ToString();
+                                var joining = emp.date_of_joining?.ToString();
+
+                                <!option value="@empId"
+                                         data-name="@empName"
+                                         data-company="@empCompany"
+                                         data-joining="@joining"
+                                         @(Model.Employee == empId ? "selected" : "")>
+                                    @empId - @empName
+                                </!option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Name</label>
+                    <input asp-for="EmployeeName"
+                           id="EmployeeName"
+                           class="form-control bg-light"
+                           readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Leave Policy
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <select asp-for="LeavePolicy"
+                            class="form-select"
+                            required>
+                        <option value="">-- Select Leave Policy --</option>
+
+                        @if (ViewBag.LeavePolicies != null)
+                        {
+                            foreach (var policy in ViewBag.LeavePolicies)
+                            {
+                                var policyName = policy.name?.ToString();
+
+                                <!option value="@policyName"
+                                         @(Model.LeavePolicy == policyName ? "selected" : "")>
+                                    @policyName
+                                </!option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company</label>
+                    <input asp-for="Company"
+                           id="Company"
+                           class="form-control bg-light"
+                           readonly />
+                </div>
+            </div>
+        </div>
+
+        <div class="card border rounded-3 p-4 mb-3">
+            <h6 class="mb-3">Assignment Details</h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Assignment based on</label>
+                    <select asp-for="AssignmentBasedOn"
+                            id="AssignmentBasedOn"
+                            class="form-select">
+                        <option value="">-- Select --</option>
+                        <!option value="Leave Period" @(Model.AssignmentBasedOn == "Leave Period" ? "selected" : "")>Leave Period</!option>
+                        <!option value="Joining Date" @(Model.AssignmentBasedOn == "Joining Date" ? "selected" : "")>Joining Date</!option>
+                    </select>
+                </div>
+
+                <div class="col-md-6" id="LeavePeriodContainer">
+                    <label class="form-label">
+                        Leave Period
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <select asp-for="LeavePeriod"
+                            id="LeavePeriod"
+                            class="form-select">
+                        <option value="">-- Select Leave Period --</option>
+
+                        @if (ViewBag.LeavePeriods != null)
+                        {
+                            foreach (var period in ViewBag.LeavePeriods)
+                            {
+                                var periodName = period.name?.ToString();
+
+                                <!option value="@periodName"
+                                         @(Model.LeavePeriod == periodName ? "selected" : "")>
+                                    @periodName
+                                </!option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Effective From
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="EffectiveFrom"
+                           id="EffectiveFrom"
+                           type="date"
+                           value="@effectiveFrom"
+                           class="form-control"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Effective To
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="EffectiveTo"
+                           id="EffectiveTo"
+                           type="date"
+                           value="@effectiveTo"
+                           class="form-control"
+                           required />
+                </div>
+            </div>
+        </div>
+
+        <div class="card border rounded-3 p-4 mb-3">
+            <h6 class="mb-3">Leave Settings</h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-check mt-2">
+                        <input asp-for="AddUnusedLeaves"
+                               class="form-check-input"
+                               type="checkbox" />
+                        <label class="form-check-label">
+                            Add unused leaves from previous allocations
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">Leaves Allocated</label>
+                    @if (Model.LeavesAllocated)
+                    {
+                        <span class="badge bg-success">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">No</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+<div class="card border rounded-3 p-4 mb-3">
+    <h6 class="mb-3">Document Information</h6>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">ERPNext Ref</label>
+            <input type="text"
+                   class="form-control bg-light"
+                   value="@(string.IsNullOrWhiteSpace(Model.ErpNextId) ? "-" : Model.ErpNextId)"
+                   readonly />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Document Status</label>
+            <div class="form-control bg-light">
+                @if (isDraft)
+                {
+                    <span>Draft</span>
+                }
+                else if (isSubmitted)
+                {
+                    <span>Submitted</span>
+                }
+                else if (isCancelled)
+                {
+                    <span>Cancelled</span>
+                }
+                else
+                {
+                    <span>Unknown</span>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.AmendedFrom))
+        {
+            <div class="col-md-6">
+                <label class="form-label">Amended From</label>
+                <input type="text"
+                       class="form-control bg-light"
+                       value="@Model.AmendedFrom"
+                       readonly />
+            </div>
+        }
+    </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2">
+    @if (isDraft && !string.IsNullOrWhiteSpace(Model.ErpNextId))
+    {
+        <form asp-controller="HR"
+              asp-action="SubmitLeavePolicyAssignment"
+              method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit"
+                    class="btn btn-dark btn-sm"
+                    onclick="return confirm('Submit this Leave Policy Assignment? ERPNext will process Leave Allocations according to the selected Leave Policy.');">
+                Submit
+            </button>
+        </form>
+    }
+
+    @if (isSubmitted && !string.IsNullOrWhiteSpace(Model.ErpNextId))
+    {
+        <form asp-controller="HR"
+              asp-action="CancelLeavePolicyAssignment"
+              method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Cancel this Leave Policy Assignment in ERPNext and HRMS?');">
+                Cancel
+            </button>
+        </form>
+    }
+</div>
+
+@section Scripts
+{
+    <script>
+        const employee = document.getElementById("Employee");
+        const assignmentBasedOn = document.getElementById("AssignmentBasedOn");
+        const leavePeriod = document.getElementById("LeavePeriod");
+        const leavePeriodContainer = document.getElementById("LeavePeriodContainer");
+        const effectiveFrom = document.getElementById("EffectiveFrom");
+        const effectiveTo = document.getElementById("EffectiveTo");
+
+        function syncEmployeeFields() {
+            if (!employee) {
+                return;
+            }
+
+            const option = employee.options[employee.selectedIndex];
+
+            document.getElementById("EmployeeName").value =
+                option && employee.value
+                    ? option.getAttribute("data-name") || ""
+                    : "";
+
+            document.getElementById("Company").value =
+                option && employee.value
+                    ? option.getAttribute("data-company") || ""
+                    : "";
+
+            if (assignmentBasedOn && assignmentBasedOn.value === "Joining Date") {
+                const joining = option ? option.getAttribute("data-joining") : "";
+
+                if (joining) {
+                    effectiveFrom.value = joining.substring(0, 10);
+                }
+            }
+        }
+
+        function syncAssignmentMode() {
+            if (!assignmentBasedOn) {
+                return;
+            }
+
+            const value = assignmentBasedOn.value;
+
+            if (value === "Leave Period") {
+                leavePeriodContainer.style.display = "";
+                leavePeriod.required = true;
+                effectiveFrom.readOnly = true;
+                effectiveTo.readOnly = true;
+            } else if (value === "Joining Date") {
+                leavePeriodContainer.style.display = "none";
+                leavePeriod.required = false;
+                leavePeriod.value = "";
+                effectiveFrom.readOnly = true;
+                effectiveTo.readOnly = false;
+                syncEmployeeFields();
+            } else {
+                leavePeriodContainer.style.display = "none";
+                leavePeriod.required = false;
+                leavePeriod.value = "";
+                effectiveFrom.readOnly = false;
+                effectiveTo.readOnly = false;
+            }
+        }
+
+        if (employee) {
+            employee.addEventListener("change", syncEmployeeFields);
+        }
+
+        if (assignmentBasedOn) {
+            assignmentBasedOn.addEventListener("change", syncAssignmentMode);
+            syncAssignmentMode();
+        }
+    </script>
+}

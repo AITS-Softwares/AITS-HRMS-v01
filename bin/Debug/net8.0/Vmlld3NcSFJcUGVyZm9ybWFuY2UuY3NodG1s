@@ -1,0 +1,68 @@
+﻿@{
+    ViewBag.Title = "Performance";
+}
+
+<h4 class="mb-4">Performance</h4>
+
+<h5 class="mb-3">Your Shortcuts</h5>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <li><a href="@Url.Action("Appraisal", "HR")">Appraisal</a></li>
+            <span>Appraisal</span>
+            <span class="badge bg-secondary-subtle text-secondary">0 Pending</span>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="@Url.Action("EmployeePerformanceFeedback", "HR")" class="text-decoration-none text-dark d-flex justify-content-between align-items-center card p-3">
+            <span>Employee Performance Feedback</span>
+            <span class="badge bg-secondary-subtle text-secondary">0</span>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="@Url.Action("Goal", "HR")" class="text-decoration-none text-dark d-flex justify-content-between align-items-center card p-3">
+            <span>Goal</span>
+            <span class="badge bg-secondary-subtle text-secondary">0</span>
+        </a>
+    </div>
+</div>
+
+<h5 class="mb-3">Masters &amp; Transactions</h5>
+<div class="row g-4">
+    <div class="col-6 col-md-4">
+        <h6>Masters</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("AppraisalTemplate", "HR")">Appraisal Template</a></li>
+            <li><a href="@Url.Action("KRA", "HR")">KRA</a></li>
+            <li><a href="@Url.Action("EmployeeFeedbackCriteria", "HR")">Employee Feedback Criteria</a></li>
+        </ul>
+    </div>
+    <div class="col-6 col-md-4">
+        <h6>Appraisal</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("Appraisal", "HR")">Appraisal</a></li>
+            <li><a href="@Url.Action("AppraisalCycle", "HR")">Appraisal Cycle</a></li>
+            <li><a href="@Url.Action("EmployeePerformanceFeedback", "HR")">Employee Performance Feedback</a></li>
+            <li><a href="@Url.Action("Goal", "HR")">Goal</a></li>
+        </ul>
+    </div>
+    <div class="col-6 col-md-4">
+        <h6>Energy Points</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("EnergyPointRule", "HR")">Energy Point Rule</a></li>
+            <li><a href="@Url.Action("EnergyPointSettings", "HR")">Energy Point Settings</a></li>
+            <li><a href="@Url.Action("EnergyPointLog", "HR")">Energy Point Log</a></li>
+        </ul>
+    </div>
+    <div class="col-6 col-md-4">
+        <h6>Promotion</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("EmployeePromotion", "HR")">Employee Promotion</a></li>
+        </ul>
+    </div>
+    <div class="col-6 col-md-4">
+        <h6>Reports</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("AppraisalOverview", "HR")">Appraisal Overview</a></li>
+        </ul>
+    </div>
+</div>

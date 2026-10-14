@@ -1,0 +1,653 @@
+﻿@* @model Erp_Aits.Models.Employee
+@{
+    ViewBag.Title = "New Employee";
+}
+
+<form asp-action="CreateEmployee" asp-controller="HR" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee</h4>
+        <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+    </div>
+
+    <!-- ERPNext Style Tabs Navigation -->
+    <ul class="nav nav-tabs mb-3" id="employeeTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview" type="button">Overview</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#joining" type="button">Joining</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#address" type="button">Address & Contacts</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#attendance" type="button">Attendance & Leaves</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#salary" type="button">Salary</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#personal" type="button">Personal Details</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile" type="button">Profile</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#exit" type="button">Employee Exit</button></li>
+    </ul>
+
+    <div class="tab-content card p-4 shadow-sm" id="employeeTabContent">
+
+        <!-- 1. OVERVIEW TAB -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <h6 class="text-muted mb-3">Basic Information</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Series *</label>
+                    <input class="form-control" value="HR-EMP-" disabled />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Gender *</label>
+                    <input asp-for="Gender" class="form-control" list="genderList" placeholder="Select or Type Gender" required />
+                    <datalist id="genderList">
+                        <option value="Female"></option>
+                        <option value="Male"></option>
+                        <option value="Non-Binary"></option>
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date of Joining *</label>
+                    <input asp-for="DateOfJoining" type="date" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">First Name *</label>
+                    <input asp-for="FirstName" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date of Birth *</label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status *</label>
+                    <input asp-for="Status" class="form-control" list="statusList" value="Active" required />
+                    <datalist id="statusList">
+                        <option value="Active"></option>
+                        <option value="Inactive"></option>
+                        <option value="Suspended"></option>
+                        <option value="Left"></option>
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Middle Name</label>
+                    <input asp-for="MiddleName" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Salutation</label>
+                    <input asp-for="Salutation" class="form-control" list="salutationList" placeholder="Select or Type Salutation" />
+                    <datalist id="salutationList">
+                        @if (ViewBag.Salutations != null)
+                        {
+                            foreach (var s in ViewBag.Salutations)
+                            {
+                                <option value="@s.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" />
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">User Details</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">User ID</label>
+                    <input asp-for="UserId" class="form-control" list="userList" placeholder="Select or Type User ID" />
+                    <datalist id="userList">
+                        @if (ViewBag.Users != null)
+                        {
+                            foreach (var u in ViewBag.Users)
+                            {
+                                <option value="@u.name">@u.full_name</option>
+                            }
+                        }
+                    </datalist>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Company Details</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Company *</label>
+                    <input asp-for="Company" class="form-control" value="Vinod Cookware India Private Limited" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Designation</label>
+                    <input asp-for="Designation" class="form-control" list="designationList" placeholder="Select or Type Designation" />
+                    <datalist id="designationList">
+                        @if (ViewBag.Designations != null)
+                        {
+                            foreach (var des in ViewBag.Designations)
+                            {
+                                <option value="@des.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Branch</label>
+                    <input asp-for="Branch" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Department</label>
+                    <input asp-for="Department" class="form-control" list="departmentList" placeholder="Select or Type Department" />
+                    <datalist id="departmentList">
+                        @if (ViewBag.Departments != null)
+                        {
+                            foreach (var d in ViewBag.Departments)
+                            {
+                                <option value="@d.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Reports To</label>
+                    <input asp-for="ReportsTo" class="form-control" list="reportsToList" placeholder="Select or Type Manager" />
+                    <datalist id="reportsToList">
+                        @if (ViewBag.ReportsToEmployees != null)
+                        {
+                            foreach (var emp in ViewBag.ReportsToEmployees)
+                            {
+                                <option value="@emp.name">@emp.employee_name</option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Grade</label>
+                    <input asp-for="Grade" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Employment Type</label>
+                    <input asp-for="EmploymentType" class="form-control" list="empTypeList" placeholder="Select or Type Employment Type" />
+                    <datalist id="empTypeList">
+                        @if (ViewBag.EmploymentTypes != null)
+                        {
+                            foreach (var et in ViewBag.EmploymentTypes)
+                            {
+                                <option value="@et.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. JOINING TAB -->
+        <div class="tab-pane fade" id="joining" role="tabpanel">
+            <h6 class="text-muted mb-3">Joining Details</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Job Applicant</label>
+                    <input asp-for="JobApplicant" class="form-control" list="jobApplicantList" placeholder="Select or Type Applicant" />
+                    <datalist id="jobApplicantList">
+                        @if (ViewBag.JobApplicants != null)
+                        {
+                            foreach (var ja in ViewBag.JobApplicants)
+                            {
+                                <option value="@ja.name">@ja.applicant_name</option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Confirmation Date</label>
+                    <input asp-for="ConfirmationDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Notice (days)</label>
+                    <input asp-for="NoticeDays" type="number" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Offer Date</label>
+                    <input asp-for="OfferDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Contract End Date</label>
+                    <input asp-for="ContractEndDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date Of Retirement</label>
+                    <input asp-for="DateOfRetirement" type="date" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ADDRESS & CONTACTS TAB -->
+        <div class="tab-pane fade" id="address" role="tabpanel">
+            <h6 class="text-muted mb-3">Contact Information</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Mobile</label>
+                    <input asp-for="Mobile" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Personal Email</label>
+                    <input asp-for="PersonalEmail" type="email" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Preferred Contact Email</label>
+                    <input asp-for="PreferredContactEmail" class="form-control" list="prefEmailList" placeholder="Select or Type Email Type" />
+                    <datalist id="prefEmailList">
+                        <option value="Company Email"></option>
+                        <option value="Personal Email"></option>
+                        <option value="User ID"></option>
+                    </datalist>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Company Email</label>
+                    <input asp-for="CompanyEmail" type="email" class="form-control" />
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <div class="form-check mt-3">
+                        <input asp-for="Unsubscribed" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Unsubscribed</label>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Address</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Current Address</label>
+                    <textarea asp-for="CurrentAddress" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Permanent Address</label>
+                    <textarea asp-for="PermanentAddress" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Current Address Is</label>
+                    <input asp-for="CurrentAddressIs" class="form-control" list="accommodationList" placeholder="Select or Type Accommodation Type" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Permanent Address Is</label>
+                    <input asp-for="PermanentAddressIs" class="form-control" list="accommodationList" placeholder="Select or Type Accommodation Type" />
+                    <datalist id="accommodationList">
+                        <option value="Rented"></option>
+                        <option value="Owned"></option>
+                        <option value="Ancestral"></option>
+                    </datalist>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Emergency Contact</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Emergency Contact Name</label>
+                    <input asp-for="EmergencyContactName" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Emergency Phone</label>
+                    <input asp-for="EmergencyPhone" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Relation</label>
+                    <input asp-for="Relation" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ATTENDANCE & LEAVES TAB -->
+        <div class="tab-pane fade" id="attendance" role="tabpanel">
+            <h6 class="text-muted mb-3">Attendance Device ID (Biometric/RF tag ID)</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Attendance Device ID</label>
+                    <input asp-for="AttendanceDeviceId" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Holiday List</label>
+                    <input asp-for="HolidayList" class="form-control" list="holidayList" placeholder="Select or Type Holiday List" />
+                    <datalist id="holidayList">
+                        @if (ViewBag.HolidayLists != null)
+                        {
+                            foreach (var hl in ViewBag.HolidayLists)
+                            {
+                                <option value="@hl.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Default Shift</label>
+                    <input asp-for="DefaultShift" class="form-control" />
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Approvers</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Expense Approver</label>
+                    <input asp-for="ExpenseApprover" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Shift Request Approver</label>
+                    <input asp-for="ShiftRequestApprover" class="form-control" list="userList" placeholder="Select or Type Approver" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Leave Approver</label>
+                    <input asp-for="LeaveApprover" class="form-control" list="userList" placeholder="Select or Type Approver" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. SALARY TAB -->
+        <div class="tab-pane fade" id="salary" role="tabpanel">
+            <h6 class="text-muted mb-3">Salary Details</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Cost to Company (CTC)</label>
+                    <input asp-for="CTC" type="number" step="0.01" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Payroll Cost Center</label>
+                    <input asp-for="PayrollCostCenter" class="form-control" list="costCenterList" placeholder="Select or Type Cost Center" />
+                    <datalist id="costCenterList">
+                        @if (ViewBag.CostCenters != null)
+                        {
+                            foreach (var cc in ViewBag.CostCenters)
+                            {
+                                <option value="@cc.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Salary Currency</label>
+                    <input asp-for="SalaryCurrency" class="form-control" list="currencyList" value="INR" />
+                    <datalist id="currencyList">
+                        @if (ViewBag.Currencies != null)
+                        {
+                            foreach (var cur in ViewBag.Currencies)
+                            {
+                                <option value="@cur.name"></option>
+                            }
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Salary Mode</label>
+                    <input asp-for="SalaryMode" class="form-control" list="salaryModeList" value="Bank" />
+                    <datalist id="salaryModeList">
+                        <option value="Bank"></option>
+                        <option value="Cheque"></option>
+                        <option value="Cash"></option>
+                    </datalist>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. PERSONAL DETAILS TAB -->
+        <div class="tab-pane fade" id="personal" role="tabpanel">
+            <h6 class="text-muted mb-3">Personal Information</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Marital Status</label>
+                    <input asp-for="MaritalStatus" class="form-control" list="maritalList" placeholder="Select or Type Status" />
+                    <datalist id="maritalList">
+                        <option value="Single"></option>
+                        <option value="Married"></option>
+                        <option value="Divorced"></option>
+                        <option value="Widowed"></option>
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Blood Group</label>
+                    <input asp-for="BloodGroup" class="form-control" list="bloodList" placeholder="Select or Type Blood Group" />
+                    <datalist id="bloodList">
+                        <option value="A+"></option>
+                        <option value="A-"></option>
+                        <option value="B+"></option>
+                        <option value="B-"></option>
+                        <option value="O+"></option>
+                        <option value="O-"></option>
+                        <option value="AB+"></option>
+                        <option value="AB-"></option>
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Family Background</label>
+                    <textarea asp-for="FamilyBackground" class="form-control" rows="3" placeholder="Here you can maintain family details like name and occupation of parent, spouse and children"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Health Details</label>
+                    <textarea asp-for="HealthDetails" class="form-control" rows="3" placeholder="Here you can maintain height, weight, allergies, medical concerns etc"></textarea>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Health Insurance</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Health Insurance Provider</label>
+                    <input asp-for="HealthInsuranceProvider" class="form-control" />
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Passport Details</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Passport Number</label>
+                    <input asp-for="PassportNumber" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Date of Issue</label>
+                    <input asp-for="PassportDateOfIssue" type="date" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Valid Upto</label>
+                    <input asp-for="PassportValidUpto" type="date" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Place of Issue</label>
+                    <input asp-for="PassportPlaceOfIssue" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. PROFILE TAB (Matching ERPNext Screenshot) -->
+        <div class="tab-pane fade" id="profile" role="tabpanel">
+            <h6 class="text-muted mb-3">Bio / Cover Letter</h6>
+            <div class="mb-4">
+                <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Short biography for website and other publications."></textarea>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Educational Qualification</h6>
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:40px">No.</th>
+                        <th>School/University</th>
+                        <th>Qualification</th>
+                        <th>Level</th>
+                        <th>Year of Passing</th>
+                        <th style="width:40px"></th>
+                    </tr>
+                </thead>
+                <tbody id="eduBody"></tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="addEduRow()">Add Row</button>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Previous Work Experience</h6>
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:40px">No.</th>
+                        <th>Company</th>
+                        <th>Designation</th>
+                        <th>Salary</th>
+                        <th>Address</th>
+                        <th style="width:40px"></th>
+                    </tr>
+                </thead>
+                <tbody id="expBody"></tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="addExpRow()">Add Row</button>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">History In Company</h6>
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:40px">No.</th>
+                        <th>Branch</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th style="width:40px"></th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="addHistoryRow()">Add Row</button>
+        </div>
+
+        <!-- 8. EMPLOYEE EXIT TAB -->
+        <div class="tab-pane fade" id="exit" role="tabpanel">
+            <h6 class="text-muted mb-3">Exit Details</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Resignation Letter Date</label>
+                    <input asp-for="ResignationLetterDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Exit Interview Held On</label>
+                    <input asp-for="ExitInterviewHeldOn" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Leave Encashed?</label>
+                    <input asp-for="LeaveEncashed" class="form-control" list="leaveEncashedList" placeholder="Select or Type" />
+                    <datalist id="leaveEncashedList">
+                        <option value="Yes"></option>
+                        <option value="No"></option>
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Relieving Date</label>
+                    <input asp-for="RelievingDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">New Workplace</label>
+                    <input asp-for="NewWorkplace" class="form-control" />
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="text-muted mb-3">Feedback</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Reason for Leaving</label>
+                    <textarea asp-for="ReasonForLeaving" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Feedback</label>
+                    <textarea asp-for="Feedback" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<script>
+    let eduCount = 0, expCount = 0, historyCount = 0;
+
+    function addEduRow() {
+        eduCount++;
+        const tbody = document.getElementById('eduBody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${eduCount}</td>
+            <td><input type="text" name="EduSchools" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="EduQualifications" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="EduLevels" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="EduYears" class="form-control form-control-sm" /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">&times;</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function addExpRow() {
+        expCount++;
+        const tbody = document.getElementById('expBody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${expCount}</td>
+            <td><input type="text" name="ExpCompanies" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="ExpDesignations" class="form-control form-control-sm" /></td>
+            <td><input type="number" step="0.01" name="ExpSalaries" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="ExpAddresses" class="form-control form-control-sm" /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">&times;</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function addHistoryRow() {
+        historyCount++;
+        const tbody = document.getElementById('historyBody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${historyCount}</td>
+            <td><input type="text" name="HistBranches" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="HistDepartments" class="form-control form-control-sm" /></td>
+            <td><input type="text" name="HistDesignations" class="form-control form-control-sm" /></td>
+            <td><input type="date" name="HistFromDates" class="form-control form-control-sm" /></td>
+            <td><input type="date" name="HistToDates" class="form-control form-control-sm" /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">&times;</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    addEduRow();
+    addExpRow();
+    addHistoryRow();
+</script> *@
+
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.Employee
+
+@{
+    ViewBag.Title = "New Employee";
+
+    Model.Status = string.IsNullOrWhiteSpace(Model.Status) ? "Active" : Model.Status;
+    Model.Company = string.IsNullOrWhiteSpace(Model.Company) ? "Vinod Cookware India Private Limited" : Model.Company;
+    Model.SalaryCurrency = string.IsNullOrWhiteSpace(Model.SalaryCurrency) ? "INR" : Model.SalaryCurrency;
+    Model.SalaryMode = string.IsNullOrWhiteSpace(Model.SalaryMode) ? "Bank" : Model.SalaryMode;
+}
+
+@* <form asp-action="CreateEmployee" asp-controller="HR" method="post"> *@
+<form asp-action="CreateEmployee" asp-controller="HR" method="post" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee</h4>
+        <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-warning">@TempData["ErpNextError"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <partial name="_EmployeeFormFields" model="Model" />
+</form>

@@ -1,0 +1,412 @@
+﻿@* @model List<Erp_Aits.Models.LeaveApplication>
+@{
+    ViewBag.Title = "Leave Application";
+}
+
+<style>
+    :root {
+        --accent: #3b4b8c;
+        --accent-light: #eef0fa;
+    }
+
+    body {
+        background: linear-gradient(160deg, #eef1f8 0%, #e3e9f7 45%, #eef4f2 100%);
+        min-height: 100vh;
+    }
+
+    .leave-list-wrapper {
+        max-width: 1400px;
+        width: 92%;
+        margin: 0 auto;
+        padding-top: 4px;
+    }
+
+        .leave-list-wrapper .list-header {
+            background: linear-gradient(120deg, #1f2a44 0%, #34437a 55%, var(--accent) 100%);
+            padding: 1.1rem 1.6rem;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 8px 22px rgba(31, 42, 68, 0.28);
+        }
+
+            .leave-list-wrapper .list-header h4 {
+                font-weight: 650;
+                color: #ffffff;
+                letter-spacing: 0.4px;
+                margin: 0;
+            }
+
+        .leave-list-wrapper .btn-dark {
+            background: linear-gradient(135deg, #f7b733 0%, #e8912a 100%);
+            color: #1f2a44;
+            border: none;
+            padding: 0.5rem 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(232, 145, 42, 0.45);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .leave-list-wrapper .btn-dark:hover {
+                background: linear-gradient(135deg, #ffc94d 0%, #f39d33 100%);
+                box-shadow: 0 5px 14px rgba(232, 145, 42, 0.6);
+                transform: translateY(-2px);
+                color: #16203a;
+            }
+
+        .leave-list-wrapper .list-body {
+            background: #ffffff;
+            border-left: 5px solid var(--accent);
+            border-right: 5px solid var(--accent);
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 10px 28px rgba(31, 42, 68, 0.12);
+            overflow: hidden;
+            padding: 0.5rem 1.5rem 1.5rem;
+        }
+
+        .leave-list-wrapper .table {
+            margin-bottom: 0;
+        }
+
+            .leave-list-wrapper .table thead th {
+                color: var(--accent);
+                font-weight: 650;
+                font-size: 0.82rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 2px solid var(--accent-light);
+                padding: 1rem 0.75rem;
+                background: transparent;
+            }
+
+            .leave-list-wrapper .table tbody td {
+                padding: 0.9rem 0.75rem;
+                color: #26314f;
+                font-size: 0.95rem;
+                border-bottom: 1px solid #eef0f6;
+                vertical-align: middle;
+            }
+
+            .leave-list-wrapper .table tbody tr {
+                transition: background-color 0.15s ease-in-out;
+            }
+
+                .leave-list-wrapper .table tbody tr:hover {
+                    background-color: var(--accent-light);
+                }
+
+                .leave-list-wrapper .table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+
+        .leave-list-wrapper .badge {
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.3px;
+            padding: 0.4em 0.85em;
+            border-radius: 6px;
+            background-color: var(--accent-light) !important;
+            color: var(--accent) !important;
+        }
+
+        .leave-list-wrapper .text-muted {
+            padding: 1.5rem 0.25rem;
+        }
+</style>
+
+<div class="leave-list-wrapper">
+    <div class="list-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Leave Application</h4>
+        <a href="@Url.Action("CreateLeave", "HR")" class="btn btn-dark btn-sm">+ Add Leave Application</a>
+    </div>
+
+    <div class="list-body">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Leave Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lv in Model)
+                {
+                    <tr>
+                        <td>@lv.LeaveApplicationCode</td>
+                        <td>@lv.Employee</td>
+                        <td>@lv.EmployeeName</td>
+                        <td>@lv.LeaveType</td>
+                        <td><span class="badge bg-secondary-subtle text-secondary">@lv.Status</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!Model.Any())
+        {
+            <p class="text-muted">No leave applications found.</p>
+        }
+    </div>
+</div>
+
+@model List<Erp_Aits.Models.LeaveApplication>
+@{
+    ViewBag.Title = "Leave Application";
+}
+
+<style>
+    :root {
+        --accent: #3b4b8c;
+        --accent-light: #eef0fa;
+    }
+
+    body {
+        background: linear-gradient(160deg, #eef1f8 0%, #e3e9f7 45%, #eef4f2 100%);
+        min-height: 100vh;
+    }
+
+    .leave-list-wrapper {
+        max-width: 1400px;
+        width: 92%;
+        margin: 0 auto;
+        padding-top: 4px;
+    }
+
+        .leave-list-wrapper .list-header {
+            background: linear-gradient(120deg, #1f2a44 0%, #34437a 55%, var(--accent) 100%);
+            padding: 1.1rem 1.6rem;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 8px 22px rgba(31, 42, 68, 0.28);
+        }
+
+            .leave-list-wrapper .list-header h4 {
+                font-weight: 650;
+                color: #ffffff;
+                letter-spacing: 0.4px;
+                margin: 0;
+            }
+
+        .leave-list-wrapper .btn-dark {
+            background: linear-gradient(135deg, #f7b733 0%, #e8912a 100%);
+            color: #1f2a44;
+            border: none;
+            padding: 0.5rem 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(232, 145, 42, 0.45);
+            transition: all 0.2s ease-in-out;
+        }
+
+            .leave-list-wrapper .btn-dark:hover {
+                background: linear-gradient(135deg, #ffc94d 0%, #f39d33 100%);
+                box-shadow: 0 5px 14px rgba(232, 145, 42, 0.6);
+                transform: translateY(-2px);
+                color: #16203a;
+            }
+
+        .leave-list-wrapper .btn-outline-light {
+            border: 1.5px solid rgba(255,255,255,0.7);
+            color: #ffffff;
+            padding: 0.5rem 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 8px;
+            background: transparent;
+            transition: all 0.2s ease-in-out;
+        }
+
+            .leave-list-wrapper .btn-outline-light:hover {
+                background: rgba(255,255,255,0.15);
+                color: #ffffff;
+                transform: translateY(-2px);
+            }
+
+        .leave-list-wrapper .list-body {
+            background: #ffffff;
+            border-left: 5px solid var(--accent);
+            border-right: 5px solid var(--accent);
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 10px 28px rgba(31, 42, 68, 0.12);
+            overflow: hidden;
+            padding: 0.5rem 1.5rem 1.5rem;
+        }
+
+        .leave-list-wrapper .table {
+            margin-bottom: 0;
+        }
+
+            .leave-list-wrapper .table thead th {
+                color: var(--accent);
+                font-weight: 650;
+                font-size: 0.82rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 2px solid var(--accent-light);
+                padding: 1rem 0.75rem;
+                background: transparent;
+            }
+
+            .leave-list-wrapper .table tbody td {
+                padding: 0.9rem 0.75rem;
+                color: #26314f;
+                font-size: 0.95rem;
+                border-bottom: 1px solid #eef0f6;
+                vertical-align: middle;
+            }
+
+            .leave-list-wrapper .table tbody tr {
+                transition: background-color 0.15s ease-in-out;
+            }
+
+                .leave-list-wrapper .table tbody tr:hover {
+                    background-color: var(--accent-light);
+                }
+
+                .leave-list-wrapper .table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+
+        .leave-list-wrapper .badge {
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.3px;
+            padding: 0.4em 0.85em;
+            border-radius: 6px;
+            background-color: var(--accent-light) !important;
+            color: var(--accent) !important;
+        }
+
+        .leave-list-wrapper .text-muted {
+            padding: 1.5rem 0.25rem;
+        }
+</style>
+
+<div class="leave-list-wrapper">
+    <div class="list-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Leave Application</h4>
+        <div>
+            <a href="@Url.Action("SyncLeaveApplicationsFromErpNext", "HR")" class="btn btn-outline-light btn-sm me-2">Sync from ERPNext</a>
+            <a href="@Url.Action("CreateLeave", "HR")" class="btn btn-dark btn-sm">+ Add Leave Application</a>
+        </div>
+    </div>
+
+    <div class="list-body">
+
+        @if (TempData["ErpNextError"] != null)
+        {
+            <div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-3">@TempData["Success"]</div>
+        }
+
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Leave Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lv in Model)
+                {
+                    <tr>
+                        <td>@lv.LeaveApplicationCode</td>
+                        <td>@lv.Employee</td>
+                        <td>@lv.EmployeeName</td>
+                        <td>@lv.LeaveType</td>
+                        <td><span class="badge bg-secondary-subtle text-secondary">@lv.Status</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!Model.Any())
+        {
+            <p class="text-muted">No leave applications found.</p>
+        }
+    </div>
+</div> *@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model List<Erp_Aits.Models.LeaveApplication>
+@{
+    ViewBag.Title = "Leave Applications";
+}
+
+<div class="leave-list-wrapper mt-4">
+    <div class="list-header d-flex justify-content-between align-items-center bg-dark p-3 text-white rounded-top">
+        <h4 class="mb-0">Leave Applications</h4>
+        <div>
+            <a href="@Url.Action("CreateLeave", "HR")" class="btn btn-warning btn-sm fw-bold">+ Add Leave Application</a>
+        </div>
+    </div>
+
+    <div class="list-body bg-white p-4 border rounded-bottom shadow-sm">
+        @if (TempData["ErpNextError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID Code</th>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Leave Type</th>
+                    <th>Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var lv in Model)
+                    {
+                        <tr>
+                            <td><strong>@lv.LeaveApplicationCode</strong></td>
+                            <td>@lv.Employee</td>
+                            <td>@lv.EmployeeName</td>
+                            <td>@lv.LeaveType</td>
+                            <td><span class="badge bg-secondary">@lv.Status</span></td>
+                            <td class="text-center">
+                                <a href="@Url.Action("LeaveApplicationDetails", "HR", new { id = lv.Id })" class="btn btn-sm btn-outline-dark">View</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">No leave applications found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

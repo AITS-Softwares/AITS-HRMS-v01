@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Create New Identification Document Type";
+}
+
+<div class="container my-5" style="max-width: 600px;">
+    <div class="card p-4 shadow-sm">
+        <h4 class="mb-3">Create New Identification Document Type</h4>
+        <form action="/HR/CreateIdentificationDocumentType" method="post">
+            <div class="mb-3">
+                <label class="form-label">Identification Document Type Name</label>
+                <input type="text" name="identification_document_type" class="form-control" required placeholder="Enter new ID type..." />
+            </div>
+            <button type="submit" class="btn btn-dark w-100">Save to ERPNext Master</button>
+            <a href="@Url.Action("CreateTravelRequest", "HR")" class="btn btn-link w-100 mt-2">Cancel</a>
+        </form>
+    </div>
+</div>

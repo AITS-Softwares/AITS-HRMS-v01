@@ -1,0 +1,155 @@
+﻿@{
+    ViewBag.Title = "Salary Structure";
+}
+
+<style>
+    .erp-list-page {
+        max-width: 1210px;
+        margin: 0 auto;
+    }
+
+    .erp-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .erp-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .erp-menu-icon {
+        border: 0;
+        background: transparent;
+        font-size: 22px;
+        color: #64748b;
+    }
+
+    .erp-title {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .erp-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .erp-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 7px 13px;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .erp-btn-dark {
+        background: #111;
+        color: #fff;
+    }
+
+    .erp-btn-light {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .list-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        min-height: 650px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .list-filter-row {
+        display: grid;
+        grid-template-columns: 150px 150px 1fr auto auto;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        align-items: center;
+    }
+
+    .erp-input, .erp-select {
+        height: 34px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f3f4f6;
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+
+    .empty-state {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #374151;
+    }
+
+    .empty-icon {
+        width: 55px;
+        height: 55px;
+        margin: 0 auto 15px;
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 28px;
+    }
+
+    .empty-text {
+        margin-bottom: 12px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="erp-list-page">
+    <div class="erp-title-row">
+        <div class="erp-title-left">
+            <button type="button" class="erp-menu-icon">≡</button>
+            <div class="erp-title">Salary Structure</div>
+        </div>
+
+        <div class="erp-toolbar">
+            <a href="@Url.Action("BulkSalaryStructureAssignment", "HR")" class="erp-btn erp-btn-light">Bulk Salary Structure Assignment</a>
+            <button type="button" class="erp-btn erp-btn-light">List View</button>
+            <button type="button" class="erp-btn erp-btn-light">Refresh</button>
+            <button type="button" class="erp-btn erp-btn-light">...</button>
+            <a href="@Url.Action("CreateSalaryStructure", "HR")" class="erp-btn erp-btn-dark">+ Add Salary Structure</a>
+        </div>
+    </div>
+
+    <main class="list-card">
+        <form method="get" class="list-filter-row">
+            <input type="text" name="id" class="erp-input" placeholder="ID" value="@Context.Request.Query["id"]" />
+
+            <select name="isActive" class="erp-select">
+                <option value="">Is Active</option>
+                <option value="Yes" selected="@(Context.Request.Query["isActive"] == "Yes")">Yes</option>
+                <option value="No" selected="@(Context.Request.Query["isActive"] == "No")">No</option>
+            </select>
+
+            <div></div>
+            <button type="submit" class="erp-btn erp-btn-light">Filter</button>
+            <button type="button" class="erp-btn erp-btn-light">Last Updated On</button>
+        </form>
+
+        <div class="empty-state">
+            <div class="empty-icon">☷</div>
+            <div class="empty-text">You haven't created a Salary Structure yet</div>
+            <a href="@Url.Action("CreateSalaryStructure", "HR")" class="erp-btn erp-btn-light">
+                Create your first Salary Structure
+            </a>
+        </div>
+    </main>
+</div>

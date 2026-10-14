@@ -1,0 +1,59 @@
+﻿@{
+    ViewBag.Title = "Leaves";
+}
+<h4 class="mb-4">Leaves</h4>
+
+<h5 class="mb-3">Your Shortcuts</h5>
+<div class="d-flex flex-wrap gap-4 mb-4">
+    <a href="@Url.Action("CreateLeave", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Leave Application</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.OpenLeaveApplicationCount Open</span>
+    </a>
+    <a href="@Url.Action("LeaveAllocation", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Leave Allocation</span>
+        <span class="badge bg-secondary-subtle text-secondary">0</span>
+    </a>
+</div>
+
+<h5 class="mb-3">Masters &amp; Reports</h5>
+<div class="row g-4">
+    <div class="col-md-3">
+        <h6>Setup</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("HolidayList", "HR")">Holiday List</a></li>
+            <li><a href="@Url.Action("LeaveType", "HR")">Leave Type</a></li>
+            <li><a href="@Url.Action("LeavePeriod", "HR")">Leave Period</a></li>
+            <li><a href="@Url.Action("LeavePolicy", "HR")">Leave Policy</a></li>
+            <li><a href="@Url.Action("LeaveBlockList", "HR")">Leave Block List</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Allocation</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("LeaveAllocation", "HR")">Leave Allocation</a></li>
+            <li><a href="@Url.Action("LeavePolicyAssignment", "HR")">Leave Policy Assignment</a></li>
+            <li><a href="@Url.Action("LeaveControlPanel", "HR")">Leave Control Panel</a></li>
+            <li><a href="@Url.Action("LeaveEncashment", "HR")">Leave Encashment</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Application</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("CreateLeave", "HR")">Leave Application</a></li>
+            @* <a href="@Url.Action("CreateLeave", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2"> *@
+            @* <li><a href="@Url.Action("CreateCompensatoryLeaveRequest", "HR")">Compensatory Leave Request</a></li> *@
+            <li><a href="/HR/CompensatoryLeaveRequest">Compensatory Leave Request</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-md-3">
+        <h6>Reports</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("EmployeeLeaveBalance", "HR")">Employee Leave Balance</a></li>
+            <li><a href="@Url.Action("EmployeeLeaveBalanceSummary", "HR")">Employee Leave Balance Summary</a></li>
+            <li><a href="@Url.Action("EmployeesWorkingOnHoliday", "HR")">Employees working on a holiday</a></li>
+        </ul>
+    </div>
+</div>

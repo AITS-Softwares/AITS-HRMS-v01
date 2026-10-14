@@ -1,0 +1,476 @@
+﻿@model Erp_Aits.Models.PaymentEntry
+
+@{
+    ViewBag.Title = "Payment Entry " + Model.Id;
+
+    string Money(decimal value)
+    {
+        return value.ToString("N2");
+    }
+
+    string NullableMoney(decimal? value)
+    {
+        return value.HasValue ? value.Value.ToString("N2") : "";
+    }
+
+    string NullableDate(DateTime? value)
+    {
+        return value.HasValue ? value.Value.ToString("dd-MM-yyyy") : "";
+    }
+
+    string StatusText =
+        !string.IsNullOrWhiteSpace(Model.Status)
+            ? Model.Status
+            : Model.DocStatus == 1
+                ? "Submitted"
+                : Model.DocStatus == 2
+                    ? "Cancelled"
+                    : "Draft";
+}
+
+<style>
+    .payment-detail-page {
+        padding: 20px;
+    }
+
+    .payment-section {
+        border-top: 1px solid #d7dce2;
+        padding-top: 18px;
+        margin-top: 18px;
+    }
+
+        .payment-section:first-of-type {
+            border-top: 0;
+            padding-top: 0;
+            margin-top: 0;
+        }
+
+    .payment-section-title {
+        font-weight: 700;
+        margin-bottom: 14px;
+        color: #111827;
+    }
+
+    .form-label {
+        font-size: 13px;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+
+    .form-control[readonly],
+    textarea.form-control[readonly] {
+        background-color: #f8fafc;
+        color: #111827;
+        border-color: #d7dce2;
+        min-height: 38px;
+    }
+
+    .erp-badge {
+        display: inline-block;
+        background: #d8f3e5;
+        color: #047857;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+        .status-badge.submitted {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+    .table th {
+        background: #f8fafc;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .table td {
+        font-size: 13px;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="payment-detail-page">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1">Payment Entry - @Model.Id</h4>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErpNextId))
+            {
+                <span class="erp-badge">@Model.ErpNextId</span>
+            }
+
+            <span class="status-badge @(Model.DocStatus == 1 ? "submitted" : Model.DocStatus == 2 ? "cancelled" : "")">
+                @StatusText
+            </span>
+        </div>
+
+        <a href="@Url.Action("PaymentEntry", "HR")" class="btn btn-outline-secondary">
+            Back
+        </a>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Type of Payment</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series</label>
+                <input class="form-control" value="@Model.Series" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Posting Date</label>
+                <input class="form-control" value="@Model.PostingDate.ToString("dd-MM-yyyy")" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Payment Type</label>
+                <input class="form-control" value="@Model.PaymentType" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Company</label>
+                <input class="form-control" value="@Model.Company" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Mode of Payment</label>
+                <input class="form-control" value="@Model.ModeOfPayment" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Payment From / To</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Party Type</label>
+                <input class="form-control" value="@Model.PartyType" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Company Bank Account</label>
+                <input class="form-control" value="@Model.CompanyBankAccount" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Party</label>
+                <input class="form-control" value="@Model.Party" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Party Bank Account</label>
+                <input class="form-control" value="@Model.PartyBankAccount" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Party Name</label>
+                <input class="form-control" value="@Model.PartyName" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Contact</label>
+                <input class="form-control" value="@Model.ContactPerson" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input class="form-control" value="@Model.ContactEmail" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Accounts</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Party Balance</label>
+                <input class="form-control" value="@Money(Model.PartyBalance)" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Paid To</label>
+                <input class="form-control" value="@Model.PaidTo" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Paid From</label>
+                <input class="form-control" value="@Model.PaidFrom" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Currency (To)</label>
+                <input class="form-control" value="@Model.PaidToAccountCurrency" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Currency (From)</label>
+                <input class="form-control" value="@Model.PaidFromAccountCurrency" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Balance (To)</label>
+                <input class="form-control" value="@Money(Model.PaidToAccountBalance)" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Balance (From)</label>
+                <input class="form-control" value="@Money(Model.PaidFromAccountBalance)" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Amount</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Paid Amount</label>
+                <input class="form-control" value="@Money(Model.PaidAmount)" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Received Amount</label>
+                <input class="form-control" value="@Money(Model.ReceivedAmount)" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Source Exchange Rate</label>
+                <input class="form-control" value="@Model.SourceExchangeRate.ToString("N6")" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Target Exchange Rate</label>
+                <input class="form-control" value="@Model.TargetExchangeRate.ToString("N6")" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Reference</h6>
+
+        <div class="mb-3">
+            <button type="button" class="btn btn-sm btn-light" disabled>Get Outstanding Invoices</button>
+            <button type="button" class="btn btn-sm btn-light" disabled>Get Outstanding Orders</button>
+        </div>
+
+        <label class="form-label">Payment References</label>
+        <table class="table table-bordered align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">No.</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th class="text-end">Grand Total</th>
+                    <th class="text-end">Outstanding</th>
+                    <th class="text-end">Allocated</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="6" class="text-muted text-center py-3">No Data</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Writeoff</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Total Allocated Amount</label>
+                <input class="form-control" value="@Money(Model.TotalAllocatedAmount)" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Unallocated Amount</label>
+                <input class="form-control" value="@Money(Model.UnallocatedAmount)" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Difference Amount</label>
+                <input class="form-control" value="@Money(Model.DifferenceAmount)" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Taxes and Charges</h6>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Sales Taxes and Charges Template</label>
+                <input class="form-control" value="@Model.SalesTaxesChargesTemplate" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Purchase Taxes and Charges Template</label>
+                <input class="form-control" value="@Model.PurchaseTaxesChargesTemplate" readonly />
+            </div>
+        </div>
+
+        <label class="form-label">Advance Taxes and Charges</label>
+        <table class="table table-bordered align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">No.</th>
+                    <th>Type</th>
+                    <th>Account Head</th>
+                    <th class="text-end">Tax Rate</th>
+                    <th class="text-end">Amount</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Taxes != null && Model.Taxes.Count > 0)
+                {
+                    int i = 1;
+
+                    foreach (var tax in Model.Taxes)
+                    {
+                        <tr>
+                            <td>@(i++)</td>
+                            <td>@tax.Type</td>
+                            <td>@tax.AccountHead</td>
+                            <td class="text-end">@NullableMoney(tax.TaxRate)</td>
+                            <td class="text-end">@NullableMoney(tax.Amount)</td>
+                            <td class="text-end">@NullableMoney(tax.Total)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-muted text-center py-3">No Data</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Deductions or Loss</h6>
+
+        <label class="form-label">Payment Deductions or Loss</label>
+        <table class="table table-bordered align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">No.</th>
+                    <th>Account</th>
+                    <th>Cost Center</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-muted text-center py-3">No Data</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">GST Details</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Company Address</label>
+                <input class="form-control" value="@Model.CompanyAddress" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Customer Address</label>
+                <input class="form-control" value="@Model.CustomerAddress" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Company GSTIN</label>
+                <input class="form-control" value="@Model.CompanyGstin" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Customer GSTIN</label>
+                <input class="form-control" value="@Model.BillingAddressGstin" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Place of Supply</label>
+                <input class="form-control" value="@Model.PlaceOfSupply" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">GST Category</label>
+                <input class="form-control" value="@Model.GstCategory" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Transaction ID</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Cheque/Reference No</label>
+                <input class="form-control" value="@Model.ReferenceNo" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Cheque/Reference Date</label>
+                <input class="form-control" value="@NullableDate(Model.ReferenceDate)" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Accounting Dimensions</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Project</label>
+                <input class="form-control" value="@Model.Project" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Cost Center</label>
+                <input class="form-control" value="@Model.CostCenter" readonly />
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">More Information</h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <input class="form-control" value="@StatusText" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">DocStatus</label>
+                <input class="form-control" value="@Model.DocStatus" readonly />
+            </div>
+        </div>
+    </div>
+</div>

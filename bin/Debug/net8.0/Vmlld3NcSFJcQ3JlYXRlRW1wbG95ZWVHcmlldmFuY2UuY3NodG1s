@@ -1,0 +1,249 @@
+﻿@model Erp_Aits.Models.EmployeeGrievance
+@{
+    ViewBag.Title = "Create Employee Grievance";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>New Employee Grievance</h4>
+        <a href="@Url.Action("EmployeeGrievance", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErpNextError"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form asp-action="CreateEmployeeGrievance" method="post" id="grievanceForm">
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Grievance Details</h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Subject <span class="text-danger">*</span></label>
+                    <input asp-for="Subject" class="form-control" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Date <span class="text-danger">*</span></label>
+                    <input asp-for="GrievanceDate" type="date" class="form-control" value="@Model.GrievanceDate.ToString("yyyy-MM-dd")" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Raised By <span class="text-danger">*</span></label>
+                    <select asp-for="RaisedBy" class="form-select" required>
+                        <option value="">Select Employee</option>
+                        @if (ViewBag.Employees != null)
+                        {
+                            foreach (var emp in ViewBag.Employees)
+                            {
+                                string id = emp.name?.ToString();
+                                string name = emp.employee_name?.ToString();
+
+                                <option value="@id" selected="@(Model.RaisedBy == id)">
+                                    @(string.IsNullOrWhiteSpace(name) ? id : name + " (" + id + ")")
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="Open" selected="@(Model.Status == "Open")">Open</option>
+                        <option value="Investigated" selected="@(Model.Status == "Investigated")">Investigated</option>
+                        <option value="Resolved" selected="@(Model.Status == "Resolved")">Resolved</option>
+                        <option value="Invalid" selected="@(Model.Status == "Invalid")">Invalid</option>
+                        <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Grievance Against Party <span class="text-danger">*</span></label>
+                    <select asp-for="GrievanceAgainstParty" class="form-select" id="GrievanceAgainstParty" required>
+                        <option value="">Select DocType</option>
+                        @if (ViewBag.DocTypes != null)
+                        {
+                            foreach (var dt in ViewBag.DocTypes)
+                            {
+                                string name = dt.name?.ToString();
+
+                                <option value="@name" selected="@(Model.GrievanceAgainstParty == name)">
+                                    @name
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Grievance Against <span class="text-danger">*</span></label>
+                    <select asp-for="GrievanceAgainst" class="form-select" id="GrievanceAgainst" required>
+                        <option value="">Select Grievance Against</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Associated Document Type</label>
+                    <select asp-for="AssociatedDocumentType" class="form-select" id="AssociatedDocumentType">
+                        <option value="">Select DocType</option>
+                        @if (ViewBag.DocTypes != null)
+                        {
+                            foreach (var dt in ViewBag.DocTypes)
+                            {
+                                string name = dt.name?.ToString();
+
+                                <option value="@name" selected="@(Model.AssociatedDocumentType == name)">
+                                    @name
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Associated Document</label>
+                    <select asp-for="AssociatedDocument" class="form-select" id="AssociatedDocument">
+                        <option value="">Select Associated Document</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Grievance Type <span class="text-danger">*</span></label>
+                    <select asp-for="GrievanceType" class="form-select" required>
+                        <option value="">Select Grievance Type</option>
+                        @if (ViewBag.GrievanceTypes != null)
+                        {
+                            foreach (var gt in ViewBag.GrievanceTypes)
+                            {
+                                string name = gt.name?.ToString();
+
+                                <option value="@name" selected="@(Model.GrievanceType == name)">
+                                    @name
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Description <span class="text-danger">*</span></label>
+                    <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Investigation / Resolution</h6>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label">Cause of Grievance</label>
+                    <textarea asp-for="CauseOfGrievance" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Resolved By</label>
+                    <select asp-for="ResolvedBy" class="form-select">
+                        <option value="">Select User</option>
+                        @if (ViewBag.Users != null)
+                        {
+                            foreach (var user in ViewBag.Users)
+                            {
+                                string id = user.name?.ToString();
+                                string name = user.full_name?.ToString();
+
+                                <option value="@id" selected="@(Model.ResolvedBy == id)">
+                                    @(string.IsNullOrWhiteSpace(name) ? id : name + " (" + id + ")")
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Resolution Date</label>
+                    <input asp-for="ResolutionDate" type="date" class="form-control" value="@(Model.ResolutionDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Responsible</label>
+                    <select asp-for="EmployeeResponsible" class="form-select">
+                        <option value="">Select Employee</option>
+                        @if (ViewBag.Employees != null)
+                        {
+                            foreach (var emp in ViewBag.Employees)
+                            {
+                                string id = emp.name?.ToString();
+                                string name = emp.employee_name?.ToString();
+
+                                <option value="@id" selected="@(Model.EmployeeResponsible == id)">
+                                    @(string.IsNullOrWhiteSpace(name) ? id : name + " (" + id + ")")
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Resolution Details</label>
+                    <textarea asp-for="ResolutionDetails" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 py-2">Save Grievance</button>
+    </form>
+</div>
+
+<script>
+    async function loadDynamicOptions(sourceId, targetId, selectedValue) {
+        const source = document.getElementById(sourceId);
+        const target = document.getElementById(targetId);
+
+        if (!source || !target) {
+            return;
+        }
+
+        const doctype = source.value;
+        target.innerHTML = '<option value="">Select</option>';
+
+        if (!doctype) {
+            return;
+        }
+
+        const response = await fetch('/HR/GetEmployeeGrievanceLinkOptions?doctype=' + encodeURIComponent(doctype));
+        const rows = await response.json();
+
+        rows.forEach(function (row) {
+            const option = document.createElement('option');
+            option.value = row.value;
+            option.textContent = row.text;
+
+            if (selectedValue && selectedValue === row.value) {
+                option.selected = true;
+            }
+
+            target.appendChild(option);
+        });
+    }
+
+    document.getElementById('GrievanceAgainstParty').addEventListener('change', function () {
+        loadDynamicOptions('GrievanceAgainstParty', 'GrievanceAgainst', '');
+    });
+
+    document.getElementById('AssociatedDocumentType').addEventListener('change', function () {
+        loadDynamicOptions('AssociatedDocumentType', 'AssociatedDocument', '');
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadDynamicOptions('GrievanceAgainstParty', 'GrievanceAgainst', '@Model.GrievanceAgainst');
+        loadDynamicOptions('AssociatedDocumentType', 'AssociatedDocument', '@Model.AssociatedDocument');
+    });
+</script>

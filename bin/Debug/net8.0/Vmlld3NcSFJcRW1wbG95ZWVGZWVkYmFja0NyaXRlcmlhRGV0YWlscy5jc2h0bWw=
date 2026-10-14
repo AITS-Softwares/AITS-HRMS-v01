@@ -1,0 +1,80 @@
+@model Erp_Aits.Models.EmployeeFeedbackCriteria
+@{
+    ViewBag.Title = Model.Criteria;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-action="EmployeeFeedbackCriteriaDetails"
+      asp-controller="HR"
+      method="post"
+      id="criteriaDetailsForm">
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CriteriaCode" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0">@Model.Criteria</h4>
+            <small class="text-muted">@Model.CriteriaCode</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("EmployeeFeedbackCriteria", "HR")"
+               class="btn btn-outline-dark btn-sm">
+                Back to List
+            </a>
+
+            <button type="submit"
+                    class="btn btn-dark btn-sm">
+                Save
+            </button>
+
+            <button type="submit"
+                    form="deleteCriteriaForm"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this Employee Feedback Criteria from ERPNext and HRMS?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label asp-for="Criteria" class="form-label">
+                    Criteria <span class="text-danger">*</span>
+                </label>
+                <input asp-for="Criteria"
+                       class="form-control"
+                       maxlength="140"
+                       required />
+                <span asp-validation-for="Criteria" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form asp-action="DeleteEmployeeFeedbackCriteria"
+      asp-controller="HR"
+      asp-route-id="@Model.Id"
+      method="post"
+      id="deleteCriteriaForm"
+      class="d-none">
+    @Html.AntiForgeryToken()
+</form>

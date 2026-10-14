@@ -7,12 +7,9 @@
     <h4 class="mb-0">Employee Promotion</h4>
 
     <div class="d-flex gap-2">
-        <form method="post" asp-action="SyncEmployeePromotionsFromErpNext" asp-controller="HR">
-            <button type="submit" class="btn btn-outline-primary btn-sm">
-                Sync From ERPNext
-            </button>
+        <form asp-action="SyncEmployeePromotionsFromErpNext" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Sync from ERPNext</button>
         </form>
-
         <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#quickAddModal">
             + Add Employee Promotion
         </button>

@@ -1,0 +1,209 @@
+﻿@model List<Erp_Aits.Models.CompensatoryLeaveRequest>
+@{
+    ViewBag.Title = "Compensatory Leave Request";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: linear-gradient(160deg, #f4f6fb 0%, #eef1f8 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+    }
+
+    .clr-list-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 16px 40px;
+    }
+
+    .clr-page-header {
+        margin-bottom: 22px;
+    }
+
+        .clr-page-header h4 {
+            font-family: 'Manrope', sans-serif;
+            color: #0f2544;
+            font-weight: 800;
+            font-size: 21px;
+            margin: 0;
+        }
+
+    .btn-add {
+        background: #0f2544;
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 10px 22px;
+        border-radius: 999px;
+        letter-spacing: 0.2px;
+        transition: all 0.2s ease-in-out;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 12px rgba(15, 37, 68, 0.25);
+    }
+
+        .btn-add:hover {
+            background: #2dd4bf;
+            color: #0a2540;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(45, 212, 191, 0.4);
+        }
+
+    .table-card {
+        background: linear-gradient(180deg, #f7f9fd 0%, #f1f4fa 100%);
+        border: 1px solid #e2e6f0;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+        padding: 6px;
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table thead th {
+            background: #ffffff;
+            border: none;
+            color: #0f2544;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 20px;
+            border-bottom: 2px solid #2dd4bf;
+        }
+
+        .table tbody tr {
+            background: #ffffff;
+            transition: background-color 0.15s ease;
+        }
+
+            .table tbody tr:hover {
+                background: #f0fbfa;
+            }
+
+        .table td {
+            vertical-align: middle;
+            padding: 14px 20px;
+            font-size: 14px;
+            color: #475569;
+            border-bottom: 1px solid #eef1f7;
+        }
+
+    .clr-id-badge {
+        display: inline-block;
+        background: rgba(45, 212, 191, 0.14);
+        color: #0f766e;
+        font-weight: 700;
+        font-size: 12.5px;
+        padding: 5px 14px;
+        border-radius: 999px;
+        letter-spacing: 0.2px;
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+</style>
+
+<div class="clr-list-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-3 clr-page-header">
+        <h4 class="mb-0">Compensatory Leave Request</h4>
+        <div>
+            <a href="@Url.Action("CreateCompensatoryLeaveRequest", "HR")" class="btn-add">+ Add Compensatory Leave Request</a>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mb-3">@TempData["Success"]</div>
+    }
+
+    <div class="table-card">
+        @* <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID / ERP ID</th>
+                    <th>Employee Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("CompensatoryLeaveRequestDetails", "HR", new { id = string.IsNullOrEmpty(r.ErpNextId) ? r.Id.ToString() : r.ErpNextId })" style="text-decoration: none; display: inline-block;">
+                                <span class="clr-id-badge">@(string.IsNullOrWhiteSpace(r.ErpNextId) ? "HR-CLR-" + r.Id.ToString("D5") : r.ErpNextId)</span>
+                            </a>
+                        </td>
+                        @* <td>@(string.IsNullOrWhiteSpace(r.EmployeeName) ? r.Employee : r.EmployeeName)</td> *@
+
+
+
+        @*                 <td>
+                            <a href="@Url.Action("CompensatoryLeaveRequestDetails", "HR", new { id = string.IsNullOrEmpty(r.ErpNextId) ? r.Id.ToString() : r.ErpNextId })"
+                               class="btn btn-sm btn-outline-primary">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table> *@ 
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID / ERP ID</th>
+                    <th>Employee Name</th>
+                    <th>Leave Type</th>
+                    <th>Work Date</th>
+                    <th style="width: 160px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    var displayId = string.IsNullOrWhiteSpace(r.ErpNextId) ? "HR-CLR-" + r.Id.ToString("D5") : r.ErpNextId;
+                    var detailId = string.IsNullOrWhiteSpace(r.ErpNextId) ? r.Id.ToString() : r.ErpNextId;
+
+                    <tr>
+                        <td>
+                            <span class="clr-id-badge">@displayId</span>
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(r.EmployeeName) ? r.Employee : r.EmployeeName)</td>
+                        <td>@r.LeaveType</td>
+                        <td>
+                            @(r.WorkFromDate?.ToString("dd-MM-yyyy"))
+                            -
+                            @(r.WorkEndDate?.ToString("dd-MM-yyyy"))
+                        </td>
+                        <td>
+                            <a href="@Url.Action("CompensatoryLeaveRequestDetails", "HR", new { id = detailId })"
+                               class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="empty-state">No compensatory leave requests found.</p>
+    }
+</div>

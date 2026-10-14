@@ -1,0 +1,432 @@
+﻿@model List<Erp_Aits.Models.LeaveBalanceRow>
+@{
+    ViewBag.Title = "Employee Leave Balance";
+
+    int totalTaken = Model?.Sum(r => r.LeavesTaken) ?? 0;
+    int totalAllocated = Model?.Sum(r => r.TotalAllocated) ?? 0;
+    int totalBalance = Model?.Sum(r => r.Balance) ?? 0;
+}
+
+<div class="ea-detail-header">
+    <div class="ea-detail-header-left">
+        <div>
+            <div class="ea-breadcrumb">HR Reports</div>
+            <h4 class="mb-0">Employee Leave Balance</h4>
+        </div>
+    </div>
+</div>
+
+<div class="ea-section">
+    <div class="ea-section-title">
+        <span class="ea-section-icon">🔍</span> Filters
+    </div>
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">From Date</label>
+            <input type="date" name="fromDate" class="form-control ea-input" value="@(((DateTime?)ViewBag.FromDate)?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">To Date</label>
+            <input type="date" name="toDate" class="form-control ea-input" value="@(((DateTime?)ViewBag.ToDate)?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Company</label>
+            <input type="text" class="form-control ea-input ea-input-readonly" value="AITS" disabled />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Department</label>
+            <input type="text" name="department" class="form-control ea-input" placeholder="All departments" value="@ViewBag.Department" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Employee</label>
+            <input type="text" name="employee" class="form-control ea-input" placeholder="All employees" value="@ViewBag.Employee" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-1">
+            <label class="form-label ea-form-label">Status</label>
+            <select name="status" class="form-select ea-input">
+                <option value="Active" selected="@(ViewBag.Status == "Active")">Active</option>
+                <option value="Inactive" selected="@(ViewBag.Status == "Inactive")">Inactive</option>
+            </select>
+        </div>
+        <div class="col-12 col-lg-1 d-flex gap-2">
+            <button type="submit" class="btn btn-dark btn-sm ea-apply-btn w-100">Apply</button>
+        </div>
+
+        @if (ViewBag.FromDate != null || ViewBag.ToDate != null || !string.IsNullOrEmpty(ViewBag.Department) || !string.IsNullOrEmpty(ViewBag.Employee))
+        {
+            <div class="col-12 col-lg-auto">
+                <a href="@Url.Action("LeaveBalance", "HR")" class="btn btn-outline-secondary btn-sm ea-apply-btn w-100">Clear Filters</a>
+            </div>
+        }
+
+        <div class="col-12">
+            <label class="ea-toggle mb-0">
+                <input type="checkbox" id="consolidateCheck" checked />
+                <span class="ea-toggle-slider"></span>
+                <span class="ea-toggle-label">Consolidate Leave Types</span>
+            </label>
+        </div>
+    </form>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="ea-empty-state">
+        <div class="ea-empty-icon">🗂️</div>
+        <p class="text-muted mb-0">No data found for the selected filters.</p>
+    </div>
+}
+else
+{
+    <div class="ea-stats-row">
+        <div class="ea-stat-card">
+            <div class="ea-stat-label">Employees</div>
+            <div class="ea-stat-value">@Model.Count</div>
+        </div>
+        <div class="ea-stat-card">
+            <div class="ea-stat-label">Total Leaves Taken</div>
+            <div class="ea-stat-value">@totalTaken</div>
+        </div>
+        <div class="ea-stat-card">
+            <div class="ea-stat-label">Total Allocated</div>
+            <div class="ea-stat-value">@totalAllocated</div>
+        </div>
+        <div class="ea-stat-card ea-stat-highlight">
+            <div class="ea-stat-label">Total Balance</div>
+            <div class="ea-stat-value">@totalBalance</div>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-table-wrapper">
+            <table class="table table-hover align-middle ea-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                        <th class="text-end">Leaves Taken</th>
+                        <th class="text-end">Total Allocated</th>
+                        <th class="text-end">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model)
+                    {
+                        string balanceClass = row.Balance <= 0 ? "ea-balance-low" : row.Balance <= 5 ? "ea-balance-warn" : "ea-balance-good";
+                        <tr>
+                            <td><span class="ea-code-badge">@row.EmployeeCode</span></td>
+                            <td>
+                                <div class="ea-employee">
+                                    <span class="ea-avatar">
+                                        @(string.IsNullOrWhiteSpace(row.EmployeeName) ? "?" : row.EmployeeName.Trim()[0].ToString().ToUpper())
+                                    </span>
+                                    <span>@row.EmployeeName</span>
+                                </div>
+                            </td>
+                            <td>@(string.IsNullOrEmpty(row.Department) ? "—" : row.Department)</td>
+                            <td class="text-end">@row.LeavesTaken</td>
+                            <td class="text-end">@row.TotalAllocated</td>
+                            <td class="text-end">
+                                <span class="ea-balance-pill @balanceClass">@row.Balance</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<style>
+    .ea-detail-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ea-detail-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .ea-breadcrumb {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 0.1rem;
+    }
+
+    .ea-section {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ea-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 1.1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f0f1f3;
+    }
+
+    .ea-section-icon {
+        font-size: 1.05rem;
+    }
+
+    .ea-form-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+
+    .ea-input {
+        border-radius: 8px;
+        border: 1px solid #dfe2e6;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.88rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .ea-input:focus {
+            border-color: #495057;
+            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+            outline: none;
+        }
+
+    .ea-input-readonly {
+        background-color: #f8f9fa;
+        color: #6c757d;
+    }
+
+    .ea-apply-btn {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    /* Toggle switch */
+    .ea-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .ea-toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .ea-toggle-slider {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        background: #dfe2e6;
+        border-radius: 999px;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .ea-toggle-slider::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+    .ea-toggle input:checked + .ea-toggle-slider {
+        background: #212529;
+    }
+
+        .ea-toggle input:checked + .ea-toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+    .ea-toggle-label {
+        font-size: 0.88rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    /* Empty state */
+    .ea-empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .ea-empty-icon {
+        font-size: 2.2rem;
+        margin-bottom: 0.6rem;
+        opacity: 0.6;
+    }
+
+    /* Stat cards */
+    .ea-stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ea-stat-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.1rem 1.25rem;
+    }
+
+    .ea-stat-highlight {
+        background: linear-gradient(135deg, #1c1e21, #2c2f33);
+        color: #fff;
+    }
+
+        .ea-stat-highlight .ea-stat-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .ea-stat-highlight .ea-stat-value {
+            color: #7CFFB2;
+        }
+
+    .ea-stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #9aa0a6;
+        margin-bottom: 0.3rem;
+    }
+
+    .ea-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    /* Table */
+    .ea-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .ea-table thead tr {
+        background: #f8f9fa;
+    }
+
+    .ea-table thead th {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #6c757d;
+        border-bottom: 2px solid #eee;
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+    }
+
+    .ea-table tbody td {
+        padding: 0.8rem 1rem;
+    }
+
+    .ea-code-badge {
+        display: inline-block;
+        background: #eef1f5;
+        color: #333;
+        font-weight: 600;
+        font-size: 0.83rem;
+        padding: 0.28rem 0.6rem;
+        border-radius: 6px;
+    }
+
+    .ea-employee {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .ea-avatar {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 50%;
+        background: #212529;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ea-balance-pill {
+        display: inline-block;
+        min-width: 36px;
+        text-align: center;
+        padding: 0.3rem 0.65rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .ea-balance-good {
+        background: #d7f5e3;
+        color: #1b7a43;
+    }
+
+    .ea-balance-warn {
+        background: #fff3cd;
+        color: #997404;
+    }
+
+    .ea-balance-low {
+        background: #fdecea;
+        color: #b3261e;
+    }
+
+    @@media (max-width: 992px) {
+        .ea-stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .ea-section {
+            padding: 1.1rem;
+        }
+
+        .ea-stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .ea-stat-card {
+            padding: 0.9rem 1rem;
+        }
+
+        .ea-stat-value {
+            font-size: 1.25rem;
+        }
+    }
+</style>

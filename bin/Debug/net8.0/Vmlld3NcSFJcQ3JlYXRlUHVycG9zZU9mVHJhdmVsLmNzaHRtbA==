@@ -1,0 +1,22 @@
+﻿@model Erp_Aits.Models.PurposeOfTravel
+@{
+    ViewBag.Title = "New Purpose of Travel";
+}
+
+<form asp-action="CreatePurposeOfTravel" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">New Purpose of Travel</h4>
+            <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4">
+        <div class="mb-3">
+            <label class="form-label">Purpose of Travel <span class="text-danger">*</span></label>
+            <input asp-for="Purpose" class="form-control" required autofocus />
+        </div>
+    </div>
+</form>

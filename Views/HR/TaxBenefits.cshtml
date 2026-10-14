@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Tax & Benefits";
 }
 
@@ -179,7 +179,7 @@
                 </li>
                 <li>
                     <a class="workspace-link" href="@Url.Action("EmployeeTaxExemptionProofSubmission", "HR")">
-                        Employee Tax Exemption Proof Submission ... <span class="external-arrow">↗</span>
+                        Employee Tax Exemption Proof Submission <span class="external-arrow">↗</span>
                     </a>
                 </li>
             </ul>
@@ -223,3 +223,26 @@
         <a href="#">+ New</a>
     </div>
 </div>
+
+<style>
+    .workspace-shell { max-width: 1100px; margin: 0 auto; padding: 30px; border: 1px solid #e7e8f2; border-radius: 16px; box-shadow: 0 8px 26px rgba(20,41,68,.07); color:#17183b; }
+    .workspace-shell > h5 { font-size: 24px; letter-spacing: -.02em; margin-bottom: 22px !important; }
+    .shortcut-row { gap: 14px; margin-bottom: 34px; }
+    .shortcut-row > a { display:flex; align-items:center; min-height:72px; padding: 16px 18px; border:1px solid #e7e8f2; border-radius:11px; background:#fbfaff; color:#42617f; text-decoration:none; font-weight:650; }
+    .shortcut-row > a:hover { border-color:#9cc5dc; color:#142944; transform:translateY(-2px); box-shadow:0 7px 16px rgba(18,135,127,.12); }
+    .workspace-link { color:#535775; font-size:14px; text-decoration:none; }
+    .workspace-link:hover { color:#142944; }
+    .external-arrow { color:#12877f; }
+    .badge-soft { background:#eaf2f8; color:#142944; }
+    .section-heading { color:#17183b; font-size:20px; margin-bottom:18px; }
+    .workspace-grid { gap:16px; column-gap:16px; }
+    .workspace-group { border:1px solid #e7e8f2; border-radius:12px; padding:20px; min-height:150px; background:#fff; transition:.18s ease; }
+    .workspace-group:hover { border-color:#c4dbe8; box-shadow:0 7px 18px rgba(20,41,68,.08); }
+    .workspace-group h6 { color:#17183b; font-size:15px; margin-bottom:15px; }
+    .workspace-group li { margin-bottom:12px; }
+    .workspace-actions { position:static; justify-content:flex-end; margin-top:24px; }
+    .workspace-actions a { border:1px solid #d6e6ef; background:#fff; color:#142944; padding:9px 14px; }
+    @@media(max-width:900px){.workspace-shell{padding:20px}.shortcut-row,.workspace-grid{grid-template-columns:1fr}.workspace-actions{justify-content:flex-start}}
+</style>
+
+

@@ -1,0 +1,500 @@
+﻿@model Erp_Aits.Models.ShiftRequest
+
+@{
+    ViewBag.Title = "New Shift Request";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+    </div>
+}
+
+
+<form asp-action="NewShiftRequest"
+      asp-controller="HR"
+      method="post"
+      id="shiftRequestForm">
+    <input type="hidden" name="Status" value="Draft" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h4 class="mb-0 d-inline">
+                New Shift Request
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning ms-2">
+                Not Saved
+            </span>
+        </div>
+
+
+        <div class="d-flex gap-2">
+
+            <a href="@Url.Action("ShiftRequest", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="btn btn-dark btn-sm px-4">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="card border rounded-3 p-4">
+
+        <div class="row g-3">
+
+            <!-- SHIFT TYPE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Shift Type
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="ShiftType"
+                        id="ShiftType"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Shift Type --
+                    </option>
+
+                    @if (ViewBag.ShiftTypes != null)
+                    {
+                        foreach (var shift in ViewBag.ShiftTypes)
+                        {
+                            <option value="@shift.name">
+                                @shift.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- COMPANY -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Company
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Company"
+                        id="Company"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Company --
+                    </option>
+
+                    @if (ViewBag.Companies != null)
+                    {
+                        foreach (var company in ViewBag.Companies)
+                        {
+                            <option value="@company.name">
+                                @company.name
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- EMPLOYEE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Employee"
+                        id="Employee"
+                        class="form-select"
+                        required>
+
+                    <option value="">
+                        -- Select Employee --
+                    </option>
+
+                    @if (ViewBag.Employees != null)
+                    {
+                        foreach (var emp in ViewBag.Employees)
+                        {
+                            <option value="@emp.name"
+                                    data-name="@emp.employee_name"
+                                    data-company="@emp.company"
+                                    data-department="@emp.department"
+                                    data-default-shift="@emp.default_shift">
+
+                                @emp.name - @emp.employee_name
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- APPROVER -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Approver
+                    <span class="text-danger">*</span>
+                </label>
+
+                <select asp-for="Approver"
+                        id="Approver"
+                        class="form-select"
+                        required
+                        disabled>
+
+                    <option value="">
+                        -- Select Employee First --
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- EMPLOYEE NAME -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Employee Name
+                </label>
+
+                <input asp-for="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- DEPARTMENT -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Department
+                </label>
+
+                <input asp-for="Department"
+                       id="Department"
+                       class="form-control bg-light"
+                       readonly />
+
+            </div>
+
+
+            <!-- FROM DATE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    From Date
+                    <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="FromDate"
+                       id="FromDate"
+                       type="date"
+                       class="form-control"
+                       required />
+
+            </div>
+
+
+            <div class="col-md-6"></div>
+
+
+            <!-- TO DATE -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    To Date
+                </label>
+
+                <input asp-for="ToDate"
+                       id="ToDate"
+                       type="date"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        const employee =
+            document.getElementById(
+                "Employee"
+            );
+
+
+        const approver =
+            document.getElementById(
+                "Approver"
+            );
+
+
+        employee.addEventListener(
+            "change",
+            async function () {
+
+                const employeeId =
+                    this.value;
+
+
+                const selected =
+                    this.options[
+                        this.selectedIndex
+                    ];
+
+
+                document.getElementById(
+                    "EmployeeName"
+                ).value =
+                    selected && employeeId
+                        ? selected.getAttribute(
+                            "data-name"
+                        ) || ""
+                        : "";
+
+
+                document.getElementById(
+                    "Company"
+                ).value =
+                    selected && employeeId
+                        ? selected.getAttribute(
+                            "data-company"
+                        ) || ""
+                        : "";
+
+
+                document.getElementById(
+                    "Department"
+                ).value =
+                    selected && employeeId
+                        ? selected.getAttribute(
+                            "data-department"
+                        ) || ""
+                        : "";
+
+
+                approver.innerHTML = `
+                    <option value="">
+                        -- Loading Approvers --
+                    </option>
+                `;
+
+                approver.disabled =
+                    true;
+
+
+                if (!employeeId)
+                {
+                    approver.innerHTML = `
+                        <option value="">
+                            -- Select Employee First --
+                        </option>
+                    `;
+
+                    return;
+                }
+
+
+                try
+                {
+                    const response =
+                        await fetch(
+                            '@Url.Action("GetShiftRequestEmployeeDetails", "HR")'
+                            + "?employee="
+                            + encodeURIComponent(
+                                employeeId
+                            )
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !data ||
+                        data.success !== true
+                    )
+                    {
+                        alert(
+                            data?.message ||
+                            "Unable to load Employee details."
+                        );
+
+                        return;
+                    }
+
+
+                    document.getElementById(
+                        "EmployeeName"
+                    ).value =
+                        data.employeeName || "";
+
+
+                    document.getElementById(
+                        "Company"
+                    ).value =
+                        data.company || "";
+
+
+                    document.getElementById(
+                        "Department"
+                    ).value =
+                        data.department || "";
+
+
+                    approver.innerHTML = `
+                        <option value="">
+                            -- Select Approver --
+                        </option>
+                    `;
+
+
+                    if (
+                        Array.isArray(
+                            data.approvers
+                        )
+                    )
+                    {
+                        data.approvers.forEach(
+                            function (user) {
+
+                                const option =
+                                    document.createElement(
+                                        "option"
+                                    );
+
+                                option.value =
+                                    user;
+
+                                option.textContent =
+                                    user;
+
+                                approver.appendChild(
+                                    option
+                                );
+                            }
+                        );
+                    }
+
+
+                    approver.disabled =
+                        false;
+
+
+                    // ==========================================
+                    // Prevent employee default shift
+                    // ==========================================
+
+                    const defaultShift =
+                        data.defaultShift || "";
+
+
+                    const shift =
+                        document.getElementById(
+                            "ShiftType"
+                        );
+
+
+                    Array.from(
+                        shift.options
+                    ).forEach(
+                        function (option) {
+
+                            option.disabled =
+                                defaultShift &&
+                                option.value ===
+                                    defaultShift;
+                        }
+                    );
+
+
+                    if (
+                        shift.value ===
+                        defaultShift
+                    )
+                    {
+                        shift.value = "";
+                    }
+                }
+                catch (error)
+                {
+                    console.error(error);
+
+                    alert(
+                        "Unable to load Shift Request employee information."
+                    );
+                }
+            }
+        );
+
+
+        // ================================================
+        // FROM / TO DATE
+        // ================================================
+
+        document.getElementById(
+            "ToDate"
+        ).addEventListener(
+            "change",
+            function () {
+
+                const from =
+                    document.getElementById(
+                        "FromDate"
+                    ).value;
+
+
+                if (
+                    from &&
+                    this.value &&
+                    this.value < from
+                )
+                {
+                    alert(
+                        "To Date cannot be before From Date."
+                    );
+
+                    this.value = "";
+                }
+            }
+        );
+
+    </script>
+}

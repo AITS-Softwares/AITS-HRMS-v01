@@ -1,0 +1,226 @@
+@model Erp_Aits.Models.ErpNextCompanyListViewModel
+@{
+    ViewBag.Title = "Company";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: radial-gradient(circle at top left, #f0fdfa 0%, #eef2f3 45%, #f4f7f6 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .company-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 28px 16px 60px;
+    }
+
+    .accent-bar {
+        height: 5px;
+        width: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #0f766e 0%, #14b8a6 45%, #f59e0b 100%);
+        margin-bottom: 22px;
+        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.2);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        padding: 22px 28px;
+        background: linear-gradient(120deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(15, 118, 110, 0.28);
+    }
+
+    .page-title .eyebrow {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 2px;
+    }
+
+    .page-title h2 {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 4px;
+        font-size: 25px;
+    }
+
+    .page-title p {
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .btn-add {
+        background: #ffffff;
+        color: #0f766e;
+        border-radius: 9px;
+        padding: 10px 24px;
+        font-weight: 800;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add:hover {
+        background: #f59e0b;
+        color: #ffffff;
+    }
+
+    .table-card {
+        background: #ffffff;
+        border: 1px solid #e6f5f3;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(20, 40, 40, 0.08);
+        padding: 26px;
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        width: 320px;
+        max-width: 100%;
+        border-radius: 9px;
+        border: 1.5px solid #d9ece9;
+        padding: 10px 16px;
+        font-size: 14px;
+        background: #ffffff;
+    }
+
+    .btn-filter {
+        border: 1.5px solid #14b8a6;
+        color: #0f766e;
+        font-weight: 700;
+        border-radius: 9px;
+        padding: 9px 20px;
+        background: #ffffff;
+    }
+
+    .table thead th {
+        background-color: #e6f8f5;
+        border: none;
+        color: #0f766e;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 14px;
+        border-bottom: 2px solid #99f6e4;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 14px;
+        color: #334155;
+        border-bottom: 1px solid #eef2f1;
+    }
+
+    .company-link {
+        color: #134e4a;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .company-link:hover {
+        color: #0d9488;
+        text-decoration: underline;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 42px 16px;
+        color: #64748b;
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 18px;
+        }
+    }
+</style>
+
+<div class="company-wrapper">
+    <div class="accent-bar"></div>
+
+    @if (TempData["CompanySuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["CompanySuccess"]</div>
+    }
+    @if (TempData["CompanyError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["CompanyError"]</div>
+    }
+
+    <div class="page-header">
+        <div class="page-title">
+            <div class="eyebrow">HR / Master Data Sync</div>
+            <h2>Company</h2>
+            <p>Company data is fetched from ERPNext and saved back to ERPNext.</p>
+        </div>
+        <a class="btn-add" href="@Url.Action("CreateCompany", "Company")">+ Add Company</a>
+    </div>
+
+    <div class="table-card">
+        <form class="toolbar" method="get" action="@Url.Action("Company", "Company")">
+            <input class="search-box" type="search" name="search" value="@Model.Search" placeholder="Search Company" />
+            <button class="btn-filter" type="submit">Filter</button>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Country</th>
+                        <th>Parent Company</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Companies.Any())
+                    {
+                        foreach (var company in Model.Companies)
+                        {
+                            <tr>
+                                <td>
+                                    <a class="company-link" href="@Url.Action("CompanyDetails", "Company", new { name = company.Name })">
+                                        @(string.IsNullOrWhiteSpace(company.CompanyName) ? company.Name : company.CompanyName)
+                                    </a>
+                                </td>
+                                <td>@company.Country</td>
+                                <td>@company.ParentCompany</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">
+                                <div class="empty-state">No Company records found from ERPNext.</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

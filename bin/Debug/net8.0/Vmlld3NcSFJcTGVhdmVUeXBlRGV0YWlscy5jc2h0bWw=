@@ -1,0 +1,199 @@
+@model Erp_Aits.Models.LeaveType
+@{
+    ViewBag.Title = "Leave Type - " + Model.LeaveTypeName;
+    var earningComponents = ViewBag.EarningComponents as List<string> ?? new List<string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Leave Type - @Model.LeaveTypeName</h4>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("LeaveType", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+        <button type="submit" form="leaveTypeForm" class="btn btn-dark btn-sm">Save</button>
+        <form method="post" action="@Url.Action("DeleteLeaveType", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Leave Type from ERPNext and HRMS?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+
+<form id="leaveTypeForm" method="post" action="@Url.Action("UpdateLeaveType", "HR", new { id = Model.Id })">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ErpNextId" value="@Model.ErpNextId" />
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Leave Type Name <span class="text-danger">*</span></label>
+                <input type="text" name="LeaveTypeName" class="form-control" value="@Model.LeaveTypeName" required />
+                <span class="text-danger">@ViewData.ModelState["LeaveTypeName"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+            </div>
+            <div class="col-md-6"></div>
+
+            <div class="col-md-6">
+                <label class="form-label">Maximum Leave Allocation Allowed per Leave Period</label>
+                <input type="number" step="0.01" name="MaxLeavesAllowed" class="form-control" value="@Model.MaxLeavesAllowed" />
+            </div>
+            <div class="col-md-6 form-check mt-4">
+                <input class="form-check-input toggle-section" type="checkbox" name="IsCarryForward" value="true" id="IsCarryForward" data-target="carryForwardSection" @(Model.IsCarryForward ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="IsCarryForward">Is Carry Forward</label>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Allow Leave Application After (Working Days)</label>
+                <input type="number" name="ApplicableAfterWorkingDays" class="form-control" value="@Model.ApplicableAfterWorkingDays" />
+                <p class="text-muted small mb-0">Minimum working days required since Date of Joining to apply for this leave</p>
+            </div>
+            <div class="col-md-6 form-check mt-4">
+                <input class="form-check-input" type="checkbox" name="IsLWP" value="true" id="IsLWP" @(Model.IsLWP ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="IsLWP">Is Leave Without Pay</label>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Maximum Consecutive Leaves Allowed</label>
+                <input type="number" name="MaxContinuousDaysAllowed" class="form-control" value="@Model.MaxContinuousDaysAllowed" />
+            </div>
+            <div class="col-md-6 form-check mt-4">
+                <input class="form-check-input toggle-section" type="checkbox" name="IsPartiallyPaidLeave" value="true" id="IsPartiallyPaidLeave" data-target="partialPaidSection" @(Model.IsPartiallyPaidLeave ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="IsPartiallyPaidLeave">Is Partially Paid Leave</label>
+            </div>
+
+            <div class="col-md-6"></div>
+            <div class="col-md-6" id="partialPaidSection">
+                <label class="form-label">Fraction of Daily Salary per Leave <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" min="0" max="1" name="FractionOfDailySalaryPerLeave" class="form-control" value="@Model.FractionOfDailySalaryPerLeave" />
+                <span class="text-danger">@ViewData.ModelState["FractionOfDailySalaryPerLeave"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+                <p class="text-muted small mb-0">For a day of leave taken, if you still pay (say) 50% of the daily salary, then enter 0.50 in this field.</p>
+            </div>
+
+            <div class="col-md-6"></div>
+            <div class="col-md-6 form-check">
+                <input class="form-check-input" type="checkbox" name="IsOptionalLeave" value="true" id="IsOptionalLeave" @(Model.IsOptionalLeave ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="IsOptionalLeave">Is Optional Leave</label>
+                <p class="text-muted small mb-0">These leaves are holidays permitted by the company however, availing it is optional for an Employee.</p>
+            </div>
+
+            <div class="col-md-6"></div>
+            <div class="col-md-6 form-check">
+                <input class="form-check-input" type="checkbox" name="AllowNegativeBalance" value="true" id="AllowNegativeBalance" @(Model.AllowNegativeBalance ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="AllowNegativeBalance">Allow Negative Balance</label>
+            </div>
+
+            <div class="col-md-6"></div>
+            <div class="col-md-6 form-check">
+                <input class="form-check-input" type="checkbox" name="AllowOverAllocation" value="true" id="AllowOverAllocation" @(Model.AllowOverAllocation ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="AllowOverAllocation">Allow Over Allocation</label>
+                <p class="text-muted small mb-0">Allows allocating more leaves than the number of days in the allocation period.</p>
+            </div>
+
+            <div class="col-md-6"></div>
+            <div class="col-md-6 form-check">
+                <input class="form-check-input" type="checkbox" name="IncludeHolidaysWithinLeaves" value="true" id="IncludeHolidaysWithinLeaves" @(Model.IncludeHolidaysWithinLeaves ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="IncludeHolidaysWithinLeaves">Include holidays within leaves as leaves</label>
+            </div>
+
+            <div class="col-md-6"></div>
+            <div class="col-md-6 form-check">
+                <input class="form-check-input" type="checkbox" name="IsCompensatory" value="true" id="IsCompensatory" @(Model.IsCompensatory ? "checked" : "") />
+                <label class="form-check-label fw-semibold" for="IsCompensatory">Is Compensatory</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3" id="carryForwardSection">
+        <h6>Carry Forward</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Maximum Carry Forwarded Leaves</label>
+                <input type="number" step="0.01" name="MaxCarryForwardedLeaves" class="form-control" value="@Model.MaxCarryForwardedLeaves" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Expire Carry Forwarded Leaves (Days)</label>
+                <input type="number" name="ExpireCarryForwardedLeaves" class="form-control" value="@Model.ExpireCarryForwardedLeaves" />
+                <p class="text-muted small mb-0">Calculated in days</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6>Encashment</h6>
+        <div class="form-check mb-3">
+            <input class="form-check-input toggle-section" type="checkbox" name="AllowEncashment" value="true" id="AllowEncashment" data-target="encashmentFields" @(Model.AllowEncashment ? "checked" : "") />
+            <label class="form-check-label fw-semibold" for="AllowEncashment">Allow Encashment</label>
+        </div>
+        <div class="row g-3" id="encashmentFields">
+            <div class="col-md-6">
+                <label class="form-label">Maximum Encashable Leaves</label>
+                <input type="number" step="0.01" name="MaxEncashableLeaves" class="form-control" value="@Model.MaxEncashableLeaves" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Earning Component</label>
+                <select name="EarningComponent" class="form-select">
+                    <option value="">-- Select --</option>
+                    @foreach (var component in earningComponents)
+                    {
+                        <option value="@component" selected="@(Model.EarningComponent == component)">@component</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Non-Encashable Leaves</label>
+                <input type="number" step="0.01" name="NonEncashableLeaves" class="form-control" value="@Model.NonEncashableLeaves" />
+                <p class="text-muted small mb-0">Indicates the number of leaves that cannot be encashed from the leave balance.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6>Earned Leave</h6>
+        <div class="form-check mb-3">
+            <input class="form-check-input toggle-section" type="checkbox" name="IsEarnedLeave" value="true" id="IsEarnedLeave" data-target="earnedLeaveFields" @(Model.IsEarnedLeave ? "checked" : "") />
+            <label class="form-check-label fw-semibold" for="IsEarnedLeave">Is Earned Leave</label>
+        </div>
+        <div class="row g-3" id="earnedLeaveFields">
+            <div class="col-md-6">
+                <label class="form-label">Earned Leave Frequency</label>
+                <select name="EarnedLeaveFrequency" class="form-select">
+                    @foreach (var option in new[] { "Monthly", "Quarterly", "Half-Yearly", "Yearly" })
+                    {
+                        <option value="@option" selected="@(Model.EarnedLeaveFrequency == option)">@option</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Allocate on Day</label>
+                <select name="AllocateOnDay" class="form-select">
+                    @foreach (var option in new[] { "Last Day", "Date of Joining", "First Day" })
+                    {
+                        <option value="@option" selected="@(Model.AllocateOnDay == option)">@option</option>
+                    }
+                </select>
+                <p class="text-muted small mb-0">The day of the month when leaves should be allocated</p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Rounding</label>
+                <select name="Rounding" class="form-select">
+                    @foreach (var option in new[] { "0.25", "0.5", "1.0" })
+                    {
+                        <option value="@option" selected="@(Model.Rounding?.ToString("0.##") == option)">@option</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    (function () {
+        function updateSection(checkbox) {
+            var section = document.getElementById(checkbox.dataset.target);
+            if (section) section.style.display = checkbox.checked ? "" : "none";
+        }
+
+        document.querySelectorAll(".toggle-section").forEach(function (checkbox) {
+            checkbox.addEventListener("change", function () { updateSection(checkbox); });
+            updateSection(checkbox);
+        });
+    })();
+</script>

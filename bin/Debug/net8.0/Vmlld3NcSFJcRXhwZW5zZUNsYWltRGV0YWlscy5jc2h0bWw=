@@ -1,0 +1,518 @@
+@model Erp_Aits.Models.ExpenseClaim
+
+@{
+    ViewBag.Title = "Expense Claim " + Model.ExpenseClaimCode;
+    bool isCancelled = string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool isDraft = !isCancelled
+        && !string.Equals(Model.Status, "Submitted", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(Model.Status, "Paid", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(Model.Status, "Unpaid", StringComparison.OrdinalIgnoreCase);
+    bool canCancel = !isDraft && !isCancelled && !string.IsNullOrWhiteSpace(Model.ErpNextId);
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var emp in ViewBag.Employees)
+        {
+            <option value="@emp.name"
+                    data-name="@emp.employee_name"
+                    data-department="@emp.department"
+                    data-company="@emp.company">
+                @emp.employee_name (@emp.name)
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="userList">
+    @if (ViewBag.Users != null)
+    {
+        foreach (var u in ViewBag.Users)
+        {
+            <option value="@u.name">@u.full_name (@u.name)</option>
+        }
+    }
+</datalist>
+
+<datalist id="departmentList">
+    @if (ViewBag.Departments != null)
+    {
+        foreach (var d in ViewBag.Departments)
+        {
+            <option value="@d.name">@d.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="companyList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.name"
+                    data-gstin="@c.gstin"
+                    data-payable="@c.default_payable_account"
+                    data-cost-center="@c.cost_center">
+                @c.name
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="companyGstinList">
+    @if (ViewBag.Companies != null)
+    {
+        foreach (var c in ViewBag.Companies)
+        {
+            <option value="@c.gstin">@c.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="expenseTypeList">
+    @if (ViewBag.ExpenseTypes != null)
+    {
+        foreach (var t in ViewBag.ExpenseTypes)
+        {
+            <option value="@t.name">@t.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="accountList">
+    @if (ViewBag.Accounts != null)
+    {
+        foreach (var acc in ViewBag.Accounts)
+        {
+            <option value="@acc.name">@acc.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="advanceList">
+    @if (ViewBag.EmployeeAdvances != null)
+    {
+        foreach (var adv in ViewBag.EmployeeAdvances)
+        {
+            <option value="@adv.name"
+                    data-posting-date="@adv.posting_date"
+                    data-advance-amount="@adv.advance_amount"
+                    data-paid-amount="@adv.paid_amount"
+                    data-claimed-amount="@adv.claimed_amount">
+                @adv.name
+            </option>
+        }
+    }
+</datalist>
+
+<datalist id="projectList">
+    @if (ViewBag.Projects != null)
+    {
+        foreach (var p in ViewBag.Projects)
+        {
+            <option value="@p.name">@(p.project_name ?? p.name)</option>
+        }
+    }
+</datalist>
+
+<datalist id="costCenterList">
+    @if (ViewBag.CostCenters != null)
+    {
+        foreach (var cc in ViewBag.CostCenters)
+        {
+            <option value="@cc.name">@cc.name</option>
+        }
+    }
+</datalist>
+
+<datalist id="taskList">
+    @if (ViewBag.Tasks != null)
+    {
+        foreach (var t in ViewBag.Tasks)
+        {
+            <option value="@t.name">@t.subject (@t.name)</option>
+        }
+    }
+</datalist>
+
+<form asp-controller="HR" asp-action="UpdateExpenseClaim" method="post" id="expenseClaimForm">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div class="text-muted small">Expense Claim</div>
+            <h4 class="mb-0">@Model.ExpenseClaimCode</h4>
+            <span class="badge @(isCancelled ? "bg-danger" : isDraft ? "bg-secondary" : "bg-success")">
+                @(isCancelled ? "Cancelled" : isDraft ? "Draft" : "Submitted")
+            </span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("ExpenseClaimList", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            @if (isDraft)
+            {
+                <button type="submit" class="btn btn-outline-dark btn-sm">Save</button>
+            }
+        </div>
+    </div>
+
+    <fieldset @(isDraft ? "" : "disabled")>
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Basic Information</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Series</label>
+                    <input asp-for="ExpenseClaimCode" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">ERPNext Ref</label>
+                    <input asp-for="ErpNextId" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Expense Approver</label>
+                    <input asp-for="ExpenseApprover" class="form-control" list="userList" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">From Employee</label>
+                    <input asp-for="Employee" id="Employee" class="form-control" list="employeeList" oninput="autoFillEmployeeData(this.value)" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Name</label>
+                    <input asp-for="EmployeeName" id="EmployeeName" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Department</label>
+                    <input asp-for="Department" id="Department" class="form-control" list="departmentList" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company</label>
+                    <input asp-for="Company" id="Company" class="form-control" list="companyList" oninput="autoFillCompanyData(this.value)" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company GSTIN</label>
+                    <input asp-for="CompanyGstin" id="CompanyGstin" class="form-control" list="companyGstinList" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Approval Status</label>
+                    <select asp-for="ApprovalStatus" class="form-select">
+                        <option value="Draft">Draft</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Expenses</h6>
+                @if (isDraft)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="addExpenseRow()">Add Row</button>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Expense Date</th>
+                            <th>Expense Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Sanctioned Amount</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesBody">
+                        @for (int i = 0; i < Model.Expenses.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><input type="date" name="Expenses[@i].ExpenseDate" value="@(Model.Expenses[i].ExpenseDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" /></td>
+                                <td><input name="Expenses[@i].ExpenseClaimType" value="@Model.Expenses[i].ExpenseClaimType" class="form-control form-control-sm" list="expenseTypeList" /></td>
+                                <td><input name="Expenses[@i].Description" value="@Model.Expenses[i].Description" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Expenses[@i].Amount" value="@Model.Expenses[i].Amount" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Expenses[@i].SanctionedAmount" value="@Model.Expenses[i].SanctionedAmount" class="form-control form-control-sm" /></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Taxes and Charges</h6>
+                @if (isDraft)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="addTaxRow()">Add Row</button>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Account Head</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="taxesBody">
+                        @for (int i = 0; i < Model.Taxes.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><input name="Taxes[@i].AccountHead" value="@Model.Taxes[i].AccountHead" class="form-control form-control-sm" list="accountList" /></td>
+                                <td><input type="number" step="0.01" name="Taxes[@i].Rate" value="@Model.Taxes[i].Rate" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Taxes[@i].Amount" value="@Model.Taxes[i].Amount" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Taxes[@i].Total" value="@Model.Taxes[i].Total" class="form-control form-control-sm" /></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Advances</h6>
+                @if (isDraft)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="addAdvanceRow()">Add Row</button>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Employee Advance</th>
+                            <th>Posting Date</th>
+                            <th>Advance Paid</th>
+                            <th>Unclaimed Amount</th>
+                            <th>Allocated Amount</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="advancesBody">
+                        @for (int i = 0; i < Model.Advances.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><input name="Advances[@i].EmployeeAdvance" value="@Model.Advances[i].EmployeeAdvance" class="form-control form-control-sm" list="advanceList" /></td>
+                                <td><input type="date" name="Advances[@i].PostingDate" value="@(Model.Advances[i].PostingDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Advances[@i].AdvancePaid" value="@Model.Advances[i].AdvancePaid" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Advances[@i].UnclaimedAmount" value="@Model.Advances[i].UnclaimedAmount" class="form-control form-control-sm" /></td>
+                                <td><input type="number" step="0.01" name="Advances[@i].AllocatedAmount" value="@Model.Advances[i].AllocatedAmount" class="form-control form-control-sm" /></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Accounting</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Posting Date</label>
+                    <input asp-for="PostingDate" type="date" class="form-control" value="@(Model.PostingDate?.ToString("yyyy-MM-dd"))" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Clearance Date</label>
+                    <input asp-for="ClearanceDate" type="date" class="form-control" value="@(Model.ClearanceDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Payable Account</label>
+                    <input asp-for="PayableAccount" id="PayableAccount" class="form-control" list="accountList" />
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-check">
+                        <input asp-for="IsPaid" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Is Paid</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Project</label>
+                    <input asp-for="Project" class="form-control" list="projectList" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Cost Center</label>
+                    <input asp-for="CostCenter" id="CostCenter" class="form-control" list="costCenterList" />
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Remark</label>
+                    <textarea asp-for="Remark" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4">
+            <h6 class="mb-3">More Info</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    <input asp-for="Status" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Task</label>
+                    <input asp-for="Task" class="form-control" list="taskList" />
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+<div class="d-flex justify-content-end gap-2 mt-3">
+    @if (isDraft && !string.IsNullOrWhiteSpace(Model.ErpNextId))
+    {
+        <form asp-controller="HR" asp-action="SubmitExpenseClaim" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-dark btn-sm" onclick="return confirm('Submit this Expense Claim in ERPNext and HRMS?');">Submit</button>
+        </form>
+    }
+
+    @if (canCancel)
+    {
+        <form asp-controller="HR" asp-action="CancelExpenseClaim" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this Expense Claim in ERPNext and HRMS?');">Cancel</button>
+        </form>
+    }
+</div>
+
+<script>
+    let expenseIdx = @Model.Expenses.Count;
+    let taxIdx = @Model.Taxes.Count;
+    let advanceIdx = @Model.Advances.Count;
+
+    function esc(value) {
+        if (value === null || value === undefined) return '';
+        return String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    }
+
+    function today() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    function findOption(listId, value) {
+        return document.querySelector(`#${listId} option[value="${CSS.escape(value)}"]`);
+    }
+
+    function autoFillEmployeeData(employee) {
+        const opt = findOption('employeeList', employee);
+        if (!opt) return;
+
+        const empName = opt.getAttribute('data-name') || '';
+        const department = opt.getAttribute('data-department') || '';
+        const company = opt.getAttribute('data-company') || '';
+
+        if (empName) document.getElementById('EmployeeName').value = empName;
+        if (department) document.getElementById('Department').value = department;
+        if (company) {
+            document.getElementById('Company').value = company;
+            autoFillCompanyData(company);
+        }
+    }
+
+    function autoFillCompanyData(company) {
+        const opt = findOption('companyList', company);
+        if (!opt) return;
+
+        const gstin = opt.getAttribute('data-gstin') || '';
+        const payable = opt.getAttribute('data-payable') || '';
+        const costCenter = opt.getAttribute('data-cost-center') || '';
+
+        if (gstin) document.getElementById('CompanyGstin').value = gstin;
+        if (payable) document.getElementById('PayableAccount').value = payable;
+        if (costCenter) document.getElementById('CostCenter').value = costCenter;
+    }
+
+    function addExpenseRow() {
+        const i = expenseIdx++;
+        document.getElementById('expensesBody').insertAdjacentHTML('beforeend', `
+            <tr>
+                <td>${i + 1}</td>
+                <td><input type="date" name="Expenses[${i}].ExpenseDate" value="${today()}" class="form-control form-control-sm" /></td>
+                <td><input name="Expenses[${i}].ExpenseClaimType" class="form-control form-control-sm" list="expenseTypeList" /></td>
+                <td><input name="Expenses[${i}].Description" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Expenses[${i}].Amount" value="0.00" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Expenses[${i}].SanctionedAmount" value="0.00" class="form-control form-control-sm" /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+            </tr>`);
+    }
+
+    function addTaxRow() {
+        const i = taxIdx++;
+        document.getElementById('taxesBody').insertAdjacentHTML('beforeend', `
+            <tr>
+                <td>${i + 1}</td>
+                <td><input name="Taxes[${i}].AccountHead" class="form-control form-control-sm" list="accountList" /></td>
+                <td><input type="number" step="0.01" name="Taxes[${i}].Rate" value="0.00" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Taxes[${i}].Amount" value="0.00" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Taxes[${i}].Total" value="0.00" class="form-control form-control-sm" /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+            </tr>`);
+    }
+
+    function addAdvanceRow() {
+        const i = advanceIdx++;
+        document.getElementById('advancesBody').insertAdjacentHTML('beforeend', `
+            <tr>
+                <td>${i + 1}</td>
+                <td><input name="Advances[${i}].EmployeeAdvance" class="form-control form-control-sm" list="advanceList" /></td>
+                <td><input type="date" name="Advances[${i}].PostingDate" value="${today()}" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Advances[${i}].AdvancePaid" value="0.00" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Advances[${i}].UnclaimedAmount" value="0.00" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Advances[${i}].AllocatedAmount" value="0.00" class="form-control form-control-sm" /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+            </tr>`);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!document.getElementById('expensesBody').children.length && @isDraft.ToString().ToLower()) {
+            addExpenseRow();
+        }
+    });
+</script>

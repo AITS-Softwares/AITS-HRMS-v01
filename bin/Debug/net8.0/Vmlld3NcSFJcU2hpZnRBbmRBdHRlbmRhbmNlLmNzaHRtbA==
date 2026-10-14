@@ -1,0 +1,70 @@
+﻿@{
+    ViewBag.Title = "Shift & Attendance";
+}
+
+<h4 class="mb-4">Shift &amp; Attendance</h4>
+
+<h5 class="mb-3">Your Shortcuts</h5>
+<div class="d-flex flex-wrap gap-4 mb-4">
+    <a href="@Url.Action("EmployeeCheckin", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Employee Checkin</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.EmployeeCheckinCount</span>
+    </a>
+    <a href="@Url.Action("Attendance", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Attendance</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.AttendanceCount</span>
+    </a>
+    <a href="@Url.Action("ShiftRequest", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+        <span>Shift Request</span>
+        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.ShiftRequestPendingCount Pending</span>
+    </a>
+    <a href="@Url.Action("Dashboard", "HR")" class="text-decoration-none text-dark">
+        Dashboard
+    </a>
+    <a href="@Url.Action("Roster", "HR")" class="text-decoration-none text-dark">
+        Roster
+    </a>
+</div>
+
+<h5 class="mb-3">Masters &amp; Reports</h5>
+<div class="row g-4">
+    <div class="col-md-3">
+        <h6>Shifts</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("ShiftType", "HR")">Shift Type</a></li>
+            <li><a href="@Url.Action("ShiftAssignment", "HR")">Shift Assignment</a></li>
+            <li><a href="@Url.Action("ShiftSchedule", "HR")">Shift Schedule</a></li>
+            @* <li><a href="@Url.Action("ShiftScheduleAssignment", "HR")">Shift Schedule Assignment</a></li> *@
+            <a href="/HR/ShiftScheduleAssignment">Shift Schedule Assignment</a>
+            <li><a href="@Url.Action("ShiftRequest", "HR")">Shift Request</a></li>
+            <li><a href="@Url.Action("ShiftAssignmentTool", "HR")">Shift Assignment Tool</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Attendance</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("Attendance", "HR")">Attendance</a></li>
+            <li><a href="@Url.Action("AttendanceRequest", "HR")">Attendance Request</a></li>
+            <li><a href="@Url.Action("EmployeeCheckin", "HR")">Employee Checkin</a></li>
+            <li><a href="@Url.Action("EmployeeAttendanceTool", "HR")">Employee Attendance Tool</a></li>
+            <li><a href="@Url.Action("UploadAttendance", "HR")">Upload Attendance</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Time</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("Timesheet", "HR")">Timesheet</a></li>
+            <li><a href="@Url.Action("ActivityType", "HR")">Activity Type</a></li>
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h6>Reports</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("MonthlyAttendanceSheet", "HR")">Monthly Attendance Sheet</a></li>
+            <li><a href="@Url.Action("ShiftAttendance", "HR")">Shift Attendance</a></li>
+            <li><a href="@Url.Action("EmployeeHoursUtilization", "HR")">Employee Hours Utilization Based On Time...</a></li>
+            <li><a href="@Url.Action("ProjectProfitability", "HR")">Project Profitability</a></li>
+            <li><a href="@Url.Action("EmployeesWorkingOnHoliday", "HR")">Employees working on a holiday</a></li>
+        </ul>
+    </div>
+</div>

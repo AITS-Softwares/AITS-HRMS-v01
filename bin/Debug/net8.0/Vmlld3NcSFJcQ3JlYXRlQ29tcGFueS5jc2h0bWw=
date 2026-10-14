@@ -1,0 +1,884 @@
+@model Erp_Aits.Models.ErpNextCompanyFormViewModel
+@{
+    ViewBag.Title = Model.IsEdit ? "Company Details" : "New Company";
+    string formAction = Model.IsEdit ? "UpdateCompany" : "CreateCompany";
+}
+
+@functions {
+    private IEnumerable<string> OptionsWithCurrent(IEnumerable<string> options, string? current, params string[] fixedOptions)
+    {
+        var values = new List<string>();
+        if (fixedOptions != null)
+        {
+            values.AddRange(fixedOptions);
+        }
+
+        values.AddRange(options ?? Enumerable.Empty<string>());
+
+        if (!string.IsNullOrWhiteSpace(current))
+        {
+            values.Add(current);
+        }
+
+        return values
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value);
+    }
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: radial-gradient(circle at top left, #f0fdfa 0%, #eef2f3 45%, #f4f7f6 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color-scheme: light;
+    }
+
+    .company-form-wrapper {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 16px 60px;
+    }
+
+    .accent-bar {
+        height: 5px;
+        width: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #0f766e 0%, #14b8a6 45%, #f59e0b 100%);
+        margin-bottom: 22px;
+    }
+
+    .company-panel {
+        background: #ffffff;
+        border: 1px solid #e6f5f3;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(20, 40, 40, 0.08);
+        overflow: hidden;
+    }
+
+    .company-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 24px;
+        background: linear-gradient(120deg, #0f766e 0%, #0d9488 55%, #14b8a6 100%);
+    }
+
+    .company-header h4 {
+        color: #ffffff;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .header-subtitle {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.9px;
+        text-transform: uppercase;
+    }
+
+    .btn-save {
+        background: #ffffff;
+        color: #0f766e;
+        border: 0;
+        border-radius: 9px;
+        padding: 10px 24px;
+        font-weight: 800;
+    }
+
+    .btn-save:hover {
+        background: #f59e0b;
+        color: #ffffff;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0 20px;
+        background: #ffffff;
+    }
+
+    .tab-button {
+        border: 0;
+        background: transparent;
+        color: #475569;
+        padding: 15px 14px 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+    }
+
+    .tab-button.active {
+        color: #111827;
+        border-bottom-color: #111827;
+    }
+
+    .tab-pane {
+        display: none;
+        padding: 24px;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    .section {
+        border-bottom: 1px solid #e8f1ef;
+        padding-bottom: 22px;
+        margin-bottom: 22px;
+    }
+
+    .section:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+    }
+
+    .section h5 {
+        color: #0f172a;
+        font-weight: 800;
+        font-size: 16px;
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        font-size: 13px;
+    }
+
+    .form-control, .form-select {
+        border: 1.5px solid #d9ece9;
+        border-radius: 8px;
+        min-height: 38px;
+        font-size: 14px;
+        background-color: #ffffff;
+        color: #0f172a;
+        color-scheme: light;
+    }
+
+    .form-select option {
+        background: #ffffff;
+        color: #0f172a;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.14);
+    }
+
+    .form-check-input:checked {
+        background-color: #0f766e;
+        border-color: #0f766e;
+    }
+
+    .help-text {
+        color: #64748b;
+        font-size: 13px;
+        margin: 8px 0 12px;
+    }
+
+    .grid-table {
+        border: 1px solid #d9ece9;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .grid-table table {
+        margin: 0;
+    }
+
+    .grid-table thead th {
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .btn-soft {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 7px 13px;
+        font-weight: 700;
+    }
+
+    .danger-row {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 24px 24px;
+    }
+
+    .missing-panel {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        color: #64748b;
+        padding: 24px;
+    }
+
+    @@media (max-width: 768px) {
+        .company-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="company-form-wrapper">
+    <div class="accent-bar"></div>
+
+    @if (TempData["CompanySuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["CompanySuccess"]</div>
+    }
+    @if (TempData["CompanyError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["CompanyError"]</div>
+    }
+
+    <datalist id="companyOptions">
+        @foreach (var option in Model.Companies)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="countryOptions">
+        @foreach (var option in Model.Countries)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="currencyOptions">
+        @foreach (var option in Model.Currencies)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="letterHeadOptions">
+        @foreach (var option in Model.LetterHeads)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="holidayListOptions">
+        @foreach (var option in Model.HolidayLists)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="accountOptions">
+        @foreach (var option in Model.Accounts)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="paymentTermsOptions">
+        @foreach (var option in Model.PaymentTermsTemplates)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="financeBookOptions">
+        @foreach (var option in Model.FinanceBooks)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="roleOptions">
+        @foreach (var option in Model.Roles)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="warehouseOptions">
+        @foreach (var option in Model.Warehouses)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="contactOptions">
+        @foreach (var option in Model.Contacts)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="salaryComponentOptions">
+        @foreach (var option in Model.SalaryComponents)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+    <datalist id="chartAccountOptions">
+        @foreach (var option in Model.ChartOfAccountTemplates)
+        {
+            <option value="@option"></option>
+        }
+    </datalist>
+
+    <form method="post" action="@Url.Action(formAction, "Company")">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="IsEdit" />
+        <input type="hidden" asp-for="OriginalName" />
+
+        <div class="company-panel">
+            <div class="company-header">
+                <div>
+                    <div class="header-subtitle">HR / Master Data Sync</div>
+                    <h4>@(Model.IsEdit ? "Company Details" : "New Company")</h4>
+                </div>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+
+            <div class="tabs" role="tablist">
+                <button class="tab-button active" type="button" data-tab="details">Details</button>
+                <button class="tab-button" type="button" data-tab="accounts">Accounts</button>
+                <button class="tab-button" type="button" data-tab="buying">Buying and Selling</button>
+                <button class="tab-button" type="button" data-tab="hr">HR & Payroll</button>
+                <button class="tab-button" type="button" data-tab="stock">Stock and Manufacturing</button>
+                <button class="tab-button" type="button" data-tab="print">Print Options</button>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger px-4 pt-3"></div>
+
+            <div class="tab-pane active" id="tab-details">
+                <div class="section">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Company *</label>
+                            <input asp-for="Company" class="form-control" required />
+                            <span asp-validation-for="Company" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Letter Head</label>
+                            <select asp-for="DefaultLetterHead" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.LetterHeads, Model.DefaultLetterHead))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Abbr *</label>
+                            <input asp-for="Abbr" class="form-control" required />
+                            <span asp-validation-for="Abbr" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tax ID</label>
+                            <input asp-for="TaxId" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Currency *</label>
+                            <select asp-for="DefaultCurrency" class="form-select" required>
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Currencies, Model.DefaultCurrency))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                            <span asp-validation-for="DefaultCurrency" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Domain</label>
+                            <input asp-for="Domain" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Country *</label>
+                            <select asp-for="Country" class="form-select" required>
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Countries, Model.Country, "India"))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Date of Establishment</label>
+                            <input asp-for="DateOfEstablishment" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default GST Rate</label>
+                            <input asp-for="DefaultGstRate" class="form-control" type="number" step="0.01" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Parent Company</label>
+                            <select asp-for="ParentCompany" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Companies, Model.ParentCompany))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                <input asp-for="IsGroup" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label">Is Group</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Holiday List</label>
+                            <select asp-for="DefaultHolidayList" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.HolidayLists, Model.DefaultHolidayList))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Tax Details</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">GSTIN / UIN</label>
+                            <input asp-for="GstinUin" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">GST Category *</label>
+                            <select asp-for="GstCategory" class="form-select" required>
+                                <option>Unregistered</option>
+                                <option>Registered Regular</option>
+                                <option>Registered Composition</option>
+                                <option>SEZ</option>
+                                <option>Overseas</option>
+                                <option>Consumer</option>
+                                <option>Deemed Export</option>
+                                <option>UIN Holders</option>
+                            </select>
+                            <span asp-validation-for="GstCategory" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">PAN</label>
+                            <input asp-for="Pan" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Registration Details</h5>
+                    <textarea asp-for="RegistrationDetailsText" class="form-control" rows="6"></textarea>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="tab-accounts">
+                <div class="section">
+                    <h5>Chart of Accounts</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Create Chart Of Accounts Based On</label>
+                            <select asp-for="CreateChartOfAccountsBasedOn" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.ChartOfAccountTemplates, Model.CreateChartOfAccountsBasedOn, "Standard Template", "Existing Company"))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Default Accounts</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Default Customs Duty Expense Account</label>
+                            <select asp-for="DefaultCustomsDutyExpenseAccount" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Accounts, Model.DefaultCustomsDutyExpenseAccount))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Payment Terms Template</label>
+                            <select asp-for="DefaultPaymentTermsTemplate" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.PaymentTermsTemplates, Model.DefaultPaymentTermsTemplate))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default GST Expense Account</label>
+                            <select asp-for="DefaultGstExpenseAccount" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Accounts, Model.DefaultGstExpenseAccount))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Finance Book</label>
+                            <select asp-for="DefaultFinanceBook" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.FinanceBooks, Model.DefaultFinanceBook))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 offset-md-6">
+                            <label class="form-label">Default Customs Duty Payable Account</label>
+                            <select asp-for="DefaultCustomsDutyPayableAccount" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Accounts, Model.DefaultCustomsDutyPayableAccount))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Advance Payments</h5>
+                    <div class="form-check">
+                        <input asp-for="BookAdvancePaymentsInSeparatePartyAccount" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Book Advance Payments in Separate Party Account</label>
+                    </div>
+                    <div class="help-text">Enabling this option will allow you to record advances in separate party accounts.</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Reconciliation Takes Effect On</label>
+                            <select asp-for="ReconciliationTakesEffectOn" class="form-select">
+                                <option>Oldest Of Invoice Or Advance</option>
+                                <option>Advance Payment Date</option>
+                                <option>Reconciliation Date</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Exchange Rate Revaluation Settings</h5>
+                    <div class="form-check mb-3">
+                        <input asp-for="AutoCreateExchangeRateRevaluation" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Auto Create Exchange Rate Revaluation</label>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Frequency</label>
+                            <select asp-for="Frequency" class="form-select">
+                                <option>Daily</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input asp-for="SubmitErrJournals" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Submit ERR Journals?</label>
+                    </div>
+                    <div class="help-text">Upon enabling this, the JV will be submitted for a different exchange rate.</div>
+                </div>
+
+                <div class="section">
+                    <h5>Budget Detail</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Exception Budget Approver Role</label>
+                            <select asp-for="ExceptionBudgetApproverRole" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Roles, Model.ExceptionBudgetApproverRole))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Fixed Asset Defaults</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Series for Asset Depreciation Entry (Journal Entry)</label>
+                            <input asp-for="SeriesForAssetDepreciationEntry" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Expenses Included In Asset Valuation</label>
+                            <select asp-for="ExpensesIncludedInAssetValuation" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Accounts, Model.ExpensesIncludedInAssetValuation))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="tab-buying">
+                <div class="section">
+                    <h5>Buying & Selling Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Default Buying Terms</label>
+                            <select asp-for="DefaultBuyingTerms" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.TermsAndConditions, Model.DefaultBuyingTerms))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Selling Terms</label>
+                            <select asp-for="DefaultSellingTerms" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.TermsAndConditions, Model.DefaultSellingTerms))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Monthly Sales Target</label>
+                            <input asp-for="MonthlySalesTarget" class="form-control" type="number" step="0.01" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Default Sales Contact</label>
+                            <select asp-for="DefaultSalesContact" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Contacts, Model.DefaultSalesContact))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 offset-md-6">
+                            <label class="form-label">Default Warehouse for Sales Return</label>
+                            <select asp-for="DefaultWarehouseForSalesReturn" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Warehouses, Model.DefaultWarehouseForSalesReturn))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="tab-hr">
+                <div class="section">
+                    <h5>HR & Payroll Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Default Employee Advance Account</label>
+                            <select asp-for="DefaultEmployeeAdvanceAccount" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Accounts, Model.DefaultEmployeeAdvanceAccount))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>HRA Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Basic Component</label>
+                            <select asp-for="BasicComponent" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.SalaryComponents, Model.BasicComponent))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Arrear Component</label>
+                            <select asp-for="ArrearComponent" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.SalaryComponents, Model.ArrearComponent))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">HRA Component</label>
+                            <select asp-for="HraComponent" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.SalaryComponents, Model.HraComponent))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="tab-stock">
+                <div class="section">
+                    <h5>Manufacturing</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Default Operating Cost Account</label>
+                            <select asp-for="DefaultOperatingCostAccount" class="form-select">
+                                <option value="">Select</option>
+                                @foreach (var option in OptionsWithCurrent(Model.Accounts, Model.DefaultOperatingCostAccount))
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="tab-print">
+                <div class="section">
+                    <div class="form-check">
+                        <input asp-for="EnablePhysicalSignature" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Enable Physical Signature</label>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h5>Bank Details</h5>
+                    <div class="grid-table">
+                        <table class="table align-middle" id="bankDetailsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:44px"><input type="checkbox" disabled /></th>
+                                    <th style="width:70px">No.</th>
+                                    <th>Print Label</th>
+                                    <th>Print Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var i = 0; i < Model.BankDetails.Count; i++)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" disabled /></td>
+                                        <td class="row-number">@(i + 1)</td>
+                                        <td>
+                                            <select class="form-select" name="BankDetails[@i].PrintLabel">
+                                                <option value="">Select</option>
+                                                @foreach (var option in OptionsWithCurrent(Model.PrintLabelOptions, Model.BankDetails[i].PrintLabel))
+                                                {
+                                                    <option value="@option" selected="@(option.Equals(Model.BankDetails[i].PrintLabel, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@option</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td><input class="form-control" name="BankDetails[@i].PrintValue" value="@Model.BankDetails[i].PrintValue" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn-soft" onclick="addPrintRow('bankDetailsTable', 'BankDetails')">Add Row</button>
+                </div>
+
+                <div class="section">
+                    <h5>Registration Details</h5>
+                    <div class="grid-table">
+                        <table class="table align-middle" id="registrationDetailsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:44px"><input type="checkbox" disabled /></th>
+                                    <th style="width:70px">No.</th>
+                                    <th>Print Label</th>
+                                    <th>Print Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var i = 0; i < Model.RegistrationDetails.Count; i++)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" disabled /></td>
+                                        <td class="row-number">@(i + 1)</td>
+                                        <td>
+                                            <select class="form-select" name="RegistrationDetails[@i].PrintLabel">
+                                                <option value="">Select</option>
+                                                @foreach (var option in OptionsWithCurrent(Model.PrintLabelOptions, Model.RegistrationDetails[i].PrintLabel))
+                                                {
+                                                    <option value="@option" selected="@(option.Equals(Model.RegistrationDetails[i].PrintLabel, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@option</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td><input class="form-control" name="RegistrationDetails[@i].PrintValue" value="@Model.RegistrationDetails[i].PrintValue" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn-soft" onclick="addPrintRow('registrationDetailsTable', 'RegistrationDetails')">Add Row</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.IsEdit)
+    {
+        <div class="danger-row">
+            <form method="post" action="@Url.Action("DeleteCompany", "Company")" onsubmit="return confirm('Delete this company from ERPNext? ERPNext will stop this if the company is already used.');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="name" value="@Model.OriginalName" />
+                <button type="submit" class="btn btn-outline-danger">Delete Company</button>
+            </form>
+        </div>
+    }
+</div>
+
+<script>
+    var printLabelOptions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(OptionsWithCurrent(Model.PrintLabelOptions, string.Empty)));
+
+    document.querySelectorAll('.tab-button').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var tabName = button.getAttribute('data-tab');
+            document.querySelectorAll('.tab-button').forEach(function (item) { item.classList.remove('active'); });
+            document.querySelectorAll('.tab-pane').forEach(function (item) { item.classList.remove('active'); });
+            button.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        });
+    });
+
+    function addPrintRow(tableId, prefix) {
+        var tbody = document.querySelector('#' + tableId + ' tbody');
+        var index = tbody.querySelectorAll('tr').length;
+        var row = document.createElement('tr');
+        var optionsHtml = '<option value="">Select</option>' + printLabelOptions.map(function (option) {
+            return '<option value="' + escapeHtml(option) + '">' + escapeHtml(option) + '</option>';
+        }).join('');
+
+        row.innerHTML =
+            '<td><input type="checkbox" disabled /></td>' +
+            '<td class="row-number">' + (index + 1) + '</td>' +
+            '<td><select class="form-select" name="' + prefix + '[' + index + '].PrintLabel">' + optionsHtml + '</select></td>' +
+            '<td><input class="form-control" name="' + prefix + '[' + index + '].PrintValue" /></td>';
+        tbody.appendChild(row);
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+</script>

@@ -1,0 +1,1256 @@
+﻿@model Erp_Aits.Models.EmployeePerformanceFeedback
+
+@{
+    ViewBag.Title = "New Employee Performance Feedback";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">
+        <strong>ERPNext Validation:</strong>
+        @TempData["ErpNextError"]
+    </div>
+}
+
+<style>
+    .feedback-star-rating {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        min-height: 34px;
+    }
+
+    .feedback-star {
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        color: #d1d5db;
+        user-select: none;
+    }
+
+        .feedback-star.active {
+            color: #f4b400;
+        }
+</style>
+
+<form asp-action="CreateEmployeePerformanceFeedback"
+      asp-controller="HR"
+      method="post"
+      id="feedbackForm">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h4 class="mb-0 d-inline">
+                New Employee Performance Feedback
+            </h4>
+
+            <span class="badge bg-warning-subtle text-warning ms-2">
+                Not Saved
+            </span>
+        </div>
+
+        <button type="submit"
+                class="btn btn-dark btn-sm px-4">
+            Save
+        </button>
+
+    </div>
+
+
+    <ul class="nav nav-tabs mb-3">
+
+        <li class="nav-item">
+            <a class="nav-link active"
+               data-bs-toggle="tab"
+               href="#employeeDetailsTab">
+                Employee Details
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#feedbackTab">
+                Feedback
+            </a>
+        </li>
+
+    </ul>
+
+
+    <div class="tab-content">
+
+        <!-- ===================================================== -->
+        <!-- EMPLOYEE DETAILS -->
+        <!-- ===================================================== -->
+
+        <div class="tab-pane fade show active"
+             id="employeeDetailsTab">
+
+            <div class="card border rounded-3 p-4 mb-3">
+
+                <div class="row g-3">
+
+                    <!-- EMPLOYEE -->
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            For Employee
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select asp-for="ForEmployee"
+                                id="ForEmployee"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Employee --
+                            </option>
+
+                            @if (ViewBag.Employees != null)
+                            {
+                                foreach (var emp in ViewBag.Employees)
+                                {
+                                    <option value="@emp.name"
+                                            data-name="@emp.employee_name"
+                                            data-company="@emp.company">
+
+                                        @emp.name - @emp.employee_name
+
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- REVIEWER -->
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Reviewer
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select asp-for="Reviewer"
+                                id="Reviewer"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Reviewer --
+                            </option>
+
+                            @if (ViewBag.Reviewers != null)
+                            {
+                                foreach (var reviewer in ViewBag.Reviewers)
+                                {
+                                    <option value="@reviewer.name"
+                                            data-name="@reviewer.employee_name">
+
+                                        @reviewer.name - @reviewer.employee_name
+
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ADDED ON -->
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Added On
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="AddedOn"
+                               type="datetime-local"
+                               class="form-control"
+                               value="@Model.AddedOn.ToString("yyyy-MM-ddTHH:mm:ss")"
+                               required />
+
+                        <small class="text-muted">
+                            Asia/Kolkata
+                        </small>
+
+                    </div>
+
+
+                    <!-- EMPLOYEE NAME -->
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Employee Name
+                        </label>
+
+                        <input asp-for="EmployeeName"
+                               id="EmployeeName"
+                               class="form-control bg-light"
+                               readonly />
+
+                    </div>
+
+
+                    <!-- REVIEWER NAME -->
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Reviewer Name
+                        </label>
+
+                        <input asp-for="ReviewerName"
+                               id="ReviewerName"
+                               class="form-control bg-light"
+                               readonly />
+
+                    </div>
+
+
+                    <!-- COMPANY -->
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Company
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="Company"
+                               id="Company"
+                               class="form-control bg-light"
+                               readonly
+                               required />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- APPRAISAL + RATINGS -->
+            <!-- hidden until employee selected -->
+            <!-- ================================================= -->
+
+            <div id="appraisalSection"
+                 class="card border rounded-3 p-4"
+                 style="display:none;">
+
+                <div class="row g-3 mb-4">
+
+                    <!-- APPRAISAL DROPDOWN -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Appraisal
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select asp-for="Appraisal"
+                                id="Appraisal"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Appraisal --
+                            </option>
+
+                            @if (ViewBag.Appraisals != null)
+                            {
+                                foreach (var appraisal in ViewBag.Appraisals)
+                                {
+                                    <option value="@appraisal.name"
+                                            data-employee="@appraisal.employee">
+
+                                        @appraisal.name
+
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FEEDBACK RATINGS -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                    <h6 class="mb-0">
+                        Feedback Ratings
+                    </h6>
+
+                    <button type="button"
+                            id="btnAddFeedbackRating"
+                            class="btn btn-sm btn-outline-secondary">
+                        + Add Row
+                    </button>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered align-middle"
+                           id="feedbackRatingsTable">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th style="width:60px;">
+                                    No.
+                                </th>
+
+                                <th>
+                                    Criteria
+                                    <span class="text-danger">*</span>
+                                </th>
+
+                                <th style="width:200px;">
+                                    Weightage (%)
+                                    <span class="text-danger">*</span>
+                                </th>
+
+                                <th style="width:260px;">
+                                    Rating
+                                </th>
+
+                                <th style="width:70px;">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="feedbackRatingsBody">
+
+                            <tr id="noRatingsRow">
+
+                                <td colspan="5"
+                                    class="text-center text-muted py-3">
+
+                                    Select Appraisal or click Add Row.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- TOTAL SCORE -->
+                <div class="row mt-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Total Score
+                        </label>
+
+                        <input asp-for="TotalScore"
+                               id="TotalScore"
+                               class="form-control bg-light"
+                               value="0"
+                               readonly />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- FEEDBACK TAB -->
+        <!-- ===================================================== -->
+
+        <div class="tab-pane fade"
+             id="feedbackTab">
+
+            <div class="card border rounded-3 p-4">
+
+                <label class="form-label">
+                    Feedback
+                    <span class="text-danger">*</span>
+                </label>
+
+                <textarea asp-for="Feedback"
+                          class="form-control"
+                          rows="8"
+                          required></textarea>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+<!-- =========================================================== -->
+<!-- HIDDEN CRITERIA MASTER -->
+<!-- =========================================================== -->
+
+<select id="criteriaMaster"
+        style="display:none;">
+
+    <option value="">
+        -- Select Criteria --
+    </option>
+
+    @if (ViewBag.FeedbackCriteria != null)
+    {
+        foreach (var item in ViewBag.FeedbackCriteria)
+        {
+            <option value="@item.criteria"
+                    data-weightage="@item.per_weightage">
+
+                @item.criteria
+
+            </option>
+        }
+    }
+
+</select>
+
+
+@section Scripts
+{
+    <script>
+
+        let ratingIndex = 0;
+
+
+        // ============================================================
+        // CRITERIA OPTIONS
+        // ============================================================
+
+        function getCriteriaOptions() {
+
+            const source =
+                document.getElementById(
+                    "criteriaMaster"
+                );
+
+            return source
+                ? source.innerHTML
+                : '<option value="">-- Select Criteria --</option>';
+        }
+
+
+        // ============================================================
+        // EMPLOYEE CHANGE
+        // ============================================================
+
+        document.getElementById(
+            "ForEmployee"
+        ).addEventListener(
+            "change",
+            function () {
+
+                const employee =
+                    this.value;
+
+
+                const selected =
+                    this.options[
+                        this.selectedIndex
+                    ];
+
+
+                document.getElementById(
+                    "EmployeeName"
+                ).value =
+                    selected
+                        ? selected.getAttribute(
+                            "data-name"
+                        ) || ""
+                        : "";
+
+
+                document.getElementById(
+                    "Company"
+                ).value =
+                    selected
+                        ? selected.getAttribute(
+                            "data-company"
+                        ) || ""
+                        : "";
+
+
+                // Show Appraisal section only after Employee selection
+                document.getElementById(
+                    "appraisalSection"
+                ).style.display =
+                    employee
+                        ? "block"
+                        : "none";
+
+
+                // Filter appraisal dropdown to this employee
+                const appraisal =
+                    document.getElementById(
+                        "Appraisal"
+                    );
+
+
+                Array.from(
+                    appraisal.options
+                ).forEach(
+                    function (option) {
+
+                        if (!option.value) {
+
+                            option.hidden = false;
+
+                            return;
+                        }
+
+
+                        const ownerEmployee =
+                            option.getAttribute(
+                                "data-employee"
+                            );
+
+
+                        option.hidden =
+                            ownerEmployee !== employee;
+                    }
+                );
+
+
+                appraisal.value = "";
+
+
+                clearRatingRows();
+
+
+                // Employee cannot review himself
+                const reviewer =
+                    document.getElementById(
+                        "Reviewer"
+                    );
+
+
+                if (
+                    reviewer.value &&
+                    reviewer.value === employee
+                )
+                {
+                    reviewer.value = "";
+
+                    document.getElementById(
+                        "ReviewerName"
+                    ).value = "";
+                }
+            }
+        );
+
+
+        // ============================================================
+        // REVIEWER
+        // ============================================================
+
+        document.getElementById(
+            "Reviewer"
+        ).addEventListener(
+            "change",
+            function () {
+
+                const employee =
+                    document.getElementById(
+                        "ForEmployee"
+                    ).value;
+
+
+                if (
+                    employee &&
+                    employee === this.value
+                )
+                {
+                    alert(
+                        "Employees cannot give feedback to themselves."
+                    );
+
+                    this.value = "";
+
+                    document.getElementById(
+                        "ReviewerName"
+                    ).value = "";
+
+                    return;
+                }
+
+
+                const selected =
+                    this.options[
+                        this.selectedIndex
+                    ];
+
+
+                document.getElementById(
+                    "ReviewerName"
+                ).value =
+                    selected
+                        ? selected.getAttribute(
+                            "data-name"
+                        ) || ""
+                        : "";
+            }
+        );
+
+
+        // ============================================================
+        // APPRAISAL SELECTED
+        //
+        // ERP criteria automatically loaded from Appraisal Template.
+        // ============================================================
+
+        document.getElementById(
+            "Appraisal"
+        ).addEventListener(
+            "change",
+            async function () {
+
+                const appraisal =
+                    this.value;
+
+
+                clearRatingRows();
+
+
+                if (!appraisal)
+                    return;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            '@Url.Action("GetEmployeePerformanceFeedbackAppraisalDetails", "HR")'
+                            + "?appraisal="
+                            + encodeURIComponent(
+                                appraisal
+                            )
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!data ||
+                        data.success !== true)
+                    {
+                        alert(
+                            data &&
+                            data.message
+                                ? data.message
+                                : "Unable to load Appraisal."
+                        );
+
+                        return;
+                    }
+
+
+                    const employee =
+                        document.getElementById(
+                            "ForEmployee"
+                        ).value;
+
+
+                    if (
+                        data.employee &&
+                        data.employee !== employee
+                    )
+                    {
+                        alert(
+                            "Selected Appraisal does not belong to the selected Employee."
+                        );
+
+                        this.value = "";
+
+                        return;
+                    }
+
+
+                    if (
+                        Array.isArray(
+                            data.ratings
+                        )
+                    )
+                    {
+                        data.ratings.forEach(
+                            function (rating) {
+
+                                addFeedbackRatingRow(
+                                    rating.criteria || "",
+                                    rating.perWeightage || 0,
+                                    0
+                                );
+                            }
+                        );
+                    }
+
+                }
+                catch (error)
+                {
+                    console.error(error);
+
+                    alert(
+                        "Unable to load Feedback Ratings."
+                    );
+                }
+            }
+        );
+
+
+        // ============================================================
+        // ADD ROW
+        // ============================================================
+
+        document.getElementById(
+            "btnAddFeedbackRating"
+        ).addEventListener(
+            "click",
+            function () {
+
+                addFeedbackRatingRow(
+                    "",
+                    0,
+                    0
+                );
+            }
+        );
+
+
+        function addFeedbackRatingRow(
+            criteria = "",
+            weightage = 0,
+            rating = 0)
+        {
+            const tbody =
+                document.getElementById(
+                    "feedbackRatingsBody"
+                );
+
+
+            const noData =
+                document.getElementById(
+                    "noRatingsRow"
+                );
+
+
+            if (noData)
+                noData.remove();
+
+
+            const index =
+                ratingIndex++;
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td class="rating-row-number">
+                    ${index + 1}
+                </td>
+
+
+                <td>
+
+                    <select name="FeedbackRatings[${index}].Criteria"
+                            class="form-select form-select-sm criteria-select"
+                            required>
+
+                        ${getCriteriaOptions()}
+
+                    </select>
+
+                </td>
+
+
+                <td>
+
+                    <input type="number"
+                           name="FeedbackRatings[${index}].Weightage"
+                           class="form-control form-control-sm weightage-input"
+                           value="${weightage}"
+                           min="0"
+                           max="100"
+                           step="0.01"
+                           required />
+
+                </td>
+
+
+                <td>
+
+                    <div class="feedback-star-rating">
+
+                        <input type="hidden"
+                               name="FeedbackRatings[${index}].Rating"
+                               class="rating-value"
+                               value="${rating}" />
+
+                        <span class="feedback-star"
+                              data-star="1">
+                            ☆
+                        </span>
+
+                        <span class="feedback-star"
+                              data-star="2">
+                            ☆
+                        </span>
+
+                        <span class="feedback-star"
+                              data-star="3">
+                            ☆
+                        </span>
+
+                        <span class="feedback-star"
+                              data-star="4">
+                            ☆
+                        </span>
+
+                        <span class="feedback-star"
+                              data-star="5">
+                            ☆
+                        </span>
+
+                    </div>
+
+                </td>
+
+
+                <td class="text-center">
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-rating-row">
+
+                        ×
+
+                    </button>
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+
+            const criteriaSelect =
+                row.querySelector(
+                    ".criteria-select"
+                );
+
+
+            if (criteria)
+            {
+                criteriaSelect.value =
+                    criteria;
+
+
+                // Important:
+                // Appraisal-loaded weightage must stay as ERP supplied.
+                row.querySelector(
+                    ".weightage-input"
+                ).value =
+                    weightage;
+            }
+
+
+            setRatingStars(
+                row,
+                rating
+            );
+
+
+            reindexRatingRows();
+        }
+
+
+        // ============================================================
+        // CRITERIA DROPDOWN CHANGE
+        //
+        // Automatically populate its configured weightage if available.
+        // ============================================================
+
+        document.addEventListener(
+            "change",
+            function (event) {
+
+                if (
+                    !event.target.classList.contains(
+                        "criteria-select"
+                    )
+                )
+                {
+                    return;
+                }
+
+
+                const option =
+                    event.target.options[
+                        event.target.selectedIndex
+                    ];
+
+
+                const weightage =
+                    option
+                        ? option.getAttribute(
+                            "data-weightage"
+                        )
+                        : "";
+
+
+                const row =
+                    event.target.closest(
+                        "tr"
+                    );
+
+
+                const weightageInput =
+                    row.querySelector(
+                        ".weightage-input"
+                    );
+
+
+                if (
+                    weightageInput &&
+                    weightage !== null &&
+                    weightage !== ""
+                )
+                {
+                    weightageInput.value =
+                        weightage;
+                }
+            }
+        );
+
+
+        // ============================================================
+        // STAR RATING
+        // ============================================================
+
+        document.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target.classList.contains(
+                        "feedback-star"
+                    )
+                )
+                {
+                    const starCount =
+                        parseInt(
+                            event.target.getAttribute(
+                                "data-star"
+                            )
+                        );
+
+
+                    const row =
+                        event.target.closest(
+                            "tr"
+                        );
+
+
+                    const internalRating =
+                        starCount / 5;
+
+
+                    setRatingStars(
+                        row,
+                        internalRating
+                    );
+
+
+                    calculateTotalScore();
+                }
+
+
+                if (
+                    event.target.classList.contains(
+                        "remove-rating-row"
+                    )
+                )
+                {
+                    event.target
+                        .closest("tr")
+                        .remove();
+
+
+                    reindexRatingRows();
+
+                    calculateTotalScore();
+
+
+                    const rows =
+                        document.querySelectorAll(
+                            "#feedbackRatingsBody tr"
+                        );
+
+
+                    if (rows.length === 0)
+                    {
+                        clearRatingRows();
+                    }
+                }
+            }
+        );
+
+
+        function setRatingStars(
+            row,
+            rating)
+        {
+            const hidden =
+                row.querySelector(
+                    ".rating-value"
+                );
+
+
+            if (hidden)
+            {
+                hidden.value =
+                    rating;
+            }
+
+
+            const selectedStars =
+                Math.round(
+                    parseFloat(
+                        rating || 0
+                    ) * 5
+                );
+
+
+            row.querySelectorAll(
+                ".feedback-star"
+            )
+            .forEach(
+                function (star) {
+
+                    const number =
+                        parseInt(
+                            star.getAttribute(
+                                "data-star"
+                            )
+                        );
+
+
+                    if (number <= selectedStars)
+                    {
+                        star.classList.add(
+                            "active"
+                        );
+
+                        star.textContent =
+                            "★";
+                    }
+                    else
+                    {
+                        star.classList.remove(
+                            "active"
+                        );
+
+                        star.textContent =
+                            "☆";
+                    }
+                }
+            );
+        }
+
+
+        // ============================================================
+        // REMOVE / REINDEX
+        // ============================================================
+
+        function reindexRatingRows()
+        {
+            const rows =
+                document.querySelectorAll(
+                    "#feedbackRatingsBody tr"
+                );
+
+
+            ratingIndex =
+                0;
+
+
+            rows.forEach(
+                function (row, index) {
+
+                    if (
+                        row.id ===
+                        "noRatingsRow"
+                    )
+                    {
+                        return;
+                    }
+
+
+                    const number =
+                        row.querySelector(
+                            ".rating-row-number"
+                        );
+
+
+                    if (number)
+                        number.textContent =
+                            index + 1;
+
+
+                    row.querySelectorAll(
+                        "input, select"
+                    )
+                    .forEach(
+                        function (field) {
+
+                            const name =
+                                field.getAttribute(
+                                    "name"
+                                );
+
+
+                            if (!name)
+                                return;
+
+
+                            field.setAttribute(
+                                "name",
+                                name.replace(
+                                    /FeedbackRatings\[\d+\]/,
+                                    "FeedbackRatings[" +
+                                    index +
+                                    "]"
+                                )
+                            );
+                        }
+                    );
+
+
+                    ratingIndex++;
+                }
+            );
+        }
+
+
+        function clearRatingRows()
+        {
+            ratingIndex = 0;
+
+
+            document.getElementById(
+                "feedbackRatingsBody"
+            ).innerHTML = `
+
+                <tr id="noRatingsRow">
+
+                    <td colspan="5"
+                        class="text-center text-muted py-3">
+
+                        Select Appraisal or click Add Row.
+
+                    </td>
+
+                </tr>
+            `;
+
+
+            document.getElementById(
+                "TotalScore"
+            ).value =
+                "0";
+        }
+
+
+        // ============================================================
+        // TOTAL SCORE PREVIEW
+        //
+        // ERP remains final authority.
+        // ============================================================
+
+        function calculateTotalScore()
+        {
+            let total = 0;
+
+
+            document.querySelectorAll(
+                "#feedbackRatingsBody tr"
+            )
+            .forEach(
+                function (row) {
+
+                    const rating =
+                        row.querySelector(
+                            ".rating-value"
+                        );
+
+
+                    const weightage =
+                        row.querySelector(
+                            ".weightage-input"
+                        );
+
+
+                    if (
+                        !rating ||
+                        !weightage
+                    )
+                        return;
+
+
+                    total +=
+                        parseFloat(
+                            rating.value || 0
+                        )
+                        * 5
+                        * (
+                            parseFloat(
+                                weightage.value || 0
+                            )
+                            / 100
+                        );
+                }
+            );
+
+
+            document.getElementById(
+                "TotalScore"
+            ).value =
+                total.toFixed(2);
+        }
+
+    </script>
+}

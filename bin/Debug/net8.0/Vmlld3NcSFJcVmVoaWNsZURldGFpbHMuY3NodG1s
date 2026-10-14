@@ -1,0 +1,111 @@
+﻿@model Erp_Aits.Models.Vehicle
+@{
+    ViewBag.Title = Model.LicensePlate;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">@Model.LicensePlate</h4>
+        <small class="text-muted">@Model.VehicleCode</small>
+    </div>
+    <a href="@Url.Action("Vehicle", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
+</div>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">License Plate</label>
+            <div class="form-control bg-light">@Model.LicensePlate</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Model</label>
+            <div class="form-control bg-light">@Model.Model</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Make</label>
+            <div class="form-control bg-light">@Model.Make</div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Odometer Value (Last)</label>
+            <div class="form-control bg-light">@Model.OdometerValueLast</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Chassis No</label>
+            <div class="form-control bg-light">@Model.ChassisNo</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Acquisition Date</label>
+            <div class="form-control bg-light">@(Model.AcquisitionDate?.ToString("dd-MM-yyyy"))</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Vehicle Value</label>
+            <div class="form-control bg-light">@Model.VehicleValue</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Location</label>
+            <div class="form-control bg-light">@Model.Location</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employee</label>
+            <div class="form-control bg-light">@Model.Employee</div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Insurance Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Insurance Company</label>
+            <div class="form-control bg-light">@Model.InsuranceCompany</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Start Date</label>
+            <div class="form-control bg-light">@(Model.InsuranceStartDate?.ToString("dd-MM-yyyy"))</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Policy No</label>
+            <div class="form-control bg-light">@Model.PolicyNo</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">End Date</label>
+            <div class="form-control bg-light">@(Model.InsuranceEndDate?.ToString("dd-MM-yyyy"))</div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Additional Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Fuel Type</label>
+            <div class="form-control bg-light">@Model.FuelType</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Color</label>
+            <div class="form-control bg-light">@Model.Color</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Fuel UOM</label>
+            <div class="form-control bg-light">@Model.FuelUOM</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Wheels</label>
+            <div class="form-control bg-light">@Model.Wheels</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Last Carbon Check</label>
+            <div class="form-control bg-light">@(Model.LastCarbonCheck?.ToString("dd-MM-yyyy"))</div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Doors</label>
+            <div class="form-control bg-light">@Model.Doors</div>
+        </div>
+    </div>
+</div>

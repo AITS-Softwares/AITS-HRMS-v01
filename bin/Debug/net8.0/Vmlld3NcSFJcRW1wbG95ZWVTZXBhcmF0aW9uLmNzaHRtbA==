@@ -1,0 +1,169 @@
+﻿@model List<Erp_Aits.Models.EmployeeSeparation>
+
+@{
+    ViewBag.Title = "Employee Separation";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErpNextError"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (ViewBag.SyncWarning != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.SyncWarning
+
+        <div class="small mt-1">
+            Existing HRMS data is displayed because
+            ERPNext refresh was not completed.
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h4 class="mb-0">
+        Employee Separation
+    </h4>
+
+    <!-- NO SYNC BUTTON -->
+    <a href="@Url.Action(
+                   "CreateEmployeeSeparation",
+                   "HR")"
+       class="btn btn-dark btn-sm">
+
+        + Add Employee Separation
+
+    </a>
+
+</div>
+
+<form method="get"
+      action="@Url.Action(
+                "EmployeeSeparation",
+                "HR")"
+      class="row g-2 mb-3">
+
+    <div class="col-auto">
+
+        <input type="text"
+               name="id"
+               class="form-control form-control-sm"
+               placeholder="ID"
+               value="@ViewBag.IdFilter" />
+
+    </div>
+
+    <div class="col-auto">
+
+        <input type="text"
+               name="employeeName"
+               class="form-control form-control-sm"
+               placeholder="Employee Name"
+               value="@ViewBag.EmployeeNameFilter" />
+
+    </div>
+
+    <div class="col-auto">
+
+        <button type="submit"
+                class="btn btn-sm btn-outline-secondary">
+            Search
+        </button>
+
+    </div>
+
+    <div class="col-auto">
+
+        <a href="@Url.Action(
+                           "EmployeeSeparation",
+                           "HR")"
+           class="btn btn-sm btn-outline-secondary">
+            Clear
+        </a>
+
+    </div>
+
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle">
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Employee Name</th>
+                    <th>Status</th>
+                    <th>Separation Begins On</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var s in Model)
+                {
+                    <tr style="cursor:pointer"
+                        onclick="window.location='@Url.Action(
+                                                    "EmployeeSeparationDetails",
+                                                    "HR",
+                                                    new { id = s.Id })'">
+
+                        <td>
+                            @(string.IsNullOrWhiteSpace(
+                                                s.EmployeeSeparationCode)
+                                                ? s.Id.ToString()
+                                                : s.EmployeeSeparationCode)
+                </td>
+
+                        <td>@s.Employee</td>
+
+                        <td>@s.EmployeeName</td>
+
+                        <td>@s.Status</td>
+
+                        <td>
+                            @s.SeparationBeginsOn
+                            .ToString("yyyy-MM-dd")
+                        </td>
+
+                    </tr>
+                        }
+
+            </tbody>
+
+        </table>
+
+    </div>
+}
+else
+{
+    <p class="text-muted text-center py-5">
+        No employee separations found.
+    </p>
+}

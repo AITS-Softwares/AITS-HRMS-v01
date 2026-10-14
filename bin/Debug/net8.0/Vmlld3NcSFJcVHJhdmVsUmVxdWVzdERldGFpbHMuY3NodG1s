@@ -1,0 +1,610 @@
+@model Erp_Aits.Models.TravelRequest
+@{
+    ViewBag.Title = Model.EmployeeName + " - " + Model.TravelRequestCode;
+    var travelTypes = new List<string> { "Domestic", "International" };
+    var travelFunding = new List<string> { "Require Full Funding", "Fully Sponsored", "Partially Sponsored, Require Partial Funding" };
+    var travelModes = new List<string> { "Flight", "Train", "Taxi", "Bus" };
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>ERPNext Validation:</strong> @TempData["ErpNextError"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div id="clientError" class="alert alert-danger d-none"></div>
+
+<form id="travelRequestForm"
+      method="post"
+      action="@Url.Action("UpdateTravelRequest", "HR")">
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="TravelRequestCode" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <a href="@Url.Action("TravelRequest", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <div>
+                <div class="text-muted small">@Model.TravelRequestCode</div>
+                <h4 class="mb-0">@Model.EmployeeName</h4>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+            <button type="submit"
+                    form="deleteTravelRequestForm"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this Travel Request from HRMS and ERPNext?');">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">General Details</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="ea-form-label">Travel Type <span class="text-danger">*</span></label>
+                <select asp-for="TravelType" id="TravelType" class="form-select ea-input" required>
+                    <option value="">-- Select Travel Type --</option>
+                    @foreach (var item in travelTypes)
+                    {
+                        <option value="@item" selected="@(Model.TravelType == item)">@item</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Purpose of Travel <span class="text-danger">*</span></label>
+                <div class="erp-link-wrapper">
+                    <input asp-for="PurposeOfTravel"
+                           id="PurposeOfTravel"
+                           data-master="PurposeOfTravel"
+                           class="form-control ea-input erp-link"
+                           autocomplete="off"
+                           required />
+                    <div class="erp-link-menu"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Travel Funding</label>
+                <select asp-for="TravelFunding" id="TravelFunding" class="form-select ea-input">
+                    <option value="">-- Select Travel Funding --</option>
+                    @foreach (var item in travelFunding)
+                    {
+                        <option value="@item" selected="@(Model.TravelFunding == item)">@item</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Details of Sponsor (Name, Location)</label>
+                <input asp-for="DetailsOfSponsor" class="form-control ea-input" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Copy of Invitation/Announcement</label>
+                <input asp-for="CopyOfInvitation" class="form-control ea-input" />
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">Employee Details</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="ea-form-label">Employee <span class="text-danger">*</span></label>
+                <div class="erp-link-wrapper">
+                    <input asp-for="Employee"
+                           id="employeeSelect"
+                           data-master="Employee"
+                           class="form-control ea-input erp-link"
+                           autocomplete="off"
+                           required />
+                    <div class="erp-link-menu"></div>
+                </div>
+                <div id="employeeError" class="text-danger small mt-1"></div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Employee Name</label>
+                <input asp-for="EmployeeName" id="employeeNameInput" class="form-control ea-input" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Date of Birth</label>
+                <input type="date"
+                       asp-for="DateOfBirth"
+                       asp-format="{0:yyyy-MM-dd}"
+                       id="DateOfBirth"
+                       class="form-control ea-input"
+                       readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Identification Document Type</label>
+                <div class="erp-link-wrapper">
+                    <input asp-for="IdentificationDocumentType"
+                           data-master="IdentificationDocumentType"
+                           class="form-control ea-input erp-link"
+                           autocomplete="off" />
+                    <div class="erp-link-menu"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Identification Document Number</label>
+                <input asp-for="IdentificationDocumentNumber" class="form-control ea-input" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Contact Number</label>
+                <input asp-for="ContactNumber" id="ContactNumber" class="form-control ea-input" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Contact Email</label>
+                <input asp-for="ContactEmail" id="ContactEmail" type="email" class="form-control ea-input" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Passport Number</label>
+                <input asp-for="PassportNumber" id="PassportNumber" class="form-control ea-input" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="ea-form-label">Company <span class="text-danger">*</span></label>
+                <div class="erp-link-wrapper">
+                    <input asp-for="Company"
+                           id="Company"
+                           data-master="Company"
+                           class="form-control ea-input erp-link"
+                           autocomplete="off"
+                           required />
+                    <div class="erp-link-menu"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">Description</div>
+        <textarea asp-for="OtherDetailsDescription" class="form-control ea-input" rows="3"></textarea>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">Travel Itinerary</div>
+        <div class="table-responsive">
+            <table id="itineraryTable" class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Travel From</th>
+                        <th>Travel To</th>
+                        <th>Mode of Travel</th>
+                        <th>Departure Datetime</th>
+                        <th style="width:70px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="itineraryBody"></tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-outline-dark btn-sm" onclick="addItineraryRow()">+ Add Itinerary</button>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">Costing Details</div>
+        <div class="table-responsive">
+            <table id="costingTable" class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Expense Type</th>
+                        <th>Sponsored Amount</th>
+                        <th>Funded Amount</th>
+                        <th>Total Amount</th>
+                        <th style="width:70px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="costingBody"></tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-outline-dark btn-sm" onclick="addCostingRow()">+ Add Costing</button>
+        <div class="mt-3 fw-bold">Total Estimated Cost: <span id="grandTotal">0.00</span></div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">Accounting Dimensions</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="ea-form-label">Cost Center</label>
+                <div class="erp-link-wrapper">
+                    <input asp-for="CostCenter"
+                           id="CostCenter"
+                           data-master="CostCenter"
+                           class="form-control ea-input erp-link"
+                           autocomplete="off" />
+                    <div class="erp-link-menu"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ea-section">
+        <div class="ea-section-title">Event Details</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="ea-form-label">Name of Organizer</label>
+                <input asp-for="NameOfOrganizer" class="form-control ea-input" />
+            </div>
+            <div class="col-md-6">
+                <label class="ea-form-label">Address of Organizer</label>
+                <input asp-for="AddressOfOrganizer" class="form-control ea-input" />
+            </div>
+            <div class="col-md-12">
+                <label class="ea-form-label">Other Details</label>
+                <textarea asp-for="EventOtherDetails" class="form-control ea-input" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form id="deleteTravelRequestForm"
+      method="post"
+      action="@Url.Action("DeleteTravelRequest", "HR")">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="code" value="@Model.TravelRequestCode" />
+</form>
+
+<style>
+    .ea-section {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .ea-section-title {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: .65rem;
+        border-bottom: 1px solid #eef1f4;
+    }
+
+    .ea-form-label {
+        font-weight: 600;
+        font-size: .85rem;
+        margin-bottom: .35rem;
+    }
+
+    .erp-link-wrapper {
+        position: relative;
+    }
+
+    .erp-link-menu {
+        display: none;
+        position: absolute;
+        z-index: 50;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 240px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #d7dde6;
+        border-radius: 8px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .14);
+    }
+
+    .erp-link-option {
+        width: 100%;
+        border: 0;
+        background: #fff;
+        text-align: left;
+        padding: .55rem .75rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .erp-link-option:hover {
+        background: #f4f7fb;
+    }
+
+    .erp-link-option small,
+    .erp-link-status {
+        color: #6b7280;
+        font-size: .78rem;
+    }
+
+    .erp-link-status {
+        padding: .65rem .75rem;
+    }
+</style>
+
+<script>
+    const ERP_SEARCH_URL = '@Url.Action("SearchTravelRequestMaster", "HR")';
+    const EMPLOYEE_URL = '@Url.Action("GetTravelRequestEmployeeDetails", "HR")';
+    const travelModes = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(travelModes));
+    const initialItineraries = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject((Model.Itineraries ?? new List<Erp_Aits.Models.TravelItinerary>()).Select(x => new {
+        travelFrom = x.TravelFrom,
+        travelTo = x.TravelTo,
+        modeOfTravel = x.ModeOfTravel,
+        departureDatetime = x.DepartureDatetime?.ToString("yyyy-MM-ddTHH:mm")
+    })));
+    const initialCostings = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject((Model.Costings ?? new List<Erp_Aits.Models.TravelCosting>()).Select(x => new {
+        expenseType = x.ExpenseType,
+        sponsoredAmount = x.SponsoredAmount,
+        fundedAmount = x.FundedAmount,
+        totalAmount = x.TotalAmount
+    })));
+
+    let itineraryIndex = 0;
+    let costingIndex = 0;
+    let employeeLookupVersion = 0;
+    const linkTimers = new WeakMap();
+    const linkVersions = new WeakMap();
+
+    function esc(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function showError(message) {
+        const box = document.getElementById('clientError');
+        box.textContent = message;
+        box.classList.remove('d-none');
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function closeLinkMenus(except = null) {
+        document.querySelectorAll('.erp-link-menu').forEach(function(menu) {
+            if (menu !== except) menu.style.display = 'none';
+        });
+    }
+
+    async function searchErpLink(input) {
+        const master = input.dataset.master;
+        const menu = input.parentElement.querySelector('.erp-link-menu');
+        if (!master || !menu) return;
+
+        const version = (linkVersions.get(input) || 0) + 1;
+        linkVersions.set(input, version);
+        closeLinkMenus(menu);
+        menu.innerHTML = '<div class="erp-link-status">Loading ERPNext records...</div>';
+        menu.style.display = 'block';
+
+        try {
+            const url = ERP_SEARCH_URL
+                + '?master=' + encodeURIComponent(master)
+                + '&search=' + encodeURIComponent(input.value.trim());
+            const response = await fetch(url, { credentials: 'same-origin' });
+            if (!response.ok) throw new Error('HRMS search HTTP ' + response.status);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'ERPNext search failed.');
+            if (linkVersions.get(input) !== version) return;
+
+            const items = data.items || [];
+            menu.innerHTML = '';
+
+            if (!items.length) {
+                menu.innerHTML = '<div class="erp-link-status">No ERPNext records found.</div>';
+                return;
+            }
+
+            items.forEach(function(item) {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.className = 'erp-link-option';
+                const value = item.value || '';
+                option.innerHTML = '<span>' + esc(value) + '</span>'
+                    + (item.description ? '<small>' + esc(item.description) + '</small>' : '');
+                option.addEventListener('click', function() {
+                    input.value = value;
+                    menu.style.display = 'none';
+                    input.dispatchEvent(new Event('erp-link-selected', { bubbles: true }));
+                });
+                menu.appendChild(option);
+            });
+        } catch (error) {
+            if (linkVersions.get(input) !== version) return;
+            menu.innerHTML = '<div class="erp-link-status text-danger">Unable to load ERPNext records: ' + esc(error.message) + '</div>';
+        }
+    }
+
+    function attachErpLink(input) {
+        if (!input || input.dataset.linkInitialized === '1') return;
+        input.dataset.linkInitialized = '1';
+        input.addEventListener('focus', function() { searchErpLink(input); });
+        input.addEventListener('input', function() {
+            clearTimeout(linkTimers.get(input));
+            linkTimers.set(input, setTimeout(function() {
+                searchErpLink(input);
+            }, 250));
+        });
+    }
+
+    function initializeErpLinks(root = document) {
+        root.querySelectorAll('.erp-link').forEach(attachErpLink);
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.erp-link-wrapper')) closeLinkMenus();
+    });
+
+    async function fillEmployeeDetails(input) {
+        const employee = input.value.trim();
+        const version = ++employeeLookupVersion;
+        document.getElementById('employeeError').textContent = '';
+
+        if (!employee) return;
+
+        try {
+            const response = await fetch(EMPLOYEE_URL + '?employee=' + encodeURIComponent(employee), {
+                credentials: 'same-origin'
+            });
+            if (!response.ok) throw new Error('Employee lookup HTTP ' + response.status);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Employee not found in ERPNext.');
+            if (version !== employeeLookupVersion || input.value.trim() !== employee) return;
+
+            document.getElementById('employeeNameInput').value = data.employeeName || '';
+            document.getElementById('DateOfBirth').value = (data.dateOfBirth || '').substring(0, 10);
+            document.getElementById('ContactNumber').value = data.contactNumber || '';
+            document.getElementById('ContactEmail').value = data.contactEmail || '';
+            document.getElementById('PassportNumber').value = data.passportNumber || '';
+            document.getElementById('Company').value = data.company || '';
+        } catch (error) {
+            if (version === employeeLookupVersion) {
+                document.getElementById('employeeError').textContent = error.message;
+            }
+        }
+    }
+
+    function modeOptions(selected = '') {
+        let html = '<option value="">-- Select Mode --</option>';
+        travelModes.forEach(function(mode) {
+            html += '<option value="' + esc(mode) + '"' + (mode === selected ? ' selected' : '') + '>' + esc(mode) + '</option>';
+        });
+        return html;
+    }
+
+    function addItineraryRow(data = {}) {
+        const index = itineraryIndex++;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="row-number"></td>
+            <td><input name="Itineraries[${index}].TravelFrom" class="form-control form-control-sm" value="${esc(data.travelFrom || '')}" /></td>
+            <td><input name="Itineraries[${index}].TravelTo" class="form-control form-control-sm" value="${esc(data.travelTo || '')}" /></td>
+            <td><select name="Itineraries[${index}].ModeOfTravel" class="form-select form-select-sm">${modeOptions(data.modeOfTravel || '')}</select></td>
+            <td><input type="datetime-local" name="Itineraries[${index}].DepartureDatetime" class="form-control form-control-sm" value="${esc(data.departureDatetime || '')}" /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItineraryRow(this)">x</button></td>`;
+        document.getElementById('itineraryBody').appendChild(row);
+        reindexItineraries();
+    }
+
+    function removeItineraryRow(button) {
+        button.closest('tr').remove();
+        reindexItineraries();
+    }
+
+    function reindexItineraries() {
+        document.querySelectorAll('#itineraryBody tr').forEach(function(row, index) {
+            row.querySelector('.row-number').textContent = index + 1;
+            row.querySelectorAll('[name]').forEach(function(field) {
+                field.name = field.name.replace(/Itineraries\[\d+\]/, 'Itineraries[' + index + ']');
+            });
+        });
+        itineraryIndex = document.querySelectorAll('#itineraryBody tr').length;
+    }
+
+    function addCostingRow(data = {}) {
+        const index = costingIndex++;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="row-number"></td>
+            <td>
+                <div class="erp-link-wrapper">
+                    <input name="Costings[${index}].ExpenseType" data-master="ExpenseType" class="form-control form-control-sm erp-link" autocomplete="off" value="${esc(data.expenseType || '')}" />
+                    <div class="erp-link-menu"></div>
+                </div>
+            </td>
+            <td><input type="number" name="Costings[${index}].SponsoredAmount" class="form-control form-control-sm sponsored-amount" min="0" step="0.01" value="${esc(data.sponsoredAmount ?? 0)}" oninput="calculateCosting(this)" /></td>
+            <td><input type="number" name="Costings[${index}].FundedAmount" class="form-control form-control-sm funded-amount" min="0" step="0.01" value="${esc(data.fundedAmount ?? 0)}" oninput="calculateCosting(this)" /></td>
+            <td><input type="number" name="Costings[${index}].TotalAmount" class="form-control form-control-sm total-amount" step="0.01" readonly /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeCostingRow(this)">x</button></td>`;
+        document.getElementById('costingBody').appendChild(row);
+        initializeErpLinks(row);
+        calculateCosting(row.querySelector('.sponsored-amount'));
+        reindexCostings();
+    }
+
+    function calculateCosting(input) {
+        const row = input.closest('tr');
+        const sponsored = Number(row.querySelector('.sponsored-amount').value) || 0;
+        const funded = Number(row.querySelector('.funded-amount').value) || 0;
+        row.querySelector('.total-amount').value = (sponsored + funded).toFixed(2);
+        calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+        let sum = 0;
+        document.querySelectorAll('#costingBody .total-amount').forEach(function(field) {
+            sum += Number(field.value) || 0;
+        });
+        document.getElementById('grandTotal').textContent = sum.toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function removeCostingRow(button) {
+        button.closest('tr').remove();
+        reindexCostings();
+        calculateGrandTotal();
+    }
+
+    function reindexCostings() {
+        document.querySelectorAll('#costingBody tr').forEach(function(row, index) {
+            row.querySelector('.row-number').textContent = index + 1;
+            row.querySelectorAll('[name]').forEach(function(field) {
+                field.name = field.name.replace(/Costings\[\d+\]/, 'Costings[' + index + ']');
+            });
+        });
+        costingIndex = document.querySelectorAll('#costingBody tr').length;
+    }
+
+    document.getElementById('travelRequestForm').addEventListener('submit', function(event) {
+        document.getElementById('clientError').classList.add('d-none');
+
+        if (!document.getElementById('TravelType').value) {
+            event.preventDefault();
+            showError('Please select Travel Type.');
+            return;
+        }
+
+        if (!document.getElementById('PurposeOfTravel').value.trim()) {
+            event.preventDefault();
+            showError('Please select Purpose of Travel.');
+            return;
+        }
+
+        if (!document.getElementById('employeeSelect').value.trim()) {
+            event.preventDefault();
+            showError('Please select Employee.');
+            return;
+        }
+
+        if (!document.getElementById('Company').value.trim()) {
+            event.preventDefault();
+            showError('Please select Company.');
+            return;
+        }
+
+        reindexItineraries();
+        reindexCostings();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeErpLinks();
+        document.getElementById('employeeSelect').addEventListener('erp-link-selected', function() {
+            fillEmployeeDetails(this);
+        });
+        (initialItineraries.length ? initialItineraries : [{}]).forEach(addItineraryRow);
+        (initialCostings.length ? initialCostings : [{}]).forEach(addCostingRow);
+        calculateGrandTotal();
+    });
+</script>

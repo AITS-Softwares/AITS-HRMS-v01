@@ -1,110 +1,118 @@
-﻿@model Erp_Aits.Models.EmployeeOnboarding
+@model Erp_Aits.Models.EmployeeOnboarding
 @{
     ViewBag.Title = "Employee Onboarding - " + Model.EmployeeName;
+    var isDraft = Model.DocStatus == 0;
+    var isCancelled = Model.DocStatus == 2;
+    var isCompleted = string.Equals(Model.BoardingStatus, "Completed", StringComparison.OrdinalIgnoreCase);
+    var displayStatus = isCancelled ? "Cancelled" : isCompleted ? "Completed" : isDraft ? "Draft" : "Pending";
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger" role="alert">@TempData["ErpNextError"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" role="alert">@TempData["Success"]</div>
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Employee Onboarding - @Model.EmployeeName</h4>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <label class="form-label">Job Applicant</label>
-        <input class="form-control" value="@Model.JobApplicant" readonly />
+    <div>
+        <h4 class="mb-1">Employee Onboarding - @Model.EmployeeName</h4>
+        <span class="badge @(isCancelled ? "bg-danger" : isCompleted ? "bg-success" : isDraft ? "bg-secondary" : "bg-warning text-dark")">@displayStatus</span>
     </div>
-    <div class="col-md-6">
-        <label class="form-label">Company</label>
-        <input class="form-control" value="@Model.Company" readonly />
-    </div>
-
-    <div class="col-md-6">
-        <label class="form-label">Job Offer</label>
-        <input class="form-control" value="@Model.JobOffer" readonly />
-    </div>
-    <div class="col-md-6">
-        <label class="form-label">Boarding Status</label>
-        <input class="form-control" value="@Model.BoardingStatus" readonly />
-    </div>
-
-    <div class="col-md-6">
-        <label class="form-label">Employee Onboarding Template</label>
-        <input class="form-control" value="@Model.EmployeeOnboardingTemplate" readonly />
-    </div>
-</div>
-
-<hr />
-<h6 class="mb-3">Employee Details</h6>
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <label class="form-label">Employee Name</label>
-        <input class="form-control" value="@Model.EmployeeName" readonly />
-    </div>
-    <div class="col-md-6">
-        <label class="form-label">Date of Joining</label>
-        <input class="form-control" value="@Model.DateOfJoining.ToString("dd-MM-yyyy")" readonly />
-    </div>
-
-    <div class="col-md-6">
-        <label class="form-label">Department</label>
-        <input class="form-control" value="@Model.Department" readonly />
-    </div>
-    <div class="col-md-6">
-        <label class="form-label">Onboarding Begins On</label>
-        <input class="form-control" value="@Model.OnboardingBeginsOn.ToString("dd-MM-yyyy")" readonly />
-    </div>
-
-    <div class="col-md-6">
-        <label class="form-label">Designation</label>
-        <input class="form-control" value="@Model.Designation" readonly />
-    </div>
-
-    <div class="col-md-6">
-        <label class="form-label">Employee Grade</label>
-        <input class="form-control" value="@Model.EmployeeGrade" readonly />
-    </div>
-
-    <div class="col-md-6">
-        <label class="form-label">Holiday List</label>
-        <input class="form-control" value="@Model.HolidayList" readonly />
-    </div>
-</div>
-
-<hr />
-<h6 class="mb-1">Onboarding Activities</h6>
-<table class="table table-bordered align-middle">
-    <thead>
-        <tr>
-            <th>No.</th>
-            <th>Activity Name</th>
-            <th>User</th>
-            <th>Begin On (Days)</th>
-            <th>Duration (Days)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Activities != null && Model.Activities.Any())
+    <div class="d-flex gap-2">
+        @if (isDraft)
         {
-            int i = 1;
-            foreach (var a in Model.Activities)
+            <button type="submit" form="onboardingForm" class="btn btn-dark">Save</button>
+            <form asp-action="SubmitEmployeeOnboarding" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        }
+        else if (!isCancelled)
+        {
+            @if (!isCompleted)
             {
-                <tr>
-                    <td>@(i++)</td>
-                    <td>@a.ActivityName</td>
-                    <td>@a.User</td>
-                    <td>@a.BeginOnDays</td>
-                    <td>@a.DurationDays</td>
-                </tr>
+                <form asp-action="CompleteEmployeeOnboarding" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success">Mark as Complete</button>
+                </form>
             }
+            <form asp-action="CancelEmployeeOnboarding" asp-route-id="@Model.Id" method="post" class="d-inline" onsubmit="return confirm('Cancel this Employee Onboarding?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger">Cancel</button>
+            </form>
         }
-        else
-        {
-            <tr><td colspan="5" class="text-muted text-center py-3">No activities added</td></tr>
-        }
-    </tbody>
-</table>
-
-<hr />
-<div class="form-check mb-4">
-    <input class="form-check-input" type="checkbox" disabled checked="@Model.NotifyUsersByEmail" />
-    <label class="form-check-label">Notify users by email</label>
+        <a asp-action="EmployeeOnboarding" class="btn btn-outline-secondary">Back</a>
+    </div>
 </div>
+
+<form asp-action="UpdateEmployeeOnboarding" asp-route-id="@Model.Id" method="post" id="onboardingForm">
+    @Html.AntiForgeryToken()
+    <fieldset disabled="@(!isDraft)">
+        <div class="card border p-4 mb-3">
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Job Applicant</label><input asp-for="JobApplicant" class="form-control" required /></div>
+                <div class="col-md-6"><label class="form-label">Company</label><input asp-for="Company" class="form-control" required /></div>
+                <div class="col-md-6"><label class="form-label">Job Offer</label><input asp-for="JobOffer" class="form-control" required /></div>
+                <div class="col-md-6"><label class="form-label">Boarding Status</label><input asp-for="BoardingStatus" class="form-control" readonly /></div>
+                <div class="col-md-6"><label class="form-label">Employee Onboarding Template</label><input asp-for="EmployeeOnboardingTemplate" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">Project</label><input asp-for="Project" class="form-control" /></div>
+            </div>
+        </div>
+
+        <div class="card border p-4 mb-3">
+            <h6 class="mb-3">Employee Details</h6>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Employee Name</label><input asp-for="EmployeeName" class="form-control" required /></div>
+                <div class="col-md-6"><label class="form-label">Date of Joining</label><input asp-for="DateOfJoining" type="date" class="form-control" required /></div>
+                <div class="col-md-6"><label class="form-label">Department</label><input asp-for="Department" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">Onboarding Begins On</label><input asp-for="OnboardingBeginsOn" type="date" class="form-control" required /></div>
+                <div class="col-md-6"><label class="form-label">Designation</label><input asp-for="Designation" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">Employee Grade</label><input asp-for="EmployeeGrade" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">Holiday List</label><input asp-for="HolidayList" class="form-control" /></div>
+                <div class="col-md-6 d-flex align-items-end"><div class="form-check"><input asp-for="NotifyUsersByEmail" class="form-check-input" /><label asp-for="NotifyUsersByEmail" class="form-check-label">Notify users by email</label></div></div>
+            </div>
+        </div>
+
+        <div class="card border p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Onboarding Activities</h6>
+                @if (isDraft) { <button type="button" id="addActivity" class="btn btn-sm btn-outline-secondary">Add Row</button> }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead><tr><th>Activity Name</th><th>User</th><th>Begin On (Days)</th><th>Duration (Days)</th>@if (isDraft) { <th></th> }</tr></thead>
+                    <tbody id="activityRows">
+                    @if (Model.Activities != null)
+                    {
+                        foreach (var activity in Model.Activities)
+                        {
+                            <tr>
+                                <td><input name="ActivityNames" value="@activity.ActivityName" class="form-control" /></td>
+                                <td><input name="Users" value="@activity.User" class="form-control" /></td>
+                                <td><input name="BeginOnDaysArr" type="number" min="0" value="@activity.BeginOnDays" class="form-control" /></td>
+                                <td><input name="DurationDaysArr" type="number" min="1" value="@activity.DurationDays" class="form-control" /></td>
+                                @if (isDraft) { <td><button type="button" class="btn btn-sm btn-outline-danger remove-activity">Remove</button></td> }
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+@if (isDraft)
+{
+    <script>
+        document.getElementById('addActivity').addEventListener('click', function () {
+            document.getElementById('activityRows').insertAdjacentHTML('beforeend', '<tr><td><input name="ActivityNames" class="form-control" required></td><td><input name="Users" class="form-control"></td><td><input name="BeginOnDaysArr" type="number" min="0" value="0" class="form-control"></td><td><input name="DurationDaysArr" type="number" min="1" value="1" class="form-control"></td><td><button type="button" class="btn btn-sm btn-outline-danger remove-activity">Remove</button></td></tr>');
+        });
+        document.getElementById('activityRows').addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-activity')) event.target.closest('tr').remove();
+        });
+    </script>
+}

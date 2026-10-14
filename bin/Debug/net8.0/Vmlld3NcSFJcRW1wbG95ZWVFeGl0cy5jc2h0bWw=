@@ -1,0 +1,540 @@
+﻿@model List<Erp_Aits.Models.EmployeeExitRow>
+@{
+    ViewBag.Title = "Employee Exits";
+    var fromDate = ((DateTime)ViewBag.FromDate).ToString("yyyy-MM-dd");
+    var toDate = ((DateTime)ViewBag.ToDate).ToString("yyyy-MM-dd");
+
+    int totalExits = Model?.Count ?? 0;
+    int pendingInterviews = Model?.Count(r => r.InterviewStatus != "Completed") ?? 0;
+}
+
+<div class="eas-wrap">
+
+    <div class="eas-header">
+        <div>
+            <div class="eas-breadcrumb">HR Reports</div>
+            <h4 class="eas-title">Employee Exits</h4>
+        </div>
+        <div class="eas-header-actions">
+            <button type="button" class="eas-btn eas-btn-light" onclick="location.reload();" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <form method="get" asp-action="EmployeeExits" class="eas-filter-form">
+
+        <div class="eas-filter-section-label">Basic Filters</div>
+        <div class="eas-filter-bar">
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">From Date</label>
+                <input type="date" name="fromDate" class="eas-filter-input" value="@fromDate" />
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">To Date</label>
+                <input type="date" name="toDate" class="eas-filter-input" value="@toDate" />
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Company</label>
+                <input type="text" name="company" class="eas-filter-input" placeholder="All companies" value="@ViewBag.Company" />
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Department</label>
+                <input type="text" name="department" class="eas-filter-input" placeholder="All departments" value="@ViewBag.Department" />
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Designation</label>
+                <input type="text" name="designation" class="eas-filter-input" placeholder="All designations" value="@ViewBag.Designation" />
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Employee</label>
+                <input type="text" name="employee" class="eas-filter-input" placeholder="All employees" value="@ViewBag.Employee" />
+            </div>
+        </div>
+
+        <div class="eas-filter-section-label">Advanced Filters</div>
+        <div class="eas-filter-bar">
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Reports To</label>
+                <input type="text" name="reportsTo" class="eas-filter-input" placeholder="Manager" value="@ViewBag.ReportsTo" />
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Interview Status</label>
+                <select name="interviewStatus" class="eas-filter-input">
+                    <option value="">All Statuses</option>
+                    @foreach (var s in new[] { "Pending", "Scheduled", "Completed" })
+                    {
+                        <option value="@s" selected="@(ViewBag.InterviewStatus == s)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="eas-filter-group">
+                <label class="eas-filter-label">Final Decision</label>
+                <select name="finalDecision" class="eas-filter-input">
+                    <option value="">All Decisions</option>
+                    @foreach (var d in new[] { "No Objection", "Not Applicable", "Employee Requests Deletion of Data" })
+                    {
+                        <option value="@d" selected="@(ViewBag.FinalDecision == d)">@d</option>
+                    }
+                </select>
+            </div>
+            <div class="eas-filter-group eas-filter-btn-group">
+                <label class="eas-filter-label eas-filter-label-hidden">&nbsp;</label>
+                <button type="submit" class="eas-btn eas-btn-primary w-100">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+            </div>
+        </div>
+
+        <div class="eas-toggle-row">
+            <label class="eas-toggle">
+                <input type="checkbox" name="exitInterviewPending" value="true" checked="@ViewBag.ExitInterviewPending" />
+                <span class="eas-toggle-slider"></span>
+                <span class="eas-toggle-label">Exit Interview Pending</span>
+            </label>
+            <label class="eas-toggle">
+                <input type="checkbox" name="exitQuestionnairePending" value="true" checked="@ViewBag.ExitQuestionnairePending" />
+                <span class="eas-toggle-slider"></span>
+                <span class="eas-toggle-label">Exit Questionnaire Pending</span>
+            </label>
+            <label class="eas-toggle">
+                <input type="checkbox" name="fnfPending" value="true" checked="@ViewBag.FnFPending" />
+                <span class="eas-toggle-slider"></span>
+                <span class="eas-toggle-label">FnF Pending</span>
+            </label>
+        </div>
+    </form>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="eas-stats-row">
+            <div class="eas-stat-card">
+                <div class="eas-stat-label">Total Exits</div>
+                <div class="eas-stat-value">@totalExits</div>
+            </div>
+            <div class="eas-stat-card eas-stat-highlight">
+                <div class="eas-stat-label">Interviews Not Completed</div>
+                <div class="eas-stat-value">@pendingInterviews</div>
+            </div>
+        </div>
+    }
+
+    <div class="eas-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="eas-table-wrapper">
+                <table class="table table-hover align-middle eas-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Relieving Date</th>
+                            <th>Interview Status</th>
+                            <th>Final Decision</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model)
+                        {
+                            string interviewClass = row.InterviewStatus?.ToLower() switch
+                            {
+                                "completed" => "eas-badge-paid",
+                                "scheduled" => "eas-badge-claimed",
+                                "pending" => "eas-badge-returned",
+                                _ => "eas-badge-default"
+                            };
+                            <tr>
+                                <td><span class="eas-code-badge">@row.Employee</span></td>
+                                <td>
+                                    <div class="eas-employee">
+                                        <span class="eas-avatar">
+                                            @(string.IsNullOrWhiteSpace(row.EmployeeName) ? "?" : row.EmployeeName.Trim()[0].ToString().ToUpper())
+                                        </span>
+                                        <span>@row.EmployeeName</span>
+                                    </div>
+                                </td>
+                                <td>@row.Company</td>
+                                <td>@(string.IsNullOrEmpty(row.Department) ? "—" : row.Department)</td>
+                                <td>@(string.IsNullOrEmpty(row.Designation) ? "—" : row.Designation)</td>
+                                <td>@(row.RelievingDate?.ToString("dd-MM-yyyy") ?? "—")</td>
+                                <td><span class="eas-status-pill @interviewClass">@(string.IsNullOrEmpty(row.InterviewStatus) ? "—" : row.InterviewStatus)</span></td>
+                                <td>@(string.IsNullOrEmpty(row.FinalDecision) ? "—" : row.FinalDecision)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="eas-empty">
+                <i class="fas fa-clipboard-list eas-empty-icon"></i>
+                <div class="eas-empty-text">Nothing to show for the selected filters</div>
+            </div>
+        }
+    </div>
+
+</div>
+
+<style>
+    .eas-wrap {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .eas-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 18px;
+    }
+
+    .eas-breadcrumb {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 0.15rem;
+    }
+
+    .eas-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 20px;
+        color: #1a1a2e;
+    }
+
+    .eas-btn {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+        .eas-btn:hover {
+            background: #f3f4f6;
+        }
+
+    .eas-btn-primary {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        color: #fff;
+    }
+
+        .eas-btn-primary:hover {
+            background: #4338ca;
+        }
+
+    .eas-filter-form {
+        margin-bottom: 20px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #eef0f3;
+    }
+
+    .eas-filter-section-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 8px;
+        margin-top: 12px;
+    }
+
+        .eas-filter-section-label:first-child {
+            margin-top: 0;
+        }
+
+    .eas-filter-bar {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        margin-bottom: 8px;
+        align-items: end;
+    }
+
+    .eas-filter-group {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .eas-filter-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .eas-filter-label-hidden {
+        visibility: hidden;
+    }
+
+    .eas-filter-input {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #374151;
+        background: #fff;
+        width: 100%;
+    }
+
+        .eas-filter-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* Toggle switches for checkboxes */
+    .eas-toggle-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 14px;
+    }
+
+    .eas-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .eas-toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .eas-toggle-slider {
+        position: relative;
+        width: 38px;
+        height: 21px;
+        background: #dfe2e6;
+        border-radius: 999px;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .eas-toggle-slider::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 17px;
+            height: 17px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+    .eas-toggle input:checked + .eas-toggle-slider {
+        background: #4f46e5;
+    }
+
+        .eas-toggle input:checked + .eas-toggle-slider::before {
+            transform: translateX(17px);
+        }
+
+    .eas-toggle-label {
+        font-size: 13px;
+        color: #374151;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* Stat cards */
+    .eas-stats-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .eas-stat-card {
+        background: #f8f9fc;
+        border: 1px solid #eef0f3;
+        border-radius: 12px;
+        padding: 14px 18px;
+    }
+
+    .eas-stat-highlight {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        border: none;
+        color: #fff;
+    }
+
+        .eas-stat-highlight .eas-stat-label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .eas-stat-highlight .eas-stat-value {
+            color: #fff;
+        }
+
+    .eas-stat-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .eas-stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    /* Table */
+    .eas-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .eas-table thead tr {
+        background: #f8f9fc;
+    }
+
+    .eas-table th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #64748b;
+        border-bottom: 2px solid #f0f2f5;
+        white-space: nowrap;
+        padding: 10px 14px;
+    }
+
+    .eas-table td {
+        font-size: 13px;
+        padding: 10px 14px;
+        white-space: nowrap;
+    }
+
+    .eas-code-badge {
+        display: inline-block;
+        background: #eef1f5;
+        color: #333;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 3px 9px;
+        border-radius: 6px;
+    }
+
+    .eas-employee {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .eas-avatar {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 50%;
+        background: #4f46e5;
+        color: #fff;
+        font-weight: 600;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .eas-status-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .eas-badge-paid {
+        background: #d7f5e3;
+        color: #1b7a43;
+    }
+
+    .eas-badge-claimed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .eas-badge-returned {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .eas-badge-default {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .eas-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 90px 0;
+        color: #94a3b8;
+    }
+
+    .eas-empty-icon {
+        font-size: 34px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+    }
+
+    .eas-empty-text {
+        font-size: 14px;
+    }
+
+    @@media (max-width: 992px) {
+        .eas-filter-bar {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .eas-wrap {
+            padding: 16px 18px;
+        }
+
+        .eas-filter-bar {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .eas-stats-row {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .eas-toggle-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .eas-filter-bar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

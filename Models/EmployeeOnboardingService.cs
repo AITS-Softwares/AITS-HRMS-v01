@@ -205,7 +205,8 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 string query = @"SELECT Id, ErpNextId, JobApplicant, JobOffer, EmployeeOnboardingTemplate, Company, BoardingStatus,
-                                        EmployeeName, DateOfJoining, Department, OnboardingBeginsOn, Designation, EmployeeGrade, HolidayList, NotifyUsersByEmail
+                                        Employee, EmployeeName, DateOfJoining, Department, OnboardingBeginsOn, Designation, EmployeeGrade, HolidayList,
+                                        Project, NotifyUsersByEmail, DocStatus, AmendedFrom
                                  FROM EmployeeOnboardings WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(id)) query += " AND CAST(Id AS VARCHAR) LIKE @Id";
@@ -260,7 +261,8 @@ namespace Erp_Aits.Services
                 conn.Open();
 
                 string query = @"SELECT Id, ErpNextId, JobApplicant, JobOffer, EmployeeOnboardingTemplate, Company, BoardingStatus,
-                                        EmployeeName, DateOfJoining, Department, OnboardingBeginsOn, Designation, EmployeeGrade, HolidayList, NotifyUsersByEmail
+                                        Employee, EmployeeName, DateOfJoining, Department, OnboardingBeginsOn, Designation, EmployeeGrade, HolidayList,
+                                        Project, NotifyUsersByEmail, DocStatus, AmendedFrom
                                  FROM EmployeeOnboardings WHERE Id = @Id AND IsDeleted = 0";
                 using (var cmd = new SqlCommand(query, conn))
                 {
@@ -765,6 +767,7 @@ namespace Erp_Aits.Services
                 EmployeeOnboardingTemplate = reader["EmployeeOnboardingTemplate"] == DBNull.Value ? null : reader["EmployeeOnboardingTemplate"].ToString(),
                 Company = reader["Company"]?.ToString(),
                 BoardingStatus = reader["BoardingStatus"]?.ToString(),
+                Employee = reader["Employee"] == DBNull.Value ? null : reader["Employee"].ToString(),
                 EmployeeName = reader["EmployeeName"]?.ToString(),
                 DateOfJoining = Convert.ToDateTime(reader["DateOfJoining"]),
                 Department = reader["Department"] == DBNull.Value ? null : reader["Department"].ToString(),
@@ -772,7 +775,10 @@ namespace Erp_Aits.Services
                 Designation = reader["Designation"] == DBNull.Value ? null : reader["Designation"].ToString(),
                 EmployeeGrade = reader["EmployeeGrade"] == DBNull.Value ? null : reader["EmployeeGrade"].ToString(),
                 HolidayList = reader["HolidayList"] == DBNull.Value ? null : reader["HolidayList"].ToString(),
-                NotifyUsersByEmail = Convert.ToBoolean(reader["NotifyUsersByEmail"])
+                Project = reader["Project"] == DBNull.Value ? null : reader["Project"].ToString(),
+                NotifyUsersByEmail = Convert.ToBoolean(reader["NotifyUsersByEmail"]),
+                DocStatus = reader["DocStatus"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocStatus"]),
+                AmendedFrom = reader["AmendedFrom"] == DBNull.Value ? null : reader["AmendedFrom"].ToString()
             };
         }
     }

@@ -1,0 +1,132 @@
+﻿@model Erp_Aits.Models.InterviewFeedbackModel
+@{
+    ViewBag.Title = "New Interview Feedback";
+}
+
+<form asp-action="CreateInterviewFeedback" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">New Interview Feedback</h4>
+            <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <h6 class="mb-3">Details</h6>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Interview <span class="text-danger">*</span></label>
+            <input asp-for="InterviewId" type="number" class="form-control" required />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Interviewer <span class="text-danger">*</span></label>
+            <input asp-for="Interviewer" class="form-control" required />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Result <span class="text-danger">*</span></label>
+            <select asp-for="Result" class="form-select">
+                <option value="Cleared">Cleared</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+    </div>
+
+    <hr />
+    <h6 class="mb-3">Skill Assessment</h6>
+
+    <table class="table table-bordered align-middle mb-1" id="skillsTable">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" disabled /></th>
+                <th style="width:60px">No.</th>
+                <th>Skill <span class="text-danger">*</span></th>
+                <th>Rating <span class="text-danger">*</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td class="row-number">1</td>
+                <td><input type="text" name="SkillNames" class="form-control form-control-sm border-0" /></td>
+                <td>
+                    <div class="star-rating" data-index="0">
+                        <i class="fa-star" data-value="1">★</i>
+                        <i class="fa-star" data-value="2">★</i>
+                        <i class="fa-star" data-value="3">★</i>
+                        <i class="fa-star" data-value="4">★</i>
+                        <i class="fa-star" data-value="5">★</i>
+                        <input type="hidden" name="SkillRatings" class="rating-input" value="0" />
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSkillRow()">Add Row</button>
+
+    <hr class="my-4" />
+    <h6 class="mb-2">Feedback</h6>
+    <textarea asp-for="FeedbackText" class="form-control" rows="8"></textarea>
+
+</form>
+
+<style>
+    .star-rating {
+        display: flex;
+        gap: 2px;
+    }
+
+        .star-rating .fa-star {
+            cursor: pointer;
+            font-size: 16px;
+            color: #d1d5db;
+            font-style: normal;
+        }
+
+            .star-rating .fa-star.filled {
+                color: #f59e0b;
+            }
+</style>
+
+<script>
+    document.querySelectorAll('.star-rating').forEach(initStars);
+
+    function initStars(container) {
+        var stars = container.querySelectorAll('.fa-star');
+        var input = container.querySelector('.rating-input');
+
+        stars.forEach(function (star) {
+            star.addEventListener('click', function () {
+                var value = parseInt(star.getAttribute('data-value'));
+                input.value = value;
+                stars.forEach(function (s) {
+                    s.classList.toggle('filled', parseInt(s.getAttribute('data-value')) <= value);
+                });
+            });
+        });
+    }
+
+    function addSkillRow() {
+        var tbody = document.querySelector('#skillsTable tbody');
+        var rowNum = tbody.rows.length + 1;
+
+        var row = document.createElement('tr');
+        row.innerHTML =
+            '<td><input type="checkbox" /></td>' +
+            '<td class="row-number">' + rowNum + '</td>' +
+            '<td><input type="text" name="SkillNames" class="form-control form-control-sm border-0" /></td>' +
+            '<td>' +
+                '<div class="star-rating">' +
+                    '<i class="fa-star" data-value="1">★</i>' +
+                    '<i class="fa-star" data-value="2">★</i>' +
+                    '<i class="fa-star" data-value="3">★</i>' +
+                    '<i class="fa-star" data-value="4">★</i>' +
+                    '<i class="fa-star" data-value="5">★</i>' +
+                    '<input type="hidden" name="SkillRatings" class="rating-input" value="0" />' +
+                '</div>' +
+            '</td>';
+
+        tbody.appendChild(row);
+        initStars(row.querySelector('.star-rating'));
+    }
+</script>

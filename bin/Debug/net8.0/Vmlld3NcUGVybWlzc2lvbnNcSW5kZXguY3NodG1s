@@ -1,0 +1,579 @@
+﻿@model Erp_Aits.Models.UserPageAccessViewModel
+@{
+    ViewData["Title"] = "Page Access Management";
+    ViewData["Module"] = "Administration";
+    ViewData["Icon"] = "lock";
+}
+
+<div class="content-card">
+    <div class="card-header-custom">
+        <h5>
+            <i class="fas fa-lock text-primary"></i>
+            Page Access Management
+            <span class="badge bg-primary ms-2">@Model.AllPages.Count Pages</span>
+        </h5>
+        <div class="d-flex gap-2">
+            <a asp-controller="Users" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- AntiForgery Token -->
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+    }
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-users"></i> Select User
+                </div>
+                <div class="card-body">
+                    <select id="userSelect" class="form-select" onchange="loadUserPages()">
+                        <option value="">-- Select User --</option>
+                        @foreach (var user in Model.Users)
+                        {
+                            <option value="@user.Id" selected="@(user.Id == Model.SelectedUserId)">
+                                @user.Name (@user.Role)
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span><i class="fas fa-file-alt"></i> Page Access</span>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-light" onclick="selectAllPages()">
+                            <i class="fas fa-check-double"></i> Select All
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="deselectAllPages()">
+                            <i class="fas fa-times"></i> Clear All
+                        </button>
+                        <span id="selectedCount" class="badge bg-light text-dark">0 pages selected</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Quick Action Buttons -->
+                    <div class="mb-3 d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="selectAllPages()">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button type="button" class="btn btn-sm btn-warning" onclick="selectLeadPermissions()">
+                            <i class="fas fa-users"></i> Leads
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" onclick="selectCustomerPermissions()">
+                            <i class="fas fa-user-plus"></i> Customers
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info" onclick="selectOpportunityPermissions()">
+                            <i class="fas fa-rocket"></i> Opportunities
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="selectLeadTasksPermissions()">
+                            <i class="fas fa-tasks"></i> Lead Tasks
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="selectLeadEventsPermissions()">
+                            <i class="fas fa-calendar-alt"></i> Lead Events
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="selectOpportunityTasksPermissions()">
+                            <i class="fas fa-tasks"></i> Opp Tasks
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="selectOpportunityEventsPermissions()">
+                            <i class="fas fa-calendar-alt"></i> Opp Events
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="deselectAllPages()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+
+                    <div id="pagesContainer">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-user fa-3x d-block mb-3"></i>
+                            <p>Select a user to manage their page access</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer" id="saveContainer" style="display:none;">
+                    <input type="hidden" id="userIdHidden" value="" />
+                    <button type="button" class="btn btn-primary w-100" onclick="saveUserPages()">
+                        <i class="fas fa-save"></i> Save Page Access
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-item {
+        padding: 8px 12px;
+        margin: 4px 0;
+        border-radius: 8px;
+        border: 1px solid #f0f2f5;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+        .page-item:hover {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .page-item.selected {
+            background: #eef2ff;
+            border-color: #4f46e5;
+        }
+
+        .page-item .page-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .page-item .page-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #4f46e5;
+        }
+
+    .page-group {
+        background: #f8fafc;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-top: 8px;
+    }
+
+        .page-group:first-child {
+            margin-top: 0;
+        }
+
+    #pagesContainer {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+        #pagesContainer::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #pagesContainer::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+
+        #pagesContainer::-webkit-scrollbar-thumb {
+            background: #c1c7cd;
+            border-radius: 8px;
+        }
+
+            #pagesContainer::-webkit-scrollbar-thumb:hover {
+                background: #a0a7ae;
+            }
+</style>
+
+@section Scripts {
+    <script>
+        console.log('Page Access Management loaded');
+
+        var currentSelectedPages = [];
+        var saveInProgress = false;
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        // ============================================================
+        // LOAD USER PAGES
+        // ============================================================
+        function loadUserPages() {
+            var userId = $('#userSelect').val();
+            console.log('Loading pages for user:', userId);
+
+            if (!userId) {
+                $('#pagesContainer').html(`
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-user fa-3x d-block mb-3"></i>
+                        <p>Select a user to manage their page access</p>
+                    </div>
+                `);
+                $('#saveContainer').hide();
+                return;
+            }
+
+            $('#userIdHidden').val(userId);
+
+            $('#pagesContainer').html(`
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                    <p class="mt-2">Loading pages...</p>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetUserPages", "Permissions")',
+                type: 'GET',
+                data: { userId: userId },
+                success: function(response) {
+                    console.log('Response received:', response);
+
+                    if (response.success) {
+                        currentSelectedPages = response.selectedPages || [];
+                        console.log('Selected pages:', currentSelectedPages);
+                        renderPages(response.allPages, response.selectedPages);
+                        $('#saveContainer').show();
+                    } else {
+                        alert(response.message || 'Error loading pages.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading pages:', error);
+                    alert('Error loading pages. Please try again.');
+                }
+            });
+        }
+
+        // ============================================================
+        // RENDER PAGES
+        // ============================================================
+        function renderPages(pages, selectedIds) {
+            console.log('Rendering pages, selectedIds:', selectedIds);
+
+            var html = '';
+            var selectedCount = 0;
+
+            // Group pages by parent menu
+            var grouped = {};
+            pages.forEach(function(p) {
+                var key = p.parentMenu || 'Main';
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(p);
+            });
+
+            var sortedKeys = Object.keys(grouped).sort();
+
+            sortedKeys.forEach(function(key) {
+                html += '<div class="page-group">' + key + '</div>';
+                grouped[key].forEach(function(p) {
+                    var isSelected = selectedIds && selectedIds.includes(p.id);
+                    if (isSelected) selectedCount++;
+
+                    html += '<div class="page-item ' + (isSelected ? 'selected' : '') + '" onclick="togglePage(' + p.id + ')">';
+                    html += '<div class="d-flex align-items-center gap-3">';
+                    html += '<input type="checkbox" class="page-checkbox" id="page_' + p.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="togglePage(' + p.id + ')" />';
+                    html += '<span class="page-icon"><i class="fas fa-' + (p.icon || 'file') + '"></i></span>';
+                    html += '<div class="flex-grow-1">';
+                    html += '<div class="fw-semibold">' + p.displayName + '</div>';
+                    html += '<small class="text-muted">' + p.controllerName + '.' + p.actionName + '</small>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+            });
+
+            $('#pagesContainer').html(html);
+            $('#selectedCount').text(selectedCount + ' pages selected');
+            console.log('Rendered ' + selectedCount + ' pages selected');
+        }
+
+        // ============================================================
+        // TOGGLE PAGE SELECTION
+        // ============================================================
+        function togglePage(pageId) {
+            var checkbox = document.getElementById('page_' + pageId);
+            var pageItem = checkbox.closest('.page-item');
+
+            if (checkbox.checked) {
+                if (!currentSelectedPages.includes(pageId)) {
+                    currentSelectedPages.push(pageId);
+                }
+                pageItem.classList.add('selected');
+            } else {
+                currentSelectedPages = currentSelectedPages.filter(function(id) {
+                    return id !== pageId;
+                });
+                pageItem.classList.remove('selected');
+            }
+
+            $('#selectedCount').text(currentSelectedPages.length + ' pages selected');
+            console.log('Current selected pages:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT ALL PAGES
+        // ============================================================
+        function selectAllPages() {
+            var checkboxes = document.querySelectorAll('.page-checkbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = true;
+                var pageId = parseInt(checkbox.id.replace('page_', ''));
+                if (!currentSelectedPages.includes(pageId)) {
+                    currentSelectedPages.push(pageId);
+                }
+                var pageItem = checkbox.closest('.page-item');
+                if (pageItem) {
+                    pageItem.classList.add('selected');
+                }
+            });
+            $('#selectedCount').text(currentSelectedPages.length + ' pages selected');
+            console.log('Selected all pages:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // DESELECT ALL PAGES
+        // ============================================================
+        function deselectAllPages() {
+            var checkboxes = document.querySelectorAll('.page-checkbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+                var pageId = parseInt(checkbox.id.replace('page_', ''));
+                currentSelectedPages = currentSelectedPages.filter(function(id) {
+                    return id !== pageId;
+                });
+                var pageItem = checkbox.closest('.page-item');
+                if (pageItem) {
+                    pageItem.classList.remove('selected');
+                }
+            });
+            $('#selectedCount').text(currentSelectedPages.length + ' pages selected');
+            console.log('Deselected all pages');
+        }
+
+        // ============================================================
+        // SELECT LEAD PERMISSIONS
+        // ============================================================
+        function selectLeadPermissions() {
+            // Lead permissions: 2=Index, 3=Details, 4=Create, 5=Edit, 6=Delete
+            var permissions = [2, 3, 4, 5, 6];
+            selectPermissions(permissions);
+            console.log('Selected Lead permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT CUSTOMER PERMISSIONS
+        // ============================================================
+        function selectCustomerPermissions() {
+            // Customer permissions: 7=Index, 8=Details, 9=Create, 10=Edit, 11=Delete
+            var permissions = [7, 8, 9, 10, 11];
+            selectPermissions(permissions);
+            console.log('Selected Customer permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT OPPORTUNITY PERMISSIONS
+        // ============================================================
+        function selectOpportunityPermissions() {
+            // Opportunity permissions: 12=Index, 13=Details, 14=Create, 15=Edit, 16=Delete
+            var permissions = [12, 13, 14, 15, 16];
+            selectPermissions(permissions);
+            console.log('Selected Opportunity permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT LEAD TASKS PERMISSIONS
+        // ============================================================
+        function selectLeadTasksPermissions() {
+            // Lead Task permissions: 27=Index, 28=Create, 29=Edit, 30=Delete
+            var permissions = [27, 28, 29, 30];
+            selectPermissions(permissions);
+            console.log('Selected Lead Task permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT LEAD EVENTS PERMISSIONS
+        // ============================================================
+        function selectLeadEventsPermissions() {
+            // Lead Event permissions: 31=Index, 32=Create, 33=Edit, 34=Delete
+            var permissions = [31, 32, 33, 34];
+            selectPermissions(permissions);
+            console.log('Selected Lead Event permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT OPPORTUNITY TASKS PERMISSIONS
+        // ============================================================
+        function selectOpportunityTasksPermissions() {
+            // Opportunity Task permissions: 35=Index, 36=Create, 37=Edit, 38=Delete
+            var permissions = [35, 36, 37, 38];
+            selectPermissions(permissions);
+            console.log('Selected Opportunity Task permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT OPPORTUNITY EVENTS PERMISSIONS
+        // ============================================================
+        function selectOpportunityEventsPermissions() {
+            // Opportunity Event permissions: 39=Index, 40=Create, 41=Edit, 42=Delete
+            var permissions = [39, 40, 41, 42];
+            selectPermissions(permissions);
+            console.log('Selected Opportunity Event permissions:', currentSelectedPages);
+        }
+
+        // ============================================================
+        // SELECT PERMISSIONS HELPER
+        // ============================================================
+        function selectPermissions(permissionIds) {
+            permissionIds.forEach(function(id) {
+                if (!currentSelectedPages.includes(id)) {
+                    currentSelectedPages.push(id);
+                }
+                var checkbox = document.getElementById('page_' + id);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    var pageItem = checkbox.closest('.page-item');
+                    if (pageItem) {
+                        pageItem.classList.add('selected');
+                    }
+                }
+            });
+            $('#selectedCount').text(currentSelectedPages.length + ' pages selected');
+        }
+
+        // ============================================================
+        // SAVE USER PAGES
+        // ============================================================
+        function saveUserPages() {
+            if (saveInProgress) {
+                return;
+            }
+
+            var userId = $('#userSelect').val();
+            if (!userId) {
+                alert('Please select a user first.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to save these page access settings?')) {
+                return;
+            }
+
+            saveInProgress = true;
+            var saveButton = document.querySelector('#saveContainer .btn-primary');
+            var originalText = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            var selectedPagesString = currentSelectedPages.join(',');
+
+            console.log('Saving data:', { userId: userId, selectedPages: selectedPagesString });
+
+            $.ajax({
+                url: '@Url.Action("Save", "Permissions")',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token,
+                    userId: userId,
+                    selectedPages: selectedPagesString
+                },
+                success: function(response) {
+                    saveInProgress = false;
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalText;
+
+                    console.log('Save response:', response);
+
+                    if (response.success) {
+                        showSuccess(response.message);
+                        // Reload to show updated permissions
+                        loadUserPages();
+                    } else {
+                        alert(response.message || 'Error saving settings.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    saveInProgress = false;
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalText;
+
+                    console.error('Error details:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText,
+                        statusCode: xhr.status
+                    });
+
+                    var errorMessage = 'Error saving settings. Please try again.';
+                    if (xhr.responseText) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.message) {
+                                errorMessage = response.message;
+                            }
+                        } catch(e) {
+                            errorMessage = errorMessage + ' Server: ' + xhr.responseText.substring(0, 100);
+                        }
+                    }
+                    alert(errorMessage);
+                }
+            });
+        }
+
+        // ============================================================
+        // SHOW SUCCESS MESSAGE
+        // ============================================================
+        function showSuccess(message) {
+            var alertDiv = $('<div class="alert alert-success alert-dismissible fade show">' +
+                '<i class="fas fa-check-circle"></i> ' + message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>');
+            $('.card-header-custom').after(alertDiv);
+            setTimeout(function() {
+                alertDiv.fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+
+        // ============================================================
+        // INITIALIZE
+        // ============================================================
+        $(document).ready(function() {
+            var selectedUser = $('#userSelect').val();
+            if (selectedUser) {
+                loadUserPages();
+            }
+        });
+
+        // Make functions globally accessible
+        window.loadUserPages = loadUserPages;
+        window.togglePage = togglePage;
+        window.saveUserPages = saveUserPages;
+        window.showSuccess = showSuccess;
+        window.selectAllPages = selectAllPages;
+        window.deselectAllPages = deselectAllPages;
+        window.selectLeadPermissions = selectLeadPermissions;
+        window.selectCustomerPermissions = selectCustomerPermissions;
+        window.selectOpportunityPermissions = selectOpportunityPermissions;
+        window.selectLeadTasksPermissions = selectLeadTasksPermissions;
+        window.selectLeadEventsPermissions = selectLeadEventsPermissions;
+        window.selectOpportunityTasksPermissions = selectOpportunityTasksPermissions;
+        window.selectOpportunityEventsPermissions = selectOpportunityEventsPermissions;
+    </script>
+}

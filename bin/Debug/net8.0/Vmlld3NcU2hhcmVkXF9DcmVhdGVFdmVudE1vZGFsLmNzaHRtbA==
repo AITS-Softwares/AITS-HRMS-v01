@@ -1,0 +1,113 @@
+﻿@model Erp_Aits.Models.EventViewModel
+
+<div class="modal fade" id="createEventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0" style="padding: 20px 24px 0;">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus text-success"></i> Create Event
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <form id="createEventForm" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Event.LeadId" value="@Model.Event.LeadId" />
+                    <input type="hidden" name="Event.OpportunityId" value="@Model.Event.OpportunityId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Event Type</label>
+                                <select name="Event.EventType" class="form-control" required>
+                                    @foreach (var type in Model.EventTypeList)
+                                    {
+                                        <option value="@type" selected="@(type == Model.Event.EventType)">@type</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Event Date</label>
+                                <input type="datetime-local" name="Event.EventDate" class="form-control"
+                                       value="@Model.Event.EventDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Assigned To</label>
+                                <select name="Event.AssignedTo" class="form-control" required>
+                                    <option value="">Select User</option>
+                                    @foreach (var user in Model.UserList)
+                                    {
+                                        <option value="@user.Id">@user.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="Event.Status" class="form-control">
+                                    @foreach (var status in Model.StatusList)
+                                    {
+                                        <option value="@status" selected="@(status == Model.Event.Status)">@status</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label required">Summary</label>
+                                <textarea name="Event.Summary" class="form-control" rows="3"
+                                          placeholder="Enter event summary" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Attachment</label>
+                                <input type="file" name="AttachmentFile" class="form-control" />
+                                <small class="text-muted">Max file size: 5MB. Allowed: .pdf, .doc, .docx, .jpg, .png</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="padding: 0 24px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-success btn-sm" onclick="submitEvent()">
+                    <i class="fas fa-save"></i> Create Event
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitEvent() {
+        var formData = new FormData(document.getElementById('createEventForm'));
+
+        $.ajax({
+            url: '@Url.Action("Create", "Events")',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#createEventModal').modal('hide');
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message || 'Error creating event.');
+                }
+            },
+            error: function() {
+                alert('Error creating event. Please try again.');
+            }
+        });
+    }
+</script>

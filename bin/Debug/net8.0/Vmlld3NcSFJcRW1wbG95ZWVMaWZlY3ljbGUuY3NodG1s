@@ -1,0 +1,721 @@
+﻿@* @{
+    ViewBag.Title = "Employee Lifecycle";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Your Shortcuts</h5>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <li><a href="@Url.Action("EmployeeOnboarding", "HR")">Employee Onboarding</a></li>
+        <small class="text-muted">0 Pending</small>
+    </div> *@
+    @* <div class="col-md-3">
+        <div class="text-primary">Employee Separation</div>
+        <small class="text-muted">0 Pending</small>
+    </div> *@
+    @* <div class="col-md-3">
+        <a href="@Url.Action("EmployeeSeparation", "HR")" class="text-decoration-none text-primary">Employee Separation</a>
+        <small class="text-muted">0 Pending</small>
+    </div> *@
+    @* <div class="col-md-3">
+        <div class="text-primary">Employee Grievance</div>
+        <small class="text-muted">0 Open</small>
+    </div> *@
+@*     <div class="col-md-3">
+        <a href="@Url.Action("EmployeeGrievance", "HR")" class="text-decoration-none text-primary">Employee Grievance</a>
+        <small class="text-muted">0 Open</small>
+    </div>
+    <div class="col-md-3">
+        <div class="text-primary">Dashboard</div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <h6>New Hires (This Month)</h6>
+        <p class="text-muted small">No Data</p>
+        <button class="btn btn-sm btn-outline-secondary">View List</button>
+    </div>
+    <div class="col-md-4">
+        <h6>Exits (This Month)</h6>
+        <p class="text-muted small">No Data</p>
+        <button class="btn btn-sm btn-outline-secondary">View List</button>
+    </div>
+    <div class="col-md-4">
+        <h6>Trainings (This Week)</h6>
+        <p class="text-muted small">No Data</p>
+        <button class="btn btn-sm btn-outline-secondary">View List</button>
+    </div>
+</div>
+
+<hr />
+<h5 class="mb-3">Masters &amp; Reports</h5>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <h6>Onboarding</h6>
+        <ul class="list-unstyled">
+            <li><a href="@Url.Action("EmployeeOnboardingTemplate", "HR")">Employee Onboarding Template</a></li>
+            @* <li><a href="#">Employee Onboarding</a></li> *@
+    @*         <li><a href="@Url.Action("EmployeeOnboarding", "HR")">Employee Onboarding</a></li>
+            <li><a href="@Url.Action("EmployeeSkillMap", "HR")">Employee Skill Map</a></li>
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <h6>Grievance</h6>
+        <ul class="list-unstyled">
+            <li><a href="#">Grievance Type</a></li>
+            <li><a href="@Url.Action("EmployeeGrievance", "HR")">Employee Grievance</a></li>
+        </ul>
+    </div>
+    <div class="col-md-4"> *@
+@*         <h6>Training</h6>
+        <ul class="list-unstyled">
+            @* <li><a href="#">Training Program</a></li> *@
+@*             <li><a href="@Url.Action("TrainingProgram", "HR")">Training Program</a></li>
+            <li><a href="@Url.Action("TrainingEvent", "HR")">Training Event</a></li>
+            <li><a href="@Url.Action("TrainingFeedback", "HR")">Training Feedback</a></li>
+            <li><a href="@Url.Action("TrainingResult", "HR")">Training Result</a></li>
+        </ul>
+    </div>
+</div> *@
+
+@* <div class="row g-4">
+    <div class="col-md-4">
+        <h6>Daily Work Summary</h6>
+        <ul class="list-unstyled">
+            <li><a href="#">Daily Work Summary</a></li>
+            <li><a href="@Url.Action("DailyWorkSummaryGroup", "HR")">Daily Work Summary Group</a></li>
+            <li><a href="@Url.Action("DailyWorkSummaryReplies", "HR")">Daily Work Summary Replies</a></li>
+        </ul> *@
+@*     </div>
+    <div class="col-md-4">
+        <h6>Reports</h6> *@
+@*         <ul class="list-unstyled">
+            <li><a href="@Url.Action("EmployeeExits", "HR")">Employee Exits</a></li>
+            <li><a href="@Url.Action("EmployeeBirthday", "HR")">Employee Birthday</a></li>
+            <li><a href="@Url.Action("EmployeeInformation", "HR")">Employee Information</a></li>
+            <li><a href="@Url.Action("EmployeeAnalytics", "HR")">Employee Analytics</a></li>
+        </ul>
+    </div>
+</div> *@ 
+
+
+
+
+
+
+
+
+
+@{
+    ViewBag.Title = "Employee Lifecycle";
+}
+
+<div class="rec-wrap">
+
+    <!-- Header -->
+    <div class="rec-topbar">
+        <span class="rec-topbar-icon"><i class="fas fa-people-arrows"></i></span>
+        <div>
+            <h4>Employee Lifecycle</h4>
+            <p>Onboarding, separation, grievance and training — the full journey</p>
+        </div>
+    </div>
+
+    <!-- Lifecycle journey path -->
+    <div class="rec-journey">
+        <a href="@Url.Action("EmployeeOnboarding", "HR")" class="rec-stop rec-stop-teal">
+            <span class="rec-stop-dot"><i class="fas fa-user-plus"></i></span>
+            <span class="rec-stop-label">Employee Onboarding</span>
+            <span class="rec-stop-note">0 Pending</span>
+        </a>
+        <a href="@Url.Action("EmployeeSeparation", "HR")" class="rec-stop rec-stop-coral">
+            <span class="rec-stop-dot"><i class="fas fa-person-walking-arrow-right"></i></span>
+            <span class="rec-stop-label">Employee Separation</span>
+            <span class="rec-stop-note">0 Pending</span>
+        </a>
+        <a href="@Url.Action("EmployeeGrievance", "HR")" class="rec-stop rec-stop-amber">
+            <span class="rec-stop-dot"><i class="fas fa-triangle-exclamation"></i></span>
+            <span class="rec-stop-label">Employee Grievance</span>
+            <span class="rec-stop-note">0 Open</span>
+        </a>
+        <div class="rec-stop rec-stop-indigo rec-stop-end">
+            <span class="rec-stop-dot"><i class="fas fa-chart-line"></i></span>
+            <span class="rec-stop-label">Dashboard</span>
+            <span class="rec-stop-note">Full view</span>
+        </div>
+    </div>
+
+    <!-- This month / this week -->
+    <div class="rec-summary-row">
+        <div class="rec-summary-card rec-fill-teal">
+            <div class="rec-summary-head">
+                <span class="rec-summary-icon"><i class="fas fa-user-plus"></i></span>
+                <h6>New Hires (This Month)</h6>
+            </div>
+            <div class="rec-no-data">
+                <span class="rec-no-data-icon-wrap"><i class="fas fa-inbox"></i></span>
+                <p>No data</p>
+            </div>
+            <button class="rec-outline-btn">View List</button>
+        </div>
+
+        <div class="rec-summary-card rec-fill-coral">
+            <div class="rec-summary-head">
+                <span class="rec-summary-icon"><i class="fas fa-door-open"></i></span>
+                <h6>Exits (This Month)</h6>
+            </div>
+            <div class="rec-no-data">
+                <span class="rec-no-data-icon-wrap"><i class="fas fa-inbox"></i></span>
+                <p>No data</p>
+            </div>
+            <button class="rec-outline-btn">View List</button>
+        </div>
+
+        <div class="rec-summary-card rec-fill-purple">
+            <div class="rec-summary-head">
+                <span class="rec-summary-icon"><i class="fas fa-graduation-cap"></i></span>
+                <h6>Trainings (This Week)</h6>
+            </div>
+            <div class="rec-no-data">
+                <span class="rec-no-data-icon-wrap"><i class="fas fa-inbox"></i></span>
+                <p>No data</p>
+            </div>
+            <button class="rec-outline-btn">View List</button>
+        </div>
+    </div>
+
+    <!-- Masters & Reports -->
+    <h5 class="rec-section-title">Masters &amp; Reports</h5>
+
+    <div class="rec-directory">
+        <div class="rec-dir-col rec-fill-teal">
+            <div class="rec-dir-head">
+                <span class="rec-dir-icon"><i class="fas fa-user-plus"></i></span>
+                <h6>Onboarding</h6>
+            </div>
+            <a href="@Url.Action("EmployeeOnboardingTemplate", "HR")">Employee Onboarding Template</a>
+            @* <li><a href="#">Employee Onboarding</a></li> *@
+            <a href="@Url.Action("EmployeeOnboarding", "HR")">Employee Onboarding</a>
+            <a href="@Url.Action("EmployeeSkillMap", "HR")">Employee Skill Map</a>
+        </div>
+
+        <div class="rec-dir-col rec-fill-amber">
+            <div class="rec-dir-head">
+                <span class="rec-dir-icon"><i class="fas fa-triangle-exclamation"></i></span>
+                <h6>Grievance</h6>
+            </div>
+            <a href="@Url.Action("GrievanceType", "HR")">Grievance Type</a>
+            <a href="@Url.Action("EmployeeGrievance", "HR")">Employee Grievance</a>
+        </div>
+
+        <div class="rec-dir-col rec-fill-purple">
+            <div class="rec-dir-head">
+                <span class="rec-dir-icon"><i class="fas fa-graduation-cap"></i></span>
+                <h6>Training</h6>
+            </div>
+            @* <li><a href="#">Training Program</a></li> *@
+            <a href="@Url.Action("TrainingProgram", "HR")">Training Program</a>
+            <a href="@Url.Action("TrainingEvent", "HR")">Training Event</a>
+            <a href="@Url.Action("TrainingFeedback", "HR")">Training Feedback</a>
+            <a href="@Url.Action("TrainingResult", "HR")">Training Result</a>
+        </div>
+    </div>
+
+    <div class="rec-directory rec-directory-2col">
+        <div class="rec-dir-col rec-fill-blue">
+            <div class="rec-dir-head">
+                <span class="rec-dir-icon"><i class="fas fa-clipboard-list"></i></span>
+                <h6>Daily Work Summary</h6>
+            </div>
+            <a href="#">Daily Work Summary</a>
+            <a href="@Url.Action("DailyWorkSummaryGroup", "HR")">Daily Work Summary Group</a>
+            <a href="@Url.Action("DailyWorkSummaryReplies", "HR")">Daily Work Summary Replies</a>
+        </div>
+
+        <div class="rec-dir-col rec-fill-navy">
+            <div class="rec-dir-head">
+                <span class="rec-dir-icon"><i class="fas fa-chart-simple"></i></span>
+                <h6>Reports</h6>
+            </div>
+            <a href="@Url.Action("EmployeeExits", "HR")">Employee Exits</a>
+            <a href="@Url.Action("EmployeeBirthday", "HR")">Employee Birthday</a>
+            <a href="@Url.Action("EmployeeInformation", "HR")">Employee Information</a>
+            <a href="@Url.Action("EmployeeAnalytics", "HR")">Employee Analytics</a>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    :root {
+        --ink: #16213e;
+        --indigo: #4f46e5;
+        --indigo-bg: #dcdafb;
+        --indigo-tx: #4338ca;
+        --teal: #0d9488;
+        --teal-bg: #bdf0e6;
+        --teal-tx: #0f766e;
+        --coral: #e11d48;
+        --coral-bg: #fbccd6;
+        --coral-tx: #be123c;
+        --amber: #d97706;
+        --amber-bg: #fce1ab;
+        --amber-tx: #b45309;
+        --purple: #7c3aed;
+        --purple-bg: #ddccfb;
+        --purple-tx: #6d28d9;
+        --blue: #2563eb;
+        --blue-bg: #c9dcfd;
+        --blue-tx: #1d4ed8;
+        --navy: #334155;
+        --navy-bg: #cbd5e1;
+        --navy-tx: #1e293b;
+        --bg: #f7f7fb;
+        --border: #e6e8f0;
+        --text: #16213e;
+        --text-muted: #6b7280;
+    }
+
+    .rec-wrap {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 4px 4px 24px;
+    }
+
+    /* ============ HEADER ============ */
+    .rec-topbar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 22px;
+        margin: 6px 0 22px;
+        background: linear-gradient(120deg, #eef0ff 0%, #f3ebfe 55%, #ffffff 100%);
+        border: 1px solid #e3e0fb;
+        border-radius: 16px;
+    }
+
+    .rec-topbar-icon {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--indigo), var(--purple));
+        color: #fff;
+        border-radius: 12px;
+        font-size: 18px;
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.30);
+    }
+
+    .rec-topbar h4 {
+        margin: 0 0 3px;
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        color: var(--indigo-tx);
+    }
+
+    .rec-topbar p {
+        margin: 0;
+        font-size: 13px;
+        color: #5b5f78;
+    }
+
+    /* ============ JOURNEY PATH ============ */
+    .rec-journey {
+        position: relative;
+        display: flex;
+        gap: 8px;
+        padding: 8px 6px 26px;
+        margin-bottom: 8px;
+    }
+
+        .rec-journey::before {
+            content: '';
+            position: absolute;
+            top: 38px;
+            left: 68px;
+            right: 68px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--teal), var(--coral), var(--amber), var(--indigo));
+            opacity: 0.30;
+            z-index: 0;
+        }
+
+    .rec-stop {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        gap: 8px;
+    }
+
+    .rec-stop-dot {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: var(--dot-color, var(--indigo));
+        border: 2px solid var(--dot-color, var(--indigo));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        box-shadow: 0 6px 16px var(--dot-shadow, rgba(79, 70, 229, 0.28));
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .rec-stop:hover .rec-stop-dot {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 9px 20px var(--dot-shadow, rgba(79, 70, 229, 0.34));
+    }
+
+    .rec-stop-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .rec-stop-note {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--dot-color, var(--indigo));
+        background: var(--dot-bg, var(--indigo-bg));
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+
+    .rec-stop-teal {
+        --dot-color: var(--teal);
+        --dot-bg: var(--teal-bg);
+        --dot-shadow: rgba(13, 148, 136, 0.28);
+    }
+
+    .rec-stop-coral {
+        --dot-color: var(--coral);
+        --dot-bg: var(--coral-bg);
+        --dot-shadow: rgba(225, 29, 72, 0.28);
+    }
+
+    .rec-stop-amber {
+        --dot-color: var(--amber);
+        --dot-bg: var(--amber-bg);
+        --dot-shadow: rgba(217, 119, 6, 0.28);
+    }
+
+    .rec-stop-indigo {
+        --dot-color: var(--indigo);
+        --dot-bg: var(--indigo-bg);
+        --dot-shadow: rgba(79, 70, 229, 0.28);
+    }
+
+    .rec-stop-end {
+        cursor: default;
+    }
+
+        .rec-stop-end .rec-stop-dot:hover {
+            transform: none;
+            background: var(--dot-color, var(--indigo));
+            box-shadow: 0 6px 16px var(--dot-shadow, rgba(79, 70, 229, 0.28));
+        }
+
+    /* ============ SUMMARY CARDS ============ */
+    .rec-summary-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .rec-summary-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 20px 18px;
+        overflow: hidden;
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+        .rec-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--fill-color, var(--indigo));
+        }
+
+        .rec-summary-card:hover {
+            box-shadow: 0 10px 22px rgba(22, 33, 62, 0.09);
+            transform: translateY(-2px);
+        }
+
+    .rec-summary-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2px;
+    }
+
+    .rec-summary-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        font-size: 14px;
+        background: var(--fill-color, var(--indigo));
+        color: #fff;
+    }
+
+    .rec-summary-head h6 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 13.5px;
+        color: var(--ink);
+    }
+
+    /* ---- empty state: small badge, not a full color panel ---- */
+    .rec-no-data {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 20px 0 14px;
+        background: #fafbfd;
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+
+    .rec-no-data-icon-wrap {
+        width: 34px;
+        height: 34px;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--fill-bg, #eef0f5);
+    }
+
+        .rec-no-data-icon-wrap i {
+            font-size: 14px;
+            color: var(--fill-tx, #94a0b8);
+        }
+
+    .rec-no-data p {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .rec-outline-btn {
+        width: 100%;
+        background: #fff;
+        border: 1.5px solid var(--fill-color, var(--indigo));
+        color: var(--fill-tx, var(--indigo-tx));
+        font-size: 13px;
+        font-weight: 700;
+        padding: 9px;
+        border-radius: 9px;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+        .rec-outline-btn:hover {
+            background: var(--fill-color, var(--indigo));
+            color: #fff;
+        }
+
+    /* fill helpers */
+    .rec-fill-teal {
+        --fill-color: var(--teal);
+        --fill-bg: var(--teal-bg);
+        --fill-tx: var(--teal-tx);
+    }
+
+    .rec-fill-coral {
+        --fill-color: var(--coral);
+        --fill-bg: var(--coral-bg);
+        --fill-tx: var(--coral-tx);
+    }
+
+    .rec-fill-amber {
+        --fill-color: var(--amber);
+        --fill-bg: var(--amber-bg);
+        --fill-tx: var(--amber-tx);
+    }
+
+    .rec-fill-purple {
+        --fill-color: var(--purple);
+        --fill-bg: var(--purple-bg);
+        --fill-tx: var(--purple-tx);
+    }
+
+    .rec-fill-blue {
+        --fill-color: var(--blue);
+        --fill-bg: var(--blue-bg);
+        --fill-tx: var(--blue-tx);
+    }
+
+    .rec-fill-navy {
+        --fill-color: var(--navy);
+        --fill-bg: var(--navy-bg);
+        --fill-tx: var(--navy-tx);
+    }
+
+    /* ============ DIRECTORY ============ */
+    .rec-section-title {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--ink);
+        margin: 0 0 14px;
+    }
+
+    .rec-directory {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .rec-directory-2col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rec-dir-col {
+        position: relative;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 18px 14px;
+        overflow: hidden;
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+        .rec-dir-col::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--fill-color, var(--indigo));
+        }
+
+        .rec-dir-col:hover {
+            box-shadow: 0 10px 22px rgba(22, 33, 62, 0.08);
+            transform: translateY(-2px);
+        }
+
+    .rec-dir-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .rec-dir-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--fill-color, var(--indigo));
+        color: #fff;
+        border-radius: 8px;
+        font-size: 12px;
+    }
+
+    .rec-dir-head h6 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--ink);
+    }
+
+    .rec-dir-col a {
+        position: relative;
+        display: block;
+        color: #4b5262;
+        text-decoration: none;
+        font-size: 13.5px;
+        padding: 6px 0 6px 12px;
+        border-left: 2px solid transparent;
+        margin-bottom: 1px;
+        transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+        border-radius: 0 6px 6px 0;
+    }
+
+        .rec-dir-col a:hover {
+            color: var(--fill-tx, var(--indigo-tx));
+            border-left-color: var(--fill-color, var(--indigo));
+            background: var(--fill-bg, #f4f5f9);
+        }
+
+    @@media (max-width: 1100px) {
+        .rec-journey {
+            flex-wrap: wrap;
+        }
+
+            .rec-journey::before {
+                display: none;
+            }
+
+        .rec-stop {
+            flex: 0 0 calc(50% - 8px);
+        }
+
+        .rec-summary-row {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .rec-directory,
+        .rec-directory-2col {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .rec-topbar {
+            padding: 16px;
+        }
+
+        .rec-stop {
+            flex: 0 0 100%;
+            flex-direction: row;
+            text-align: left;
+            justify-content: flex-start;
+        }
+
+        .rec-stop-dot {
+            width: 46px;
+            height: 46px;
+            font-size: 16px;
+        }
+
+        .rec-summary-row {
+            grid-template-columns: 1fr;
+        }
+
+        .rec-directory,
+        .rec-directory-2col {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

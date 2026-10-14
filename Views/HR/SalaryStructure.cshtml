@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Salary Structure";
+    var salaryStructures = ViewBag.SalaryStructures as List<Erp_Aits.Models.SalaryStructureListItem> ?? new List<Erp_Aits.Models.SalaryStructureListItem>();
 }
 
 <style>
@@ -111,6 +112,7 @@
         margin-bottom: 12px;
         font-size: 14px;
     }
+    .erp-table { width:100%; border-collapse:collapse; }.erp-table th { background:#f3f4f6; color:#64748b; text-align:left; padding:10px 12px; font-size:13px; font-weight:650; }.erp-table td { padding:12px; border-top:1px solid #e5e7eb; font-size:14px; }.erp-table a { color:#172033; font-weight:650; text-decoration:none; }
 </style>
 
 <div class="erp-list-page">
@@ -144,12 +146,6 @@
             <button type="button" class="erp-btn erp-btn-light">Last Updated On</button>
         </form>
 
-        <div class="empty-state">
-            <div class="empty-icon">☷</div>
-            <div class="empty-text">You haven't created a Salary Structure yet</div>
-            <a href="@Url.Action("CreateSalaryStructure", "HR")" class="erp-btn erp-btn-light">
-                Create your first Salary Structure
-            </a>
-        </div>
+        <table class="erp-table"><thead><tr><th></th><th>ID</th><th>Status</th><th>Is Active</th><th>Modified</th></tr></thead><tbody>@if (salaryStructures.Any()) { foreach (var item in salaryStructures) { <tr><td><input type="checkbox" /></td><td><a href="@Url.Action("SalaryStructureDetails", "HR", new { id = item.Name })">@item.Name</a></td><td>@item.Status</td><td>@(item.IsActive ? "Yes" : "No")</td><td>@item.Modified</td></tr> } } else { <tr><td colspan="5" class="empty-row">No Salary Structure found.</td></tr> }</tbody></table>
     </main>
 </div>

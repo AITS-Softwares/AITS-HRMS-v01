@@ -1,0 +1,214 @@
+﻿@* @model Erp_Aits.Models.HRShiftSchedule
+@{
+    ViewBag.Title = "New Shift Schedule";
+}
+
+<form method="post" action="/HR/CreateShiftSchedule">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Schedule</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <label class="form-label">Name *</label>
+        <input name="Name" class="form-control" required autofocus />
+    </div>
+
+    <div class="card p-4">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                <input name="ShiftType" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Frequency *</label>
+                <select name="Frequency" class="form-select">
+                    <option>Every Day</option>
+                    <option selected>Every Week</option>
+                    <option>Every Month</option>
+                </select>
+            </div>
+        </div>
+
+        <label class="form-label">Repeat On Days</label>
+        <table class="table table-bordered align-middle mb-1" id="daysTable">
+            <thead>
+                <tr>
+                    <th style="width:40px"><input type="checkbox" disabled /></th>
+                    <th>Day</th>
+                    <th style="width:50px"></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addDayRow()">+ Add Row</button>
+    </div>
+</form>
+
+<script>
+    var dayOptions = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+    function addDayRow() {
+        var tbody = document.getElementById('daysTable').querySelector('tbody');
+        var row = document.createElement('tr');
+
+        var options = dayOptions.map(d => `<option value="${d}">${d}</option>`).join('');
+
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td>
+                <select name="Days" class="form-select form-select-sm border-0">
+                    ${options}
+                </select>
+            </td>
+            <td><i class="fas fa-pen text-muted" style="cursor:pointer"></i></td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    // Pre-add one row like the screenshot shows (Monday by default)
+    addDayRow();
+</script> *@
+
+
+
+@model Erp_Aits.Models.HRShiftSchedule
+@{
+    ViewBag.Title = "New Shift Schedule";
+    var shiftTypes = ViewBag.ShiftTypes as List<string> ?? new List<string>();
+    string[] daysList = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    var rows = Model.Days.Any() ? Model.Days : new List<Erp_Aits.Models.HRShiftScheduleDay> { new Erp_Aits.Models.HRShiftScheduleDay { Day = "Monday" } };
+}
+
+<form method="post" action="/HR/CreateShiftSchedule">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Schedule</h4>
+        <div>
+            <a href="@Url.Action("HRShiftScheduleList", "HR")" class="btn btn-outline-secondary btn-sm me-2">Back to List</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+    }
+
+    <div class="card p-4 mb-3">
+        <label class="form-label">Name *</label>
+        <input name="Name" class="form-control" required autofocus placeholder="e.g. Weekly Morning Schedule" value="@Model.Name" />
+    </div>
+
+    <div class="card p-4" style="overflow: visible !important;">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                <select name="ShiftType" class="form-select" required>
+                    <option value="">-- Select Shift Type --</option>
+                    @foreach (var st in shiftTypes)
+                    {
+                        <option value="@st" selected="@(Model.ShiftType == st)">@st</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Exact ERPNext Frequency Options -->
+            <div class="col-md-6">
+                <label class="form-label">Frequency *</label>
+                <select name="Frequency" class="form-select" required>
+                    @foreach (var f in new[] { "Every Week", "Every 2 Weeks", "Every 3 Weeks", "Every 4 Weeks" })
+                    {
+                        <option value="@f" selected="@(Model.Frequency == f || (string.IsNullOrWhiteSpace(Model.Frequency) && f == "Every Week"))">@f</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <label class="form-label mt-3">Repeat On Days</label>
+
+        <table class="table table-bordered align-middle mb-2" style="overflow: visible !important;">
+            <thead class="bg-light">
+                <tr>
+                    <th style="width:40px"><input type="checkbox" disabled /></th>
+                    <th>Day</th>
+                    <th style="width:70px; text-align:center;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="daysTableBody">
+                @{
+                    int i = 0;
+                }
+                @foreach (var rowDay in rows)
+                {
+                    string defaultDay = string.IsNullOrWhiteSpace(rowDay.Day) ? daysList[i % daysList.Length] : rowDay.Day;
+                    string summaryId = $"summaryText_{i}";
+                    <tr>
+                        <td><input type="checkbox" name="SelectedRows" value="@i" /></td>
+                        <td style="position: relative;">
+                            <details style="position: static;">
+                                <summary class="list-unstyled fw-medium text-dark" style="cursor:pointer;" id="@summaryId">
+                                    @defaultDay
+                                </summary>
+
+                                <div class="card shadow bg-white p-3 border" style="position: absolute; left: 0; top: 100%; z-index: 1050; width: 280px; margin-top: 4px;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold small text-muted">Editing Row #@(i + 1)</span>
+                                        <button type="button" class="btn-close btn-sm" onclick="this.closest('details').removeAttribute('open');"></button>
+                                    </div>
+                                    <label class="form-label small text-muted">Day</label>
+                                    <select name="Days" class="form-select form-select-sm" onchange="document.getElementById('@summaryId').innerText = this.value; this.closest('details').removeAttribute('open');">
+                                        @foreach (var dayOption in daysList)
+                                        {
+                                            <option value="@dayOption" selected="@(dayOption == defaultDay)">@dayOption</option>
+                                        }
+                                    </select>
+                                </div>
+                            </details>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-light border" onclick="let d = this.closest('tr').querySelector('details'); if(d.hasAttribute('open')) { d.removeAttribute('open'); } else { d.setAttribute('open', ''); }" title="Edit Day">
+                                Edit
+                            </button>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-sm btn-light border text-secondary px-3" onclick="addDayRow()">Add Row</button>
+    </div>
+</form>
+
+<script>
+    const dayOptions = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    let rowIndex = @rows.Count;
+
+    function addDayRow() {
+        const tbody = document.getElementById('daysTableBody');
+        const summaryId = `summaryText_${rowIndex}`;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" name="SelectedRows" value="${rowIndex}" /></td>
+            <td style="position: relative;">
+                <details style="position: static;">
+                    <summary class="list-unstyled fw-medium text-dark" style="cursor:pointer;" id="${summaryId}">Monday</summary>
+                    <div class="card shadow bg-white p-3 border" style="position: absolute; left: 0; top: 100%; z-index: 1050; width: 280px; margin-top: 4px;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-muted">Editing Row #${rowIndex + 1}</span>
+                            <button type="button" class="btn-close btn-sm" onclick="this.closest('details').removeAttribute('open');"></button>
+                        </div>
+                        <label class="form-label small text-muted">Day</label>
+                        <select name="Days" class="form-select form-select-sm" onchange="document.getElementById('${summaryId}').innerText = this.value; this.closest('details').removeAttribute('open');">
+                            ${dayOptions.map(day => `<option value="${day}">${day}</option>`).join('')}
+                        </select>
+                    </div>
+                </details>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-light border" onclick="let d = this.closest('tr').querySelector('details'); if(d.hasAttribute('open')) { d.removeAttribute('open'); } else { d.setAttribute('open', ''); }" title="Edit Day">Edit</button>
+            </td>`;
+        tbody.appendChild(row);
+        rowIndex++;
+    }
+</script>

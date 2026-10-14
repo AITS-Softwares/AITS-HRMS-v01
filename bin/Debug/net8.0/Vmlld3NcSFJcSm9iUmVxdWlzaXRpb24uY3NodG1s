@@ -1,0 +1,45 @@
+﻿@model List<Erp_Aits.Models.JobRequisition>
+@{
+    ViewBag.Title = "Job Requisition";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Job Requisition</h4>
+    <a href="@Url.Action("CreateJobRequisition", "HR")" class="btn btn-dark btn-sm">+ Add Job Requisition</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Designation</th>
+            <th>Status</th>
+            <th>Requested By</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr style="cursor:pointer" onclick="window.location='@Url.Action("JobRequisitionDetails", "HR", new { id = r.Id })'">
+                <td>@r.Code</td>
+                <td>@r.Designation</td>
+                <td>@r.Status</td>
+                <td>@r.RequestedBy</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-5">No job requisitions found.</p>
+}

@@ -1,0 +1,245 @@
+@model Erp_Aits.Models.Appraisal
+@{
+    ViewBag.Title = "Appraisal " + Model.Id;
+    bool isDraft = Model.DocStatus == 0;
+    bool isSubmitted = Model.DocStatus == 1;
+    bool isCancelled = Model.DocStatus == 2;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>ERPNext Validation:</strong> @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-controller="HR" asp-action="UpdateAppraisal" method="post" id="appraisalForm">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1">Appraisal - @Model.Employee</h4>
+            <small class="text-muted">ERPNext ID: @(string.IsNullOrWhiteSpace(Model.ErpNextId) ? "-" : Model.ErpNextId)</small>
+            <span class="badge @(isCancelled ? "bg-danger" : isSubmitted ? "bg-success" : "bg-secondary") ms-2">
+                @(isCancelled ? "Cancelled" : isSubmitted ? "Submitted" : "Draft")
+            </span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Appraisal", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            @if (isDraft)
+            {
+                <button type="submit" class="btn btn-outline-dark btn-sm">Save</button>
+            }
+        </div>
+    </div>
+
+    <fieldset @(isDraft ? "" : "disabled")>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overviewTab">Overview</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#kraTab">KRAs</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#selfTab">Self Appraisal</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="overviewTab">
+                <div class="card p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Series</label>
+                            <input class="form-control" value="HR-APR-.YYYY.-" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Company</label>
+                            <input asp-for="Company" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Employee</label>
+                            <input asp-for="Employee" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Appraisal Cycle</label>
+                            <input asp-for="AppraisalCycle" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Employee Name</label>
+                            <input asp-for="EmployeeName" class="form-control" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Appraisal Template</label>
+                            <input asp-for="AppraisalTemplate" class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="kraTab">
+                <div class="card p-4">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" checked="@Model.RateGoalsManually" disabled />
+                        <label class="form-check-label">Rate Goals Manually</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">KRA vs Goals</h6>
+                        @if (isDraft)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addKraRow()">Add Row</button>
+                        }
+                    </div>
+
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">No.</th>
+                                <th>KRA</th>
+                                <th>Weightage (%)</th>
+                                <th>Goal Completion (%)</th>
+                                <th>Goal Score</th>
+                                <th style="width:50px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="kraRows">
+                            @for (int i = 0; i < Model.Kras.Count; i++)
+                            {
+                                <tr>
+                                    <td class="row-number">@(i + 1)</td>
+                                    <td><input name="KraNames" value="@Model.Kras[i].Kra" class="form-control form-control-sm" /></td>
+                                    <td><input name="KraWeightages" value="@Model.Kras[i].Weightage" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                                    <td><input name="KraGoalCompletions" value="@Model.Kras[i].GoalCompletion" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                                    <td><input name="KraGoalScores" value="@Model.Kras[i].GoalScore" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">x</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="feedbackTab">
+                <div class="card p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label">Average Feedback Score</label><input class="form-control" value="@Model.AvgFeedbackScore" readonly /></div>
+                        <div class="col-md-6"><label class="form-label">Final Score</label><input class="form-control" value="@Model.FinalScore" readonly /></div>
+                        <div class="col-md-6"><label class="form-label">Goal Score</label><input class="form-control" value="@Model.GoalScorePercentage" readonly /></div>
+                        <div class="col-md-6"><label class="form-label">Self Appraisal Score</label><input class="form-control" value="@Model.TotalSelfScore" readonly /></div>
+                        <div class="col-md-12"><label class="form-label">Remarks</label><textarea asp-for="Remarks" class="form-control" rows="5"></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="selfTab">
+                <div class="card p-4 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Ratings</h6>
+                        @if (isDraft)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSelfRow()">Add Row</button>
+                        }
+                    </div>
+
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">No.</th>
+                                <th>Criteria</th>
+                                <th>Weightage (%)</th>
+                                <th>Rating</th>
+                                <th style="width:50px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="selfRows">
+                            @for (int i = 0; i < Model.SelfRatings.Count; i++)
+                            {
+                                <tr>
+                                    <td class="row-number">@(i + 1)</td>
+                                    <td><input name="RatingCriteria" value="@Model.SelfRatings[i].Criteria" class="form-control form-control-sm" /></td>
+                                    <td><input name="RatingWeightages" value="@Model.SelfRatings[i].Weightage" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                                    <td><input name="RatingValues" value="@Model.SelfRatings[i].Rating" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">x</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card p-4">
+                    <h6 class="mb-3">Reflections</h6>
+                    <textarea asp-for="Reflections" class="form-control" rows="6"></textarea>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+<div class="d-flex justify-content-end gap-2 mt-3">
+    @if (isDraft && !string.IsNullOrWhiteSpace(Model.ErpNextId))
+    {
+        <form asp-controller="HR" asp-action="SubmitAppraisal" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-dark btn-sm" onclick="return confirm('Submit this Appraisal in ERPNext and HRMS?');">Submit</button>
+        </form>
+    }
+
+    @if (isSubmitted)
+    {
+        <form asp-controller="HR" asp-action="CancelAppraisal" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this submitted Appraisal in ERPNext and HRMS?');">Cancel</button>
+        </form>
+    }
+</div>
+
+<script>
+    function renumberRows(tbodyId) {
+        document.querySelectorAll('#' + tbodyId + ' tr').forEach(function (row, index) {
+            const cell = row.querySelector('.row-number');
+            if (cell) cell.textContent = index + 1;
+        });
+    }
+
+    function removeRow(button) {
+        const row = button.closest('tr');
+        const tbody = row.closest('tbody');
+        row.remove();
+        renumberRows(tbody.id);
+    }
+
+    function addKraRow() {
+        const tbody = document.getElementById('kraRows');
+        tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="row-number"></td>
+                <td><input name="KraNames" class="form-control form-control-sm" /></td>
+                <td><input name="KraWeightages" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                <td><input name="KraGoalCompletions" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                <td><input name="KraGoalScores" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">x</button></td>
+            </tr>`);
+        renumberRows('kraRows');
+    }
+
+    function addSelfRow() {
+        const tbody = document.getElementById('selfRows');
+        tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="row-number"></td>
+                <td><input name="RatingCriteria" class="form-control form-control-sm" /></td>
+                <td><input name="RatingWeightages" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                <td><input name="RatingValues" type="number" step="0.01" class="form-control form-control-sm" /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)">x</button></td>
+            </tr>`);
+        renumberRows('selfRows');
+    }
+</script>

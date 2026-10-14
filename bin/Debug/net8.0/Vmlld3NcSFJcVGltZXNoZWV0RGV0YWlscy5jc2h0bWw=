@@ -1,0 +1,148 @@
+@model Erp_Aits.Models.TimeSheet
+@{
+    ViewBag.Title = "Timesheet " + Model.Id;
+    bool isSubmitted = string.Equals(Model.Status, "Submitted", StringComparison.OrdinalIgnoreCase);
+    bool isCancelled = string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool canEdit = !isSubmitted && !isCancelled;
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var customers = ViewBag.Customers as List<string> ?? new List<string>();
+    var currencies = ViewBag.Currencies as List<string> ?? new List<string>();
+    var employees = ViewBag.Employees as List<string> ?? new List<string>();
+    var projects = ViewBag.Projects as List<string> ?? new List<string>();
+    var activityTypes = ViewBag.ActivityTypes as List<string> ?? new List<string>();
+    var tasks = ViewBag.Tasks as List<string> ?? new List<string>();
+    var logs = Model.TimeLogs.Any() ? Model.TimeLogs.ToList() : new List<Erp_Aits.Models.TimeSheetDetail> { new Erp_Aits.Models.TimeSheetDetail() };
+    if (canEdit)
+    {
+        logs.AddRange(new[]
+        {
+            new Erp_Aits.Models.TimeSheetDetail(),
+            new Erp_Aits.Models.TimeSheetDetail(),
+            new Erp_Aits.Models.TimeSheetDetail()
+        });
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0 d-inline-block me-2">Timesheet #@Model.Id</h4>
+        <span class="badge bg-success-subtle text-success">@Model.Status</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("Timesheet", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+        @if (canEdit)
+        {
+            <button id="primaryActionButton" type="submit" form="timesheetForm" name="actionCommand" value="Submit" class="btn btn-success btn-sm">Submit</button>
+            <form method="post" action="@Url.Action("DeleteTimesheet", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Timesheet from ERPNext and HRMS?');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+            </form>
+        }
+        @if (isSubmitted)
+        {
+            <form method="post" action="@Url.Action("UpdateTimesheet", "HR", new { id = Model.Id })" onsubmit="return confirm('Cancel this submitted Timesheet in ERPNext and HRMS?');">
+                <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-danger btn-sm">Cancel</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+
+<form id="timesheetForm" method="post" action="@Url.Action("UpdateTimesheet", "HR", new { id = Model.Id })">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ErpNextId" value="@Model.ErpNextId" />
+    <input type="hidden" name="Series" value="@Model.Series" />
+    <input type="hidden" name="Status" value="@Model.Status" />
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Series</label><input class="form-control" value="@Model.Series" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Status</label><input class="form-control" value="@Model.Status" readonly /></div>
+            <div class="col-md-6">
+                <label class="form-label">Company</label>
+                @if (canEdit) { <select name="Company" class="form-select">@foreach (var x in companies) { <option value="@x" selected="@(Model.Company == x)">@x</option> }</select> }
+                else { <input class="form-control" value="@Model.Company" readonly /> }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Project</label>
+                @if (canEdit) { <select name="Project" class="form-select"><option value="">-- Select Project --</option>@foreach (var x in projects) { <option value="@x" selected="@(Model.Project == x)">@x</option> }</select> }
+                else { <input class="form-control" value="@Model.Project" readonly /> }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Customer</label>
+                @if (canEdit) { <select name="Customer" class="form-select"><option value="">-- Select Customer --</option>@foreach (var x in customers) { <option value="@x" selected="@(Model.Customer == x)">@x</option> }</select> }
+                else { <input class="form-control" value="@Model.Customer" readonly /> }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Currency</label>
+                @if (canEdit) { <select name="Currency" class="form-select">@foreach (var x in currencies) { <option value="@x" selected="@(Model.Currency == x)">@x</option> }</select> }
+                else { <input class="form-control" value="@Model.Currency" readonly /> }
+            </div>
+            <div class="col-md-6"><label class="form-label">Exchange Rate</label><input name="ExchangeRate" class="form-control" value="@Model.ExchangeRate" readonly="@(!canEdit)" /></div>
+            <div class="col-md-6">
+                <label class="form-label">Employee</label>
+                @if (canEdit) { <select name="Employee" class="form-select"><option value="">-- Select Employee --</option>@foreach (var x in employees) { <option value="@x" selected="@(Model.Employee == x)">@x</option> }</select> }
+                else { <input class="form-control" value="@Model.Employee" readonly /> }
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6>Time Logs</h6>
+        <table class="table table-bordered align-middle mb-1">
+            <thead><tr><th>Activity Type</th><th>From Time</th><th>To Time</th><th>Hrs</th><th>Project</th><th>Task</th><th>Billable</th></tr></thead>
+            <tbody>
+                @for (int i = 0; i < logs.Count; i++)
+                {
+                    var log = logs[i];
+                    <tr>
+                        <td>
+                            @if (canEdit) { <select name="TimeLogs[@i].ActivityType" class="form-select"><option value="">-- Select --</option>@foreach (var x in activityTypes) { <option value="@x" selected="@(log.ActivityType == x)">@x</option> }</select> }
+                            else { @log.ActivityType }
+                        </td>
+                        <td><input name="TimeLogs[@i].FromTime" type="datetime-local" class="form-control" value="@(log.FromTime?.ToString("yyyy-MM-ddTHH:mm"))" readonly="@(!canEdit)" /></td>
+                        <td><input name="TimeLogs[@i].ToTime" type="datetime-local" class="form-control" value="@(log.ToTime?.ToString("yyyy-MM-ddTHH:mm"))" readonly="@(!canEdit)" /></td>
+                        <td><input name="TimeLogs[@i].Hrs" class="form-control" value="@log.Hrs" readonly="@(!canEdit)" /></td>
+                        <td>
+                            @if (canEdit) { <select name="TimeLogs[@i].Project" class="form-select"><option value="">-- Select --</option>@foreach (var x in projects) { <option value="@x" selected="@(log.Project == x)">@x</option> }</select> }
+                            else { @log.Project }
+                        </td>
+                        <td>
+                            @if (canEdit) { <select name="TimeLogs[@i].Task" class="form-select"><option value="">-- Select --</option>@foreach (var x in tasks) { <option value="@x" selected="@(log.Task == x)">@x</option> }</select> }
+                            else { @log.Task }
+                        </td>
+                        <td class="text-center"><input name="TimeLogs[@i].IsBillable" type="checkbox" value="true" checked="@log.IsBillable" disabled="@(!canEdit)" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <label class="form-label">Note</label>
+        <textarea name="Note" class="form-control" rows="4" readonly="@(!canEdit)">@Model.Note</textarea>
+    </div>
+</form>
+
+<script>
+    (function () {
+        var form = document.getElementById("timesheetForm");
+        var primary = document.getElementById("primaryActionButton");
+        if (!form || !primary) return;
+
+        var markDirty = function () {
+            primary.textContent = "Save";
+            primary.value = "Save";
+            primary.classList.remove("btn-success");
+            primary.classList.add("btn-dark");
+        };
+
+        form.querySelectorAll("input, select, textarea").forEach(function (field) {
+            if (field.type !== "hidden") {
+                field.addEventListener("change", markDirty);
+                field.addEventListener("input", markDirty);
+            }
+        });
+    })();
+</script>

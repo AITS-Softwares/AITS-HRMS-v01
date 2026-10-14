@@ -1,69 +1,46 @@
-﻿@model Erp_Aits.Models.EmployeePromotion
+@model Erp_Aits.Models.EmployeePromotion
 @{
-    ViewBag.Title = "Employee Promotion " + Model.Id;
+    ViewBag.Title = "Employee Promotion Details";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Employee Promotion - @Model.Id</h4>
+    <h4 class="mb-0">Employee Promotion Details</h4>
+    <a asp-action="EmployeePromotion" class="btn btn-outline-secondary btn-sm">Back</a>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <label class="form-label">Employee</label>
-        <input class="form-control" value="@Model.Employee - @Model.EmployeeName" readonly />
-    </div>
-    <div class="col-md-6">
-        <label class="form-label">Promotion Date</label>
-        <input class="form-control" value="@Model.PromotionDate.ToString("dd-MM-yyyy")" readonly />
-    </div>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
-    <div class="col-md-6">
-        <label class="form-label">Salary Currency</label>
-        <input class="form-control" value="@Model.SalaryCurrency" readonly />
-    </div>
-    <div class="col-md-6">
-        <label class="form-label">Company</label>
-        <input class="form-control" value="@Model.Company" readonly />
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6"><strong>Employee:</strong> @Model.Employee</div>
+            <div class="col-md-6"><strong>Employee Name:</strong> @Model.EmployeeName</div>
+            <div class="col-md-6"><strong>Promotion Date:</strong> @Model.PromotionDate.ToString("dd-MM-yyyy")</div>
+            <div class="col-md-6"><strong>Current CTC:</strong> @(Model.CurrentCTC?.ToString() ?? "-")</div>
+            <div class="col-md-6"><strong>Salary Currency:</strong> @Model.SalaryCurrency</div>
+            <div class="col-md-6"><strong>Company:</strong> @Model.Company</div>
+        </div>
     </div>
 </div>
 
-<hr />
-<h6 class="mb-1">Employee Promotion Details</h6>
-<p class="text-muted small mb-3">Properties updated in the Employee master on promotion submission</p>
-
-<table class="table table-bordered align-middle mb-4">
-    <thead>
-        <tr>
-            <th>No.</th>
-            <th>Property</th>
-            <th>Current</th>
-            <th>New</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Details != null && Model.Details.Any())
-        {
-            int i = 1;
-            foreach (var d in Model.Details)
+<div class="card">
+    <div class="card-header">Promotion Details</div>
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead><tr><th>Field</th><th>Property</th><th>Current</th><th>New</th></tr></thead>
+            <tbody>
+            @foreach (var detail in Model.Details)
             {
-                <tr>
-                    <td>@(i++)</td>
-                    <td>@d.Property</td>
-                    <td>@d.CurrentValue</td>
-                    <td>@d.NewValue</td>
-                </tr>
+                <tr><td>@detail.FieldName</td><td>@detail.Property</td><td>@detail.CurrentValue</td><td>@detail.NewValue</td></tr>
             }
-        }
-        else
-        {
-            <tr><td colspan="4" class="text-muted text-center py-3">No Data</td></tr>
-        }
-    </tbody>
-</table>
-
-<hr />
-<h6 class="mb-3">Salary Details</h6>
-<div class="mb-3" style="max-width: 300px;">
-    <label class="form-label">Current CTC</label>
-    <input class="form-control" value="@(Model.CurrentCTC?.ToString("N2"))" readonly />
+            </tbody>
+        </table>
+    </div>
 </div>

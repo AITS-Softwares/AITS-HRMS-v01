@@ -1,0 +1,110 @@
+﻿@model Erp_Aits.Models.EmployeeOnboarding
+@{
+    ViewBag.Title = "Employee Onboarding - " + Model.EmployeeName;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Employee Onboarding - @Model.EmployeeName</h4>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Job Applicant</label>
+        <input class="form-control" value="@Model.JobApplicant" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Company</label>
+        <input class="form-control" value="@Model.Company" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Job Offer</label>
+        <input class="form-control" value="@Model.JobOffer" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Boarding Status</label>
+        <input class="form-control" value="@Model.BoardingStatus" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Employee Onboarding Template</label>
+        <input class="form-control" value="@Model.EmployeeOnboardingTemplate" readonly />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-3">Employee Details</h6>
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Employee Name</label>
+        <input class="form-control" value="@Model.EmployeeName" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Date of Joining</label>
+        <input class="form-control" value="@Model.DateOfJoining.ToString("dd-MM-yyyy")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Department</label>
+        <input class="form-control" value="@Model.Department" readonly />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Onboarding Begins On</label>
+        <input class="form-control" value="@Model.OnboardingBeginsOn.ToString("dd-MM-yyyy")" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Designation</label>
+        <input class="form-control" value="@Model.Designation" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Employee Grade</label>
+        <input class="form-control" value="@Model.EmployeeGrade" readonly />
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Holiday List</label>
+        <input class="form-control" value="@Model.HolidayList" readonly />
+    </div>
+</div>
+
+<hr />
+<h6 class="mb-1">Onboarding Activities</h6>
+<table class="table table-bordered align-middle">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>Activity Name</th>
+            <th>User</th>
+            <th>Begin On (Days)</th>
+            <th>Duration (Days)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Activities != null && Model.Activities.Any())
+        {
+            int i = 1;
+            foreach (var a in Model.Activities)
+            {
+                <tr>
+                    <td>@(i++)</td>
+                    <td>@a.ActivityName</td>
+                    <td>@a.User</td>
+                    <td>@a.BeginOnDays</td>
+                    <td>@a.DurationDays</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-muted text-center py-3">No activities added</td></tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+<div class="form-check mb-4">
+    <input class="form-check-input" type="checkbox" disabled checked="@Model.NotifyUsersByEmail" />
+    <label class="form-check-label">Notify users by email</label>
+</div>

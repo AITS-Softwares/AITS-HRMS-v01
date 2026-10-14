@@ -1,0 +1,176 @@
+@model Erp_Aits.Models.EmployeeAdvance
+@{
+    ViewBag.Title = "Employee Advance - " + Model.EmployeeAdvanceCode;
+    bool isDraft = string.Equals(Model.Status, "Draft", StringComparison.OrdinalIgnoreCase);
+    bool isCancelled = string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool canCancel = !isDraft && !isCancelled;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErpNextError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<datalist id="employeeList">
+    @if (ViewBag.Employees != null)
+    {
+        foreach (var emp in ViewBag.Employees)
+        {
+            <option value="@emp.name" data-name="@emp.employee_name" data-company="@emp.company">@emp.employee_name</option>
+        }
+    }
+</datalist>
+
+<datalist id="mopList">
+    @if (ViewBag.ModesOfPayment != null)
+    {
+        foreach (var mop in ViewBag.ModesOfPayment)
+        {
+            <option value="@mop.name"></option>
+        }
+    }
+</datalist>
+
+<form asp-controller="HR" asp-action="UpdateEmployeeAdvance" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input asp-for="Id" type="hidden" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div class="text-muted small">Employee Advance</div>
+            <h4 class="mb-0">@Model.EmployeeAdvanceCode</h4>
+            <span class="badge @(isCancelled ? "bg-danger" : isDraft ? "bg-secondary" : "bg-success")">
+                @(isCancelled ? "Cancelled" : isDraft ? "Draft" : "Submitted")
+            </span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("EmployeeAdvance", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            @if (isDraft)
+            {
+                <button type="submit" class="btn btn-outline-dark btn-sm">Save</button>
+            }
+        </div>
+    </div>
+
+    <fieldset @(isDraft ? "" : "disabled")>
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Basic Information</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Series</label>
+                    <input asp-for="EmployeeAdvanceCode" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Posting Date</label>
+                    <input asp-for="PostingDate" type="date" class="form-control" value="@(Model.PostingDate?.ToString("yyyy-MM-dd"))" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee</label>
+                    <input asp-for="Employee" id="Employee" class="form-control" list="employeeList" oninput="fillEmployeeAdvanceEmployee(this.value)" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employee Name</label>
+                    <input asp-for="EmployeeName" id="EmployeeName" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Company</label>
+                    <input asp-for="Company" id="Company" class="form-control" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    <input asp-for="Status" class="form-control" readonly />
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3">Purpose & Amount</h6>
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Purpose</label>
+                    <textarea asp-for="Purpose" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Advance Amount</label>
+                    <input asp-for="AdvanceAmount" type="number" step="0.01" class="form-control" required />
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4">
+            <h6 class="mb-3">Accounting</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Advance Account</label>
+                    <input asp-for="AdvanceAccount" class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Mode of Payment</label>
+                    <input asp-for="ModeOfPayment" class="form-control" list="mopList" />
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-check">
+                        <input asp-for="RepayUnclaimedFromSalary" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Repay Unclaimed Amount from Salary</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+<div class="d-flex justify-content-end gap-2 mt-3">
+    @if (isDraft)
+    {
+        <form asp-controller="HR" asp-action="SubmitEmployeeAdvance" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-dark btn-sm" onclick="return confirm('Submit this Employee Advance in ERPNext and HRMS?');">Submit</button>
+        </form>
+    }
+
+    @if (canCancel)
+    {
+        <form asp-controller="HR" asp-action="CancelEmployeeAdvance" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this Employee Advance in ERPNext and HRMS?');">Cancel</button>
+        </form>
+    }
+</div>
+
+<script>
+    function fillEmployeeAdvanceEmployee(employee) {
+        const option = document.querySelector(`#employeeList option[value="${CSS.escape(employee)}"]`);
+        if (!option) return;
+
+        const employeeName = option.getAttribute("data-name") || "";
+        const company = option.getAttribute("data-company") || "";
+
+        if (employeeName) {
+            document.getElementById("EmployeeName").value = employeeName;
+        }
+
+        if (company) {
+            document.getElementById("Company").value = company;
+        }
+    }
+</script>

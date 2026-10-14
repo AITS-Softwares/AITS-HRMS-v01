@@ -1,0 +1,306 @@
+﻿@model List<Erp_Aits.Models.Employee>
+@{
+    ViewBag.Title = "Employee Leave Balance Summary";
+}
+
+<div class="ea-detail-header">
+    <div class="ea-detail-header-left">
+        <div>
+            <div class="ea-breadcrumb">HR Reports</div>
+            <h4 class="mb-0">Employee Leave Balance Summary</h4>
+        </div>
+    </div>
+    <div class="dropdown">
+        <button type="button" class="btn btn-sm btn-outline-dark ea-actions-btn dropdown-toggle" data-bs-toggle="dropdown">
+            ⚙️ Actions
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#">📤 Export</a></li>
+            <li><a class="dropdown-item" href="#">🔄 Refresh</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="ea-section">
+    <div class="ea-section-title">
+        <span class="ea-section-icon">🔍</span> Filters
+    </div>
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Report Date</label>
+            <input type="date" name="date" class="form-control ea-input" value="@(((DateTime)ViewBag.ReportDate).ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Company</label>
+            <input type="text" class="form-control ea-input ea-input-readonly" value="AITS" disabled />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Employee</label>
+            <input type="text" name="employee" class="form-control ea-input" placeholder="All employees" value="@ViewBag.Employee" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Department</label>
+            <input type="text" name="department" class="form-control ea-input" placeholder="All departments" value="@ViewBag.Department" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label ea-form-label">Status</label>
+            <select name="status" class="form-select ea-input">
+                <option value="Active" selected="@(ViewBag.Status == "Active")">Active</option>
+                <option value="Inactive" selected="@(ViewBag.Status == "Inactive")">Inactive</option>
+            </select>
+        </div>
+        <div class="col-6 col-lg-1">
+            <button type="submit" class="btn btn-dark btn-sm ea-apply-btn w-100">Apply</button>
+        </div>
+    </form>
+</div>
+
+<div class="ea-section">
+    @if (!Model.Any())
+    {
+        <div class="ea-empty-mini">
+            <div class="ea-empty-icon">🗂️</div>
+            <p class="text-muted mb-0">No employees found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="ea-table-wrapper">
+            <table class="table table-hover align-middle ea-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Employee</th>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                    </tr>
+                    <tr class="ea-quick-filter-row">
+                        <td></td>
+                        <td><input class="form-control form-control-sm ea-quick-filter" placeholder="Filter employee..." /></td>
+                        <td><input class="form-control form-control-sm ea-quick-filter" placeholder="Filter name..." /></td>
+                        <td><input class="form-control form-control-sm ea-quick-filter" placeholder="Filter department..." /></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int rowNum = 1;
+                    }
+                    @foreach (var emp in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">@rowNum</td>
+                            <td><span class="ea-code-badge">@emp.EmployeeCode</span></td>
+                            <td>
+                                <div class="ea-employee">
+                                    <span class="ea-avatar">
+                                        @(string.IsNullOrWhiteSpace(emp.FullName) ? "?" : emp.FullName.Trim()[0].ToString().ToUpper())
+                                    </span>
+                                    <span>@emp.FullName</span>
+                                </div>
+                            </td>
+                            <td>@(string.IsNullOrEmpty(emp.Department) ? "—" : emp.Department)</td>
+                        </tr>
+                        rowNum++;
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ea-table-footer">
+            <span class="ea-hint-text">Tip: use &gt;5, &lt;10 or =324 for comparisons, or 5:10 for a range.</span>
+            <span class="ea-exec-time">⏱ Execution Time: 0.0000 sec</span>
+        </div>
+    }
+</div>
+
+<style>
+    .ea-detail-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ea-detail-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .ea-breadcrumb {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 0.1rem;
+    }
+
+    .ea-actions-btn {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .ea-section {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ea-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 1.1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f0f1f3;
+    }
+
+    .ea-section-icon {
+        font-size: 1.05rem;
+    }
+
+    .ea-form-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+
+    .ea-input {
+        border-radius: 8px;
+        border: 1px solid #dfe2e6;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.88rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .ea-input:focus {
+            border-color: #495057;
+            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+            outline: none;
+        }
+
+    .ea-input-readonly {
+        background-color: #f8f9fa;
+        color: #6c757d;
+    }
+
+    .ea-apply-btn {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    /* Table */
+    .ea-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .ea-table thead tr:first-child {
+        background: #f8f9fa;
+    }
+
+    .ea-table thead th {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #6c757d;
+        border-bottom: 2px solid #eee;
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+    }
+
+    .ea-quick-filter-row td {
+        padding: 0.4rem 0.6rem;
+        background: #fbfbfc;
+        border-bottom: 1px solid #eee;
+    }
+
+    .ea-quick-filter {
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        background: #fff;
+        padding: 0.3rem 0.6rem;
+    }
+
+        .ea-quick-filter:focus {
+            border-color: #495057;
+            box-shadow: 0 0 0 2px rgba(73, 80, 87, 0.08);
+            outline: none;
+        }
+
+    .ea-table tbody td {
+        padding: 0.8rem 1rem;
+    }
+
+    .ea-code-badge {
+        display: inline-block;
+        background: #eef1f5;
+        color: #333;
+        font-weight: 600;
+        font-size: 0.83rem;
+        padding: 0.28rem 0.6rem;
+        border-radius: 6px;
+    }
+
+    .ea-employee {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .ea-avatar {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 50%;
+        background: #212529;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ea-table-footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid #f0f1f3;
+        font-size: 0.78rem;
+        color: #9aa0a6;
+    }
+
+    .ea-empty-mini {
+        text-align: center;
+        padding: 2.5rem 1rem;
+    }
+
+    .ea-empty-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.6;
+    }
+
+    @@media (max-width: 576px) {
+        .ea-section {
+            padding: 1.1rem;
+        }
+
+        .ea-table-footer {
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+    }
+</style>

@@ -1,0 +1,638 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["Module"] = "Overview";
+    ViewData["Icon"] = "house";
+}
+
+<!-- Stats Cards -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-number">@(ViewBag.Stats?.TotalLeads ?? 0)</div>
+            <div class="stat-label">Total Leads</div>
+            <span class="stat-change up">↑ @(ViewBag.Stats?.LeadGrowth ?? 0)% this month</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-number">@(ViewBag.Stats?.TotalOpportunities ?? 0)</div>
+            <div class="stat-label">Opportunities</div>
+            <span class="stat-change up">↑ @(ViewBag.Stats?.OpportunityGrowth ?? 0)% this month</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fas fa-bullhorn"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-number">@(ViewBag.Stats?.ActiveCampaigns ?? 0)</div>
+            <div class="stat-label">Active Campaigns</div>
+            <span class="stat-change @(ViewBag.Stats?.CampaignTrend >= 0 ? "up" : "down")">
+                @(ViewBag.Stats?.CampaignTrend >= 0 ? "↑" : "↓") @(Math.Abs(ViewBag.Stats?.CampaignTrend ?? 0))% this month
+            </span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fas fa-phone"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-number">@(ViewBag.Stats?.TotalCalls ?? 0)</div>
+            <div class="stat-label">Total Calls</div>
+            <span class="stat-change up">↑ @(ViewBag.Stats?.CallGrowth ?? 0)% this month</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity & Upcoming Tasks -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header-custom">
+                <h5>
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
+                </h5>
+                <a href="#" class="text-primary" style="font-size:13px; font-weight:500; text-decoration:none;">
+                    View All <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="activity-list">
+                @if (ViewBag.RecentActivities != null && ((List<dynamic>)ViewBag.RecentActivities).Any())
+                {
+                    foreach (dynamic activity in (IEnumerable<dynamic>)ViewBag.RecentActivities)
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon @activity.IconClass">
+                                <i class="fas @activity.Icon"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    <strong>@activity.Title</strong> - @activity.Description
+                                </div>
+                                <div class="activity-meta">
+                                    <span class="activity-user">@activity.User</span>
+                                    <span class="activity-time">@activity.TimeAgo</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                        <span>No recent activity found.</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Upcoming Tasks -->
+        <div class="content-card mb-4">
+            <div class="card-header-custom">
+                <h5>
+                    <i class="fas fa-bell"></i>
+                    Upcoming Tasks
+                </h5>
+                <span class="badge-count primary">@(ViewBag.UpcomingTasks?.Count ?? 0)</span>
+            </div>
+            <div class="task-list">
+                @if (ViewBag.UpcomingTasks != null && ((List<dynamic>)ViewBag.UpcomingTasks).Any())
+                {
+                    foreach (dynamic task in (IEnumerable<dynamic>)ViewBag.UpcomingTasks)
+                    {
+                        <div class="task-item">
+                            <div class="task-priority @task.PriorityClass"></div>
+                            <div class="task-content">
+                                <div class="task-title">@task.Title</div>
+                                <div class="task-meta">
+                                    <i class="fas @task.Icon text-@task.IconColor"></i>
+                                    <span>@task.DateTime</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-check-circle fa-2x d-block mb-2"></i>
+                        <span>No upcoming tasks.</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="content-card">
+            <div class="card-header-custom">
+                <h5>
+                    <i class="fas fa-chart-simple"></i>
+                    Quick Stats
+                </h5>
+            </div>
+            <div class="quick-stats">
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">
+                        <i class="fas fa-check-circle text-success"></i>
+                        Conversion Rate
+                    </div>
+                    <div class="quick-stat-value">@(ViewBag.Stats?.ConversionRate ?? 0)%</div>
+                    <div class="progress" style="height:4px;">
+                        <div class="progress-bar bg-success" style="width:@(ViewBag.Stats?.ConversionRate ?? 0)%"></div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">
+                        <i class="fas fa-clock text-warning"></i>
+                        Avg. Response Time
+                    </div>
+                    <div class="quick-stat-value">@(ViewBag.Stats?.AvgResponseTime ?? "N/A")</div>
+                    <div class="progress" style="height:4px;">
+                        <div class="progress-bar bg-warning" style="width:@(ViewBag.Stats?.ResponseTimePercent ?? 0)%"></div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">
+                        <i class="fas fa-star text-primary"></i>
+                        Customer Satisfaction
+                    </div>
+                    <div class="quick-stat-value">@(ViewBag.Stats?.SatisfactionScore ?? 0) / 5.0</div>
+                    <div class="progress" style="height:4px;">
+                        <div class="progress-bar bg-primary" style="width:@((ViewBag.Stats?.SatisfactionScore ?? 0) * 20)%"></div>
+                    </div>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-label">
+                        <i class="fas fa-envelope text-danger"></i>
+                        Email Open Rate
+                    </div>
+                    <div class="quick-stat-value">@(ViewBag.Stats?.EmailOpenRate ?? 0)%</div>
+                    <div class="progress" style="height:4px;">
+                        <div class="progress-bar bg-danger" style="width:@(ViewBag.Stats?.EmailOpenRate ?? 0)%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ============================================
+               DASHBOARD SPECIFIC STYLES
+            ============================================ */
+
+    .stat-card {
+        background: white;
+        padding: 20px 24px;
+        border-radius: 16px;
+        border: 1px solid #f0f2f5;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            border-color: #e2e8f0;
+        }
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .stat-card .stat-info {
+            flex: 1;
+        }
+
+        .stat-card .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a2e;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .stat-card .stat-change {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+    .stat-change.up {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .stat-change.down {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .stat-icon.blue {
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .stat-icon.green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .stat-icon.orange {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .stat-icon.red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .stat-icon.purple {
+        background: #f3e8ff;
+        color: #7c3aed;
+    }
+
+    .stat-icon.teal {
+        background: #ccfbf1;
+        color: #0d9488;
+    }
+
+    /* ============================================
+               ACTIVITY LIST
+            ============================================ */
+    .activity-list {
+        margin: -4px 0;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid #f0f2f5;
+        transition: all 0.2s;
+    }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-item .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+            .activity-item .activity-icon.blue {
+                background: #eef2ff;
+                color: #4f46e5;
+            }
+
+            .activity-item .activity-icon.green {
+                background: #dcfce7;
+                color: #16a34a;
+            }
+
+            .activity-item .activity-icon.orange {
+                background: #fef3c7;
+                color: #d97706;
+            }
+
+            .activity-item .activity-icon.purple {
+                background: #f3e8ff;
+                color: #7c3aed;
+            }
+
+            .activity-item .activity-icon.red {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+
+            .activity-item .activity-icon.teal {
+                background: #ccfbf1;
+                color: #0d9488;
+            }
+
+        .activity-item .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-item .activity-text {
+            font-size: 14px;
+            color: #1a1a2e;
+            margin-bottom: 2px;
+        }
+
+            .activity-item .activity-text strong {
+                font-weight: 600;
+            }
+
+        .activity-item .activity-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+            .activity-item .activity-meta .activity-user {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+                .activity-item .activity-meta .activity-user::before {
+                    content: '';
+                    display: inline-block;
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #4f46e5;
+                }
+
+            .activity-item .activity-meta .activity-time {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+                .activity-item .activity-meta .activity-time::before {
+                    content: '';
+                    display: inline-block;
+                    width: 4px;
+                    height: 4px;
+                    border-radius: 50%;
+                    background: #d1d5db;
+                }
+
+    /* ============================================
+               TASK LIST
+            ============================================ */
+    .task-list {
+        margin: -4px 0;
+    }
+
+    .task-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f2f5;
+        transition: all 0.2s;
+    }
+
+        .task-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .task-item .task-priority {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+            .task-item .task-priority.high {
+                background: #dc2626;
+            }
+
+            .task-item .task-priority.medium {
+                background: #f59e0b;
+            }
+
+            .task-item .task-priority.low {
+                background: #10b981;
+            }
+
+        .task-item .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-item .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a2e;
+            margin-bottom: 2px;
+        }
+
+        .task-item .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+            .task-item .task-meta i {
+                font-size: 12px;
+            }
+
+    /* ============================================
+               QUICK STATS
+            ============================================ */
+    .quick-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .quick-stat-item {
+        padding: 4px 0;
+    }
+
+        .quick-stat-item .quick-stat-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .quick-stat-item .quick-stat-label i {
+                font-size: 13px;
+            }
+
+        .quick-stat-item .quick-stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .quick-stat-item .progress {
+            background: #f1f5f9;
+            border-radius: 20px;
+            overflow: hidden;
+            height: 4px;
+        }
+
+            .quick-stat-item .progress .progress-bar {
+                border-radius: 20px;
+                transition: width 0.6s ease;
+            }
+
+    /* ============================================
+               BADGE COUNT
+            ============================================ */
+    .badge-count {
+        display: inline-block;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 20px;
+        line-height: 1.5;
+    }
+
+        .badge-count.primary {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .badge-count.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-count.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-count.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    /* ============================================
+               RESPONSIVE
+            ============================================ */
+    @@media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 16px;
+            flex-direction: column;
+            text-align: center;
+            gap: 8px;
+        }
+
+            .stat-card .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .stat-card .stat-number {
+                font-size: 20px;
+            }
+
+            .stat-card .stat-change {
+                font-size: 10px;
+            }
+
+        .activity-item {
+            padding: 12px 0;
+        }
+
+            .activity-item .activity-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+
+            .activity-item .activity-text {
+                font-size: 13px;
+            }
+
+        .task-item {
+            padding: 10px 0;
+        }
+
+            .task-item .task-title {
+                font-size: 13px;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-card {
+            padding: 12px 14px;
+        }
+
+            .stat-card .stat-number {
+                font-size: 18px;
+            }
+
+            .stat-card .stat-label {
+                font-size: 11px;
+            }
+
+            .stat-card .stat-change {
+                font-size: 9px;
+                padding: 1px 8px;
+            }
+
+            .stat-card .stat-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 14px;
+            }
+
+        .activity-item .activity-meta {
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .quick-stat-item .quick-stat-value {
+            font-size: 14px;
+        }
+    }
+</style>

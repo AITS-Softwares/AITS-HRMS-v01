@@ -1,0 +1,75 @@
+@model IEnumerable<Erp_Aits.Models.SalaryRegister>
+@{
+    ViewBag.Title = "Payroll Entry";
+}
+
+<style>
+    .salary-register { max-width: 1280px; margin: 0 auto; color: #172033; }
+    .salary-register__head { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:8px 0 24px; }
+    .salary-register__eyebrow { color:#64748b; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0; margin-bottom:5px; }
+    .salary-register__head h2 { margin:0; font-size:27px; font-weight:750; }
+    .salary-register__add { background:#172033; color:#fff; border:0; border-radius:6px; padding:10px 15px; font-weight:700; text-decoration:none; white-space:nowrap; }
+    .salary-register__add:hover { color:#fff; background:#0f172a; }
+    .salary-register__summary { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+    .salary-register__metric { border:1px solid #dbe3ec; border-top:3px solid #2563eb; border-radius:7px; background:#fff; padding:16px 18px; }
+    .salary-register__metric:nth-child(2) { border-top-color:#0f766e; }
+    .salary-register__metric:nth-child(3) { border-top-color:#b45309; }
+    .salary-register__metric span { display:block; color:#64748b; font-size:13px; }
+    .salary-register__metric strong { display:block; font-size:25px; margin-top:5px; }
+    .salary-register__panel { background:#fff; border:1px solid #dbe3ec; border-radius:7px; overflow:hidden; }
+    .salary-register__tools { padding:14px 16px; border-bottom:1px solid #e5eaf0; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .salary-register__tools h5 { margin:0; font-size:16px; font-weight:750; }
+    .salary-register__tools span { color:#64748b; font-size:13px; }
+    .salary-register table { margin:0; min-width:830px; }
+    .salary-register th { background:#f8fafc; color:#475569; font-size:12px; font-weight:750; text-transform:uppercase; letter-spacing:0; border-bottom:1px solid #dbe3ec; padding:12px 16px; }
+    .salary-register td { padding:13px 16px; vertical-align:middle; border-color:#edf1f5; font-size:14px; }
+    .salary-register__code { color:#1d4ed8; font-weight:700; }
+    .salary-register__muted { color:#64748b; }
+    .salary-register__status { border-radius:999px; padding:4px 9px; font-size:12px; font-weight:750; display:inline-block; }
+    .status-draft { color:#475569; background:#e2e8f0; }.status-submitted { color:#166534; background:#dcfce7; }.status-cancelled,.status-failed { color:#b91c1c; background:#fee2e2; }.status-queued { color:#92400e; background:#fef3c7; }
+    .salary-register__empty { padding:72px 20px; text-align:center; color:#64748b; }
+    .salary-register__empty strong { display:block; color:#172033; font-size:17px; margin-bottom:6px; }
+    @@media (max-width:720px) { .salary-register__head { align-items:flex-start; flex-direction:column; }.salary-register__summary { grid-template-columns:1fr; } }
+
+    .salary-register { padding:26px; background:#eaf0f6; border:1px solid #d4e0eb; border-radius:8px; }
+    .salary-register__head { padding:22px 24px; margin-bottom:20px; background:#14253d; border-radius:7px; }
+    .salary-register__eyebrow { color:#9bd4cf; }.salary-register__head h2 { color:#fff; }
+    .salary-register__add { background:#0f766e; }.salary-register__add:hover { background:#115e59; }
+    .salary-register__metric { border-color:#cbd8e5; border-top:0; border-left:4px solid #2563eb; background:#f8fbfe; }
+    .salary-register__metric:nth-child(2) { border-left-color:#0f766e; background:#f1fbf9; }.salary-register__metric:nth-child(3) { border-left-color:#d97706; background:#fff9ed; }
+    .salary-register__panel { border-color:#cbd8e5; }.salary-register__tools { background:#f4f8fc; border-color:#dbe3ec; }.salary-register__tools h5 { color:#14253d; }
+</style>
+
+<div class="salary-register">
+    @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+    @if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+
+    <header class="salary-register__head">
+        <div><div class="salary-register__eyebrow">Payroll workspace</div><h2>Payroll Entry</h2></div>
+        <a asp-action="CreatePayrollEntry" class="salary-register__add">Add Payroll Entry</a>
+    </header>
+
+    <section class="salary-register__summary">
+        <div class="salary-register__metric"><span>Total registers</span><strong>@Model.Count()</strong></div>
+        <div class="salary-register__metric"><span>Draft registers</span><strong>@Model.Count(x => string.Equals(x.Status, "Draft", StringComparison.OrdinalIgnoreCase))</strong></div>
+        <div class="salary-register__metric"><span>Submitted registers</span><strong>@Model.Count(x => string.Equals(x.Status, "Submitted", StringComparison.OrdinalIgnoreCase))</strong></div>
+    </section>
+
+    <section class="salary-register__panel">
+        <div class="salary-register__tools"><h5>Payroll Entries</h5><span>ERPNext payroll records</span></div>
+        @if (Model.Any())
+        {
+            <div class="table-responsive"><table class="table"><thead><tr><th>Register</th><th>Company</th><th>Payroll Period</th><th>Frequency</th><th>Employees</th><th>Status</th></tr></thead><tbody>
+            @foreach (var item in Model)
+            {
+                var statusClass = "status-" + (item.Status ?? "Draft").ToLowerInvariant().Replace(" ", "-");
+                <tr><td class="salary-register__code">@item.Name</td><td>@item.Company</td><td><div>@item.StartDate.ToString("dd MMM yyyy") - @item.EndDate.ToString("dd MMM yyyy")</div><small class="salary-register__muted">Posted @item.PostingDate.ToString("dd MMM yyyy")</small></td><td>@item.PayrollFrequency</td><td>@(item.NumberOfEmployees?.ToString() ?? "-")</td><td><span class="salary-register__status @statusClass">@item.Status</span></td></tr>
+            }
+            </tbody></table></div>
+        }
+        else
+        {
+            <div class="salary-register__empty"><strong>No payroll entries yet</strong><span>Create a payroll entry to begin preparing salary slips.</span><div class="mt-3"><a asp-action="CreatePayrollEntry" class="salary-register__add">Create Payroll Entry</a></div></div>
+        }
+    </section>
+</div>

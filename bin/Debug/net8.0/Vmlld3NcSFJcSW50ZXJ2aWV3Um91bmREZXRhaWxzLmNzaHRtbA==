@@ -1,0 +1,80 @@
+﻿@model Erp_Aits.Models.InterviewRound
+@{
+    ViewBag.Title = "Interview Round " + Model.Id;
+}
+
+<h4 class="mb-3">@Model.RoundName</h4>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Round Name</label>
+            <input class="form-control" value="@Model.RoundName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Expected Average Rating</label>
+            <div>
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (i <= Model.ExpectedAverageRating)
+                    {
+                        <i class="fas fa-star text-warning" style="font-size:20px; margin-right:4px;"></i>
+                    }
+                    else
+                    {
+                        <i class="far fa-star text-secondary" style="font-size:20px; margin-right:4px;"></i>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Interview Type</label>
+            <input class="form-control" value="@Model.InterviewType" readonly />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Interviewers</label>
+            <input class="form-control" value="@Model.Interviewers" readonly />
+        </div>
+    </div>
+
+    <hr class="my-4" />
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Designation</label>
+            <input class="form-control" value="@Model.Designation" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Expected Skillset</h6>
+    <table class="table table-bordered align-middle mb-0">
+        <thead>
+            <tr>
+                <th style="width:60px">No.</th>
+                <th>Skill</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int rowNum = 1;
+            }
+            @foreach (var s in Model.Skills)
+            {
+                <tr>
+                    <td>@rowNum</td>
+                    <td>@s.Skill</td>
+                    <td>@s.Description</td>
+                </tr>
+                rowNum++;
+            }
+            @if (!Model.Skills.Any())
+            {
+                <tr><td colspan="3" class="text-center text-muted py-3">No skills recorded</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

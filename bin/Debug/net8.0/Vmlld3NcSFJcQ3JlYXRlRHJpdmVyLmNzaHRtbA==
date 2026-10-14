@@ -1,0 +1,116 @@
+﻿@model Erp_Aits.Models.Driver
+@{
+    ViewBag.Title = "New Driver";
+}
+<form method="post" action="/HR/CreateDriver">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline-block me-2">New Driver</h4>
+            <span class="badge bg-warning-subtle text-warning">Not Saved</span>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@err.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <div class="card p-4 mb-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Series</label>
+                <input name="Series" value="@Model.Series" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Employee</label>
+                <input name="Employee" value="@Model.Employee" class="form-control" placeholder="Employee code" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Full Name *</label>
+                <input name="FullName" value="@Model.FullName" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Cellphone Number</label>
+                <input name="CellNumber" value="@Model.CellNumber" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status *</label>
+                <select name="Status" class="form-select">
+                    <option selected="@("Active".Equals(Model.Status))">Active</option>
+                    <option selected="@("Suspended".Equals(Model.Status))">Suspended</option>
+                    <option selected="@("Left".Equals(Model.Status))">Left</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Address</label>
+                <input name="Address" value="@Model.Address" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Transporter</label>
+                <input name="Transporter" value="@Model.Transporter" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">License Details</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">License Number</label>
+                <input name="LicenseNumber" value="@Model.LicenseNumber" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Issuing Date</label>
+                <input name="IssuingDate" type="date" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Expiry Date</label>
+                <input name="ExpiryDate" type="date" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Driving License Categories</h6>
+        <label class="form-label">Driving License Category</label>
+        <table class="table table-bordered align-middle mb-1" id="categoriesTable">
+            <thead>
+                <tr>
+                    <th style="width:30px"></th>
+                    <th style="width:50px">No.</th>
+                    <th>Driver licence class</th>
+                    <th>Description</th>
+                    <th>Issuing Date</th>
+                    <th>Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addCategoryRow()">Add Row</button>
+    </div>
+</form>
+
+<script>
+    var categoryRowCount = 0;
+
+    function addCategoryRow() {
+        categoryRowCount++;
+        var tbody = document.getElementById('categoriesTable').querySelector('tbody');
+        var row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" /></td>
+            <td>${categoryRowCount}</td>
+            <td><input type="text" name="Categories" class="form-control form-control-sm border-0" /></td>
+            <td><input type="text" name="CategoryDescriptions" class="form-control form-control-sm border-0" /></td>
+            <td><input type="date" name="CategoryIssuingDates" class="form-control form-control-sm border-0" /></td>
+            <td><input type="date" name="CategoryExpiryDates" class="form-control form-control-sm border-0" /></td>
+        `;
+        tbody.appendChild(row);
+    }
+</script>

@@ -1,0 +1,1151 @@
+﻿@model Erp_Aits.Models.Employee
+@using Erp_Aits.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using Newtonsoft.Json.Linq
+@using System.Collections
+
+@functions {
+    private static string DropValue(object row, string field)
+    {
+        if (row == null) return string.Empty;
+
+        if (row is JObject obj)
+        {
+            return obj[field]?.ToString() ?? string.Empty;
+        }
+
+        if (row is JToken token)
+        {
+            return token[field]?.ToString() ?? string.Empty;
+        }
+
+        var prop = row.GetType().GetProperty(field);
+        return prop?.GetValue(row)?.ToString() ?? string.Empty;
+    }
+
+    private static List<SelectListItem> DropOptions(object source, string valueField, string textField, string firstOption)
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "", Text = firstOption }
+        };
+
+        if (source is IEnumerable rows && source is not string)
+        {
+            foreach (var row in rows)
+            {
+                var value = DropValue(row, valueField);
+                var text = DropValue(row, textField);
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    text = value;
+                }
+
+                if (!string.IsNullOrWhiteSpace(value)
+                    && !items.Any(x => string.Equals(x.Value, value, StringComparison.OrdinalIgnoreCase)))
+                {
+                    items.Add(new SelectListItem { Value = value, Text = text });
+                }
+            }
+        }
+
+        return items;
+    }
+}
+
+
+
+        @{
+    var educationRows = Model?.EducationRows != null && Model.EducationRows.Any()
+        ? Model.EducationRows
+        : new List<EmployeeEducationRow> { new EmployeeEducationRow() };
+
+    var externalRows = Model?.ExternalWorkHistoryRows != null && Model.ExternalWorkHistoryRows.Any()
+        ? Model.ExternalWorkHistoryRows
+        : new List<EmployeeExternalWorkHistoryRow> { new EmployeeExternalWorkHistoryRow() };
+
+    var internalRows = Model?.InternalWorkHistoryRows != null && Model.InternalWorkHistoryRows.Any()
+        ? Model.InternalWorkHistoryRows
+        : new List<EmployeeInternalWorkHistoryRow> { new EmployeeInternalWorkHistoryRow() };
+
+    var companyOptions = DropOptions(ViewBag.Companies, "name", "name", "Select Company");
+    var userOptions = DropOptions(ViewBag.Users, "name", "name", "Select User");
+    var designationOptions = DropOptions(ViewBag.Designations, "name", "name", "Select Designation");
+    var departmentOptions = DropOptions(ViewBag.Departments, "name", "name", "Select Department");
+    var reportsToOptions = DropOptions(ViewBag.ReportsToEmployees, "name", "name", "Select Reports To");
+    var branchOptions = DropOptions(ViewBag.Branches, "name", "name", "Select Branch");
+    var gradeOptions = DropOptions(ViewBag.EmployeeGrades, "name", "name", "Select Grade");
+    var employmentTypeOptions = DropOptions(ViewBag.EmploymentTypes, "name", "name", "Select Employment Type");
+    var jobApplicantOptions = DropOptions(ViewBag.JobApplicants, "name", "applicant_name", "Select Job Applicant");
+    var holidayListOptions = DropOptions(ViewBag.HolidayLists, "name", "name", "Select Holiday List");
+    var defaultShiftOptions = DropOptions(ViewBag.ShiftTypes, "name", "name", "Select Default Shift");
+    var payrollCostCenterOptions = DropOptions(ViewBag.CostCenters, "name", "name", "Select Payroll Cost Center");
+    var healthInsuranceProviderOptions = DropOptions(ViewBag.HealthInsuranceProviders, "name", "name", "Select Health Insurance Provider");
+    var salutationOptions = DropOptions(ViewBag.Salutations, "name", "name", "Select Salutation");
+
+    var preferredContactEmailOptions = DropOptions(ViewBag.PreferredContactEmails, "name", "name", "Select Preferred Contact Email");
+    if (preferredContactEmailOptions.Count == 1)
+    {
+        preferredContactEmailOptions.Add(new SelectListItem { Value = "Personal Email", Text = "Personal Email" });
+        preferredContactEmailOptions.Add(new SelectListItem { Value = "Company Email", Text = "Company Email" });
+        preferredContactEmailOptions.Add(new SelectListItem { Value = "User ID", Text = "User ID" });
+    }
+}
+
+@* } *@
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="ErpNextId" />
+<input type="hidden" asp-for="EmployeeCode" />
+<input type="hidden" asp-for="FullName" />
+<input type="hidden" name="ChildTablesPosted" value="true" />
+
+<style>
+    .employee-form-card {
+        max-width: 1260px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #dfe3e8;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .employee-tabs {
+        display: flex;
+        gap: 22px;
+        padding: 0 20px;
+        border-bottom: 1px solid #dfe3e8;
+        background: #fff;
+        white-space: nowrap;
+    }
+
+        .employee-tabs button {
+            border: 0;
+            background: transparent;
+            padding: 14px 0 12px;
+            font-size: 14px;
+            color: #364152;
+            cursor: pointer;
+        }
+
+            .employee-tabs button.active {
+                color: #111827;
+                font-weight: 600;
+                border-bottom: 2px solid #111827;
+            }
+
+    .employee-pane {
+        display: none !important;
+        padding: 20px;
+    }
+
+        .employee-pane.active {
+            display: block !important;
+        }
+
+        .employee-pane:not(.active) {
+            display: none !important;
+        }
+
+    .employee-salary-pane:not(.active) {
+        display: none !important;
+    }
+
+      /*   .employee-pane.active {
+            display: block;
+        } */
+
+    .employee-section {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 18px;
+        margin-top: 18px;
+    }
+
+        .employee-section:first-child {
+            border-top: 0;
+            padding-top: 0;
+            margin-top: 0;
+        }
+
+    .employee-section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 16px;
+        color: #111827;
+    }
+
+    .employee-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px 30px;
+    }
+
+        .employee-grid.two {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .employee-grid.one {
+            grid-template-columns: 1fr;
+        }
+
+    .employee-field label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 6px;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .employee-field input,
+    .employee-field select,
+    .employee-field textarea {
+        width: 100%;
+        min-height: 34px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 6px 10px;
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    .employee-field textarea {
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    .employee-help {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 6px;
+    }
+
+    .employee-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+        .employee-table th,
+        .employee-table td {
+            border: 1px solid #d1d5db;
+            padding: 6px;
+            vertical-align: middle;
+        }
+
+        .employee-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        .employee-table input,
+        .employee-table select {
+            width: 100%;
+            min-height: 30px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 4px 8px;
+            background: #fff;
+        }
+
+    .employee-small-btn {
+        margin-top: 8px;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .employee-remove-btn {
+        border: 1px solid #ef4444;
+        color: #ef4444;
+        background: #fff;
+        border-radius: 4px;
+        padding: 3px 8px;
+    }
+
+    @@media (max-width: 900px) {
+        .employee-grid,
+        .employee-grid.two {
+            grid-template-columns: 1fr;
+        }
+
+        .employee-tabs {
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="employee-form-card">
+    <div class="employee-tabs">
+        <button type="button" class="active" data-employee-tab="overview">Overview</button>
+        <button type="button" data-employee-tab="joining">Joining</button>
+        <button type="button" data-employee-tab="address">Address & Contacts</button>
+        <button type="button" data-employee-tab="attendance">Attendance & Leaves</button>
+        <button type="button" data-employee-tab="salary">Salary</button>
+        <button type="button" data-employee-tab="personal">Personal Details</button>
+        <button type="button" data-employee-tab="profile">Profile</button>
+        <button type="button" data-employee-tab="exit">Employee Exit</button>
+    </div>
+
+    <div class="employee-pane active" data-employee-pane="overview">
+        <div class="employee-section">
+            <div class="employee-grid">
+                <div class="employee-field">
+                    <label>Series *</label>
+                    <input value="HR-EMP-" readonly />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="Gender">Gender *</label>
+                    <select asp-for="Gender">
+                        <option value="">Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="DateOfJoining">Date of Joining *</label>
+                    <input asp-for="DateOfJoining" type="date" required />
+                    <span asp-validation-for="DateOfJoining" class="text-danger"></span>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="FirstName">First Name *</label>
+                    <input asp-for="FirstName" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="DateOfBirth">Date of Birth *</label>
+                    <input asp-for="DateOfBirth" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="Status">Status *</label>
+                    <select asp-for="Status">
+                        <option>Active</option>
+                        <option>Inactive</option>
+                        <option>Suspended</option>
+                        <option>Left</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="MiddleName">Middle Name</label>
+                    <input asp-for="MiddleName" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="Salutation">Salutation</label>
+                    <select asp-for="Salutation">
+                        <option value="">Select Salutation</option>
+                        @if (ViewBag.Salutations != null)
+                        {
+                            foreach (var s in ViewBag.Salutations)
+                            {
+                                <option value="@s.name">@s.name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="LastName">Last Name</label>
+                    <input asp-for="LastName" />
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">User Details</div>
+            <div class="employee-grid one">
+                <div class="employee-field" style="max-width: 530px;">
+                    <label asp-for="UserId">User ID</label>
+                    <select asp-for="UserId" asp-items="userOptions"></select>
+                    <div class="employee-help">System User login ID. If set, it will become default for all HR forms.</div>
+                    <button type="button" class="employee-small-btn">Create User</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Company Details</div>
+            <div class="employee-grid">
+                <div class="employee-field">
+                    <label asp-for="Company">Company *</label>
+                    <select asp-for="Company" asp-items="companyOptions" required></select>
+                </div>
+
+                @* <div class="employee-field">
+                    <label asp-for="Designation">Designation</label>
+                    <select asp-for="Designation">
+                        <option value="">Select Designation</option>
+                        @if (ViewBag.Designations != null)
+                        {
+                            foreach (var item in ViewBag.Designations)
+                            {
+                                <option value="@item.name">@item.name</option>
+                            }
+                        }
+                    </select>
+                </div> *@
+                <div class="employee-field">
+                    <label asp-for="Designation">Designation</label>
+                    <select asp-for="Designation" asp-items="designationOptions"></select>
+                </div>
+
+                @* <div class="employee-field">
+                    <label asp-for="Branch">Branch</label>
+                    <select asp-for="Branch">
+                        <option value="">Select Branch</option>
+                        @if (ViewBag.Branches != null)
+                        {
+                            foreach (var item in ViewBag.Branches)
+                            {
+                                <option value="@item.name">@item.name</option>
+                            }
+                        }
+                    </select>
+                </div> *@
+                <div class="employee-field">
+                    <label asp-for="Branch">Branch</label>
+                    <select asp-for="Branch" asp-items="branchOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="Department">Department</label>
+                    <select asp-for="Department" asp-items="departmentOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="ReportsTo">Reports to</label>
+                    <select asp-for="ReportsTo" asp-items="reportsToOptions"></select>
+                </div>
+
+              @*   <div class="employee-field">
+                    <label asp-for="Grade">Grade</label>
+                    <select asp-for="Grade">
+                        <option value="">Select Grade</option>
+                        @if (ViewBag.EmployeeGrades != null)
+                        {
+                            foreach (var item in ViewBag.EmployeeGrades)
+                            {
+                                <option value="@item.name">@item.name</option>
+                            }
+                        }
+                    </select>
+                </div> *@
+
+                <div class="employee-field">
+                    <label asp-for="Grade">Grade</label>
+                    <select asp-for="Grade" asp-items="gradeOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="EmploymentType">Employment Type</label>
+                    <select asp-for="EmploymentType" asp-items="employmentTypeOptions"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="employee-pane" data-employee-pane="joining">
+        <div class="employee-section">
+            <div class="employee-grid">
+                <div class="employee-field">
+                    <label asp-for="JobApplicant">Job Applicant</label>
+                    <select asp-for="JobApplicant" asp-items="jobApplicantOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="ConfirmationDate">Confirmation Date</label>
+                    <input asp-for="ConfirmationDate" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="NoticeDays">Notice (days)</label>
+                    <input asp-for="NoticeDays" type="number" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="OfferDate">Offer Date</label>
+                    <input asp-for="OfferDate" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="ContractEndDate">Contract End Date</label>
+                    <input asp-for="ContractEndDate" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="DateOfRetirement">Date Of Retirement</label>
+                    <input asp-for="DateOfRetirement" type="date" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="employee-pane" data-employee-pane="address">
+        <div class="employee-section">
+            <div class="employee-grid">
+                <div class="employee-field">
+                    <label asp-for="Mobile">Mobile</label>
+                    <input asp-for="Mobile" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PersonalEmail">Personal Email</label>
+                    <input asp-for="PersonalEmail" type="email" />
+                </div>
+
+                @* <div class="employee-field">
+                    <label asp-for="PreferredContactEmail">Preferred Contact Email</label>
+                    <select asp-for="PreferredContactEmail">
+                        <option value="">Select</option>
+                        <option>Personal Email</option>
+                        <option>Company Email</option>
+                        <option>User ID</option>
+                    </select>
+                </div> *@
+                <div class="employee-field">
+                    <label asp-for="PreferredContactEmail">Preferred Contact Email</label>
+                    <select asp-for="PreferredContactEmail" asp-items="preferredContactEmailOptions"></select>
+                </div>
+
+
+
+
+                <div class="employee-field">
+                    <label asp-for="CompanyEmail">Company Email</label>
+                    <input asp-for="CompanyEmail" type="email" />
+                    <div class="employee-help">Provide Email Address registered in company</div>
+                </div>
+
+                <div class="employee-field">
+                    <label>&nbsp;</label>
+                    <label>
+                        <input asp-for="Unsubscribed" type="checkbox" style="width:auto; min-height:auto;" />
+                        Unsubscribed
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Address</div>
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="CurrentAddress">Current Address</label>
+                    <textarea asp-for="CurrentAddress"></textarea>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PermanentAddress">Permanent Address</label>
+                    <textarea asp-for="PermanentAddress"></textarea>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="CurrentAddressIs">Current Address Is</label>
+                    <select asp-for="CurrentAddressIs">
+                        <option value="">Select</option>
+                        <option value="Owned">Owned</option>
+                        <option value="Rented">Rented</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PermanentAddressIs">Permanent Address Is</label>
+                    <select asp-for="PermanentAddressIs">
+                        <option value="">Select</option>
+                        <option value="Owned">Owned</option>
+                        <option value="Rented">Rented</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Emergency Contact</div>
+            <div class="employee-grid">
+                <div class="employee-field">
+                    <label asp-for="EmergencyContactName">Emergency Contact Name</label>
+                    <input asp-for="EmergencyContactName" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="EmergencyPhone">Emergency Phone</label>
+                    <input asp-for="EmergencyPhone" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="Relation">Relation</label>
+                    <input asp-for="Relation" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="employee-pane" data-employee-pane="attendance">
+        <div class="employee-section">
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="AttendanceDeviceId">Attendance Device ID (Biometric/RF tag ID)</label>
+                    <input asp-for="AttendanceDeviceId" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="HolidayList">Holiday List</label>
+                    <select asp-for="HolidayList" asp-items="holidayListOptions"></select>
+                    <div class="employee-help">Applicable Holiday List</div>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="DefaultShift">Default Shift</label>
+                    <select asp-for="DefaultShift" asp-items="defaultShiftOptions"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Approvers</div>
+
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="ExpenseApprover">Expense Approver</label>
+                    <select asp-for="ExpenseApprover" asp-items="userOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="ShiftRequestApprover">Shift Request Approver</label>
+                    <select asp-for="ShiftRequestApprover" asp-items="userOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="LeaveApprover">Leave Approver</label>
+                    <select asp-for="LeaveApprover" asp-items="userOptions"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="employee-pane employee-salary-pane" data-employee-pane="salary">
+        <div class="employee-section">
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="CTC">Cost to Company (CTC)</label>
+                    <input asp-for="CTC" type="number" step="0.01" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PayrollCostCenter">Payroll Cost Center</label>
+                    <select asp-for="PayrollCostCenter" asp-items="payrollCostCenterOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="SalaryCurrency">Salary Currency</label>
+                    <select asp-for="SalaryCurrency">
+                        <option value="">Select Salary Currency</option>
+                        @if (ViewBag.Currencies != null)
+                        {
+                            foreach (var currency in ViewBag.Currencies)
+                            {
+                                <option value="@currency.name">@currency.name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PanNumber">PAN Number</label>
+                    <input asp-for="PanNumber" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="SalaryMode">Salary Mode</label>
+                    <select asp-for="SalaryMode">
+                        <option value="">Select</option>
+                        <option>Bank</option>
+                        <option>Cash</option>
+                        <option>Cheque</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="ProvidentFundAccount">Provident Fund Account</label>
+                    <input asp-for="ProvidentFundAccount" />
+                </div>
+                <div class="employee-section bank-details-section" id="bankDetailsSection">
+                    <div class="employee-section-title">Bank Details</div>
+
+                    <div class="employee-grid two">
+                        <div class="employee-field">
+                            <label asp-for="BankName">Bank Name</label>
+                            <input asp-for="BankName" />
+                        </div>
+
+                        <div class="employee-field">
+                            <label asp-for="BankAccountNo">Bank A/C No</label>
+                            <input asp-for="BankAccountNo" />
+                        </div>
+
+                        <div class="employee-field">
+                            <label asp-for="IFSCCode">IFSC Code</label>
+                            <input asp-for="IFSCCode" />
+                        </div>
+
+                        <div class="employee-field">
+                            <label asp-for="MICRCode">MICR Code</label>
+                            <input asp-for="MICRCode" />
+                        </div>
+
+                        <div class="employee-field">
+                            <label asp-for="IBAN">IBAN</label>
+                            <input asp-for="IBAN" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>     
+    <div class="employee-pane" data-employee-pane="personal">
+        <div class="employee-section">
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="MaritalStatus">Marital Status</label>
+                    <select asp-for="MaritalStatus">
+                        <option value="">Select</option>
+                        <option>Single</option>
+                        <option>Married</option>
+                        <option>Divorced</option>
+                        <option>Widowed</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="BloodGroup">Blood Group</label>
+                    <select asp-for="BloodGroup">
+                        <option value="">Select</option>
+                        <option>A+</option>
+                        <option>A-</option>
+                        <option>B+</option>
+                        <option>B-</option>
+                        <option>AB+</option>
+                        <option>AB-</option>
+                        <option>O+</option>
+                        <option>O-</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="FamilyBackground">Family Background</label>
+                    <textarea asp-for="FamilyBackground"></textarea>
+                    <div class="employee-help">Here you can maintain family details like name and occupation of parent, spouse and children</div>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="HealthDetails">Health Details</label>
+                    <textarea asp-for="HealthDetails"></textarea>
+                    <div class="employee-help">Here you can maintain height, weight, allergies, medical concerns etc</div>
+                </div>
+            </div>
+        </div>
+
+        @* <div class="employee-section">
+            <div class="employee-section-title">Health Insurance</div>
+            <div class="employee-grid two">
+            <div class="employee-field">
+                <label asp-for="HealthInsuranceProvider">Health Insurance Provider</label>
+                <select asp-for="HealthInsuranceProvider" asp-items="healthInsuranceProviderOptions"></select>
+            </div>
+            </div>
+        </div> *@
+        <div class="employee-section">
+            <div class="employee-section-title">Health Insurance</div>
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="HealthInsuranceProvider">Health Insurance Provider</label>
+                    <select asp-for="HealthInsuranceProvider" asp-items="healthInsuranceProviderOptions"></select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="HealthInsuranceNo">Health Insurance No</label>
+                    <input asp-for="HealthInsuranceNo" />
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Passport Details</div>
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="PassportNumber">Passport Number</label>
+                    <input asp-for="PassportNumber" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PassportDateOfIssue">Date of Issue</label>
+                    <input asp-for="PassportDateOfIssue" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PassportValidUpto">Valid Upto</label>
+                    <input asp-for="PassportValidUpto" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="PassportPlaceOfIssue">Place of Issue</label>
+                    <input asp-for="PassportPlaceOfIssue" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="employee-pane" data-employee-pane="profile">
+        <div class="employee-section">
+            <div class="employee-grid one">
+                <div class="employee-field">
+                    <label asp-for="Bio">Bio / Cover Letter</label>
+                    <textarea asp-for="Bio" style="min-height: 220px;"></textarea>
+                    <div class="employee-help">Short biography for website and other publications.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Educational Qualification</div>
+            <table class="employee-table" id="educationTable">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>School/University</th>
+                        <th>Qualification</th>
+                        <th>Level</th>
+                        <th>Year of Passing</th>
+                        <th style="width:60px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="educationBody">
+                    @for (var i = 0; i < educationRows.Count; i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+
+                            <td>
+                                <input name="EduSchools" value="@educationRows[i].SchoolUniversity" />
+                            </td>
+
+                            <td>
+                                <input name="EduQualifications" value="@educationRows[i].Qualification" />
+                            </td>
+
+                            <td>
+                                <select name="EduLevels">
+                                    <option value="">Select Level</option>
+                                    <option value="Graduate" selected="@(educationRows[i].Level == "Graduate" ? "selected" : null)">Graduate</option>
+                                    <option value="Post Graduate" selected="@(educationRows[i].Level == "Post Graduate" ? "selected" : null)">Post Graduate</option>
+                                    <option value="Under Graduate" selected="@(educationRows[i].Level == "Under Graduate" ? "selected" : null)">Under Graduate</option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <input name="EduYears" type="number" value="@educationRows[i].YearOfPassing" />
+                            </td>
+
+                            <td>
+                                <button type="button" class="employee-remove-btn" onclick="this.closest('tr').remove(); renumberRows('educationBody');">x</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button type="button" class="employee-small-btn" onclick="addEducationRow()">Add Row</button>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Previous Work Experience</div>
+            <table class="employee-table" id="externalWorkTable">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Company</th>
+                        <th>Designation</th>
+                        <th>Salary</th>
+                        <th>Address</th>
+                        <th style="width:60px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="externalWorkBody">
+                    @for (var i = 0; i < externalRows.Count; i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td><input name="ExpCompanies" value="@externalRows[i].CompanyName" /></td>
+                            <td>
+                                <select name="ExpDesignations">
+                                    @foreach (var item in designationOptions)
+                                    {
+                                        <option value="@item.Value" selected="@(item.Value == externalRows[i].Designation ? "selected" : null)">
+                                            @item.Text
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td><input name="ExpSalaries" type="number" step="0.01" value="@externalRows[i].Salary" /></td>
+                            <td><input name="ExpAddresses" value="@externalRows[i].Address" /></td>
+                            <td><button type="button" class="employee-remove-btn" onclick="this.closest('tr').remove(); renumberRows('externalWorkBody');">x</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button type="button" class="employee-small-btn" onclick="addExternalWorkRow()">Add Row</button>
+        </div>
+        <div class="employee-section">
+            <div class="employee-section-title">History In Company</div>
+            <table class="employee-table" id="internalWorkTable">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">No.</th>
+                        <th>Branch</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th style="width:60px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="internalWorkBody">
+                    @for (var i = 0; i < internalRows.Count; i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                        <td>
+                            <select name="HistBranches">
+                                <option value="">Select Branch</option>
+                                @foreach (var item in branchOptions)
+                                {
+                                    <option value="@item.Value" selected="@(item.Value == internalRows[i].Branch ? "selected" : null)">
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select name="HistDepartments">
+                                <option value="">Select Department</option>
+                                @foreach (var item in departmentOptions)
+                                {
+                                    <option value="@item.Value" selected="@(item.Value == internalRows[i].Department ? "selected" : null)">
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select name="HistDesignations">
+                                <option value="">Select Designation</option>
+                                @foreach (var item in designationOptions)
+                                {
+                                    <option value="@item.Value" selected="@(item.Value == internalRows[i].Designation ? "selected" : null)">
+                                        @item.Text
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                            <td><input name="HistFromDates" type="date" value="@(internalRows[i].FromDate?.ToString("yyyy-MM-dd"))" /></td>
+                            <td><input name="HistToDates" type="date" value="@(internalRows[i].ToDate?.ToString("yyyy-MM-dd"))" /></td>
+                            <td><button type="button" class="employee-remove-btn" onclick="this.closest('tr').remove(); renumberRows('internalWorkBody');">x</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button type="button" class="employee-small-btn" onclick="addInternalWorkRow()">Add Row</button>
+        </div>
+    </div>
+
+    <div class="employee-pane" data-employee-pane="exit">
+        <div class="employee-section">
+            <div class="employee-grid">
+                <div class="employee-field">
+                    <label asp-for="ResignationLetterDate">Resignation Letter Date</label>
+                    <input asp-for="ResignationLetterDate" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="ExitInterviewHeldOn">Exit Interview Held On</label>
+                    <input asp-for="ExitInterviewHeldOn" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="LeaveEncashed">Leave Encashed?</label>
+                    <select asp-for="LeaveEncashed">
+                        <option value="">Select</option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="EncashmentDate">Encashment Date</label>
+                    <input asp-for="EncashmentDate" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="RelievingDate">Relieving Date</label>
+                    <input asp-for="RelievingDate" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="NewWorkplace">New Workplace</label>
+                    <input asp-for="NewWorkplace" />
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-section">
+            <div class="employee-section-title">Feedback</div>
+            <div class="employee-grid two">
+                <div class="employee-field">
+                    <label asp-for="ReasonForLeaving">Reason for Leaving</label>
+                    <textarea asp-for="ReasonForLeaving"></textarea>
+                </div>
+
+                <div class="employee-field">
+                    <label asp-for="Feedback">Feedback</label>
+                    <textarea asp-for="Feedback"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+       document.addEventListener('DOMContentLoaded', function () {
+        function showEmployeePane(selectedTab) {
+            document.querySelectorAll('[data-employee-tab]').forEach(function (button) {
+                button.classList.toggle('active', button.getAttribute('data-employee-tab') === selectedTab);
+            });
+
+            document.querySelectorAll('[data-employee-pane]').forEach(function (pane) {
+                var isSelected = pane.getAttribute('data-employee-pane') === selectedTab;
+                pane.classList.toggle('active', isSelected);
+                pane.style.display = isSelected ? 'block' : 'none';
+            });
+        }
+
+        document.querySelectorAll('[data-employee-tab]').forEach(function (tabButton) {
+            tabButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                showEmployeePane(tabButton.getAttribute('data-employee-tab'));
+            });
+        });
+
+        showEmployeePane('overview');
+            function toggleBankDetails() {
+        var salaryMode = document.getElementById('SalaryMode');
+        var bankDetails = document.getElementById('bankDetailsSection');
+
+        if (!salaryMode || !bankDetails) {
+            return;
+        }
+
+        bankDetails.style.display = salaryMode.value === 'Bank' ? 'block' : 'none';
+    }
+
+    var salaryMode = document.getElementById('SalaryMode');
+    if (salaryMode) {
+        salaryMode.addEventListener('change', toggleBankDetails);
+    }
+
+    toggleBankDetails();
+    });
+
+    function renumberRows(bodyId) {
+        document.querySelectorAll('#' + bodyId + ' tr').forEach(function (row, index) {
+            row.cells[0].innerText = index + 1;
+        });
+    }
+
+    function removeEmployeeRow(button, bodyId) {
+        button.closest('tr').remove();
+        renumberRows(bodyId);
+    }
+
+    function addEducationRow() {
+        var tbody = document.getElementById('educationBody');
+        var tr = document.createElement('tr');
+
+        tr.innerHTML =
+            '<td></td>' +
+            '<td><input name="EduSchools" /></td>' +
+            '<td><input name="EduQualifications" /></td>' +
+          '<td><select name="EduLevels"><option value="">Select Level</option><option value="Graduate">Graduate</option><option value="Post Graduate">Post Graduate</option><option value="Under Graduate">Under Graduate</option></select></td>' +
+            '<td><input name="EduYears" type="number" /></td>' +
+            '<td><button type="button" class="employee-remove-btn" onclick="removeEmployeeRow(this, \'educationBody\')">x</button></td>';
+
+        tbody.appendChild(tr);
+        renumberRows('educationBody');
+    }
+
+    function addExternalWorkRow() {
+        var tbody = document.getElementById('externalWorkBody');
+        var tr = document.createElement('tr');
+
+        tr.innerHTML =
+            '<td></td>' +
+            '<td><input name="ExpCompanies" /></td>' +
+            '<td><select name="ExpDesignations">' + (document.getElementById('Designation') ? document.getElementById('Designation').innerHTML : '<option value="">Select Designation</option>') + '</select></td>' +
+            '<td><input name="ExpSalaries" type="number" step="0.01" /></td>' +
+            '<td><input name="ExpAddresses" /></td>' +
+            '<td><button type="button" class="employee-remove-btn" onclick="removeEmployeeRow(this, \'externalWorkBody\')">x</button></td>';
+
+        tbody.appendChild(tr);
+        renumberRows('externalWorkBody');
+    }
+
+
+
+        function clearEmptyRow(tbody) {
+        if (!tbody) {
+            return;
+        }
+
+        var emptyRow = tbody.querySelector('[data-empty-row="true"], .empty-row');
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+    }
+
+
+
+
+
+
+      function addInternalWorkRow() {
+        var tbody = document.getElementById('internalWorkBody');
+        clearEmptyRow(tbody);
+
+        var branchSelect = document.getElementById('Branch');
+        var departmentSelect = document.getElementById('Department');
+        var designationSelect = document.getElementById('Designation');
+
+        var branchOptionsHtml = branchSelect ? branchSelect.innerHTML : '<option value="">Select Branch</option>';
+        var departmentOptionsHtml = departmentSelect ? departmentSelect.innerHTML : '<option value="">Select Department</option>';
+        var designationOptionsHtml = designationSelect ? designationSelect.innerHTML : '<option value="">Select Designation</option>';
+
+        var tr = document.createElement('tr');
+
+        tr.innerHTML =
+            '<td></td>' +
+            '<td><select name="HistBranches">' + branchOptionsHtml + '</select></td>' +
+            '<td><select name="HistDepartments">' + departmentOptionsHtml + '</select></td>' +
+            '<td><select name="HistDesignations">' + designationOptionsHtml + '</select></td>' +
+            '<td><input name="HistFromDates" type="date" /></td>' +
+            '<td><input name="HistToDates" type="date" /></td>' +
+            '<td><button type="button" class="employee-remove-btn" onclick="removeEmployeeRow(this, \'internalWorkBody\')">x</button></td>';
+
+        tbody.appendChild(tr);
+        renumberRows('internalWorkBody');
+    }
+</script>

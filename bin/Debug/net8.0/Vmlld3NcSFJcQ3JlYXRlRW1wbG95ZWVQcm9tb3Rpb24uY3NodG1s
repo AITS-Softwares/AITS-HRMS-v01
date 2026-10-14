@@ -1,0 +1,352 @@
+﻿@model Erp_Aits.Models.EmployeePromotion
+@{
+    ViewBag.Title = "New Employee Promotion";
+    var employees = ViewBag.Employees as IEnumerable<dynamic>;
+    var companies = ViewBag.Companies as List<string>;
+}
+
+<form asp-action="CreateEmployeePromotion" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 d-inline">New Employee Promotion</h4>
+            <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Employee <span class="text-danger">*</span></label>
+            <select asp-for="Employee" id="employeeSelect" class="form-control" required>
+                <option value="">Select Employee</option>
+                @if (employees != null)
+                {
+                    foreach (var e in employees)
+                    {
+                        <option value="@e.name">@e.name - @e.employee_name</option>
+                    }
+                }
+            </select>
+            <input type="hidden" asp-for="EmployeeName" id="EmployeeName" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Promotion Date <span class="text-danger">*</span></label>
+            <input asp-for="PromotionDate" type="date" class="form-control" required value="@Model.PromotionDate.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Salary Currency</label>
+            <input asp-for="SalaryCurrency" id="SalaryCurrency" class="form-control" readonly />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <select asp-for="Company" id="Company" class="form-control">
+                <option value="">Select Company</option>
+                @if (companies != null)
+                {
+                    foreach (var c in companies)
+                    {
+                        <option value="@c">@c</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    <hr />
+
+    <h6 class="mb-1">Employee Promotion Details</h6>
+    <p class="text-muted small mb-3">
+        Set the properties that should be updated in the Employee master on promotion submission
+    </p>
+
+    <table class="table table-bordered align-middle mb-1" id="detailsTable">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" disabled /></th>
+                <th style="width:50px">No.</th>
+                <th>Property</th>
+                <th>Current</th>
+                <th>New</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="openEmployeePropertyModal()">
+        Add Employee Property
+    </button>
+
+    <hr />
+
+    <h6 class="mb-3">Salary Details</h6>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Current CTC</label>
+            <input asp-for="CurrentCTC" id="CurrentCTC" type="number" step="0.01" class="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Revised CTC</label>
+            <input type="number" step="0.01" class="form-control" />
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="employeePropertyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Property</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Property</label>
+                    <select id="modalProperty" class="form-control" onchange="onPropertyChanged()">
+                        <option value="">Select Property</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Current</label>
+                    <input id="modalCurrent" class="form-control" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">New</label>
+                    <div id="modalNewWrapper">
+                        <input id="modalNew" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="addToDetailsBtn" class="btn btn-dark btn-sm" onclick="addPropertyToDetails()" disabled>
+                    Add to Details
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let employeeFieldsLoaded = false;
+    let selectedPropertyData = null;
+
+    document.getElementById('employeeSelect').addEventListener('change', async function () {
+        const employee = this.value;
+
+        clearPromotionDetails();
+
+        if (!employee) {
+            document.getElementById('EmployeeName').value = '';
+            document.getElementById('SalaryCurrency').value = '';
+            document.getElementById('Company').value = '';
+            document.getElementById('CurrentCTC').value = '';
+            return;
+        }
+
+        const res = await fetch('/HR/GetEmployeePromotionEmployeeDetails?employee=' + encodeURIComponent(employee));
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('EmployeeName').value = data.employeeName || '';
+            document.getElementById('SalaryCurrency').value = data.salaryCurrency || 'INR';
+            document.getElementById('Company').value = data.company || '';
+            document.getElementById('CurrentCTC').value = data.currentCtc || '';
+        }
+    });
+
+    async function openEmployeePropertyModal() {
+        const employee = document.getElementById('employeeSelect').value;
+
+        if (!employee) {
+            alert('Please select Employee first.');
+            return;
+        }
+
+        if (!employeeFieldsLoaded) {
+            await loadEmployeeFields();
+        }
+
+        selectedPropertyData = null;
+        document.getElementById('modalProperty').value = '';
+        document.getElementById('modalCurrent').value = '';
+        document.getElementById('modalNewWrapper').innerHTML = '<input id="modalNew" class="form-control" />';
+        document.getElementById('addToDetailsBtn').disabled = true;
+
+        const modal = new bootstrap.Modal(document.getElementById('employeePropertyModal'));
+        modal.show();
+    }
+
+    async function loadEmployeeFields() {
+        const res = await fetch('/HR/GetEmployeePromotionEmployeeFields');
+        const data = await res.json();
+
+        const ddl = document.getElementById('modalProperty');
+        ddl.innerHTML = '<option value="">Select Property</option>';
+
+        if (data.success && data.data) {
+            data.data.forEach(function (field) {
+                const option = document.createElement('option');
+                option.value = field.value;
+                option.textContent = field.label;
+                ddl.appendChild(option);
+            });
+        }
+
+        employeeFieldsLoaded = true;
+    }
+
+    async function onPropertyChanged() {
+        const employee = document.getElementById('employeeSelect').value;
+        const fieldname = document.getElementById('modalProperty').value;
+
+        document.getElementById('modalCurrent').value = '';
+        document.getElementById('addToDetailsBtn').disabled = true;
+        selectedPropertyData = null;
+
+        if (!fieldname) return;
+
+        if (isDuplicateField(fieldname)) {
+            alert('Property already added');
+            document.getElementById('modalProperty').value = '';
+            return;
+        }
+
+        const url = '/HR/GetEmployeePromotionFieldProperty?employee='
+            + encodeURIComponent(employee)
+            + '&fieldname='
+            + encodeURIComponent(fieldname);
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success) {
+            alert(data.message || 'Unable to fetch property.');
+            return;
+        }
+
+        selectedPropertyData = {
+            fieldname: fieldname,
+            property: data.label,
+            current: data.value || '',
+            datatype: data.datatype,
+            options: data.options,
+            optionList: data.optionList || []
+        };
+
+        document.getElementById('modalCurrent').value = selectedPropertyData.current;
+        renderNewField(selectedPropertyData);
+        document.getElementById('addToDetailsBtn').disabled = false;
+    }
+
+    function renderNewField(data) {
+        const wrapper = document.getElementById('modalNewWrapper');
+        wrapper.innerHTML = '';
+
+        if (data.datatype === 'Link' || data.datatype === 'Select') {
+            const select = document.createElement('select');
+            select.id = 'modalNew';
+            select.className = 'form-control';
+
+            const empty = document.createElement('option');
+            empty.value = '';
+            empty.textContent = '';
+            select.appendChild(empty);
+
+            data.optionList.forEach(function (x) {
+                const opt = document.createElement('option');
+                opt.value = x;
+                opt.textContent = x;
+                select.appendChild(opt);
+            });
+
+            wrapper.appendChild(select);
+            return;
+        }
+
+        const input = document.createElement('input');
+        input.id = 'modalNew';
+        input.className = 'form-control';
+
+        if (data.datatype === 'Date') {
+            input.type = 'date';
+        } else if (data.datatype === 'Int' || data.datatype === 'Float' || data.datatype === 'Currency') {
+            input.type = 'number';
+            input.step = '0.01';
+        } else {
+            input.type = 'text';
+        }
+
+        wrapper.appendChild(input);
+    }
+
+    function addPropertyToDetails() {
+        if (!selectedPropertyData) {
+            alert('Value missing');
+            return;
+        }
+
+        const newValue = document.getElementById('modalNew').value || '';
+
+        if (selectedPropertyData.current === newValue) {
+            alert('Nothing to change');
+            return;
+        }
+
+        const tbody = document.querySelector('#detailsTable tbody');
+        const rowNum = tbody.rows.length + 1;
+
+        const row = document.createElement('tr');
+        row.setAttribute('data-fieldname', selectedPropertyData.fieldname);
+
+        row.innerHTML =
+            '<td><input type="checkbox" /></td>' +
+            '<td>' + rowNum + '</td>' +
+            '<td>' +
+                escapeHtml(selectedPropertyData.property) +
+                '<input type="hidden" name="PropertyFieldNames" value="' + escapeHtml(selectedPropertyData.fieldname) + '" />' +
+                '<input type="hidden" name="PropertyNames" value="' + escapeHtml(selectedPropertyData.property) + '" />' +
+            '</td>' +
+            '<td>' +
+                escapeHtml(selectedPropertyData.current) +
+                '<input type="hidden" name="CurrentValues" value="' + escapeHtml(selectedPropertyData.current) + '" />' +
+            '</td>' +
+            '<td>' +
+                escapeHtml(newValue) +
+                '<input type="hidden" name="NewValues" value="' + escapeHtml(newValue) + '" />' +
+            '</td>';
+
+        tbody.appendChild(row);
+
+        bootstrap.Modal.getInstance(document.getElementById('employeePropertyModal')).hide();
+    }
+
+    function isDuplicateField(fieldname) {
+        return document.querySelector('#detailsTable tbody tr[data-fieldname="' + fieldname + '"]') !== null;
+    }
+
+    function clearPromotionDetails() {
+        document.querySelector('#detailsTable tbody').innerHTML = '';
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+</script>

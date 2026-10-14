@@ -1,0 +1,98 @@
+﻿@model Erp_Aits.Models.EmployeeGrade
+@{
+    ViewBag.Title = "New Employee Grade";
+}
+
+<form asp-action="CreateEmployeeGrade" asp-controller="HR" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Employee Grade</h4>
+
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("EmployeeGrades", "HR")"
+               class="btn btn-outline-secondary btn-sm">
+                Back
+            </a>
+
+            <button type="submit" class="btn btn-dark btn-sm px-4">
+                Save
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErpNextError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card p-4 shadow-sm bg-white border">
+        <div class="mb-3">
+            <label class="form-label">
+                Name <span class="text-danger">*</span>
+            </label>
+
+            <input asp-for="GradeName"
+                   class="form-control"
+                   required
+                   autofocus
+                   placeholder="Enter Grade Name" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">
+                Default Salary Structure
+            </label>
+
+            <input asp-for="DefaultSalaryStructure"
+                   class="form-control"
+                   list="salaryStructureList"
+                   placeholder="Select or type salary structure" />
+
+            <datalist id="salaryStructureList">
+                @if (ViewBag.SalaryStructures != null)
+                {
+                    foreach (var ss in ViewBag.SalaryStructures)
+                    {
+                        <option value="@ss.name">@ss.name</option>
+                    }
+                }
+            </datalist>
+        </div>
+
+        <div id="basePayBox" style="display:none;">
+            <label class="form-label">
+                Default Base Pay
+            </label>
+
+            <input asp-for="DefaultBasePay"
+                   class="form-control"
+                   type="number"
+                   step="0.01"
+                   placeholder="Enter Default Base Pay" />
+        </div>
+    </div>
+</form>
+
+<script>
+    const salaryInput = document.querySelector('[name="DefaultSalaryStructure"]');
+    const basePayBox = document.getElementById('basePayBox');
+
+    function toggleBasePay() {
+        if (!salaryInput || !basePayBox) {
+            return;
+        }
+
+        basePayBox.style.display = salaryInput.value.trim() ? 'block' : 'none';
+    }
+
+    if (salaryInput) {
+        salaryInput.addEventListener('input', toggleBasePay);
+        salaryInput.addEventListener('change', toggleBasePay);
+    }
+
+    toggleBasePay();
+</script>

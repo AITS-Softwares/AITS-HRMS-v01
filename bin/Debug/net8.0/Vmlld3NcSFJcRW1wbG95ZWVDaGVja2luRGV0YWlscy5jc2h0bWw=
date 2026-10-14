@@ -1,0 +1,217 @@
+﻿@model Erp_Aits.Models.EmployeeCheckin
+
+@{
+    ViewBag.Title = Model.EmployeeName + " - " + Model.EmployeeCheckinCode;
+
+    bool editMode =
+        ViewBag.EditMode == true ||
+        string.Equals(Context.Request.Query["edit"], "true", StringComparison.OrdinalIgnoreCase);
+
+    string timeValue = Model.Time.HasValue
+        ? Model.Time.Value.ToString("yyyy-MM-ddTHH:mm:ss")
+        : "";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">@Model.EmployeeName</h4>
+        <p class="text-muted small mb-0">@Model.EmployeeCheckinCode</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("EmployeeCheckin", "HR")"
+           class="btn btn-outline-secondary btn-sm">
+            Back to List
+        </a>
+
+        @if (!editMode)
+        {
+            <a href="/HR/EmployeeCheckinDetails/@Model.Id?edit=true"
+               class="btn btn-dark btn-sm">
+                Edit
+            </a>
+
+            <form method="post"
+                  action="@Url.Action("DeleteEmployeeCheckin", "HR", new { id = Model.Id })"
+                  onsubmit="return confirm('Are you sure you want to delete this Employee Checkin?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger btn-sm">
+                    Delete
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mb-3">@TempData["Success"]</div>
+}
+
+@if (TempData["ErpNextError"] != null)
+{
+    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+}
+
+<form method="post" action="@Url.Action("UpdateEmployeeCheckin", "HR", new { id = Model.Id })">
+    @Html.AntiForgeryToken()
+
+    <div class="card p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+
+                @if (editMode)
+                {
+                    <input name="Employee"
+                           id="Employee"
+                           class="form-control"
+                           list="employeeList"
+                           value="@Model.Employee"
+                           required />
+
+                    <datalist id="employeeList">
+                        @if (ViewBag.Employees != null)
+                        {
+                            foreach (var emp in ViewBag.Employees)
+                            {
+                                <option value="@emp.name">@emp.employee_name</option>
+                            }
+                        }
+                    </datalist>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Employee" readonly />
+                    <input type="hidden" name="Employee" value="@Model.Employee" />
+                }
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Time *</label>
+
+                @if (editMode)
+                {
+                    <input type="datetime-local"
+                           name="Time"
+                           class="form-control"
+                           value="@timeValue"
+                           step="1"
+                           required />
+                }
+                else
+                {
+                    <input class="form-control"
+                           value="@(Model.Time?.ToString("dd-MM-yyyy HH:mm:ss"))"
+                           readonly />
+                    <input type="hidden" name="Time" value="@timeValue" />
+                }
+
+                <small class="text-muted">Asia/Kolkata</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Employee Name</label>
+                <input name="EmployeeName"
+                       id="EmployeeName"
+                       class="form-control bg-light"
+                       value="@Model.EmployeeName"
+                       readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Location / Device ID</label>
+                <input name="LocationDeviceId"
+                       class="form-control"
+                       value="@Model.LocationDeviceId"
+                       @(editMode ? "" : "readonly") />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Log Type</label>
+
+                @if (editMode)
+                {
+                    <select name="LogType" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option value="IN" selected="@(Model.LogType == "IN")">IN</option>
+                        <option value="OUT" selected="@(Model.LogType == "OUT")">OUT</option>
+                    </select>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.LogType" readonly />
+                    <input type="hidden" name="LogType" value="@Model.LogType" />
+                }
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-check mt-4">
+                    <input type="hidden" name="SkipAutoAttendance" value="false" />
+
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="SkipAutoAttendance"
+                           value="true"
+                           id="SkipAutoAttendance"
+                           @(Model.SkipAutoAttendance ? "checked" : "")
+                           @(editMode ? "" : "disabled") />
+
+                    <label class="form-check-label" for="SkipAutoAttendance">
+                        Skip Auto Attendance
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        @if (editMode)
+        {
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-dark">Save</button>
+                <a href="/HR/EmployeeCheckinDetails/@Model.Id"
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+            </div>
+        }
+    </div>
+</form>
+
+@if (editMode)
+{
+    <script>
+        async function loadEmployeeName() {
+            const employee = document.getElementById("Employee")?.value;
+            const employeeNameInput = document.getElementById("EmployeeName");
+
+            if (!employeeNameInput) return;
+
+            employeeNameInput.value = "";
+
+            if (!employee) return;
+
+            try {
+                const response = await fetch(
+                    '@Url.Action("GetEmployeeSkillMapEmployeeDetails", "HR")' +
+                    '?employee=' + encodeURIComponent(employee)
+                );
+
+                const data = await response.json();
+
+                if (data && data.success) {
+                    employeeNameInput.value = data.employeeName || "";
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const employee = document.getElementById("Employee");
+
+            if (employee) {
+                employee.addEventListener("change", loadEmployeeName);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,464 @@
+﻿@model List<Erp_Aits.Models.EmployeeAdvanceSummaryRow>
+@{
+    ViewBag.Title = "Employee Advance Summary";
+    var fromDate = ((DateTime)ViewBag.FromDate).ToString("yyyy-MM-dd");
+    var toDate = ((DateTime)ViewBag.ToDate).ToString("yyyy-MM-dd");
+
+    int totalAdvances = Model?.Sum(r => r.NoOfAdvances) ?? 0;
+    decimal totalAmount = Model?.Sum(r => r.TotalAdvanceAmount) ?? 0;
+    int employeeCount = Model?.Count ?? 0;
+}
+
+<div class="eas-wrap">
+
+    <div class="eas-header">
+        <div>
+            <div class="eas-breadcrumb">HR Reports</div>
+            <h4 class="eas-title">Employee Advance Summary</h4>
+        </div>
+        <div class="eas-header-actions">
+            <button type="button" class="eas-btn eas-btn-light" onclick="location.reload();" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <form method="get" asp-action="EmployeeAdvanceSummary" class="eas-filter-bar">
+        <div class="eas-filter-group">
+            <label class="eas-filter-label">Employee</label>
+            <input type="text" name="employee" class="eas-filter-input" placeholder="All employees"
+                   value="@ViewBag.Employee" />
+        </div>
+
+        <div class="eas-filter-group">
+            <label class="eas-filter-label">From Date</label>
+            <input type="date" name="fromDate" class="eas-filter-input" value="@fromDate" />
+        </div>
+
+        <div class="eas-filter-group">
+            <label class="eas-filter-label">To Date</label>
+            <input type="date" name="toDate" class="eas-filter-input" value="@toDate" />
+        </div>
+
+        <div class="eas-filter-group">
+            <label class="eas-filter-label">Company</label>
+            <input type="text" name="company" class="eas-filter-input" placeholder="All companies"
+                   value="@ViewBag.Company" />
+        </div>
+
+        <div class="eas-filter-group">
+            <label class="eas-filter-label">Status</label>
+            <select name="status" class="eas-filter-input">
+                <option value="">All Statuses</option>
+                @{
+                    var statuses = new[] { "Draft", "Paid", "Claimed", "Returned", "Cancelled" };
+                }
+                @foreach (var s in statuses)
+                {
+                    <option value="@s" selected="@(ViewBag.Status == s)">@s</option>
+                }
+            </select>
+        </div>
+
+        <div class="eas-filter-group eas-filter-btn-group">
+            <label class="eas-filter-label eas-filter-label-hidden">&nbsp;</label>
+            <button type="submit" class="eas-btn eas-btn-primary w-100">
+                <i class="fas fa-search"></i> Filter
+            </button>
+        </div>
+    </form>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="eas-stats-row">
+            <div class="eas-stat-card">
+                <div class="eas-stat-label">Employees</div>
+                <div class="eas-stat-value">@employeeCount</div>
+            </div>
+            <div class="eas-stat-card">
+                <div class="eas-stat-label">Total Advances</div>
+                <div class="eas-stat-value">@totalAdvances</div>
+            </div>
+            <div class="eas-stat-card eas-stat-highlight">
+                <div class="eas-stat-label">Total Advance Amount</div>
+                <div class="eas-stat-value">₹@totalAmount.ToString("N2")</div>
+            </div>
+        </div>
+    }
+
+    <div class="eas-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="eas-table-wrapper">
+                <table class="table table-hover align-middle eas-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Employee Name</th>
+                            <th>Company</th>
+                            <th>Status</th>
+                            <th class="text-end">No. of Advances</th>
+                            <th class="text-end">Total Advance Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model)
+                        {
+                            string statusClass = row.Status?.ToLower() switch
+                            {
+                                "draft" => "eas-badge-draft",
+                                "paid" => "eas-badge-paid",
+                                "claimed" => "eas-badge-claimed",
+                                "returned" => "eas-badge-returned",
+                                "cancelled" => "eas-badge-cancelled",
+                                _ => "eas-badge-default"
+                            };
+                            <tr>
+                                <td><span class="eas-code-badge">@row.Employee</span></td>
+                                <td>
+                                    <div class="eas-employee">
+                                        <span class="eas-avatar">
+                                            @(string.IsNullOrWhiteSpace(row.EmployeeName) ? "?" : row.EmployeeName.Trim()[0].ToString().ToUpper())
+                                        </span>
+                                        <span>@row.EmployeeName</span>
+                                    </div>
+                                </td>
+                                <td>@row.Company</td>
+                                <td><span class="eas-status-pill @statusClass">@row.Status</span></td>
+                                <td class="text-end">@row.NoOfAdvances</td>
+                                <td class="text-end eas-amount">₹@row.TotalAdvanceAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="eas-total-row">
+                            <td colspan="4" class="text-end">Total</td>
+                            <td class="text-end">@totalAdvances</td>
+                            <td class="text-end eas-amount">₹@totalAmount.ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="eas-empty">
+                <i class="fas fa-clipboard-list eas-empty-icon"></i>
+                <div class="eas-empty-text">Nothing to show for the selected filters</div>
+            </div>
+        }
+    </div>
+
+</div>
+
+<style>
+    .eas-wrap {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .eas-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 18px;
+    }
+
+    .eas-breadcrumb {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9aa0a6;
+        margin-bottom: 0.15rem;
+    }
+
+    .eas-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 20px;
+        color: #1a1a2e;
+    }
+
+    .eas-header-actions .eas-btn {
+        margin-left: 6px;
+    }
+
+    .eas-btn {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+        .eas-btn:hover {
+            background: #f3f4f6;
+        }
+
+    .eas-btn-primary {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        color: #fff;
+    }
+
+        .eas-btn-primary:hover {
+            background: #4338ca;
+        }
+
+    /* Filter bar as responsive grid */
+    .eas-filter-bar {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #eef0f3;
+        align-items: end;
+    }
+
+    .eas-filter-group {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .eas-filter-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .eas-filter-label-hidden {
+        visibility: hidden;
+    }
+
+    .eas-filter-input {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #374151;
+        background: #fff;
+        width: 100%;
+    }
+
+        .eas-filter-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+    /* Stat cards */
+    .eas-stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .eas-stat-card {
+        background: #f8f9fc;
+        border: 1px solid #eef0f3;
+        border-radius: 12px;
+        padding: 14px 18px;
+    }
+
+    .eas-stat-highlight {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        border: none;
+        color: #fff;
+    }
+
+        .eas-stat-highlight .eas-stat-label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .eas-stat-highlight .eas-stat-value {
+            color: #fff;
+        }
+
+    .eas-stat-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .eas-stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    /* Table */
+    .eas-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .eas-table thead tr {
+        background: #f8f9fc;
+    }
+
+    .eas-table th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #64748b;
+        border-bottom: 2px solid #f0f2f5;
+        white-space: nowrap;
+        padding: 10px 14px;
+    }
+
+    .eas-table td {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+
+    .eas-code-badge {
+        display: inline-block;
+        background: #eef1f5;
+        color: #333;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 3px 9px;
+        border-radius: 6px;
+    }
+
+    .eas-employee {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .eas-avatar {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 50%;
+        background: #4f46e5;
+        color: #fff;
+        font-weight: 600;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .eas-status-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .eas-badge-draft {
+        background: #eef1f5;
+        color: #495057;
+    }
+
+    .eas-badge-paid {
+        background: #d7f5e3;
+        color: #1b7a43;
+    }
+
+    .eas-badge-claimed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .eas-badge-returned {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .eas-badge-cancelled {
+        background: #f1f1f1;
+        color: #6c757d;
+        text-decoration: line-through;
+    }
+
+    .eas-badge-default {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .eas-amount {
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    .eas-total-row td {
+        border-top: 2px solid #eef0f3;
+        font-weight: 700;
+        background: #f8f9fc;
+        padding: 12px 14px;
+    }
+
+    .eas-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 90px 0;
+        color: #94a3b8;
+    }
+
+    .eas-empty-icon {
+        font-size: 34px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+    }
+
+    .eas-empty-text {
+        font-size: 14px;
+    }
+
+    @@media (max-width: 992px) {
+        .eas-filter-bar {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .eas-stats-row {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .eas-wrap {
+            padding: 16px 18px;
+        }
+
+        .eas-filter-bar {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .eas-stats-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .eas-stat-value {
+            font-size: 18px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .eas-filter-bar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

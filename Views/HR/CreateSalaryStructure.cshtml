@@ -1,11 +1,19 @@
 ﻿@{
     ViewBag.Title = "New Salary Structure";
+    var companies = ViewBag.StructureCompanies as List<string> ?? new List<string>();
+    var letterHeads = ViewBag.StructureLetterHeads as List<string> ?? new List<string>();
+    var currencies = ViewBag.StructureCurrencies as List<string> ?? new List<string>();
+    var modesOfPayment = ViewBag.StructureModesOfPayment as List<string> ?? new List<string>();
+    var accounts = ViewBag.StructureAccounts as List<string> ?? new List<string>();
+    var earnings = ViewBag.StructureEarnings as List<string> ?? new List<string>();
+    var deductions = ViewBag.StructureDeductions as List<string> ?? new List<string>();
 }
 
 <style>
     .erp-form-page {
         max-width: 1210px;
         margin: 0 auto;
+        padding:26px; background:#eaf0f6; border:1px solid #d4e0eb; border-radius:8px;
     }
 
     .erp-header {
@@ -13,6 +21,7 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 18px;
+        padding:20px 24px; background:#14253d; border-radius:7px;
     }
 
     .erp-title-left {
@@ -31,6 +40,7 @@
     .erp-title {
         font-size: 20px;
         font-weight: 700;
+        color:#fff;
     }
 
     .not-saved {
@@ -43,7 +53,7 @@
     }
 
     .save-btn {
-        background: #111;
+        background: #0f766e;
         color: #fff;
         border: 0;
         border-radius: 8px;
@@ -53,7 +63,7 @@
 
     .erp-card {
         background: #fff;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #cbd8e5;
         border-radius: 8px;
         overflow: hidden;
     }
@@ -61,7 +71,7 @@
     .tab-row {
         display: flex;
         gap: 28px;
-        border-bottom: 1px solid #e5e7eb;
+        background:#f4f8fc; border-bottom: 1px solid #dbe3ec;
         padding: 0 20px;
     }
 
@@ -109,8 +119,8 @@
     .erp-input, .erp-select {
         width: 100%;
         height: 34px;
-        border: 1px solid #e5e7eb;
-        background: #f3f3f3;
+        border: 1px solid #b8c7d7;
+        background: #fbfdff;
         border-radius: 8px;
         padding: 7px 10px;
         font-size: 14px;
@@ -234,7 +244,9 @@
 </style>
 
 <div class="erp-form-page">
-    <form method="post" action="#">
+    <form method="post" action="@Url.Action("CreateSalaryStructure", "HR")">
+        @Html.AntiForgeryToken()
+        @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
         <div class="erp-header">
             <div class="erp-title-left">
                 <button type="button" class="menu-icon">≡</button>
@@ -258,10 +270,10 @@
                         <input type="text" name="Name" class="erp-input" />
 
                         <label class="field-label mt-3">Company <span class="required">*</span></label>
-                        <input type="text" name="Company" class="erp-input" />
+                        <select name="Company" class="erp-select"><option value="">Select company</option>@foreach(var option in companies) { <option value="@option">@option</option> }</select>
 
                         <label class="field-label mt-3">Letter Head</label>
-                        <input type="text" name="LetterHead" class="erp-input" />
+                        <select name="LetterHead" class="erp-select"><option value="">Select letter head</option>@foreach(var option in letterHeads) { <option value="@option">@option</option> }</select>
                     </div>
 
                     <div>
@@ -272,7 +284,10 @@
                         </select>
 
                         <label class="field-label mt-3">Currency <span class="required">*</span></label>
-                        <input type="text" name="Currency" value="INR" class="erp-input" />
+                        <select name="Currency" class="erp-select"><option value="">Select currency</option>@foreach(var option in currencies) { <option value="@option">@option</option> }</select>
+
+                        <label class="field-label mt-3">Is Default</label>
+                        <select name="IsDefault" class="erp-select"><option>No</option><option>Yes</option></select>
                     </div>
 
                     <div>
@@ -297,6 +312,9 @@
                             <option>Weekly</option>
                             <option>Daily</option>
                         </select>
+
+                        <label class="field-label mt-3">Salary Component</label><select name="SalaryComponent" class="erp-select"><option value="">Select salary component</option>@foreach(var option in earnings) { <option value="@option">@option</option> }</select>
+                        <label class="field-label mt-3">Hour Rate</label><input type="number" step="0.01" name="HourRate" class="erp-input" />
                     </div>
                 </div>
             </div>
@@ -350,12 +368,12 @@
                 <div class="form-grid">
                     <div>
                         <label class="field-label">Mode of Payment</label>
-                        <input type="text" name="ModeOfPayment" class="erp-input" />
+                        <select name="ModeOfPayment" class="erp-select"><option value="">Select mode of payment</option>@foreach(var option in modesOfPayment) { <option value="@option">@option</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Payment Account</label>
-                        <input type="text" name="PaymentAccount" class="erp-input" />
+                        <select name="PaymentAccount" class="erp-select"><option value="">Select payment account</option>@foreach(var option in accounts) { <option value="@option">@option</option> }</select>
                     </div>
                 </div>
             </div>
@@ -392,6 +410,8 @@
 </div>
 
 <script>
+    const structureEarnings = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(earnings));
+    const structureDeductions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(deductions));
     document.querySelectorAll('.tab-btn').forEach(function (button) {
         button.addEventListener('click', function () {
             document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
@@ -415,15 +435,16 @@
         row.innerHTML = `
             <td><input type="checkbox" /></td>
             <td>${rowNo}</td>
-            <td><input type="text" name="${bodyId}Components" /></td>
+            <td><select name="${bodyId === 'earningsBody' ? 'EarningsComponents' : 'DeductionsComponents'}">${['<option value="">Select component</option>'].concat((bodyId === 'earningsBody' ? structureEarnings : structureDeductions).map(value => '<option value="' + value.replace(/"/g, '&quot;') + '">' + value + '</option>')).join('')}</select></td>
             <td><input type="text" name="${bodyId}Abbrs" /></td>
-            <td><input type="number" step="0.01" name="${bodyId}Amounts" /></td>
+            <td><input type="number" step="0.01" name="${bodyId === 'earningsBody' ? 'EarningsAmounts' : 'DeductionsAmounts'}" /></td>
             <td><input type="checkbox" name="${bodyId}DependsOnPaymentDays" /></td>
             <td><input type="checkbox" name="${bodyId}IsTaxApplicable" /></td>
             <td>⚙</td>
         `;
 
         body.appendChild(row);
+        enhanceLargeSelects(row);
     }
     function openFormulaHelp() {
         document.getElementById('formulaHelpModal').style.display = 'flex';
@@ -432,4 +453,19 @@
     function closeFormulaHelp() {
         document.getElementById('formulaHelpModal').style.display = 'none';
     }
+
+    function enhanceLargeSelects(scope) {
+        scope.querySelectorAll('select').forEach(function (select) {
+            if (select.dataset.searchSelectReady || select.options.length <= 11) return;
+            select.dataset.searchSelectReady = 'true';
+            const wrapper = document.createElement('div'); wrapper.style.position = 'relative';
+            const input = document.createElement('input'); input.type = 'text'; input.className = 'erp-input'; input.placeholder = select.options[0].text;
+            const menu = document.createElement('div'); menu.className = 'search-select-menu'; menu.style.cssText = 'display:none;position:fixed;z-index:3000;max-height:260px;overflow:auto;background:#fff;border:1px solid #94a3b8;border-radius:6px;box-shadow:0 10px 20px rgba(15,23,42,.18)';
+            select.parentNode.insertBefore(wrapper, select); wrapper.appendChild(input); wrapper.appendChild(menu); wrapper.appendChild(select); select.style.display = 'none';
+            const values = Array.from(select.options).slice(1).map(option => ({ value: option.value, text: option.text }));
+            function render(term) { const matches = values.filter(value => value.text.toLowerCase().startsWith(term.toLowerCase())).slice(0,10); menu.innerHTML = matches.map(value => '<button type="button" data-value="' + value.value.replace(/"/g,'&quot;') + '" style="display:block;width:100%;padding:8px 10px;border:0;background:#fff;text-align:left">' + value.text + '</button>').join('') || '<span style="display:block;padding:9px 10px">No matching option</span>'; const box=input.getBoundingClientRect(); menu.style.left=box.left+'px'; menu.style.top=(box.bottom+4)+'px'; menu.style.width=box.width+'px'; menu.style.display='block'; }
+            input.addEventListener('focus', () => render(input.value)); input.addEventListener('input', () => render(input.value)); menu.addEventListener('click', event => { const value=event.target.dataset.value; if(!value)return; select.value=value; input.value=event.target.textContent; menu.style.display='none'; select.dispatchEvent(new Event('change')); }); document.addEventListener('click', event => {if(!wrapper.contains(event.target)) menu.style.display='none';});
+        });
+    }
+    enhanceLargeSelects(document);
 </script>

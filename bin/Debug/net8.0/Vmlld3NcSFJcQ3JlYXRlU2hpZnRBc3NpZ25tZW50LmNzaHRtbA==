@@ -1,0 +1,299 @@
+﻿@* @model Erp_Aits.Models.HRShiftAssignment
+@{
+    ViewBag.Title = "New Shift Assignment";
+}
+
+<form method="post" action="/HR/CreateShiftAssignment">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Assignment</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Employee Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <input name="Employee" class="form-control" required autofocus />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <input name="Company" class="form-control" required value="@Model.Company" />
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Shift Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                <input name="ShiftType" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Start Date *</label>
+                <input name="StartDate" type="date" class="form-control" required value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <input name="ShiftLocation" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input name="EndDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select name="Status" class="form-select">
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form> *@
+
+
+
+
+
+
+
+
+
+@* 
+
+@model Erp_Aits.Models.HRShiftAssignment
+@{
+    ViewBag.Title = "New Shift Assignment";
+    var employees = ViewBag.EmployeesList as List<object> ?? new List<object>();
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var shiftTypes = ViewBag.ShiftTypes as List<string> ?? new List<string>();
+    var shiftLocations = ViewBag.ShiftLocations as List<string> ?? new List<string>();
+}
+
+<form method="post" action="/HR/CreateShiftAssignment">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Assignment</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+    }
+
+    <div class="card p-4">
+        <h6 class="mb-3">Employee Details</h6>
+        <div class="row g-3">
+            <!-- Employee Dropdown -->
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <select name="Employee" id="employeeSelect" class="form-select" required onchange="updateEmployeeName(this)">
+                    <option value="">-- Select Employee --</option>
+                    @foreach (var emp in employees)
+                    {
+                        var empId = emp.GetType().GetProperty("EmployeeId")?.GetValue(emp, null)?.ToString();
+                        var empName = emp.GetType().GetProperty("EmployeeName")?.GetValue(emp, null)?.ToString();
+                        <option value="@empId" data-empname="@empName" selected="@(Model.Employee == empId)">@empId - @empName</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Hidden/Readonly Employee Name Field if needed, or bind it -->
+            <input type="hidden" name="EmployeeName" id="employeeNameInput" value="@Model.EmployeeName" />
+
+            <!-- Company Dropdown -->
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <select name="Company" class="form-select" required>
+                    <option value="">-- Select Company --</option>
+                    @foreach (var comp in companies)
+                    {
+                        <option value="@comp" selected="@(Model.Company == comp)">@comp</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Shift Details</h6>
+        <div class="row g-3">
+            <!-- Shift Type Dropdown with Create New Link -->
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                <select name="ShiftType" class="form-select" required onchange="handleShiftTypeChange(this)">
+                    <option value="">-- Select Shift Type --</option>
+                    @foreach (var st in shiftTypes)
+                    {
+                        <option value="@st" selected="@(Model.ShiftType == st)">@st</option>
+                    }
+                    <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Shift Type</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Start Date *</label>
+                <input name="StartDate" type="date" class="form-control" required value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <input name="ShiftLocation" class="form-control" value="@Model.ShiftLocation" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input name="EndDate" type="date" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select name="Status" class="form-select">
+                    <option value="Active" selected="@(Model.Status == "Active")">Active</option>
+                    <option value="Inactive" selected="@(Model.Status == "Inactive")">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function updateEmployeeName(selectElement) {
+        var selectedOption = selectElement.options[selectElement.selectedIndex];
+        var empName = selectedOption.getAttribute("data-empname");
+        document.getElementById("employeeNameInput").value = empName || "";
+    }
+
+    function handleShiftTypeChange(selectElement) {
+        if (selectElement.value === "__CREATE_NEW__") {
+            selectElement.value = "";
+            location.href = '@Url.Action("CreateShiftType", "HR")';
+        }
+    }
+</script> *@
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.HRShiftAssignment
+@{
+    ViewBag.Title = "New Shift Assignment";
+    var employees = ViewBag.EmployeesList as List<object> ?? new List<object>();
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var shiftTypes = ViewBag.ShiftTypes as List<string> ?? new List<string>();
+    var shiftLocations = ViewBag.ShiftLocations as List<string> ?? new List<string>();
+}
+
+<form method="post" action="/HR/CreateShiftAssignment">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Shift Assignment</h4>
+        <div>
+            <a href="@Url.Action("ShiftAssignment", "HR")" class="btn btn-outline-secondary btn-sm me-2">Back to List</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
+    </div>
+
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+    }
+
+    <div class="card p-4">
+        <h6 class="mb-3">Employee Details</h6>
+        <div class="row g-3">
+            <!-- Employee Dropdown -->
+            <div class="col-md-6">
+                <label class="form-label">Employee *</label>
+                <select name="Employee" id="employeeSelect" class="form-select" required onchange="updateEmployeeName(this)">
+                    <option value="">-- Select Employee --</option>
+                    @foreach (var emp in employees)
+                    {
+                        var empId = emp.GetType().GetProperty("EmployeeId")?.GetValue(emp, null)?.ToString();
+                        var empName = emp.GetType().GetProperty("EmployeeName")?.GetValue(emp, null)?.ToString();
+                        <option value="@empId" data-empname="@empName" selected="@(Model.Employee == empId)">@empId - @empName</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Hidden Employee Name Field (Auto-filled on selection) -->
+            <input type="hidden" name="EmployeeName" id="employeeNameInput" value="@Model.EmployeeName" />
+
+            <!-- Company Dropdown -->
+            <div class="col-md-6">
+                <label class="form-label">Company *</label>
+                <select name="Company" class="form-select" required>
+                    <option value="">-- Select Company --</option>
+                    @foreach (var comp in companies)
+                    {
+                        <option value="@comp" selected="@(Model.Company == comp)">@comp</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="mb-3">Shift Details</h6>
+        <div class="row g-3">
+            <!-- Shift Type Dropdown with Create New Link -->
+            <div class="col-md-6">
+                <label class="form-label">Shift Type *</label>
+                <select name="ShiftType" class="form-select" required onchange="handleShiftTypeChange(this)">
+                    <option value="">-- Select Shift Type --</option>
+                    @foreach (var st in shiftTypes)
+                    {
+                        <option value="@st" selected="@(Model.ShiftType == st)">@st</option>
+                    }
+                    <option value="__CREATE_NEW__" class="fw-bold text-primary">+ Create New Shift Type</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Start Date *</label>
+                <input name="StartDate" type="date" class="form-control" required value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Shift Location</label>
+                <select name="ShiftLocation" class="form-select">
+                    <option value="">-- Select Shift Location --</option>
+                    @foreach (var loc in shiftLocations)
+                    {
+                        <option value="@loc" selected="@(Model.ShiftLocation == loc)">@loc</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">End Date</label>
+                <input name="EndDate" type="date" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select name="Status" class="form-select">
+                    <option value="Active" selected="@(Model.Status == "Active")">Active</option>
+                    <option value="Inactive" selected="@(Model.Status == "Inactive")">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function updateEmployeeName(selectElement) {
+        var selectedOption = selectElement.options[selectElement.selectedIndex];
+        var empName = selectedOption.getAttribute("data-empname");
+        document.getElementById("employeeNameInput").value = empName || "";
+    }
+
+    function handleShiftTypeChange(selectElement) {
+        if (selectElement.value === "__CREATE_NEW__") {
+            selectElement.value = "";
+            location.href = '@Url.Action("CreateShiftType", "HR")';
+        }
+    }
+</script>

@@ -1,0 +1,228 @@
+﻿@model Erp_Aits.Models.CompensatoryLeaveRequest
+@{
+    ViewBag.Title = "New Compensatory Leave Request";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: linear-gradient(160deg, #f4f6fb 0%, #eef1f8 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+    }
+
+    .clr-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 16px 60px;
+    }
+
+    .clr-panel {
+        border-radius: 16px;
+        border: 1px solid #e2e6f0;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+
+    .clr-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 26px 32px;
+        background: linear-gradient(135deg, #0f2544 0%, #16345c 100%);
+        border-bottom: 3px solid #2dd4bf;
+        position: relative;
+    }
+
+        .clr-page-header h4 {
+            font-family: 'Manrope', sans-serif;
+            color: #ffffff;
+            font-weight: 800;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .clr-page-header p {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 12.5px;
+            margin: 4px 0 0;
+        }
+
+        .clr-page-header .btn-save {
+            background: #2dd4bf;
+            color: #0a2540;
+            border: none;
+            font-weight: 700;
+            font-size: 13.5px;
+            padding: 10px 26px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(45, 212, 191, 0.3);
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            z-index: 10;
+        }
+
+            .clr-page-header .btn-save:hover {
+                background: #5eead4;
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(45, 212, 191, 0.45);
+                color: #0a2540;
+            }
+
+    .clr-card {
+        background: linear-gradient(180deg, #f7f9fd 0%, #f1f4fa 100%);
+        padding: 32px 32px 28px;
+    }
+
+    .clr-section-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 20px;
+    }
+
+        .clr-section-title .bar {
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(180deg, #2dd4bf, #0f766e);
+            border-radius: 2px;
+        }
+
+        .clr-section-title h6 {
+            font-family: 'Manrope', sans-serif;
+            color: #0f2544;
+            font-weight: 700;
+            font-size: 13.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 0;
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+        .form-label .req-dot {
+            color: #dc2626;
+            font-weight: 700;
+            margin-left: 2px;
+        }
+
+    .form-control {
+        border: 1.5px solid #dde3ee;
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 14px;
+        background-color: #ffffff;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 128px;
+    }
+
+    hr.clr-divider {
+        border: none;
+        border-top: 1px solid #e5eaf3;
+        margin: 26px 0 24px;
+    }
+
+    .form-check {
+        padding-left: 1.8em;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="clr-wrapper">
+    <form asp-action="CreateCompensatoryLeaveRequest" method="post" id="clrForm">
+        <div class="clr-panel">
+            <div class="clr-page-header">
+                <div>
+                    <h4>New Compensatory Leave Request</h4>
+                    <p>HR &middot; Leave Management</p>
+                </div>
+                <button type="submit" class="btn btn-sm btn-save">Save</button>
+            </div>
+
+            <div class="clr-card">
+                @if (TempData["ErpNextError"] != null)
+                {
+                    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
+                }
+
+                <div class="clr-section-title">
+                    <span class="bar"></span>
+                    <h6>Employee Details</h6>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Employee<span class="req-dot">*</span></label>
+
+                        <input asp-for="Employee"
+                               class="form-control"
+                               list="employeeList"
+                               placeholder="Select or type employee code..."
+                               required />
+
+                        <datalist id="employeeList">
+                            @if (ViewBag.Employees != null)
+                            {
+                                foreach (var emp in ViewBag.Employees)
+                                {
+                                    <option value="@emp.name">@emp.employee_name (@emp.name)</option>
+                                }
+                            }
+                        </datalist>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Leave Type<span class="req-dot">*</span></label>
+                        <select asp-for="LeaveType" class="form-control" required>
+                            <option value="">Select leave type...</option>
+
+                            @if (ViewBag.LeaveTypes != null)
+                            {
+                                foreach (var lt in ViewBag.LeaveTypes)
+                                {
+                                    <option value="@lt">@lt</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="clr-divider" />
+
+                <div class="clr-section-title">
+                    <span class="bar"></span>
+                    <h6>Worked On Holiday</h6>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Work From Date<span class="req-dot">*</span></label>
+                        <input asp-for="WorkFromDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Reason<span class="req-dot">*</span></label>
+                        <textarea asp-for="Reason" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Work End Date<span class="req-dot">*</span></label>
+                        <input asp-for="WorkEndDate" type="date" class="form-control" required />
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input asp-for="HalfDay" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label">Half Day</label>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

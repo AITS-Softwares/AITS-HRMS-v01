@@ -1,11 +1,14 @@
 ﻿@{
     ViewBag.Title = "New Salary Component";
+    var companies = ViewBag.SalaryComponentCompanies as List<string> ?? new List<string>();
+    var accounts = ViewBag.SalaryComponentAccounts as List<string> ?? new List<string>();
 }
 
 <style>
     .erp-form-page {
         max-width: 1210px;
         margin: 0 auto;
+        padding:26px; background:#eaf0f6; border:1px solid #d4e0eb; border-radius:8px;
     }
 
     .erp-header {
@@ -13,11 +16,13 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 18px;
+        padding:20px 24px; background:#14253d; border-radius:7px;
     }
 
     .erp-title {
         font-size: 22px;
         font-weight: 700;
+        color:#fff;
     }
 
     .not-saved {
@@ -30,7 +35,7 @@
     }
 
     .save-btn {
-        background: #111;
+        background: #0f766e;
         color: #fff;
         border: 0;
         border-radius: 8px;
@@ -40,7 +45,7 @@
 
     .erp-card {
         background: #fff;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #cbd8e5;
         border-radius: 8px;
         overflow: hidden;
     }
@@ -48,7 +53,7 @@
     .tab-row {
         display: flex;
         gap: 28px;
-        border-bottom: 1px solid #e5e7eb;
+        background:#f4f8fc; border-bottom: 1px solid #dbe3ec;
         padding: 0 20px;
     }
 
@@ -97,8 +102,8 @@
     .erp-select,
     .erp-textarea {
         width: 100%;
-        border: 1px solid #e5e7eb;
-        background: #f3f3f3;
+        border: 1px solid #b8c7d7;
+        background: #fbfdff;
         border-radius: 8px;
         padding: 7px 10px;
         font-size: 14px;
@@ -190,6 +195,13 @@
         font-family: Consolas, monospace;
     }
 
+    .search-select { position: relative; width: 100%; }
+    .search-select input { width: 100%; }
+    .search-select-menu { display: none; position: fixed; z-index: 3000; max-height: 260px; overflow: auto; background: #fff; border: 1px solid #94a3b8; border-radius: 6px; box-shadow: 0 10px 20px rgba(15, 23, 42, .18); }
+    .search-select-menu button { display: block; width: 100%; padding: 8px 10px; border: 0; background: #fff; color: #172033; text-align: left; }
+    .search-select-menu button:hover { background: #e8f3f3; color: #0f766e; }
+    .search-select-menu span { display: block; padding: 9px 10px; color: #64748b; }
+
     .help-box h4 {
         font-weight: 700;
         margin-bottom: 14px;
@@ -215,7 +227,9 @@
 </style>
 
 <div class="erp-form-page">
-    <form method="post" action="#">
+    <form method="post" action="@Url.Action("CreateSalaryComponent", "HR")">
+        @Html.AntiForgeryToken()
+        @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
         <div class="erp-header">
             <div>
                 <span class="erp-title">New Salary Component</span>
@@ -249,6 +263,11 @@
 
                         <label class="field-label mt-3">Description</label>
                         <textarea name="Description" class="erp-textarea"></textarea>
+
+                        <div id="componentTypeField">
+                            <label class="field-label mt-3">Component Type</label>
+                            <select name="ComponentType" class="erp-select"><option value="">Select component type</option><option>Provident Fund</option><option>Additional Provident Fund</option><option>Provident Fund Loan</option><option>Professional Tax</option></select>
+                        </div>
                     </div>
 
                     <div class="check-list">
@@ -266,6 +285,10 @@
                             <input type="checkbox" name="DeductFullTaxOnSelectedPayrollDate" />
                             <span>Deduct Full Tax on Selected Payroll Date</span>
                         </label>
+
+                        <label class="check-row"><input type="checkbox" name="VariableBasedOnTaxableSalary" /><span>Variable Based On Taxable Salary</span></label>
+                        <label class="check-row"><input type="checkbox" name="IsIncomeTaxComponent" /><span>Is Income Tax Component</span></label>
+                        <label class="check-row"><input type="checkbox" name="ExemptedFromIncomeTax" /><span>Exempted from Income Tax</span></label>
 
                         <label class="check-row">
                             <input type="checkbox" name="RoundToNearestInteger" />
@@ -285,6 +308,8 @@
                             <input type="checkbox" name="DoNotIncludeInTotal" />
                             <span>Do Not Include in Total</span>
                         </label>
+
+                        <label class="check-row"><input type="checkbox" name="DoNotIncludeInAccounts" /><span>Do Not Include in Accounting Entries</span></label>
 
                         <label class="check-row">
                             <input type="checkbox" name="RemoveIfZeroValued" checked />
@@ -317,6 +342,9 @@
                             <input type="checkbox" name="AmountBasedOnFormula" />
                             <span>Amount based on formula</span>
                         </label>
+
+                        <label class="field-label mt-3">Formula</label>
+                        <textarea name="Formula" class="erp-input code-box"></textarea>
                     </div>
 
                     <div class="help-box">
@@ -358,6 +386,10 @@
                     <input type="checkbox" name="IsFlexibleBenefit" />
                     <span>Is Flexible Benefit</span>
                 </label>
+                <div class="form-grid mt-3">
+                    <div><label class="field-label">Max Benefit Amount (Yearly)</label><input type="number" step="0.01" name="MaxBenefitAmount" class="erp-input" /></div>
+                    <div class="check-list"><label class="check-row"><input type="checkbox" name="PayAgainstBenefitClaim" /><span>Pay Against Benefit Claim</span></label><label class="check-row"><input type="checkbox" name="OnlyTaxImpact" /><span>Only Tax Impact (Cannot Claim But Part of Taxable Income)</span></label><label class="check-row"><input type="checkbox" name="CreateSeparatePaymentEntryAgainstBenefitClaim" /><span>Create Separate Payment Entry Against Benefit Claim</span></label></div>
+                </div>
             </div>
 
             <div id="accountsSection">
@@ -390,6 +422,11 @@
     </form>
 </div>
 <script>
+    const salaryComponentCompanies = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(companies));
+    const salaryComponentAccounts = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(accounts));
+    function optionList(values, placeholder) {
+        return '<option value="">' + placeholder + '</option>' + values.map(value => '<option value="' + value.replace(/"/g, '&quot;') + '">' + value + '</option>').join('');
+    }
     function showAccountsOnlyOnOverview(activeTab) {
         const accountsSection = document.getElementById('accountsSection');
 
@@ -423,16 +460,10 @@
                 ${rowNo}
             </td>
             <td style="padding:8px;">
-                <input type="text"
-                       name="AccountCompanies"
-                       class="erp-input"
-                       placeholder="Company" />
+                <select name="AccountCompanies" class="erp-select">${optionList(salaryComponentCompanies, 'Select company')}</select>
             </td>
             <td style="padding:8px;">
-                <input type="text"
-                       name="AccountHeads"
-                       class="erp-input"
-                       placeholder="Account" />
+                <select name="AccountHeads" class="erp-select">${optionList(salaryComponentAccounts, 'Select account')}</select>
             </td>
             <td style="padding:8px;text-align:center;">
                 <button type="button"
@@ -444,6 +475,7 @@
         `;
 
         body.appendChild(row);
+        enhanceLargeSelects(row);
     }
 
     function refreshAccountRowNumbers() {
@@ -489,6 +521,43 @@
             showAccountsOnlyOnOverview(button.dataset.tab);
         });
     });
+
+    const typeSelect = document.querySelector('select[name="Type"]');
+    const componentTypeField = document.getElementById('componentTypeField');
+    function refreshComponentType() { componentTypeField.style.display = typeSelect.value === 'Deduction' ? 'block' : 'none'; }
+    typeSelect.addEventListener('change', refreshComponentType);
+    refreshComponentType();
+
+    function enhanceLargeSelects(scope) {
+        scope.querySelectorAll('select').forEach(function (select) {
+            if (select.dataset.searchSelectReady || select.options.length <= 11) return;
+            select.dataset.searchSelectReady = 'true';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'search-select';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'erp-input';
+            input.placeholder = select.options[0].text;
+            const menu = document.createElement('div');
+            menu.className = 'search-select-menu';
+            select.parentNode.insertBefore(wrapper, select);
+            wrapper.appendChild(input); wrapper.appendChild(menu); wrapper.appendChild(select);
+            select.style.display = 'none';
+            const values = Array.from(select.options).slice(1).map(option => ({ value: option.value, text: option.text }));
+            function showMatches(text) {
+                const term = text.toLowerCase();
+                const matches = values.filter(value => value.text.toLowerCase().startsWith(term)).slice(0, 10);
+                menu.innerHTML = matches.map(value => '<button type="button" data-value="' + value.value.replace(/"/g, '&quot;') + '">' + value.text + '</button>').join('') || '<span>No matching option</span>';
+                const box = input.getBoundingClientRect();
+                menu.style.left = box.left + 'px'; menu.style.top = (box.bottom + 4) + 'px'; menu.style.width = box.width + 'px'; menu.style.display = 'block';
+            }
+            input.addEventListener('focus', () => showMatches(input.value));
+            input.addEventListener('input', () => showMatches(input.value));
+            menu.addEventListener('click', event => { const value = event.target.dataset.value; if (!value) return; select.value = value; input.value = event.target.textContent; menu.style.display = 'none'; select.dispatchEvent(new Event('change')); });
+            document.addEventListener('click', event => { if (!wrapper.contains(event.target)) menu.style.display = 'none'; });
+        });
+    }
+    enhanceLargeSelects(document);
 
     showAccountsOnlyOnOverview('overview');
 </script>

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Payroll";
 }
 
@@ -390,14 +390,14 @@
         <div class="workspace-section">
             <h5>Your Shortcuts</h5>
             <a class="workspace-link" href="#">Dashboard <span class="external-arrow">↗</span></a>
-            <a class="workspace-link" href="#">Salary Register <span class="external-arrow">↗</span></a>
+            <a class="workspace-link" href="@Url.Action("SalaryRegister", "HR")">Salary Register <span class="external-arrow">↗</span></a>
         </div>
 
         <div></div>
 
         <div class="workspace-section">
             <h6>Quick Links</h6>
-            <a class="workspace-link" href="#">Payroll Entry <span class="external-arrow">↗</span></a>
+            <a class="workspace-link" href="@Url.Action("PayrollEntry", "HR")">Payroll Entry <span class="external-arrow">↗</span></a>
             <br />
             <a class="workspace-link" href="#">Salary Slip <span class="external-arrow">↗</span></a>
         </div>
@@ -497,3 +497,37 @@
         ctx.stroke();
     })();
 </script>
+
+<style>
+    .payroll-page { max-width: 1100px; padding: 28px 22px 56px; color: #141633; }
+    .payroll-title-row { gap: 14px; margin-bottom: 26px; }
+    .payroll-menu-icon { width: 38px; height: 38px; border-radius: 10px; background: #eaf2f8; color: #142944; font-size: 24px; }
+    .payroll-title { font-size: 28px; letter-spacing: -.02em; }
+    .setup-card { border: 1px solid #e7e8f2; border-radius: 16px; background: linear-gradient(135deg,#fff 0%,#fbfaff 100%); padding: 28px; margin-bottom: 24px; box-shadow: 0 8px 26px rgba(20,41,68,.08); }
+    .setup-header { margin-bottom: 25px; }
+    .setup-heading { font-size: 22px; color: #17183b; }
+    .setup-subtitle { color: #747895; font-size: 14px; }
+    .dismiss-btn,.create-entry-btn,.chart-action,.bottom-btn { border: 1px solid #e6e7f0; background: #fff; color: #4d4f70; border-radius: 8px; }
+    .setup-body { grid-template-columns: 390px 1fr; gap: 38px; }
+    .setup-item { padding: 12px 14px; color: #414566; }
+    .setup-item:hover,.setup-item.active { background: #f0efff; color: #4933d6; }
+    .setup-check { border-color: #b7b9c9; color: #142944; }
+    .setup-item.active .setup-check { border-color: #142944; background: #142944; color: #fff; }
+    .setup-detail { border-left: 1px solid #ececf4; padding: 18px 0 18px 34px; }
+    .setup-detail-title { color: #17183b; font-size: 20px; }
+    .setup-detail-link { color: #142944; text-decoration: none; }
+    .create-entry-btn { color:#fff; background:#142944; border-color:#142944; padding:10px 16px; font-weight:700; }
+    .chart-card { border: 1px solid #e7e8f2; border-radius: 14px; padding: 22px; box-shadow: 0 6px 20px rgba(20,41,68,.06); }
+    .chart-title { font-size: 17px; color: #17183b; }
+    .chart-sync { color: #8b8fa8; }
+    .chart-action { padding: 8px 11px; }
+    .workspace-grid { gap: 22px; padding: 0; margin-top: 26px; }
+    .workspace-section { border: 1px solid #e7e8f2; border-radius: 12px; padding: 20px; background:#fff; }
+    .workspace-section h5,.workspace-section h6 { color:#17183b; }
+    .workspace-link { color:#535775; margin-right: 24px; }
+    .workspace-link:hover { color:#142944; }
+    .bottom-actions { margin-top: 22px; }
+    @@media(max-width:900px){.setup-body{grid-template-columns:1fr}.setup-detail{border-left:0;border-top:1px solid #ececf4;padding:22px 0 0}.payroll-page{padding:20px 14px 40px}}
+</style>
+
+

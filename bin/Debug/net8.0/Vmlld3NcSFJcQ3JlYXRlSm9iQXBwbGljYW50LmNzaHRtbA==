@@ -1,0 +1,157 @@
+﻿@model Erp_Aits.Models.JobApplicant
+@{
+    ViewBag.Title = "New Job Applicant";
+}
+
+<form asp-action="CreateJobApplicant" method="post" id="applicantForm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New Job Applicant</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-1">Interview Summary</h6>
+        <small class="text-muted">No Interview has been scheduled.</small>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Applicant Name *</label>
+                <input asp-for="ApplicantName" class="form-control" required autofocus />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Job Opening</label>
+                <input asp-for="JobOpening" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Email Address *</label>
+                <input asp-for="EmailAddress" type="email" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Designation</label>
+                <input asp-for="Designation" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Phone Number</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status *</label>
+                <select asp-for="Status" class="form-select">
+                    <option>Open</option>
+                    <option>Replied</option>
+                    <option>Rejected</option>
+                    <option>Hold</option>
+                    <option>Accepted</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Country</label>
+                <input asp-for="Country" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Source and Rating</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Source</label>
+                <input asp-for="Source" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Applicant Rating</label>
+                <div id="starRating">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fa-star star-icon @(i <= Model.ApplicantRating ? "fas text-warning" : "far text-secondary")"
+                           data-value="@i" style="cursor:pointer; font-size:20px; margin-right:4px;"></i>
+                    }
+                </div>
+                <input asp-for="ApplicantRating" type="hidden" id="ratingValue" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Resume</h6>
+        <label class="form-label">Cover Letter</label>
+        <textarea asp-for="CoverLetter" class="form-control mb-3" rows="6"></textarea>
+
+        <label class="form-label d-block">Resume Attachment</label>
+        <button type="button" class="btn btn-outline-secondary btn-sm mb-1" onclick="document.getElementById('resumeFile').click()">Attach</button>
+        <input type="file" id="resumeFile" style="display:none" />
+        <input type="hidden" asp-for="ResumeAttachment" id="resumeAttachmentPath" />
+        <input type="hidden" asp-for="ResumeAttachmentName" id="resumeAttachmentName" />
+        <div id="resumeFileLabel" class="small text-muted mb-3"></div>
+
+        <label class="form-label">Resume Link</label>
+        <input asp-for="ResumeLink" class="form-control" />
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Salary Expectation</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Currency</label>
+                <input asp-for="Currency" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Lower Range</label>
+                <input asp-for="LowerRange" type="number" step="0.01" class="form-control" />
+            </div>
+            <div class="col-md-6 offset-md-6">
+                <label class="form-label">Upper Range</label>
+                <input asp-for="UpperRange" type="number" step="0.01" class="form-control" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Star rating: click sets rating, fills stars up to clicked one
+    document.querySelectorAll('.star-icon').forEach(function (star) {
+        star.addEventListener('click', function () {
+            var value = parseInt(this.getAttribute('data-value'));
+            document.getElementById('ratingValue').value = value;
+
+            document.querySelectorAll('.star-icon').forEach(function (s) {
+                var sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= value) {
+                    s.classList.remove('far', 'text-secondary');
+                    s.classList.add('fas', 'text-warning');
+                } else {
+                    s.classList.remove('fas', 'text-warning');
+                    s.classList.add('far', 'text-secondary');
+                }
+            });
+        });
+    });
+
+    // File attach: uploads immediately on selection, stores returned path
+    document.getElementById('resumeFile').addEventListener('change', function () {
+        var file = this.files[0];
+        if (!file) return;
+
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('@Url.Action("UploadResumeAttachment", "HR")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.fileUrl) {
+                document.getElementById('resumeAttachmentPath').value = data.fileUrl;
+                document.getElementById('resumeAttachmentName').value = data.fileName;
+                document.getElementById('resumeFileLabel').innerText = 'Attached: ' + data.fileName;
+            }
+        });
+    });
+</script>

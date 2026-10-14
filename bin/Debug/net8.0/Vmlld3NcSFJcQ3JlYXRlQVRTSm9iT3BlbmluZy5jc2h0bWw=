@@ -1,0 +1,73 @@
+﻿@model Erp_Aits.Models.ATSJobOpening
+@{
+    ViewBag.Title = "New ATS Job Opening";
+}
+
+<form asp-action="CreateATSJobOpening" method="post">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">New ATS Job Opening</h4>
+        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Stats</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <span class="badge bg-danger-subtle text-danger">&#9679; @Model.Status</span>
+            </div>
+            <div class="col-md-6">
+                <span class="badge bg-primary-subtle text-primary">&#9679; @Model.OpenPositions Open Position(s)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Job Details</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Job Title *</label>
+                <input asp-for="JobTitle" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Open Positions</label>
+                <input asp-for="OpenPositions" type="number" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Department</label>
+                <input asp-for="Department" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Experience Required</label>
+                <input asp-for="ExperienceRequired" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select asp-for="Status" class="form-select">
+                    <option>Open</option>
+                    <option>Closed</option>
+                    <option>Hold</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+        <h6 class="mb-3">Role Description</h6>
+        <label class="form-label">Required Skills</label>
+        <textarea asp-for="RequiredSkills" class="form-control mb-1" rows="4"></textarea>
+        <small class="text-muted d-block mb-3">Comma-separated skills work best for ATS matching later.</small>
+
+        <label class="form-label">Job Description</label>
+        <textarea asp-for="JobDescription" class="form-control" rows="10"></textarea>
+    </div>
+
+    <div class="card p-4">
+        <h6 class="mb-3">Hiring Ownership</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Hiring Manager</label>
+                <input asp-for="HiringManager" class="form-control" />
+            </div>
+        </div>
+    </div>
+</form>

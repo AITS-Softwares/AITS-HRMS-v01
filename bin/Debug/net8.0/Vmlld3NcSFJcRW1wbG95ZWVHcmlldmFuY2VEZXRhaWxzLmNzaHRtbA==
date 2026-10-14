@@ -1,0 +1,190 @@
+﻿@* @model Erp_Aits.Models.EmployeeGrievance
+@{
+    ViewBag.Title = "Employee Grievance " + Model.Id;
+}
+<h4 class="mb-3">@Model.Subject</h4>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Subject</label>
+            <input class="form-control" value="@Model.Subject" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Date</label>
+            <input class="form-control" value="@Model.GrievanceDate.ToString("yyyy-MM-dd")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Raised By</label>
+            <input class="form-control" value="@Model.RaisedBy" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Status</label>
+            <input class="form-control" value="@Model.Status" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Grievance Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Grievance Against Party</label>
+            <input class="form-control" value="@Model.GrievanceAgainstParty" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Associated Document Type</label>
+            <input class="form-control" value="@Model.AssociatedDocumentType" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Grievance Against</label>
+            <input class="form-control" value="@Model.GrievanceAgainst" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Associated Document</label>
+            <input class="form-control" value="@Model.AssociatedDocument" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Grievance Type</label>
+            <input class="form-control" value="@Model.GrievanceType" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" rows="5" readonly>@Model.Description</textarea>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Investigation Details</h6>
+    <label class="form-label">Cause of Grievance</label>
+    <textarea class="form-control" rows="4" readonly>@Model.CauseOfGrievance</textarea>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Resolution Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Resolved By</label>
+            <input class="form-control" value="@Model.ResolvedBy" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Resolution Details</label>
+            <textarea class="form-control" rows="3" readonly>@Model.ResolutionDetails</textarea>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Resolution Date</label>
+            <input class="form-control" value="@(Model.ResolutionDate.HasValue? Model.ResolutionDate.Value.ToString("yyyy-MM-dd") : "")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employee Responsible</label>
+            <input class="form-control" value="@Model.EmployeeResponsible" readonly />
+        </div>
+    </div>
+</div> *@
+
+
+
+
+
+
+
+
+
+@model Erp_Aits.Models.EmployeeGrievance
+@{
+    ViewBag.Title = "Employee Grievance " + Model.Id;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">@Model.Subject</h4>
+    <a href="/HR/EmployeeGrievance" class="btn btn-outline-secondary btn-sm">&larr; Back to List</a>
+</div>
+
+<div class="card p-4 mb-3">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Local ID</label>
+            <input class="form-control" value="@Model.Id" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">ERPNext Reference</label>
+            <input class="form-control" value="@(string.IsNullOrEmpty(Model.ErpNextId) ? "N/A" : Model.ErpNextId)" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Subject</label>
+            <input class="form-control" value="@Model.Subject" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Date</label>
+            <input class="form-control" value="@Model.GrievanceDate.ToString("yyyy-MM-dd")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Raised By</label>
+            <input class="form-control" value="@Model.RaisedBy" readonly />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <input class="form-control" value="@Model.Status" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Grievance Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Grievance Against Party</label>
+            <input class="form-control" value="@Model.GrievanceAgainstParty" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Associated Document Type</label>
+            <input class="form-control" value="@Model.AssociatedDocumentType" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Grievance Against</label>
+            <input class="form-control" value="@Model.GrievanceAgainst" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Associated Document</label>
+            <input class="form-control" value="@Model.AssociatedDocument" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Grievance Type</label>
+            <input class="form-control" value="@Model.GrievanceType" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" rows="5" readonly>@Model.Description</textarea>
+</div>
+
+<div class="card p-4 mb-3">
+    <h6 class="mb-3">Investigation Details</h6>
+    <label class="form-label">Cause of Grievance</label>
+    <textarea class="form-control" rows="4" readonly>@Model.CauseOfGrievance</textarea>
+</div>
+
+<div class="card p-4">
+    <h6 class="mb-3">Resolution Details</h6>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Resolved By</label>
+            <input class="form-control" value="@Model.ResolvedBy" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Resolution Details</label>
+            <textarea class="form-control" rows="3" readonly>@Model.ResolutionDetails</textarea>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Resolution Date</label>
+            <input class="form-control" value="@(Model.ResolutionDate.HasValue? Model.ResolutionDate.Value.ToString("yyyy-MM-dd") : "")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Employee Responsible</label>
+            <input class="form-control" value="@Model.EmployeeResponsible" readonly />
+        </div>
+    </div>
+</div>

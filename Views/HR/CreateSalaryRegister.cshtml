@@ -1,0 +1,134 @@
+@model Erp_Aits.Models.SalaryRegister
+@{
+    ViewBag.Title = "New Payroll Entry";
+    var companies = ViewBag.Companies as List<string> ?? new List<string>();
+    var currencies = ViewBag.Currencies as List<string> ?? new List<string>();
+    var accounts = ViewBag.Accounts as List<string> ?? new List<string>();
+    var branches = ViewBag.Branches as List<string> ?? new List<string>();
+    var departments = ViewBag.Departments as List<string> ?? new List<string>();
+    var designations = ViewBag.Designations as List<string> ?? new List<string>();
+    var grades = ViewBag.Grades as List<string> ?? new List<string>();
+    var costCenters = ViewBag.CostCenters as List<string> ?? new List<string>();
+    var projects = ViewBag.Projects as List<string> ?? new List<string>();
+    var bankAccounts = ViewBag.BankAccounts as List<string> ?? new List<string>();
+    var employees = ViewBag.Employees as List<Erp_Aits.Models.PayrollEmployeeOption> ?? new List<Erp_Aits.Models.PayrollEmployeeOption>();
+}
+
+<style>
+    .salary-form { max-width:1180px; margin:0 auto; color:#172033; }.salary-form__head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:22px; }.salary-form__crumb { color:#64748b; font-size:13px; margin-bottom:5px; }.salary-form h2 { margin:0; font-size:27px; font-weight:750; }.salary-form__actions { display:flex; gap:9px; }.salary-form__btn { border-radius:6px; padding:10px 15px; font-weight:700; border:1px solid #cbd5e1; background:#fff; color:#172033; text-decoration:none; }.salary-form__btn-primary { background:#172033; color:#fff; border-color:#172033; }.salary-form__btn-primary:hover { color:#fff; background:#0f172a; }.salary-form__section { background:#fff; border:1px solid #dbe3ec; border-radius:7px; margin-bottom:16px; overflow:hidden; }.salary-form__section-head { padding:14px 18px; border-bottom:1px solid #e5eaf0; display:flex; justify-content:space-between; align-items:center; }.salary-form__section-head h5 { margin:0; font-size:16px; font-weight:750; }.salary-form__section-head span { color:#64748b; font-size:13px; }.salary-form__content { padding:19px; }.salary-form__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; }.salary-form label { display:block; margin-bottom:6px; font-weight:650; font-size:13px; color:#334155; }.salary-form .required::after { content:" *"; color:#dc2626; }.salary-form input,.salary-form select { width:100%; height:40px; border:1px solid #cbd5e1; border-radius:5px; padding:8px 10px; color:#172033; background:#fff; }.salary-form input:focus,.salary-form select:focus { outline:2px solid #bfdbfe; border-color:#2563eb; }.salary-form__checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px 20px; }.salary-form__check { display:flex; align-items:flex-start; gap:9px; padding:10px 0; }.salary-form__check input { width:16px; height:16px; margin-top:2px; }.salary-form__check label { margin:0; font-weight:550; }.salary-form__check small { display:block; color:#64748b; margin-top:2px; }.salary-form__employee { border:1px dashed #cbd5e1; padding:16px; border-radius:5px; color:#64748b; font-size:14px; }.salary-form__employee strong { color:#334155; display:block; margin-bottom:3px; }.salary-form__readonly { background:#f8fafc !important; color:#64748b !important; }.salary-form__hint { color:#64748b; font-size:12px; margin-top:5px; }
+    @@media (max-width:720px) { .salary-form__head { flex-direction:column; }.salary-form__grid,.salary-form__checks { grid-template-columns:1fr; }.salary-form__actions { width:100%; }.salary-form__actions>* { flex:1; text-align:center; } }
+
+    .salary-form { padding:26px; background:#eaf0f6; border:1px solid #d4e0eb; border-radius:8px; }
+    .salary-form__head { padding:22px 24px; margin-bottom:20px; background:#14253d; border-radius:7px; }.salary-form__crumb { color:#9bd4cf; }.salary-form h2 { color:#fff; }
+    .salary-form__btn { border-color:#8fa1b6; }.salary-form__btn-primary { background:#0f766e; border-color:#0f766e; }.salary-form__btn-primary:hover { background:#115e59; }
+    .salary-form__section { border-color:#cbd8e5; }.salary-form__section-head { background:#f4f8fc; border-left:4px solid #2563eb; border-bottom-color:#dbe3ec; }.salary-form__section:nth-of-type(3) .salary-form__section-head { border-left-color:#0f766e; }.salary-form__section:nth-of-type(4) .salary-form__section-head { border-left-color:#d97706; }.salary-form__section-head h5 { color:#14253d; }
+    .salary-form input,.salary-form select { border-color:#b8c7d7; background:#fbfdff; }.salary-form__readonly { background:#edf2f7 !important; }.salary-form__employee { border-color:#8fa1b6; background:#f8fbfe; }
+    .salary-form__employee { color:#475569; }.salary-form__employee strong { color:#14253d; }.employee-grid { min-width:1100px; background:#fff; }.employee-grid th { background:#e8eff6; color:#475569; font-size:12px; font-weight:750; white-space:nowrap; }.employee-grid td { padding:7px; vertical-align:middle; }.employee-grid input[type="checkbox"] { width:16px; height:16px; }.employee-grid .employee-text,.employee-grid .employee-select,.employee-grid .employee-department,.employee-grid .employee-designation { min-width:150px; height:34px; }.employee-grid .employee-select { min-width:220px; }.employee-remove,.salary-form__add-row { border:0; border-radius:5px; font-size:13px; font-weight:650; padding:7px 10px; }.employee-remove { background:#fee2e2; color:#b91c1c; }.salary-form__add-row { background:#dbeafe; color:#1d4ed8; }.salary-form__attendance-note { margin-top:9px; padding:12px 14px; border:1px solid #a7e1d7; border-radius:5px; background:#e8f8f3; color:#0f766e; font-size:14px; }.smart-select { position:relative; width:100%; }.smart-select__input { width:100%; }.smart-select__menu { display:none; position:fixed; z-index:2000; max-height:250px; overflow:auto; background:#fff; border:1px solid #93a4b8; border-radius:5px; box-shadow:0 8px 18px rgba(15, 35, 56, .15); }.smart-select__menu button { width:100%; text-align:left; padding:8px 10px; border:0; background:#fff; color:#172033; font-size:14px; }.smart-select__menu button:hover { background:#e8f3f3; color:#0f766e; }.smart-select__menu span { display:block; padding:9px 10px; color:#64748b; font-size:13px; }
+</style>
+
+<form asp-action="CreatePayrollEntry" method="post" class="salary-form">
+    @Html.AntiForgeryToken()
+    @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+    <header class="salary-form__head"><div><div class="salary-form__crumb">Payroll / Payroll Entry</div><h2>New Payroll Entry</h2></div><div class="salary-form__actions"><a asp-action="PayrollEntry" class="salary-form__btn">Cancel</a><button type="submit" class="salary-form__btn salary-form__btn-primary">Create Payroll Entry</button></div></header>
+
+    <section class="salary-form__section"><div class="salary-form__section-head"><h5>Payroll Period</h5><span>Required account and period information</span></div><div class="salary-form__content"><div class="salary-form__grid">
+        <div><label class="required" asp-for="PostingDate">Posting Date</label><input asp-for="PostingDate" type="date" /></div>
+        <div><label class="required" asp-for="Company">Company</label><select asp-for="Company"><option value="">Select company</option>@foreach(var option in companies){<option value="@option">@option</option>}</select></div>
+        <div><label class="required" asp-for="Currency">Currency</label><select asp-for="Currency"><option value="">Select currency</option>@foreach(var option in currencies){<option value="@option">@option</option>}</select></div>
+        <div><label class="required" asp-for="ExchangeRate">Exchange Rate</label><input asp-for="ExchangeRate" type="number" min="0" step="0.0001" /></div>
+        <div><label class="required" asp-for="PayrollPayableAccount">Payroll Payable Account</label><select asp-for="PayrollPayableAccount"><option value="">Select account</option>@foreach(var option in accounts){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="Status">Status</label><input asp-for="Status" class="salary-form__readonly" readonly /></div>
+    </div></div></section>
+
+    <section class="salary-form__section"><div class="salary-form__section-head"><h5>Salary Slip Settings</h5><span>Frequency and statutory tax controls</span></div><div class="salary-form__content"><div class="salary-form__grid">
+        <div><label class="required" asp-for="PayrollFrequency">Payroll Frequency</label><select asp-for="PayrollFrequency"><option>Monthly</option><option>Fortnightly</option><option>Bimonthly</option><option>Weekly</option><option>Daily</option></select></div>
+        <div><label class="required" asp-for="StartDate">Start Date</label><input asp-for="StartDate" type="date" /></div>
+        <div><label class="required" asp-for="EndDate">End Date</label><input asp-for="EndDate" type="date" /></div>
+        <div class="salary-form__checks"><div class="salary-form__check"><input asp-for="SalarySlipBasedOnTimesheet" type="checkbox" /><div><label asp-for="SalarySlipBasedOnTimesheet">Salary Slip Based on Timesheet</label><small>ERPNext will use approved timesheets.</small></div></div></div>
+    </div><div class="salary-form__checks mt-2"><div class="salary-form__check"><input asp-for="DeductTaxForUnclaimedEmployeeBenefits" type="checkbox" /><div><label asp-for="DeductTaxForUnclaimedEmployeeBenefits">Deduct Tax for Unclaimed Employee Benefits</label></div></div><div class="salary-form__check"><input asp-for="DeductTaxForUnsubmittedTaxExemptionProof" type="checkbox" /><div><label asp-for="DeductTaxForUnsubmittedTaxExemptionProof">Deduct Tax for Unsubmitted Tax Exemption Proof</label></div></div></div></div></section>
+
+    <section class="salary-form__section"><div class="salary-form__section-head"><h5>Employee Filters</h5><span>Use filters before creating salary slips</span></div><div class="salary-form__content"><div class="salary-form__grid">
+        <div><label asp-for="Branch">Branch</label><select asp-for="Branch"><option value="">All branches</option>@foreach(var option in branches){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="Department">Department</label><select asp-for="Department"><option value="">All departments</option>@foreach(var option in departments){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="Designation">Designation</label><select asp-for="Designation"><option value="">All designations</option>@foreach(var option in designations){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="Grade">Grade</label><select asp-for="Grade"><option value="">All grades</option>@foreach(var option in grades){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="NumberOfEmployees">Number of Employees</label><input asp-for="NumberOfEmployees" class="salary-form__readonly" placeholder="Calculated by ERPNext" readonly /></div>
+    </div>
+    <div class="salary-form__employee mt-3"><strong>Employee Details</strong><div class="table-responsive mt-3"><table class="table table-bordered align-middle mb-2 employee-grid"><thead><tr><th><input type="checkbox" aria-label="Select all employees" /></th><th>No.</th><th>Employee</th><th>Employee Name</th><th>Department</th><th>Designation</th><th>Is Salary Withheld</th><th></th></tr></thead><tbody id="employeeRows"><tr><td><input type="checkbox" name="EmployeeSelected" /></td><td class="employee-number">1</td><td><select name="EmployeeIds" class="employee-select"><option value="">Select employee</option>@foreach (var option in employees) { <option value="@option.Id">@option.Id - @option.EmployeeName</option> }</select></td><td><input name="EmployeeNames" class="employee-text salary-form__readonly" placeholder="Employee Name" readonly /></td><td><select name="EmployeeDepartments" class="employee-department"><option value="">Select department</option>@foreach (var option in departments) { <option value="@option">@option</option> }</select></td><td><select name="EmployeeDesignations" class="employee-designation"><option value="">Select designation</option>@foreach (var option in designations) { <option value="@option">@option</option> }</select></td><td class="text-center"><input type="checkbox" name="IsSalaryWithheld" /></td><td><button type="button" class="employee-remove" title="Remove row">Remove</button></td></tr></tbody></table></div><button type="button" id="addEmployeeRow" class="salary-form__add-row">Add Row</button></div>
+    <div class="salary-form__check mt-2"><input asp-for="ValidateAttendance" type="checkbox" id="validateAttendance" /><div><label asp-for="ValidateAttendance">Validate Attendance</label><small>Apply attendance validation while processing.</small></div></div>
+    <div id="attendanceNote" class="salary-form__attendance-note" style="display:@(Model.ValidateAttendance ? "block" : "none")">Attendance has been marked for all the employees between the selected payroll dates.</div>
+    </div></section>
+
+    <section class="salary-form__section"><div class="salary-form__section-head"><h5>Accounting and Payment</h5><span>Accounting dimensions and bank payment options</span></div><div class="salary-form__content"><div class="salary-form__grid">
+        <div><label class="required" asp-for="CostCenter">Cost Center</label><select asp-for="CostCenter"><option value="">Select cost center</option>@foreach(var option in costCenters){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="Project">Project</label><select asp-for="Project"><option value="">No project</option>@foreach(var option in projects){<option value="@option">@option</option>}</select></div>
+        <div><label asp-for="PaymentAccount">Payment Account</label><select asp-for="PaymentAccount"><option value="">Select payment account</option>@foreach(var option in accounts){<option value="@option">@option</option>}</select><div class="salary-form__hint">Select a payment account to create bank entries.</div></div>
+        <div><label asp-for="BankAccount">Bank Account</label><select asp-for="BankAccount"><option value="">Select bank account</option>@foreach(var option in bankAccounts){<option value="@option">@option</option>}</select></div>
+    </div></div></section>
+
+</form>
+
+<script>
+    (function () {
+        const employeeOptions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(employees));
+        const departmentOptions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(departments));
+        const designationOptions = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(designations));
+        const employeeRows = document.getElementById('employeeRows');
+        const addEmployeeRow = document.getElementById('addEmployeeRow');
+        const attendance = document.getElementById('validateAttendance');
+        const attendanceNote = document.getElementById('attendanceNote');
+
+        function refreshRowNumbers() {
+            employeeRows.querySelectorAll('tr').forEach((row, index) => row.querySelector('.employee-number').textContent = index + 1);
+        }
+
+        function escapeHtml(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function optionsHtml(values, placeholder, label) {
+            return '<option value="">' + placeholder + '</option>' + values.map(value => {
+                const itemValue = typeof value === 'string' ? value : value.Id;
+                const itemLabel = typeof value === 'string' ? value : value.Id + ' - ' + value.EmployeeName;
+                return '<option value="' + escapeHtml(itemValue) + '">' + escapeHtml(itemLabel) + '</option>';
+            }).join('');
+        }
+
+        addEmployeeRow.addEventListener('click', function () {
+            employeeRows.insertAdjacentHTML('beforeend', '<tr><td><input type="checkbox" name="EmployeeSelected"></td><td class="employee-number"></td><td><select name="EmployeeIds" class="employee-select">' + optionsHtml(employeeOptions, 'Select employee') + '</select></td><td><input name="EmployeeNames" class="employee-text salary-form__readonly" placeholder="Employee Name" readonly></td><td><select name="EmployeeDepartments" class="employee-department">' + optionsHtml(departmentOptions, 'Select department') + '</select></td><td><select name="EmployeeDesignations" class="employee-designation">' + optionsHtml(designationOptions, 'Select designation') + '</select></td><td class="text-center"><input type="checkbox" name="IsSalaryWithheld"></td><td><button type="button" class="employee-remove" title="Remove row">Remove</button></td></tr>');
+            setupSearchableDropdowns(employeeRows.lastElementChild);
+            refreshRowNumbers();
+        });
+
+        employeeRows.addEventListener('click', function (event) {
+            if (event.target.classList.contains('employee-remove')) { event.target.closest('tr').remove(); refreshRowNumbers(); }
+        });
+
+        employeeRows.addEventListener('change', function (event) {
+            if (!event.target.matches('.employee-select')) return;
+            const employee = employeeOptions.find(item => item.Id === event.target.value);
+            const row = event.target.closest('tr');
+            row.querySelector('[name="EmployeeNames"]').value = employee ? employee.EmployeeName : '';
+            row.querySelector('[name="EmployeeDepartments"]').value = employee ? employee.Department : '';
+            row.querySelector('[name="EmployeeDesignations"]').value = employee ? employee.Designation : '';
+        });
+
+        attendance.addEventListener('change', function () { attendanceNote.style.display = attendance.checked ? 'block' : 'none'; });
+
+        function setupSearchableDropdowns(scope) {
+            scope.querySelectorAll('select').forEach(select => {
+                if (select.dataset.searchReady || select.options.length <= 11) return;
+                select.dataset.searchReady = 'true';
+                const shell = document.createElement('div'); shell.className = 'smart-select';
+                const input = document.createElement('input'); input.type = 'text'; input.className = 'smart-select__input'; input.placeholder = select.options[0].text;
+                const menu = document.createElement('div'); menu.className = 'smart-select__menu';
+                select.parentNode.insertBefore(shell, select); shell.appendChild(input); shell.appendChild(menu); shell.appendChild(select); select.style.display = 'none';
+                const values = Array.from(select.options).slice(1).map(option => ({ value: option.value, text: option.text }));
+                function placeMenu() { const rect = input.getBoundingClientRect(); menu.style.left = rect.left + 'px'; menu.style.top = (rect.bottom + 4) + 'px'; menu.style.width = rect.width + 'px'; }
+                function render(filter) { const needle = filter.toLowerCase(); const visible = values.filter(item => item.text.toLowerCase().startsWith(needle)).slice(0, 10); menu.innerHTML = visible.map(item => '<button type="button" data-value="' + item.value.replace(/"/g, '&quot;') + '">' + item.text + '</button>').join('') || '<span>No matching option</span>'; placeMenu(); menu.style.display = 'block'; }
+                input.addEventListener('focus', () => render(input.value)); input.addEventListener('input', () => render(input.value));
+                menu.addEventListener('click', event => { const value = event.target.dataset.value; if (!value) return; select.value = value; input.value = event.target.textContent; menu.style.display = 'none'; select.dispatchEvent(new Event('change')); });
+                document.addEventListener('click', event => { if (!shell.contains(event.target)) menu.style.display = 'none'; });
+            });
+        }
+
+        setupSearchableDropdowns(document);
+    })();
+</script>
