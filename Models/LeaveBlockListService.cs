@@ -12,7 +12,6 @@ namespace Erp_Aits.Services
         public LeaveBlockListService(string connectionString)
         {
             _connectionString = connectionString;
-            EnsureColumns();
         }
 
         public List<LeaveBlockList> GetAll(string id = null)

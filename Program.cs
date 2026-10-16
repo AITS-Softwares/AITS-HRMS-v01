@@ -51,7 +51,12 @@ builder.Services.AddScoped<WhatsAppService>();
 
 // Campaign Scheduler
 builder.Services.AddScoped<Erp_Aits.Controllers.CampaignsController>();
-builder.Services.AddHostedService<CampaignSchedulerService>();
+// Campaign delivery is not needed while testing the local HRMS screens. It can
+// otherwise interrupt the debugger when its optional database tables are absent.
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHostedService<CampaignSchedulerService>();
+}
 
 builder.Services.Configure<HostOptions>(options =>
 {

@@ -1,5 +1,6 @@
 ﻿@{
     ViewBag.Title = "Salary Slip";
+    var slips = ViewBag.SalarySlips as List<Erp_Aits.Models.SalarySlipListItem> ?? new List<Erp_Aits.Models.SalarySlipListItem>();
 }
 
 <style>
@@ -188,13 +189,11 @@
             </div>
         </form>
 
-        <div class="empty-state">
-            <div class="empty-icon">☷</div>
-            <div class="empty-text">You haven't created a Salary Slip yet</div>
-            <a href="@Url.Action("CreateSalarySlip", "HR")" class="erp-btn erp-btn-light">
-                Create your first Salary Slip
-            </a>
-        </div>
+        @if (slips.Any()) {
+            <div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th>ID</th><th>Employee</th><th>Employee Name</th><th>Company</th><th>Salary Structure</th><th>Posting Date</th><th>Status</th><th>Modified</th></tr></thead><tbody>@foreach (var slip in slips) { <tr><td>@slip.Name</td><td>@slip.Employee</td><td>@slip.EmployeeName</td><td>@slip.Company</td><td>@slip.SalaryStructure</td><td>@slip.PostingDate</td><td>@slip.Status</td><td>@slip.Modified</td></tr> }</tbody></table></div>
+        } else {
+            <div class="empty-state"><div class="empty-icon">☷</div><div class="empty-text">No Salary Slips found in ERPNext</div><a href="@Url.Action("CreateSalarySlip", "HR")" class="erp-btn erp-btn-light">Create Salary Slip</a></div>
+        }
 
         <div class="pagination-row">
             <span>20</span>

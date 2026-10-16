@@ -160,7 +160,6 @@ namespace Erp_Aits.Services
         public LeavePolicyService(string connectionString)
         {
             _connectionString = connectionString;
-            EnsureColumns();
         }
 
         public List<LeavePolicy> GetAll(string id = null)
@@ -541,28 +540,5 @@ namespace Erp_Aits.Services
                     : "Draft";
         }
 
-        private void EnsureColumns()
-        {
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-
-                string query = @"
-                    IF COL_LENGTH('LeavePolicies', 'DocStatus') IS NULL
-                    BEGIN
-                        ALTER TABLE LeavePolicies ADD DocStatus INT NOT NULL CONSTRAINT DF_LeavePolicies_DocStatus DEFAULT 0
-                    END
-
-                    IF COL_LENGTH('LeavePolicies', 'Status') IS NULL
-                    BEGIN
-                        ALTER TABLE LeavePolicies ADD Status NVARCHAR(50) NULL
-                    END";
-
-                using (var cmd = new SqlCommand(query, conn))
-                {
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
     }
 }

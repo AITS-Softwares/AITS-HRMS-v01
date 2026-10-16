@@ -5,6 +5,8 @@
     var letterHeads = ViewBag.SalarySlipLetterHeads as List<string> ?? new List<string>();
     var earnings = ViewBag.SalarySlipEarnings as List<string> ?? new List<string>();
     var deductions = ViewBag.SalarySlipDeductions as List<string> ?? new List<string>();
+    var journalEntries = ViewBag.SalarySlipJournalEntries as List<string> ?? new List<string>();
+    var bankAccounts = ViewBag.SalarySlipBankAccounts as List<string> ?? new List<string>();
 }
 
 <style>
@@ -489,7 +491,7 @@
                 <div class="form-grid-2">
                     <div>
                         <label class="field-label">Journal Entry</label>
-                        <input type="text" name="JournalEntry" class="erp-input" />
+                        <select name="JournalEntry" class="erp-select"><option value="">Select journal entry</option>@foreach (var option in journalEntries) { <option value="@option">@option</option> }</select>
                     </div>
 
                     <div>
@@ -497,7 +499,7 @@
                         <input type="text" name="BankName" class="erp-input" />
 
                         <label class="field-label mt-4">Bank Account No</label>
-                        <input type="text" name="BankAccountNo" class="erp-input" />
+                        <select name="BankAccountNo" class="erp-select"><option value="">Select bank account</option>@foreach (var option in bankAccounts) { <option value="@option">@option</option> }</select>
                     </div>
                 </div>
             </div>

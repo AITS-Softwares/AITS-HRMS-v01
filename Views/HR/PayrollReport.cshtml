@@ -1,0 +1,18 @@
+@using Newtonsoft.Json.Linq
+@{
+    ViewBag.Title = ViewBag.ReportName ?? "Payroll Report";
+    var columns = ViewBag.ReportColumns as JArray ?? new JArray();
+    var rows = ViewBag.ReportRows as JArray ?? new JArray();
+}
+<style>
+    .report-page{max-width:1280px;margin:auto;padding:24px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.report-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:#14253d;color:#fff;border-radius:7px}.report-head h1{margin:0;font-size:22px}.report-card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:auto}.report-table{width:100%;border-collapse:collapse}.report-table th,.report-table td{padding:10px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px;white-space:nowrap}.report-table th{background:#f4f8fc;color:#526375}.empty{text-align:center;padding:55px;color:#64748b}
+</style>
+<div class="report-page">
+    @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+    <header class="report-head"><h1>@ViewBag.ReportName</h1><a href="@Url.Action("SalaryPayout", "HR")" style="color:#fff">Back to Salary Payout</a></header>
+    <main class="report-card">
+        @if (rows.Any()) {
+            <table class="report-table"><thead><tr>@foreach (var column in columns) { <th>@(column["label"]?.ToString() ?? column["fieldname"]?.ToString() ?? "Value")</th> }</tr></thead><tbody>@foreach (var row in rows) { <tr>@foreach (var column in columns) { var field = column["fieldname"]?.ToString() ?? ""; <td>@row[field]?.ToString()</td> }</tr> }</tbody></table>
+        } else { <div class="empty">No records returned by ERPNext.</div> }
+    </main>
+</div>

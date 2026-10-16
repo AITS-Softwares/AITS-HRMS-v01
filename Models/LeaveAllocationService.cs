@@ -148,7 +148,6 @@ namespace Erp_Aits.Services
         public LeaveAllocationService(string connectionString)
         {
             _connectionString = connectionString;
-            EnsureColumns();
         }
 
         public List<LeaveAllocation> GetAll(string idFilter, string employee, string employeeName, string leaveType, string leavePeriod, string leavePolicy, bool expiredOnly)

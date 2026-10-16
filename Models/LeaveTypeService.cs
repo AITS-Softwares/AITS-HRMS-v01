@@ -151,7 +151,6 @@ namespace Erp_Aits.Services
         public LeaveTypeService(string connectionString)
         {
             _connectionString = connectionString;
-            EnsureColumnsOnce();
         }
 
         public List<LeaveType> GetAll(string id = null)

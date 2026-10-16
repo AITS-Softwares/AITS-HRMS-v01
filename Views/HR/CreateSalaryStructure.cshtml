@@ -270,7 +270,7 @@
                         <input type="text" name="Name" class="erp-input" />
 
                         <label class="field-label mt-3">Company <span class="required">*</span></label>
-                        <select name="Company" class="erp-select"><option value="">Select company</option>@foreach(var option in companies) { <option value="@option">@option</option> }</select>
+                        <select id="structureCompany" name="Company" class="erp-select"><option value="">Select company</option>@foreach(var option in companies) { <option value="@option">@option</option> }</select>
 
                         <label class="field-label mt-3">Letter Head</label>
                         <select name="LetterHead" class="erp-select"><option value="">Select letter head</option>@foreach(var option in letterHeads) { <option value="@option">@option</option> }</select>
@@ -368,12 +368,12 @@
                 <div class="form-grid">
                     <div>
                         <label class="field-label">Mode of Payment</label>
-                        <select name="ModeOfPayment" class="erp-select"><option value="">Select mode of payment</option>@foreach(var option in modesOfPayment) { <option value="@option">@option</option> }</select>
+                        <select id="structureModeOfPayment" name="ModeOfPayment" class="erp-select"><option value="">Select mode of payment</option>@foreach(var option in modesOfPayment) { <option value="@option">@option</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Payment Account</label>
-                        <select name="PaymentAccount" class="erp-select"><option value="">Select payment account</option>@foreach(var option in accounts) { <option value="@option">@option</option> }</select>
+                        <select id="structurePaymentAccount" name="PaymentAccount" class="erp-select"><option value="">Select payment account</option>@foreach(var option in accounts) { <option value="@option">@option</option> }</select>
                     </div>
                 </div>
             </div>
@@ -453,6 +453,39 @@
     function closeFormulaHelp() {
         document.getElementById('formulaHelpModal').style.display = 'none';
     }
+
+    async function loadStructurePaymentAccount() {
+        const company = document.getElementById('structureCompany');
+        const modeOfPayment = document.getElementById('structureModeOfPayment');
+        const paymentAccount = document.getElementById('structurePaymentAccount');
+
+        if (!company.value || !modeOfPayment.value) return;
+
+        try {
+            const response = await fetch('/HR/GetPaymentEntryModeOfPaymentDetails?modeOfPayment='
+                + encodeURIComponent(modeOfPayment.value)
+                + '&company=' + encodeURIComponent(company.value));
+            const data = await response.json();
+
+            if (!data.success || !data.defaultAccount) return;
+
+            if (!Array.from(paymentAccount.options).some(option => option.value === data.defaultAccount)) {
+                paymentAccount.add(new Option(data.defaultAccount, data.defaultAccount));
+            }
+
+            paymentAccount.value = data.defaultAccount;
+            const paymentAccountSearchInput = paymentAccount.parentElement.querySelector('input.erp-input');
+            if (paymentAccount.dataset.searchSelectReady && paymentAccountSearchInput) {
+                paymentAccountSearchInput.value = data.defaultAccount;
+            }
+            paymentAccount.dispatchEvent(new Event('change'));
+        } catch (error) {
+            console.error('Could not load the payment account for the selected mode of payment.', error);
+        }
+    }
+
+    document.getElementById('structureModeOfPayment').addEventListener('change', loadStructurePaymentAccount);
+    document.getElementById('structureCompany').addEventListener('change', loadStructurePaymentAccount);
 
     function enhanceLargeSelects(scope) {
         scope.querySelectorAll('select').forEach(function (select) {

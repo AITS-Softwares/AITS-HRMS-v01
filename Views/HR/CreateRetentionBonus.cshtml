@@ -1,5 +1,91 @@
 @using Erp_Aits.Models
-@{ViewBag.Title="New Retention Bonus";var employees=ViewBag.RetentionEmployees as List<PayrollEmployeeOption>??new List<PayrollEmployeeOption>();var companies=ViewBag.RetentionCompanies as List<string>??new List<string>();var components=ViewBag.RetentionComponents as List<string>??new List<string>();var currencies=ViewBag.RetentionCurrencies as List<string>??new List<string>();}
+@{
+    ViewBag.Title = "New Retention Bonus";
+    var employees = ViewBag.RetentionEmployees as List<PayrollEmployeeOption> ?? new List<PayrollEmployeeOption>();
+    var companies = ViewBag.RetentionCompanies as List<string> ?? new List<string>();
+    var departments = ViewBag.RetentionDepartments as List<string> ?? new List<string>();
+    var components = ViewBag.RetentionComponents as List<string> ?? new List<string>();
+    var currencies = ViewBag.RetentionCurrencies as List<string> ?? new List<string>();
+}
 <style>.p{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.save{border:0;background:#0f766e;color:#fff;padding:9px 17px;border-radius:7px;font-weight:650}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.s{padding:20px;border-bottom:1px solid #dbe3ec}.s h2{font-size:17px;margin:0 0 16px}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.i,.sel{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff;font-size:14px}.i[readonly]{background:#f2f6f9;color:#526375}.ss{position:relative}.sm{display:none;position:fixed;z-index:3000;max-height:260px;overflow:auto;background:#fff;border:1px solid #94a3b8;border-radius:6px;box-shadow:0 10px 20px rgba(15,23,42,.18)}.sm button{display:block;width:100%;padding:8px 10px;border:0;background:#fff;text-align:left}.sm button:hover{background:#e8f3f3;color:#0f766e}@@media(max-width:800px){.p{padding:12px}.g{grid-template-columns:1fr}}</style>
-<div class="p"><form method="post" asp-action="CreateRetentionBonus">@Html.AntiForgeryToken()<header class="h"><h1>New Retention Bonus</h1><button class="save" type="submit">Save</button></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}<main class="card"><section class="s"><h2>Employee</h2><div class="g"><div class="f"><label>Employee *</label><select name="Employee" id="e" class="sel searchable" required><option value="">Select employee</option>@foreach(var x in employees){<option value="@x.Id" data-name="@x.EmployeeName" data-department="@x.Department" data-company="@x.Company" data-joining="@x.DateOfJoining">@x.Id</option>}</select></div><div class="f"><label>Employee Name</label><input id="n" class="i" readonly/></div><div class="f"><label>Department</label><input name="Department" id="d" class="i" readonly/></div><div class="f"><label>Company *</label><select name="Company" id="c" class="sel searchable" required><option value="">Select company</option>@foreach(var x in companies){<option value="@x">@x</option>}</select></div><div class="f"><label>Date of Joining</label><input id="j" class="i" readonly/></div><div class="f"><label>Amended From</label><input class="i" readonly/></div></div></section><section class="s"><h2>Bonus</h2><div class="g"><div class="f"><label>Salary Component *</label><select name="SalaryComponent" class="sel searchable" required><option value="">Select salary component</option>@foreach(var x in components){<option value="@x">@x</option>}</select></div><div class="f"><label>Bonus Amount *</label><input name="BonusAmount" class="i" type="number" step="0.01" required/></div><div class="f"><label>Bonus Payment Date *</label><input name="BonusPaymentDate" class="i" type="date" required/></div><div class="f"><label>Currency *</label><select name="Currency" class="sel searchable" required><option value="">Select currency</option>@foreach(var x in currencies){<option value="@x">@x</option>}</select></div></div></section></main></form></div>
-<script>const e=document.getElementById('e');e.addEventListener('change',()=>{const o=e.options[e.selectedIndex];n.value=o.dataset.name||'';d.value=o.dataset.department||'';j.value=o.dataset.joining||'';if(o.dataset.company)c.value=o.dataset.company});document.querySelectorAll('select.searchable').forEach(s=>{if(s.options.length<=11)return;const w=document.createElement('div'),i=document.createElement('input'),m=document.createElement('div');w.className='ss';i.className='i';i.placeholder='Type to search';m.className='sm';s.parentNode.insertBefore(w,s);w.append(i,s,m);s.style.display='none';const draw=()=>{const q=i.value.toLowerCase(),a=[...s.options].filter(x=>x.value&&x.text.toLowerCase().startsWith(q)).slice(0,10);m.innerHTML='';a.forEach(x=>{const b=document.createElement('button');b.type='button';b.textContent=x.text;b.onclick=()=>{s.value=x.value;i.value=x.text;m.style.display='none';s.dispatchEvent(new Event('change'))};m.appendChild(b)});const r=i.getBoundingClientRect();m.style.width=r.width+'px';m.style.left=r.left+'px';m.style.top=r.bottom+'px';m.style.display='block'};i.onfocus=draw;i.oninput=draw;document.addEventListener('click',x=>{if(!w.contains(x.target))m.style.display='none'})});</script>
+<div class="p">
+    <form method="post" asp-action="CreateRetentionBonus">
+        @Html.AntiForgeryToken()
+        <header class="h"><h1>New Retention Bonus</h1><button class="save" type="submit">Save</button></header>
+        @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div> }
+        <main class="card">
+            <section class="s">
+                <h2>Employee</h2>
+                <div class="g">
+                    <div class="f"><label>Employee *</label><select name="Employee" id="e" class="sel searchable" required><option value="">Select employee</option>@foreach (var x in employees) { <option value="@x.Id" data-name="@x.EmployeeName" data-department="@x.Department" data-company="@x.Company" data-joining="@x.DateOfJoining">@x.Id</option> }</select></div>
+                    <div class="f"><label>Employee Name</label><input id="n" class="i" readonly /></div>
+                    <div class="f"><label>Department</label><select name="Department" id="d" class="sel searchable"><option value="">Select department</option>@foreach (var x in departments) { <option value="@x">@x</option> }</select></div>
+                    <div class="f"><label>Company *</label><select name="Company" id="c" class="sel searchable" required><option value="">Select company</option>@foreach (var x in companies) { <option value="@x">@x</option> }</select></div>
+                    <div class="f"><label>Date of Joining</label><input id="j" class="i" readonly /></div>
+                    <div class="f"><label>Amended From</label><input class="i" readonly /></div>
+                </div>
+            </section>
+            <section class="s">
+                <h2>Bonus</h2>
+                <div class="g">
+                    <div class="f"><label>Salary Component *</label><select name="SalaryComponent" class="sel searchable" required><option value="">Select salary component</option>@foreach (var x in components) { <option value="@x">@x</option> }</select></div>
+                    <div class="f"><label>Bonus Amount *</label><input name="BonusAmount" class="i" type="number" step="0.01" required /></div>
+                    <div class="f"><label>Bonus Payment Date *</label><input name="BonusPaymentDate" class="i" type="date" required /></div>
+                    <div class="f"><label>Currency *</label><select name="Currency" class="sel searchable" required><option value="">Select currency</option>@foreach (var x in currencies) { <option value="@x">@x</option> }</select></div>
+                </div>
+            </section>
+        </main>
+    </form>
+</div>
+<script>
+function setSelectValue(id, value) {
+    const select = document.getElementById(id);
+    if (!select || !value) return;
+    select.value = value;
+    const searchInput = select.parentElement && select.parentElement.classList.contains('ss') ? select.parentElement.querySelector('input') : null;
+    if (searchInput) {
+        const option = select.options[select.selectedIndex];
+        searchInput.value = option ? option.text : value;
+    }
+}
+
+const e = document.getElementById('e');
+e.addEventListener('change', () => {
+    const o = e.options[e.selectedIndex];
+    document.getElementById('n').value = o.dataset.name || '';
+    document.getElementById('j').value = o.dataset.joining || '';
+    setSelectValue('d', o.dataset.department || '');
+    setSelectValue('c', o.dataset.company || '');
+});
+
+document.querySelectorAll('select.searchable').forEach(s => {
+    if (s.options.length <= 11) return;
+    const w = document.createElement('div'), i = document.createElement('input'), m = document.createElement('div');
+    w.className = 'ss';
+    i.className = 'i';
+    i.placeholder = 'Type to search';
+    m.className = 'sm';
+    s.parentNode.insertBefore(w, s);
+    w.append(i, s, m);
+    s.style.display = 'none';
+    const draw = () => {
+        const q = i.value.toLowerCase(), a = [...s.options].filter(x => x.value && x.text.toLowerCase().startsWith(q)).slice(0, 10);
+        m.innerHTML = '';
+        a.forEach(x => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = x.text;
+            b.onclick = () => { s.value = x.value; i.value = x.text; m.style.display = 'none'; s.dispatchEvent(new Event('change')); };
+            m.appendChild(b);
+        });
+        const r = i.getBoundingClientRect();
+        m.style.width = r.width + 'px';
+        m.style.left = r.left + 'px';
+        m.style.top = r.bottom + 'px';
+        m.style.display = 'block';
+    };
+    i.onfocus = draw;
+    i.oninput = draw;
+    document.addEventListener('click', x => { if (!w.contains(x.target)) m.style.display = 'none'; });
+});
+</script>

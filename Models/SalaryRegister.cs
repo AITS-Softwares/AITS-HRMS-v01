@@ -40,8 +40,22 @@ namespace Erp_Aits.Models
         public string Department { get; set; } = "";
         public string Designation { get; set; } = "";
         public string Grade { get; set; } = "";
+        public string Branch { get; set; } = "";
+        public string EmployeeType { get; set; } = "";
         public string Company { get; set; } = "";
         public string DateOfJoining { get; set; } = "";
         public string RelievingDate { get; set; } = "";
+    }
+
+    public class SalarySlipListItem
+    {
+        public string Name { get; set; } = "";
+        public string Employee { get; set; } = "";
+        public string EmployeeName { get; set; } = "";
+        public string Company { get; set; } = "";
+        public string SalaryStructure { get; set; } = "";
+        public string PostingDate { get; set; } = "";
+        public string Status { get; set; } = "";
+        public string Modified { get; set; } = "";
     }
 }

@@ -394,7 +394,7 @@ namespace Erp_Aits.Controllers
             try
             {
                 var response = await _erpNextService.GetAsync(
-                    "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"department\",\"designation\",\"grade\",\"company\",\"date_of_joining\",\"relieving_date\"]&filters=[[\"status\",\"=\",\"Active\"]]&limit_page_length=500");
+                    "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"department\",\"designation\",\"grade\",\"branch\",\"employee_type\",\"company\",\"date_of_joining\",\"relieving_date\"]&filters=[[\"status\",\"=\",\"Active\"]]&limit_page_length=500");
 
                 return (JObject.Parse(response)["data"] as JArray ?? new JArray())
                     .Select(item => new PayrollEmployeeOption
@@ -404,6 +404,8 @@ namespace Erp_Aits.Controllers
                         Department = item["department"]?.ToString() ?? "",
                         Designation = item["designation"]?.ToString() ?? "",
                         Grade = item["grade"]?.ToString() ?? "",
+                        Branch = item["branch"]?.ToString() ?? "",
+                        EmployeeType = item["employee_type"]?.ToString() ?? "",
                         Company = item["company"]?.ToString() ?? "",
                         DateOfJoining = item["date_of_joining"]?.ToString() ?? "",
                         RelievingDate = item["relieving_date"]?.ToString() ?? ""
@@ -822,9 +824,9 @@ namespace Erp_Aits.Controllers
         [Route("HR/CreateIncomeTaxSlab")]
         public async Task<ActionResult> CreateIncomeTaxSlab(IFormCollection form)
         {
-            if (string.IsNullOrWhiteSpace(form["EffectiveFrom"]) || string.IsNullOrWhiteSpace(form["Currency"]))
+            if (string.IsNullOrWhiteSpace(form["Name"]) || string.IsNullOrWhiteSpace(form["EffectiveFrom"]) || string.IsNullOrWhiteSpace(form["Currency"]))
             {
-                TempData["ErpNextError"] = "Effective From and Currency are required.";
+                TempData["ErpNextError"] = "Name, Effective From, and Currency are required.";
                 await LoadIncomeTaxSlabOptionsAsync();
                 return View("~/Views/HR/CreateIncomeTaxSlab.cshtml");
             }
@@ -832,6 +834,7 @@ namespace Erp_Aits.Controllers
             {
                 var payload = new JObject
                 {
+                    ["name"] = form["Name"].ToString(),
                     ["effective_from"] = form["EffectiveFrom"].ToString(),
                     ["currency"] = form["Currency"].ToString(),
                     ["company"] = form["Company"].ToString(),
@@ -926,8 +929,7 @@ namespace Erp_Aits.Controllers
             if (string.IsNullOrWhiteSpace(form["Name"]) || string.IsNullOrWhiteSpace(form["Company"]) || string.IsNullOrWhiteSpace(form["Currency"]))
             {
                 TempData["ErpNextError"] = "Name, Company, and Currency are required.";
-                await LoadSalaryStructureOptionsAsync();
-                return View("~/Views/HR/CreateSalaryStructure.cshtml");
+                return RedirectToAction(nameof(CreateSalaryStructure));
             }
             try
             {
@@ -941,7 +943,7 @@ namespace Erp_Aits.Controllers
                 TempData["Success"] = "Salary Structure created in ERPNext.";
                 return RedirectToAction(nameof(SalaryStructure));
             }
-            catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure creation failed: " + ShortErpNextError(ex.Message); await LoadSalaryStructureOptionsAsync(); return View("~/Views/HR/CreateSalaryStructure.cshtml"); }
+            catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure creation failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(CreateSalaryStructure)); }
         }
 
         private async Task LoadSalaryStructureOptionsAsync()
@@ -1134,7 +1136,7 @@ namespace Erp_Aits.Controllers
         { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Retention%20Bonus/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Retention Bonus details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/RetentionBonusDetails.cshtml"); }
 
         private async Task LoadRetentionBonusOptionsAsync()
-        { ViewBag.RetentionEmployees = await GetPayrollEmployeeOptionsAsync(); ViewBag.RetentionCompanies = await GetSalaryRegisterLinkOptionsAsync("Company"); ViewBag.RetentionComponents = await GetSalaryRegisterLinkOptionsAsync("Salary Component"); ViewBag.RetentionCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency"); }
+        { ViewBag.RetentionEmployees = await GetPayrollEmployeeOptionsAsync(); ViewBag.RetentionCompanies = await GetSalaryRegisterLinkOptionsAsync("Company"); ViewBag.RetentionDepartments = await GetSalaryRegisterLinkOptionsAsync("Department"); ViewBag.RetentionComponents = await GetSalaryRegisterLinkOptionsAsync("Salary Component"); ViewBag.RetentionCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency"); }
 
         [HttpGet]
         [Route("HR/Account")]
@@ -1527,7 +1529,8 @@ namespace Erp_Aits.Controllers
         [Route("HR/CreateEmployeeTaxExemptionCategory")]
         public async Task<ActionResult> CreateEmployeeTaxExemptionCategory(IFormCollection form)
         {
-            try { await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Category", new JObject { ["max_amount"] = form["MaxAmount"].ToString(), ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 }); TempData["Success"] = "Employee Tax Exemption Category created in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionCategory)); }
+            if (string.IsNullOrWhiteSpace(form["CategoryName"])) { TempData["ErpNextError"] = "Category Name is required."; return View("~/Views/HR/CreateEmployeeTaxExemptionCategory.cshtml"); }
+            try { await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Category", new JObject { ["name"] = form["CategoryName"].ToString(), ["max_amount"] = form["MaxAmount"].ToString(), ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 }); TempData["Success"] = "Employee Tax Exemption Category created in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionCategory)); }
             catch (Exception ex) { TempData["ErpNextError"] = "Category creation failed: " + ShortErpNextError(ex.Message); return View("~/Views/HR/CreateEmployeeTaxExemptionCategory.cshtml"); }
         }
 
@@ -1653,7 +1656,7 @@ namespace Erp_Aits.Controllers
             {
                 var payload = new JObject
                 {
-                    ["employee"] = form["Employee"].ToString(), ["salary_structure"] = form["SalaryStructure"].ToString(), ["from_date"] = form["FromDate"].ToString(), ["income_tax_slab"] = form["IncomeTaxSlab"].ToString(), ["company"] = form["Company"].ToString(), ["payroll_payable_account"] = form["PayrollPayableAccount"].ToString(), ["currency"] = form["Currency"].ToString(), ["base"] = form["Base"].ToString(), ["variable"] = form["Variable"].ToString(), ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["taxable_earnings_till_date"] = form["TaxableEarningsTillDate"].ToString(), ["tax_deducted_till_date"] = form["TaxDeductedTillDate"].ToString(), ["payroll_cost_centers"] = BuildAssignmentCostCenters(form["CostCenters"], form["CostCenterPercentages"])
+                    ["employee"] = form["Employee"].ToString(), ["salary_structure"] = form["SalaryStructure"].ToString(), ["from_date"] = form["FromDate"].ToString(), ["income_tax_slab"] = form["IncomeTaxSlab"].ToString(), ["company"] = form["Company"].ToString(), ["payroll_payable_account"] = form["PayrollPayableAccount"].ToString(), ["currency"] = form["Currency"].ToString(), ["branch"] = form["Branch"].ToString(), ["department"] = form["Department"].ToString(), ["designation"] = form["Designation"].ToString(), ["employee_grade"] = form["EmployeeGrade"].ToString(), ["grade"] = form["EmployeeGrade"].ToString(), ["employee_type"] = form["EmployeeType"].ToString(), ["base"] = form["Base"].ToString(), ["variable"] = form["Variable"].ToString(), ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["taxable_earnings_till_date"] = form["TaxableEarningsTillDate"].ToString(), ["tax_deducted_till_date"] = form["TaxDeductedTillDate"].ToString(), ["payroll_cost_centers"] = BuildAssignmentCostCenters(form["CostCenters"], form["CostCenterPercentages"])
                 };
                 await _erpNextService.PostAsync("/api/resource/Salary%20Structure%20Assignment", payload);
                 TempData["Success"] = "Salary Structure Assignment created in ERPNext.";
@@ -1680,6 +1683,11 @@ namespace Erp_Aits.Controllers
             ViewBag.AssignmentAccounts = await GetSalaryRegisterLinkOptionsAsync("Account");
             ViewBag.AssignmentCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency");
             ViewBag.AssignmentCostCenters = await GetSalaryRegisterLinkOptionsAsync("Cost Center");
+            ViewBag.AssignmentBranches = await GetSalaryRegisterLinkOptionsAsync("Branch");
+            ViewBag.AssignmentDepartments = await GetSalaryRegisterLinkOptionsAsync("Department");
+            ViewBag.AssignmentDesignations = await GetSalaryRegisterLinkOptionsAsync("Designation");
+            ViewBag.AssignmentGrades = await GetSalaryRegisterLinkOptionsAsync("Employee Grade");
+            ViewBag.AssignmentEmployeeTypes = await GetSalaryRegisterLinkOptionsAsync("Employment Type");
         }
 
         private static JArray BuildAssignmentCostCenters(IEnumerable<string> costCenters, IEnumerable<string> percentages)
@@ -1691,10 +1699,75 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/BulkSalaryStructureAssignment")]
-        public ActionResult BulkSalaryStructureAssignment()
+        public async Task<ActionResult> BulkSalaryStructureAssignment()
         {
             ViewBag.Title = "Bulk Salary Structure Assignment";
+            await LoadBulkSalaryStructureAssignmentOptionsAsync();
             return View("~/Views/HR/BulkSalaryStructureAssignment.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/BulkSalaryStructureAssignment")]
+        public async Task<ActionResult> BulkSalaryStructureAssignment(IFormCollection form)
+        {
+            var selectedEmployees = form["EmployeeIds"].Where(value => !string.IsNullOrWhiteSpace(value)).ToList();
+            var salaryStructure = form["SalaryStructure"].ToString();
+            var fromDate = form["FromDate"].ToString();
+            if (!selectedEmployees.Any() || string.IsNullOrWhiteSpace(salaryStructure) || string.IsNullOrWhiteSpace(fromDate))
+            {
+                TempData["ErpNextError"] = "Select at least one employee and complete Salary Structure and From Date.";
+                await LoadBulkSalaryStructureAssignmentOptionsAsync();
+                return View("~/Views/HR/BulkSalaryStructureAssignment.cshtml");
+            }
+
+            try
+            {
+                var baseValues = form["BaseValues"].ToList();
+                var variableValues = form["VariableValues"].ToList();
+                foreach (var employee in selectedEmployees.Select((value, index) => new { value, index }))
+                {
+                    var payload = new JObject
+                    {
+                        ["employee"] = employee.value,
+                        ["salary_structure"] = salaryStructure,
+                        ["from_date"] = fromDate,
+                        ["company"] = form["Company"].ToString(),
+                        ["payroll_payable_account"] = form["PayrollPayableAccount"].ToString(),
+                        ["branch"] = form["Branch"].ToString(),
+                        ["department"] = form["Department"].ToString(),
+                        ["designation"] = form["Designation"].ToString(),
+                        ["employee_grade"] = form["EmployeeGrade"].ToString(),
+                        ["grade"] = form["EmployeeGrade"].ToString(),
+                        ["employee_type"] = form["EmploymentType"].ToString(),
+                        ["base"] = employee.index < baseValues.Count ? baseValues[employee.index] : "",
+                        ["variable"] = employee.index < variableValues.Count ? variableValues[employee.index] : ""
+                    };
+                    await _erpNextService.PostAsync("/api/resource/Salary%20Structure%20Assignment", payload);
+                }
+
+                TempData["Success"] = $"Created {selectedEmployees.Count} salary structure assignment(s) in ERPNext.";
+                return RedirectToAction(nameof(SalaryStructureAssignment));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = "Bulk Salary Structure Assignment failed: " + ShortErpNextError(ex.Message);
+                await LoadBulkSalaryStructureAssignmentOptionsAsync();
+                return View("~/Views/HR/BulkSalaryStructureAssignment.cshtml");
+            }
+        }
+
+        private async Task LoadBulkSalaryStructureAssignmentOptionsAsync()
+        {
+            ViewBag.BulkAssignmentEmployees = await GetPayrollEmployeeOptionsAsync();
+            ViewBag.BulkAssignmentStructures = await GetSalaryRegisterLinkOptionsAsync("Salary Structure");
+            ViewBag.BulkAssignmentCompanies = await GetSalaryRegisterLinkOptionsAsync("Company");
+            ViewBag.BulkAssignmentAccounts = await GetSalaryRegisterLinkOptionsAsync("Account");
+            ViewBag.BulkAssignmentBranches = await GetSalaryRegisterLinkOptionsAsync("Branch");
+            ViewBag.BulkAssignmentDepartments = await GetSalaryRegisterLinkOptionsAsync("Department");
+            ViewBag.BulkAssignmentDesignations = await GetSalaryRegisterLinkOptionsAsync("Designation");
+            ViewBag.BulkAssignmentGrades = await GetSalaryRegisterLinkOptionsAsync("Employee Grade");
+            ViewBag.BulkAssignmentEmployeeTypes = await GetSalaryRegisterLinkOptionsAsync("Employment Type");
         }
 
 
@@ -1702,9 +1775,26 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/SalarySlip")]
-        public ActionResult SalarySlip()
+        public async Task<ActionResult> SalarySlip(string id, string employee, string employeeName, string company, string department, string branch, string salaryStructure)
         {
             ViewBag.Title = "Salary Slip";
+            var slips = new List<SalarySlipListItem>();
+            try
+            {
+                var filters = new JArray();
+                if (!string.IsNullOrWhiteSpace(id)) filters.Add(new JArray("name", "like", "%" + id + "%"));
+                if (!string.IsNullOrWhiteSpace(employee)) filters.Add(new JArray("employee", "like", "%" + employee + "%"));
+                if (!string.IsNullOrWhiteSpace(employeeName)) filters.Add(new JArray("employee_name", "like", "%" + employeeName + "%"));
+                if (!string.IsNullOrWhiteSpace(company)) filters.Add(new JArray("company", "like", "%" + company + "%"));
+                if (!string.IsNullOrWhiteSpace(department)) filters.Add(new JArray("department", "like", "%" + department + "%"));
+                if (!string.IsNullOrWhiteSpace(branch)) filters.Add(new JArray("branch", "like", "%" + branch + "%"));
+                if (!string.IsNullOrWhiteSpace(salaryStructure)) filters.Add(new JArray("salary_structure", "like", "%" + salaryStructure + "%"));
+                var response = await _erpNextService.GetAsync("/api/resource/Salary%20Slip?fields=[\"name\",\"employee\",\"employee_name\",\"company\",\"salary_structure\",\"posting_date\",\"status\",\"modified\"]&filters=" + Uri.EscapeDataString(filters.ToString(Formatting.None)) + "&order_by=modified%20desc&limit_page_length=100");
+                foreach (var item in JObject.Parse(response)["data"] as JArray ?? new JArray())
+                    slips.Add(new SalarySlipListItem { Name = item["name"]?.ToString() ?? "", Employee = item["employee"]?.ToString() ?? "", EmployeeName = item["employee_name"]?.ToString() ?? "", Company = item["company"]?.ToString() ?? "", SalaryStructure = item["salary_structure"]?.ToString() ?? "", PostingDate = item["posting_date"]?.ToString() ?? "", Status = item["status"]?.ToString() ?? "", Modified = item["modified"]?.ToString() ?? "" });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Salary Slips could not be loaded: " + ShortErpNextError(ex.Message); }
+            ViewBag.SalarySlips = slips;
             return View("~/Views/HR/SalarySlip.cshtml");
         }
 
@@ -1771,6 +1861,60 @@ namespace Erp_Aits.Controllers
             ViewBag.SalarySlipLetterHeads = await GetSalaryRegisterLinkOptionsAsync("Letter Head");
             ViewBag.SalarySlipEarnings = await GetSalaryComponentOptionsAsync("Earning");
             ViewBag.SalarySlipDeductions = await GetSalaryComponentOptionsAsync("Deduction");
+            ViewBag.SalarySlipJournalEntries = await GetSalaryRegisterLinkOptionsAsync("Journal Entry");
+            ViewBag.SalarySlipBankAccounts = await GetSalaryRegisterLinkOptionsAsync("Bank Account");
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> GeneralLedger() => await PayrollReportAsync("General Ledger");
+
+        [HttpGet]
+        public async Task<ActionResult> AccountsPayable() => await PayrollReportAsync("Accounts Payable");
+
+        [HttpGet]
+        public async Task<ActionResult> AccountsReceivable() => await PayrollReportAsync("Accounts Receivable");
+
+        [HttpGet]
+        public async Task<ActionResult> BankRemittance() => await PayrollReportAsync("Bank Remittance");
+
+        [HttpGet]
+        public async Task<ActionResult> SalaryPaymentsBasedOnPaymentMode() => await PayrollReportAsync("Salary Payments Based On Payment Mode");
+
+        [HttpGet]
+        public async Task<ActionResult> SalaryPaymentsViaEcs() => await PayrollReportAsync("Salary Payments via ECS");
+
+        [HttpGet]
+        public async Task<ActionResult> IncomeTaxComputation() => await PayrollReportAsync("Income Tax Computation");
+
+        [HttpGet]
+        public async Task<ActionResult> ProvidentFundDeductions() => await PayrollReportAsync("Provident Fund Deductions");
+
+        [HttpGet]
+        public async Task<ActionResult> ProfessionalTaxDeductions() => await PayrollReportAsync("Professional Tax Deductions");
+
+        [HttpGet]
+        public async Task<ActionResult> IncomeTaxDeductions() => await PayrollReportAsync("Income Tax Deductions");
+
+        private async Task<ActionResult> PayrollReportAsync(string reportName)
+        {
+            try
+            {
+                var filters = Uri.EscapeDataString("{}");
+                var endpoint = "/api/method/frappe.desk.query_report.run?report_name=" + Uri.EscapeDataString(reportName) + "&filters=" + filters + "&ignore_prepared_report=false";
+                var response = JObject.Parse(await _erpNextService.GetAsync(endpoint));
+                var message = response["message"] as JObject ?? new JObject();
+                ViewBag.ReportName = reportName;
+                ViewBag.ReportColumns = message["columns"] as JArray ?? new JArray();
+                ViewBag.ReportRows = message["result"] as JArray ?? new JArray();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = reportName + " could not be loaded: " + ShortErpNextError(ex.Message);
+                ViewBag.ReportName = reportName;
+                ViewBag.ReportColumns = new JArray();
+                ViewBag.ReportRows = new JArray();
+            }
+            return View("~/Views/HR/PayrollReport.cshtml");
         }
 
         private async Task<List<string>> GetSalaryComponentOptionsAsync(string componentType)
@@ -20878,13 +21022,25 @@ VALUES
 
         [HttpGet]
         [Route("HR/PaymentEntry")]
-        public ActionResult PaymentEntry(string id, string paymentType, string partyType, string party, string title)
+        public async Task<ActionResult> PaymentEntry(string id, string paymentType, string partyType, string party, string title)
         {
             ViewBag.IdFilter = id;
             ViewBag.PaymentTypeFilter = paymentType;
             ViewBag.PartyTypeFilter = partyType;
             ViewBag.PartyFilter = party;
             ViewBag.TitleFilter = title;
+
+            try
+            {
+                // Keep the local detail records current before the list is rendered.
+                await RefreshPaymentEntriesFromErpNextAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] =
+                    "Payment Entries could not be refreshed from ERPNext: "
+                    + CleanPaymentEntryErpError(ex.Message);
+            }
 
             var list = _paymentEntryService.GetAll(id, paymentType, partyType, party, title);
             return View("~/Views/HR/PaymentEntry.cshtml", list);
@@ -21142,6 +21298,36 @@ VALUES
             }
 
             return RedirectToAction("PaymentEntry");
+        }
+
+        private async Task RefreshPaymentEntriesFromErpNextAsync()
+        {
+            string listJson = await _erpNextService.GetAsync(
+                "/api/resource/Payment%20Entry"
+                + "?fields=[\"name\"]"
+                + "&order_by=modified%20desc"
+                + "&limit_page_length=100");
+
+            var rows = JObject.Parse(listJson)["data"] as JArray ?? new JArray();
+            foreach (JToken row in rows)
+            {
+                string erpId = row["name"]?.ToString();
+                if (string.IsNullOrWhiteSpace(erpId))
+                    continue;
+
+                try
+                {
+                    string detailJson = await _erpNextService.GetAsync(
+                        "/api/resource/Payment%20Entry/" + Uri.EscapeDataString(erpId));
+                    var entry = MapErpPaymentEntry(JObject.Parse(detailJson)["data"]);
+                    if (entry != null)
+                        _paymentEntryService.InsertOrUpdate(entry);
+                }
+                catch
+                {
+                    // A malformed document must not prevent other ERPNext entries from loading.
+                }
+            }
         }
 
         private string CleanPaymentEntryErpError(
