@@ -450,6 +450,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlSWRlbnRpZmljYXRpb25Eb2N1bWVudFR5cGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateIncomeTaxSlab.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlSW5jb21lVGF4U2xhYi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateInterview.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlSW50ZXJ2aWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -1128,6 +1132,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Payroll.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollEntryDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbEVudHJ5RGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollPeriod.cshtml]

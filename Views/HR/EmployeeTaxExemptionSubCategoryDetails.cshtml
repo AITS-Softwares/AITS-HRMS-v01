@@ -1,3 +1,23 @@
 @using Newtonsoft.Json.Linq
-@{ViewBag.Title="Employee Tax Exemption Sub Category Details";var d=ViewBag.Document as JObject;string V(string k)=>d?[k]?.ToString()??"";bool B(string k)=>d?[k]?.Value<int>()==1;}
-<style>.p{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{margin:0;font-size:22px}.back{color:#fff;text-decoration:none;border:1px solid #7890a8;border-radius:7px;padding:8px 13px}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px}.s{padding:20px}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.v{min-height:36px;padding:8px 10px;border:1px solid #b8c7d7;border-radius:8px;background:#f2f6f9}.check{display:flex;gap:8px;align-items:center;padding-top:25px}</style><div class="p"><header class="h"><h1>Employee Tax Exemption Sub Category Details</h1><a class="back" asp-action="EmployeeTaxExemptionSubCategory">Back to Sub Categories</a></header><main class="card"><section class="s"><div class="g"><div class="f"><label>Tax Exemption Category</label><div class="v">@V("exemption_category")</div></div><div class="f"><label>Max Exemption Amount</label><div class="v">@V("max_amount")</div></div><label class="check"><input type="checkbox" disabled checked="@B("is_active")"/> Is Active</label></div></section></main></div>
+@{
+ ViewBag.Title = "Employee Tax Exemption Sub Category Details";
+ var doc = ViewBag.Document as JObject;
+ string V(string key) => doc?[key]?.ToString() ?? "";
+ bool Active() => doc?["is_active"]?.Value<int>() == 1;
+ var categories = ViewBag.TaxCategories as List<string> ?? new();
+}
+<style>
+ .sub-page{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.sub-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.sub-head h1{margin:0;font-size:22px}.sub-actions{display:flex;gap:10px;align-items:center}.sub-actions a,.sub-actions button{color:#fff;padding:9px 14px;border-radius:6px}.sub-actions a{border:1px solid #7890a8;text-decoration:none}.sub-actions button{border:0;background:#0f766e}.sub-actions .delete{background:#b91c1c}.sub-card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;padding:20px}.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.sub-field label{display:block;font-size:13px;margin-bottom:7px}.sub-field input,.sub-field select{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:6px;padding:7px 10px}.sub-field input[readonly]{background:#f2f6f9}@@media(max-width:800px){.sub-grid{grid-template-columns:1fr}.sub-head{flex-wrap:wrap}}
+</style>
+<div class="sub-page">
+ @if(TempData["ErpNextError"] != null){<div class="alert alert-danger">@TempData["ErpNextError"]</div>}
+ @if(TempData["Success"] != null){<div class="alert alert-success">@TempData["Success"]</div>}
+ <header class="sub-head"><h1>Employee Tax Exemption Sub Category Details</h1><div class="sub-actions"><a asp-action="EmployeeTaxExemptionSubCategory">Back to Sub Categories</a>@if(doc != null){<button type="submit" form="subForm">Save</button><button type="submit" class="delete" form="deleteSubForm" onclick="return confirm('Delete this sub-category from ERPNext and HRMS?')">Delete</button>}</div></header>
+ @if(doc != null){<form id="subForm" method="post" asp-action="UpdateEmployeeTaxExemptionSubCategory" asp-route-id="@V("name")">@Html.AntiForgeryToken()<main class="sub-card"><div class="sub-grid">
+ <div class="sub-field"><label>Name</label><input value="@V("name")" readonly /></div>
+ <div class="sub-field"><label>Tax Exemption Category *</label><select name="ExemptionCategory" required><option value="">Select category</option>@foreach(var category in categories){<option value="@category" selected="@(category == V("exemption_category"))">@category</option>}</select></div>
+ <div class="sub-field"><label>Max Exemption Amount</label><input name="MaxAmount" type="number" min="0" step="0.01" value="@V("max_amount")" /></div>
+ <label><input name="IsActive" type="checkbox" checked="@Active()" /> Is Active</label>
+ </div></main></form><form id="deleteSubForm" method="post" asp-action="DeleteEmployeeTaxExemptionSubCategory" asp-route-id="@V("name")">@Html.AntiForgeryToken()</form>}
+</div>
+<script defer src="@Url.Content("~/js/tax-exemption-category-amount.js")"></script>

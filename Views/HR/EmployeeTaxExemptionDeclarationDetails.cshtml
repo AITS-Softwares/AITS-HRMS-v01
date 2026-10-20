@@ -1,3 +1,69 @@
+@using Erp_Aits.Models
 @using Newtonsoft.Json.Linq
-@{ViewBag.Title="Employee Tax Exemption Declaration Details";var d=ViewBag.Document as JObject;string V(string k)=>d?[k]?.ToString()??"";var rows=d?["declarations"] as JArray??new JArray();var fields=new[]{("Employee","employee"),("Employee Name","employee_name"),("Department","department"),("Company","company"),("Payroll Period","payroll_period"),("Currency","currency"),("Amended From","amended_from"),("Monthly House Rent","monthly_house_rent"),("Rented in Metro City","rented_in_metro_city"),("HRA as per Salary Structure","salary_structure_hra"),("Annual HRA Exemption","annual_hra_exemption"),("Monthly HRA Exemption","monthly_hra_exemption"),("Total Declared Amount","total_declared_amount"),("Total Exemption Amount","total_exemption_amount")};}
-<style>.p{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.back{color:#fff;text-decoration:none;border:1px solid #7890a8;border-radius:7px;padding:8px 13px}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px}.s{padding:20px;border-bottom:1px solid #dbe3ec}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.v{min-height:36px;padding:8px 10px;border:1px solid #b8c7d7;border-radius:8px;background:#f2f6f9}.t{width:100%;border-collapse:collapse}.t th,.t td{padding:8px;border:1px solid #dbe3ec}.t th{background:#f4f8fc}</style><div class="p"><header class="h"><h1>Employee Tax Exemption Declaration Details</h1><a class="back" asp-action="EmployeeTaxExemptionDeclaration">Back to Declarations</a></header><main class="card"><section class="s"><div class="g">@foreach(var x in fields){<div class="f"><label>@x.Item1</label><div class="v">@V(x.Item2)</div></div>}</div></section><section class="s"><h2>Tax Exemption Declaration</h2><table class="t"><thead><tr><th>Tax Exemption Category</th><th>Tax Exemption Sub Category</th><th>Amount</th></tr></thead><tbody>@foreach(var r in rows){<tr><td>@r["exemption_category"]</td><td>@r["exemption_sub_category"]</td><td>@r["amount"]</td></tr>}</tbody></table></section></main></div>
+@{
+    ViewBag.Title = "Employee Tax Exemption Declaration Details";
+    var document = ViewBag.Document as JObject;
+    string Value(string key) => document?[key]?.ToString() ?? "";
+    var docStatus = document?["docstatus"]?.Value<int>() ?? -1;
+    var isDraft = docStatus == 0;
+    var isSubmitted = docStatus == 1;
+    var disabled = isDraft ? "" : "disabled";
+    var employees = ViewBag.TaxEmployees as List<PayrollEmployeeOption> ?? new List<PayrollEmployeeOption>();
+    var periods = ViewBag.TaxPeriods as List<string> ?? new List<string>();
+    var currencies = ViewBag.TaxCurrencies as List<string> ?? new List<string>();
+    var subs = ViewBag.TaxDeclarationSubCategories as List<string> ?? new List<string>();
+    var rows = document?["declarations"] as JArray ?? new JArray();
+    if (!rows.Any()) { rows.Add(new JObject()); }
+}
+<style>
+    .tax-page{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.tax-header{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.tax-header h1{font-size:22px;margin:0}.tax-actions{display:flex;gap:10px;align-items:center}.tax-button,.tax-back{border:0;border-radius:7px;padding:9px 15px;font-weight:650;text-decoration:none}.tax-save{background:#0f766e;color:#fff}.tax-submit{background:#2563eb;color:#fff}.tax-cancel{background:#b91c1c;color:#fff}.tax-back{color:#fff;border:1px solid #7890a8}.tax-card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.tax-section{padding:20px;border-bottom:1px solid #dbe3ec}.tax-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.tax-field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.tax-input,.tax-select{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff}.tax-input[readonly]{background:#f2f6f9}.tax-table{width:100%;border-collapse:collapse}.tax-table th,.tax-table td{padding:8px;border:1px solid #dbe3ec}.tax-table th{background:#f4f8fc;text-align:left}.tax-table select,.tax-table input{width:100%;height:34px;box-sizing:border-box;border:1px solid #b8c7d7;border-radius:5px;padding:5px}.tax-add{border:0;background:#dce8f1;border-radius:6px;padding:7px 12px;margin-top:10px}.tax-status{font-size:13px;padding:4px 8px;border-radius:999px;background:#e7eef7;color:#23384e}fieldset{border:0;padding:0;margin:0}fieldset:disabled{opacity:.72}
+</style>
+<div class="tax-page">
+    @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div> }
+    @if (TempData["Success"] != null) { <div class="alert alert-success mb-3">@TempData["Success"]</div> }
+    <header class="tax-header"><div><h1>@Value("name")</h1><span class="tax-status">@(isDraft ? "Draft" : isSubmitted ? "Submitted" : "Cancelled")</span></div><div class="tax-actions"><a class="tax-back" asp-action="EmployeeTaxExemptionDeclaration">Back to Declarations</a>@if (isDraft) { <button form="taxDeclarationForm" class="tax-button tax-save" type="submit">Save</button><button form="submitTaxDeclarationForm" class="tax-button tax-submit" type="submit">Submit</button> } else if (isSubmitted) { <button form="cancelTaxDeclarationForm" class="tax-button tax-cancel" type="submit">Cancel</button> }</div></header>
+    <form id="taxDeclarationForm" method="post" action="@Url.Action("UpdateEmployeeTaxExemptionDeclaration", "HR", new { id = Value("name") })">
+        @Html.AntiForgeryToken()
+        <main class="tax-card"><fieldset @Html.Raw(disabled)>
+            <section class="tax-section"><div class="tax-grid">
+                <div class="tax-field"><label>Employee *</label><select name="Employee" id="taxEmployee" class="tax-select" required><option value="">Select employee</option>@foreach (var employee in employees) { <option value="@employee.Id" selected="@(employee.Id == Value("employee"))" data-name="@employee.EmployeeName" data-department="@employee.Department" data-company="@employee.Company">@employee.Id</option> }</select></div>
+                <div class="tax-field"><label>Employee Name</label><input id="taxEmployeeName" class="tax-input" readonly value="@Value("employee_name")" /></div>
+                <div class="tax-field"><label>Department</label><input id="taxDepartment" class="tax-input" readonly value="@Value("department")" /></div>
+                <div class="tax-field"><label>Company</label><input id="taxCompany" class="tax-input" readonly value="@Value("company")" /></div>
+                <div class="tax-field"><label>Payroll Period *</label><select name="PayrollPeriod" class="tax-select" required><option value="">Select payroll period</option>@foreach (var period in periods) { <option value="@period" selected="@(period == Value("payroll_period"))">@period</option> }</select></div>
+                <div class="tax-field"><label>Currency *</label><select name="Currency" class="tax-select" required><option value="">Select currency</option>@foreach (var currency in currencies) { <option value="@currency" selected="@(currency == Value("currency"))">@currency</option> }</select></div>
+            </div></section>
+            <section class="tax-section"><h2>Tax Exemption Declaration</h2><table class="tax-table"><thead><tr><th>Exemption Sub Category</th><th>Exemption Category</th><th>Amount</th></tr></thead><tbody id="taxRows">@foreach (var row in rows) { var subValue = row["exemption_sub_category"]?.ToString() ?? ""; <tr class="tax-row"><td><select name="DeclarationSubCategories" class="tax-sub-category"><option value="">Select sub category</option>@foreach (var sub in subs) { <option value="@sub" selected="@(sub == subValue)">@sub</option> }</select></td><td><input name="DeclarationCategories" class="tax-category" readonly value="@row["exemption_category"]" /></td><td><input name="DeclarationAmounts" class="tax-amount" type="number" min="0" step="0.01" value="@row["amount"]" /></td></tr>}</tbody></table>@if (isDraft) { <button class="tax-add" type="button" id="addTaxRow">Add Row</button> }</section>
+            <section class="tax-section"><h2>HRA Exemption</h2><div class="tax-grid">
+                <div class="tax-field"><label for="monthlyHouseRent">Monthly House Rent</label><input id="monthlyHouseRent" name="MonthlyHouseRent" class="tax-input" type="number" min="0" step="0.01" value="@Value("monthly_house_rent")" /></div>
+                <div class="tax-field"><label>Annual HRA Exemption</label><input class="tax-input" readonly value="@Value("annual_hra_exemption")" /></div>
+                <div class="tax-field"><label>Rented in Metro City</label><input type="checkbox" disabled checked="@(Value("rented_in_metro_city") == "1")" /></div>
+                <div class="tax-field"><label>Monthly HRA Exemption</label><input class="tax-input" readonly value="@Value("monthly_hra_exemption")" /></div>
+                <div class="tax-field"><label>HRA as per Salary Structure</label><input class="tax-input" readonly value="@Value("salary_structure_hra")" /></div>
+                <div class="tax-field"><label>Total Declared Amount</label><input class="tax-input" readonly value="@Value("total_declared_amount")" /></div>
+                <div class="tax-field"><label>Total Exemption Amount</label><input class="tax-input" readonly value="@Value("total_exemption_amount")" /></div>
+            </div></section>
+        </fieldset></main>
+    </form>
+    @if (isDraft) { <form id="submitTaxDeclarationForm" method="post" action="@Url.Action("SetEmployeeTaxExemptionDeclarationStatus", "HR", new { id = Value("name"), status = 1 })">@Html.AntiForgeryToken()</form> }
+    @if (isSubmitted) { <form id="cancelTaxDeclarationForm" method="post" action="@Url.Action("SetEmployeeTaxExemptionDeclarationStatus", "HR", new { id = Value("name"), status = 2 })">@Html.AntiForgeryToken()</form> }
+</div>
+@if (isDraft) {
+<script>
+    (() => {
+        const employee = document.getElementById('taxEmployee'), rows = document.getElementById('taxRows');
+        employee.addEventListener('change', () => { const option = employee.options[employee.selectedIndex]; document.getElementById('taxEmployeeName').value = option.dataset.name || ''; document.getElementById('taxDepartment').value = option.dataset.department || ''; document.getElementById('taxCompany').value = option.dataset.company || ''; });
+        async function populateFromSubCategory(row) {
+            const subCategory = row.querySelector('.tax-sub-category').value, category = row.querySelector('.tax-category'), amount = row.querySelector('.tax-amount');
+            category.value = ''; amount.value = '';
+            if (!subCategory) return;
+            const response = await fetch('@Url.Action("TaxExemptionSubCategoryDetails", "HR")?subCategory=' + encodeURIComponent(subCategory));
+            const data = await response.json();
+            if (!response.ok || !data.success) { alert(data.message || 'The exemption sub-category could not be loaded.'); return; }
+            category.value = data.category || ''; amount.value = data.amount || '0';
+        }
+        rows.addEventListener('change', event => { if (event.target.classList.contains('tax-sub-category')) populateFromSubCategory(event.target.closest('.tax-row')); });
+        document.getElementById('addTaxRow').addEventListener('click', () => { const row = rows.querySelector('.tax-row').cloneNode(true); row.querySelector('.tax-sub-category').selectedIndex = 0; row.querySelector('.tax-category').value = ''; row.querySelector('.tax-amount').value = ''; rows.append(row); });
+    })();
+</script>
+}

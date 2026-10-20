@@ -165,17 +165,17 @@
                 <div class="form-grid">
                     <div>
                         <label class="field-label">Salary Structure <span class="required">*</span></label>
-                        <select name="SalaryStructure" class="erp-select" required><option value="">Select salary structure</option>@foreach (var x in structures) { <option value="@x">@x</option> }</select>
+                        <select name="SalaryStructure" id="salaryStructure" class="erp-select" required><option value="">Select salary structure</option>@foreach (var x in structures) { <option value="@x">@x</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Company <span class="required">*</span></label>
-                        <select name="Company" class="erp-select" required><option value="">Select company</option>@foreach (var x in companies) { <option value="@x">@x</option> }</select>
+                        <select name="Company" id="company" class="erp-select" required><option value="">Select company</option>@foreach (var x in companies) { <option value="@x">@x</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">From Date <span class="required">*</span></label>
-                        <input type="date" name="FromDate" class="erp-input invalid" />
+                        <input type="date" name="FromDate" id="fromDate" class="erp-input" required />
                     </div>
 
                     <div>
@@ -191,27 +191,27 @@
                 <div class="form-grid">
                     <div>
                         <label class="field-label">Branch</label>
-                        <select name="Branch" class="erp-select"><option value="">Select branch</option>@foreach (var x in branches) { <option value="@x">@x</option> }</select>
+                        <select name="Branch" id="branch" class="erp-select"><option value="">Select branch</option>@foreach (var x in branches) { <option value="@x">@x</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Employee Grade</label>
-                        <select name="EmployeeGrade" class="erp-select"><option value="">Select grade</option>@foreach (var x in grades) { <option value="@x">@x</option> }</select>
+                        <select name="EmployeeGrade" id="employeeGrade" class="erp-select"><option value="">Select grade</option>@foreach (var x in grades) { <option value="@x">@x</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Department</label>
-                        <select name="Department" class="erp-select"><option value="">Select department</option>@foreach (var x in departments) { <option value="@x">@x</option> }</select>
+                        <select name="Department" id="department" class="erp-select"><option value="">Select department</option>@foreach (var x in departments) { <option value="@x">@x</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Employment Type</label>
-                        <select name="EmploymentType" class="erp-select"><option value="">Select employee type</option>@foreach (var x in employeeTypes) { <option value="@x">@x</option> }</select>
+                        <select name="EmploymentType" id="employmentType" class="erp-select"><option value="">Select employee type</option>@foreach (var x in employeeTypes) { <option value="@x">@x</option> }</select>
                     </div>
 
                     <div>
                         <label class="field-label">Designation</label>
-                        <select name="Designation" class="erp-select"><option value="">Select designation</option>@foreach (var x in designations) { <option value="@x">@x</option> }</select>
+                        <select name="Designation" id="designation" class="erp-select"><option value="">Select designation</option>@foreach (var x in designations) { <option value="@x">@x</option> }</select>
                     </div>
                 </div>
             </div>
@@ -233,7 +233,7 @@
                 <table class="employee-table">
                     <thead>
                         <tr>
-                            <th style="width:35px;"><input type="checkbox" /></th>
+                            <th style="width:35px;"><input type="checkbox" id="selectAllEmployees" /></th>
                             <th>Employee</th>
                             <th>Name</th>
                             <th>Grade</th>
@@ -252,11 +252,34 @@
     const employees = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(employees));
     const rows = document.getElementById('employeeRows');
     const esc = value => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    rows.innerHTML = employees.map(employee => `<tr>
-        <td><input type="checkbox" name="EmployeeIds" value="${esc(employee.Id)}" /></td>
-        <td>${esc(employee.Id)}</td><td>${esc(employee.EmployeeName)}</td><td>${esc(employee.Grade)}</td>
-        <td><input name="BaseValues" type="number" step="0.01" /></td><td><input name="VariableValues" type="number" step="0.01" /></td>
-    </tr>`).join('') || '<tr><td colspan="6" class="empty-message">No active employees found in ERPNext.</td></tr>';
+    const value = id => document.getElementById(id).value;
+    const same = (left, right) => !right || String(left || '') === right;
+    function renderEmployees() {
+        const company = value('company'), effectiveFrom = value('fromDate');
+        if (!value('salaryStructure') || !company || !effectiveFrom) {
+            rows.innerHTML = '<tr><td colspan="6" class="empty-message">Choose Salary Structure, Company, and Effective From to load eligible employees.</td></tr>';
+            return;
+        }
+        const eligible = employees.filter(employee => {
+            const joining = employee.DateOfJoining ? new Date(employee.DateOfJoining) : null;
+            const relieving = employee.RelievingDate ? new Date(employee.RelievingDate) : null;
+            const effective = new Date(effectiveFrom + 'T00:00:00');
+            return String(employee.Status || '').toLowerCase() === 'active' && same(employee.Company, company)
+                && (!joining || joining <= effective) && (!relieving || relieving >= effective)
+                && same(employee.Branch, value('branch')) && same(employee.Grade, value('employeeGrade'))
+                && same(employee.Department, value('department')) && same(employee.Designation, value('designation'))
+                && same(employee.EmployeeType, value('employmentType'));
+        });
+        rows.innerHTML = eligible.map(employee => `<tr>
+            <td><input class="employee-check" type="checkbox" name="EmployeeIds" value="${esc(employee.Id)}" /></td>
+            <td>${esc(employee.Id)}</td><td>${esc(employee.EmployeeName)}</td><td>${esc(employee.Grade || '-')}</td>
+            <td><input name="BaseByEmployee[${esc(employee.Id)}]" type="number" step="0.01" /></td><td><input name="VariableByEmployee[${esc(employee.Id)}]" type="number" step="0.01" /></td>
+        </tr>`).join('') || '<tr><td colspan="6" class="empty-message">No eligible active employees match the selected details.</td></tr>';
+        document.getElementById('selectAllEmployees').checked = false;
+    }
+    ['salaryStructure','company','fromDate','branch','employeeGrade','department','employmentType','designation'].forEach(id => document.getElementById(id).addEventListener('change', renderEmployees));
+    document.getElementById('selectAllEmployees').addEventListener('change', function () { document.querySelectorAll('.employee-check').forEach(box => box.checked = this.checked); });
+    renderEmployees();
 </script>
 
 <script>

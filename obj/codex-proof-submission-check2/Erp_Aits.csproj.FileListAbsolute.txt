@@ -1,0 +1,9 @@
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.csproj.AssemblyReference.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.AssemblyInfoInputs.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.AssemblyInfo.cs
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.csproj.CoreCompileInputs.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.RazorAssemblyInfo.cache
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.RazorAssemblyInfo.cs
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\codex-proof-submission-check2\Erp_Aits.sourcelink.json

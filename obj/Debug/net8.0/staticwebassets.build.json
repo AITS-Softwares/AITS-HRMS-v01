@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "hAKMp3b0ZTOdi3H+KENeW5+qkJ36YJu+jlY7aIbAUYU=",
+  "Hash": "uN0oYOR4lDrRScGA0fQihhGDpaO6DxHwFp88pn6bOGw=",
   "Source": "Erp_Aits",
   "BasePath": "_content/Erp_Aits",
   "Mode": "Default",
@@ -110,6 +110,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\js\\site.js"
+    },
+    {
+      "Identity": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\js\\tax-exemption-category-amount.js",
+      "SourceId": "Erp_Aits",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\",
+      "BasePath": "_content/Erp_Aits",
+      "RelativePath": "js/tax-exemption-category-amount.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\tax-exemption-category-amount.js"
     },
     {
       "Identity": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",

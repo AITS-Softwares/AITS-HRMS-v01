@@ -1,4 +1,59 @@
 @using Newtonsoft.Json.Linq
-@{ViewBag.Title="Employee Incentive Details";var doc=ViewBag.Document as JObject;string Value(string key)=>doc?[key]?.ToString()??"";}
-<style>.payroll-form{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.head h1{font-size:22px;margin:0}.head a{color:#fff;text-decoration:none}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.section{padding:20px;border-bottom:1px solid #dbe3ec}.section h2{font-size:17px;margin:0 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.value{min-height:36px;box-sizing:border-box;border:1px solid #b8c7d7;border-radius:8px;padding:8px 10px;background:#fbfdff;color:#172033}@@media(max-width:800px){.payroll-form{padding:12px}.grid{grid-template-columns:1fr}}</style>
-<div class="payroll-form"><header class="head"><h1>@(Value("name")==""?"Employee Incentive":Value("name"))</h1><a asp-action="EmployeeIncentive">Back to Employee Incentive</a></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}@if(doc!=null){<main class="card"><section class="section"><h2>Employee</h2><div class="grid"><div class="field"><label>Employee</label><div class="value">@Value("employee")</div></div><div class="field"><label>Employee Name</label><div class="value">@Value("employee_name")</div></div><div class="field"><label>Company</label><div class="value">@Value("company")</div></div><div class="field"><label>Department</label><div class="value">@Value("department")</div></div><div class="field"><label>Amended From</label><div class="value">@Value("amended_from")</div></div></div></section><section class="section"><h2>Incentive</h2><div class="grid"><div class="field"><label>Salary Component</label><div class="value">@Value("salary_component")</div></div><div class="field"><label>Currency</label><div class="value">@Value("currency")</div></div><div class="field"><label>Payroll Date</label><div class="value">@Value("payroll_date")</div></div><div class="field"><label>Incentive Amount</label><div class="value">@Value("incentive_amount")</div></div></div></section></main>}</div>
+@using Erp_Aits.Models
+@{
+    ViewBag.Title = "Employee Incentive Details";
+    var doc = ViewBag.Document as JObject;
+    string V(string key) => doc?[key]?.ToString() ?? "";
+    var id = V("name");
+    var status = doc?["docstatus"]?.Value<int>() ?? -1;
+    var draft = status == 0;
+    var ready = ViewBag.ReadyToSubmit as bool? ?? false;
+    var employees = ViewBag.IncentiveEmployees as List<PayrollEmployeeOption> ?? new();
+    var companies = ViewBag.IncentiveCompanies as List<string> ?? new();
+    var components = ViewBag.IncentiveComponents as List<string> ?? new();
+    var currencies = ViewBag.IncentiveCurrencies as List<string> ?? new();
+    var saveAction = Url.Action("UpdateEmployeeIncentive", "HR", new { id });
+    var submitAction = Url.Action("SetEmployeeIncentiveStatus", "HR", new { id, status = 1 });
+    var cancelAction = Url.Action("SetEmployeeIncentiveStatus", "HR", new { id, status = 2 });
+    var cancelAllAction = Url.Action("CancelEmployeeIncentiveAndLinks", "HR", new { id });
+    var cancellationLinks = ViewBag.CancellationLinks as JArray;
+}
+<style>
+.payroll-form{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.head h1{font-size:22px;margin:0}.actions{display:flex;align-items:center;gap:14px}.actions a{color:#fff;text-decoration:none}.action{border:0;background:#0f766e;color:#fff;padding:9px 17px;border-radius:7px;font-weight:650}.cancel{background:#b91c1c}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.section{padding:20px;border-bottom:1px solid #dbe3ec}.section h2{font-size:17px;margin:0 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.input,.select{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff;font-size:14px}.input[readonly],fieldset:disabled .input,fieldset:disabled .select{background:#edf2f7;color:#526375}fieldset{border:0;padding:0;margin:0;min-width:0}.cancel-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px}.cancel-dialog{background:white;border-radius:8px;padding:24px;width:min(100%,620px);color:#172033}.cancel-dialog h2{font-size:20px}.cancel-dialog footer{display:flex;justify-content:flex-end;gap:10px}.cancel-dialog li{overflow-wrap:anywhere}@@media(max-width:800px){.payroll-form{padding:12px}.grid{grid-template-columns:1fr}.head{flex-wrap:wrap}.actions{flex-wrap:wrap}}
+</style>
+<div class="payroll-form">
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (doc != null) {
+<form method="post" action="@saveAction" id="incentiveForm">
+    @Html.AntiForgeryToken()
+    <header class="head"><h1>@id</h1><div class="actions"><a asp-action="EmployeeIncentive">Back to Employee Incentive</a>
+    @if (draft && ready) { <button class="action" id="submitIncentive" type="submit" formaction="@submitAction" onclick="return confirm('Submit this incentive? It will become read-only.');">Submit</button> }
+    else if (draft) { <button class="action" type="submit">Save</button> }
+    else if (status == 1) { <button class="action cancel" type="submit" formnovalidate formaction="@cancelAction" onclick="return confirm('Cancel this submitted incentive?');">Cancel</button> }
+    </div></header>
+    <fieldset disabled="@(!draft)"><main class="card"><section class="section"><h2>Employee</h2><div class="grid">
+        <div class="field"><label>Employee *</label><select class="select" name="Employee" id="employee" required><option value="">Select employee</option>@foreach(var x in employees){<option value="@x.Id" selected="@(x.Id == V("employee"))" data-name="@x.EmployeeName" data-company="@x.Company" data-department="@x.Department">@x.Id</option>}</select></div>
+        <div class="field"><label>Employee Name</label><input id="employeeName" class="input" value="@V("employee_name")" readonly /></div>
+        <div class="field"><label>Company *</label><select class="select" name="Company" id="company" required><option value="">Select company</option>@foreach(var x in companies){<option value="@x" selected="@(x == V("company"))">@x</option>}</select></div>
+        <div class="field"><label>Department</label><input name="Department" id="department" class="input" value="@V("department")" readonly /></div>
+        <div class="field"><label>Amended From</label><input class="input" value="@V("amended_from")" readonly /></div>
+        <div class="field"><label>Status</label><input class="input" value="@(status == 0 ? "Draft" : status == 1 ? "Submitted" : "Cancelled")" readonly /></div>
+    </div></section><section class="section"><h2>Incentive</h2><div class="grid">
+        <div class="field"><label>Salary Component *</label><select class="select" name="SalaryComponent" required><option value="">Select salary component</option>@foreach(var x in components){<option value="@x" selected="@(x == V("salary_component"))">@x</option>}</select></div>
+        <div class="field"><label>Currency *</label><select class="select" name="Currency" required><option value="">Select currency</option>@foreach(var x in currencies){<option value="@x" selected="@(x == V("currency"))">@x</option>}</select></div>
+        <div class="field"><label>Payroll Date *</label><input name="PayrollDate" type="date" class="input" value="@V("payroll_date")" required /></div>
+        <div class="field"><label>Incentive Amount *</label><input name="IncentiveAmount" type="number" step="0.01" class="input" value="@V("incentive_amount")" required /></div>
+    </div></section></main></fieldset>
+</form>
+@if (status == 1 && cancellationLinks != null && cancellationLinks.Count > 0) {
+<div class="cancel-overlay" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelTitle"><div class="cancel-dialog"><h2 id="cancelTitle">Cancel All Documents</h2><p>Employee Incentive <strong>@id</strong> is linked with the following submitted documents:</p><ul>@foreach (var link in cancellationLinks) { <li><strong>@link["doctype"]</strong>: @link["name"]</li> }</ul><p>Cancel the incentive and all listed documents?</p><footer><button type="button" class="action" onclick="document.getElementById('cancelDialog').remove()">Go Back</button><form method="post" action="@cancelAllAction">@Html.AntiForgeryToken()<button type="submit" class="action cancel">Cancel All</button></form></footer></div></div>
+}
+<script>
+const employee = document.getElementById('employee');
+employee.addEventListener('change', () => { const option = employee.options[employee.selectedIndex]; document.getElementById('employeeName').value = option.dataset.name || ''; document.getElementById('department').value = option.dataset.department || ''; if (option.dataset.company) document.getElementById('company').value = option.dataset.company; });
+const submitButton = document.getElementById('submitIncentive');
+if (submitButton) { const form = document.getElementById('incentiveForm'); const markDirty = () => { submitButton.textContent = 'Save'; submitButton.removeAttribute('formaction'); submitButton.removeAttribute('onclick'); }; form.addEventListener('input', markDirty); form.addEventListener('change', markDirty); }
+</script>
+}
+</div>

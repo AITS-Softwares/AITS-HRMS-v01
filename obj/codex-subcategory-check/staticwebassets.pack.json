@@ -1,0 +1,301 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\obj\\codex-subcategory-check\\scopedcss\\projectbundle\\Erp_Aits.bundle.scp.css",
+      "PackagePath": "staticwebassets\\Erp_Aits.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\js\\site.js",
+      "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\js\\tax-exemption-category-amount.js",
+      "PackagePath": "staticwebassets\\js\\tax-exemption-category-amount.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "PackagePath": "staticwebassets\\lib\\bootstrap"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\campaigns\\0115d882-ee63-479f-a0a2-ae7f3b5c2b7f_Ticket_Report_20260623_155215.pdf",
+      "PackagePath": "staticwebassets\\uploads\\campaigns\\0115d882-ee63-479f-a0a2-ae7f3b5c2b7f_Ticket_Report_20260623_155215.pdf"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\campaigns\\495bbc5e-7b0d-412c-8be1-bfccaf0e40b8_Ticket_Report_20260623_155215.pdf",
+      "PackagePath": "staticwebassets\\uploads\\campaigns\\495bbc5e-7b0d-412c-8be1-bfccaf0e40b8_Ticket_Report_20260623_155215.pdf"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\campaigns\\c223ebf2-893d-402e-a7f3-54f259576dba_Ticket_Report_20260623_154755.pdf",
+      "PackagePath": "staticwebassets\\uploads\\campaigns\\c223ebf2-893d-402e-a7f3-54f259576dba_Ticket_Report_20260623_154755.pdf"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\campaigns\\f2b42f10-64c3-4f41-8ee2-020a3178beea_Ticket_Report_20260623_155215.pdf",
+      "PackagePath": "staticwebassets\\uploads\\campaigns\\f2b42f10-64c3-4f41-8ee2-020a3178beea_Ticket_Report_20260623_155215.pdf"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\employee-referral\\3c10e0ae-8fd6-436f-9337-34c67bc63b79.sql",
+      "PackagePath": "staticwebassets\\uploads\\employee-referral\\3c10e0ae-8fd6-436f-9337-34c67bc63b79.sql"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\events\\cbd5f906-797b-455c-bb63-c65227bc35f9_aits_save.png",
+      "PackagePath": "staticwebassets\\uploads\\events\\cbd5f906-797b-455c-bb63-c65227bc35f9_aits_save.png"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\job-applicant\\794ab630-9e6d-4c42-b15c-1a563eb1a995.sql",
+      "PackagePath": "staticwebassets\\uploads\\job-applicant\\794ab630-9e6d-4c42-b15c-1a563eb1a995.sql"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\travel-request\\3954b2ed-c276-44f9-b89a-c2f9f78a50ed.sql",
+      "PackagePath": "staticwebassets\\uploads\\travel-request\\3954b2ed-c276-44f9-b89a-c2f9f78a50ed.sql"
+    },
+    {
+      "Id": "obj\\codex-subcategory-check\\staticwebassets\\msbuild.Erp_Aits.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\codex-subcategory-check\\staticwebassets\\msbuild.build.Erp_Aits.props",
+      "PackagePath": "build\\Erp_Aits.props"
+    },
+    {
+      "Id": "obj\\codex-subcategory-check\\staticwebassets\\msbuild.buildMultiTargeting.Erp_Aits.props",
+      "PackagePath": "buildMultiTargeting\\Erp_Aits.props"
+    },
+    {
+      "Id": "obj\\codex-subcategory-check\\staticwebassets\\msbuild.buildTransitive.Erp_Aits.props",
+      "PackagePath": "buildTransitive\\Erp_Aits.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

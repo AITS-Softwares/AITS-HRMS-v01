@@ -1,4 +1,39 @@
 @using Newtonsoft.Json.Linq
-@{ViewBag.Title="Account Details";var d=ViewBag.Document as JObject;string V(string key)=>d?[key]?.ToString()??"";bool B(string key)=>d?[key]?.Value<int>()==1;}
-<style>.p{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.back{color:#fff;text-decoration:none;border:1px solid #7890a8;border-radius:7px;padding:8px 13px}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.s{padding:20px}.s h2{font-size:17px;margin:0 0 16px}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.v{min-height:36px;box-sizing:border-box;width:100%;border:1px solid #b8c7d7;border-radius:8px;padding:8px 10px;background:#f2f6f9;color:#526375;font-size:14px}.check{display:flex;align-items:center;gap:8px;padding-top:25px;font-size:14px}.check input{accent-color:#0f766e}@@media(max-width:800px){.p{padding:12px}.g{grid-template-columns:1fr}}</style>
-<div class="p"><header class="h"><h1>Account Details</h1><a class="back" asp-action="Account">Back to Accounts</a></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}<main class="card"><section class="s"><h2>Account</h2><div class="g"><label class="check"><input type="checkbox" disabled checked="@B("disabled")"/> Disable</label><div class="f"><label>Account Name</label><div class="v">@V("account_name")</div></div><div class="f"><label>Account Number</label><div class="v">@V("account_number")</div></div><label class="check"><input type="checkbox" disabled checked="@B("is_group")"/> Is Group</label><div class="f"><label>Company</label><div class="v">@V("company")</div></div><div class="f"><label>Root Type</label><div class="v">@V("root_type")</div></div><div class="f"><label>Report Type</label><div class="v">@V("report_type")</div></div><div class="f"><label>Currency</label><div class="v">@V("account_currency")</div></div><div class="f"><label>Parent Account</label><div class="v">@V("parent_account")</div></div><div class="f"><label>Account Type</label><div class="v">@V("account_type")</div></div><div class="f"><label>Tax Rate</label><div class="v">@V("tax_rate")</div></div><div class="f"><label>Frozen</label><div class="v">@V("freeze_account")</div></div><div class="f"><label>Balance must be</label><div class="v">@V("balance_must_be")</div></div><div class="f"><label>Lft</label><div class="v">@V("lft")</div></div><div class="f"><label>Rgt</label><div class="v">@V("rgt")</div></div><div class="f"><label>Old Parent</label><div class="v">@V("old_parent")</div></div><label class="check"><input type="checkbox" disabled checked="@B("include_in_gross")"/> Include in gross</label></div></section></main></div>
+@{
+    ViewBag.Title = "Account Details";
+    var doc = ViewBag.Document as JObject;
+    string V(string key) => doc?[key]?.ToString() ?? "";
+    bool B(string key) => doc?[key]?.Value<int>() == 1;
+    var parents = ViewBag.AccountParents as List<string> ?? new();
+    var currencies = ViewBag.AccountCurrencies as List<string> ?? new();
+    var types = new[]{"Accumulated Depreciation","Asset Received But Not Billed","Bank","Cash","Chargeable","Capital Work in Progress","Cost of Goods Sold","Current Asset","Current Liability","Depreciation","Direct Expense","Direct Income","Equity","Expense Account","Expenses Included In Asset Valuation","Expenses Included In Valuation","Fixed Asset","Income Account","Indirect Expense","Indirect Income","Liability","Payable","Receivable","Round Off","Round Off for Opening","Stock","Stock Adjustment","Stock Received But Not Billed","Service Received But Not Billed","Tax","Temporary"};
+    var action = Url.Action("UpdateAccount", "HR", new { id = V("name") });
+}
+<style>
+.p{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.actions{display:flex;align-items:center;gap:14px}.actions a{color:#fff}.save{border:0;background:#0f766e;color:#fff;padding:9px 17px;border-radius:7px;font-weight:650}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.s{padding:20px}.s h2{font-size:17px;margin:0 0 16px}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.i,.sel{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff;font-size:14px}.i[readonly]{background:#f2f6f9;color:#526375}.check{display:flex;align-items:center;gap:8px;padding-top:24px;font-size:14px}@@media(max-width:800px){.p{padding:12px}.g{grid-template-columns:1fr}.h,.actions{flex-wrap:wrap}}
+</style>
+<div class="p">
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (doc != null) {
+<form method="post" action="@action">@Html.AntiForgeryToken()
+<header class="h"><h1>@V("name")</h1><div class="actions"><a asp-action="Account">Back to Accounts</a><button type="submit" class="save">Save</button></div></header>
+<main class="card"><section class="s"><h2>Account</h2><div class="g">
+<label class="check"><input type="checkbox" name="Disabled" checked="@B("disabled")" /> Disable</label>
+<div class="f"><label>Account Name *</label><input class="i" name="AccountName" value="@V("account_name")" required /></div>
+<div class="f"><label>Account Number</label><input class="i" name="AccountNumber" value="@V("account_number")" /></div>
+<label class="check"><input type="checkbox" name="IsGroup" checked="@B("is_group")" /> Is Group</label>
+<div class="f"><label>Company</label><input class="i" value="@V("company")" readonly /></div>
+<div class="f"><label>Root Type</label><input class="i" value="@V("root_type")" readonly /></div>
+<div class="f"><label>Report Type</label><input class="i" value="@V("report_type")" readonly /></div>
+<div class="f"><label>Currency</label><select class="sel" name="AccountCurrency"><option value="">Select currency</option>@foreach(var x in currencies){<option value="@x" selected="@(x == V("account_currency"))">@x</option>}</select></div>
+<div class="f"><label>Parent Account *</label><select class="sel" name="ParentAccount" required><option value="">Select parent account</option>@foreach(var x in parents){<option value="@x" selected="@(x == V("parent_account"))">@x</option>}</select></div>
+<div class="f"><label>Account Type</label><select class="sel" name="AccountType"><option value="">Select account type</option>@foreach(var x in types){<option value="@x" selected="@(x == V("account_type"))">@x</option>}</select></div>
+<div class="f"><label>Tax Rate</label><input class="i" name="TaxRate" type="number" step="0.01" value="@V("tax_rate")" /></div>
+<div class="f"><label>Frozen</label><select class="sel" name="FreezeAccount"><option value="">Select</option>@foreach(var x in new[]{"No","Yes"}){<option value="@x" selected="@(x == V("freeze_account"))">@x</option>}</select></div>
+<div class="f"><label>Balance must be</label><select class="sel" name="BalanceMustBe"><option value="">Select balance</option>@foreach(var x in new[]{"Debit","Credit"}){<option value="@x" selected="@(x == V("balance_must_be"))">@x</option>}</select></div>
+<div class="f"><label>Lft</label><input class="i" value="@V("lft")" readonly /></div><div class="f"><label>Rgt</label><input class="i" value="@V("rgt")" readonly /></div><div class="f"><label>Old Parent</label><input class="i" value="@V("old_parent")" readonly /></div>
+<label class="check"><input type="checkbox" name="IncludeInGross" checked="@B("include_in_gross")" /> Include in gross</label>
+</div></section></main></form>
+}
+</div>

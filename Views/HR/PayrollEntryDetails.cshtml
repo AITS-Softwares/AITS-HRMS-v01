@@ -1,0 +1,57 @@
+@using Newtonsoft.Json.Linq
+@{
+    ViewBag.Title = "Payroll Entry Details";
+    var doc = ViewBag.Document as JObject;
+    string V(string key) => doc?[key]?.ToString() ?? "";
+    var employees = doc?["employees"] as JArray ?? new JArray();
+}
+<style>
+.payroll-detail{max-width:1180px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.detail-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.detail-head h1{font-size:22px;margin:0}.detail-head a{color:#fff;text-decoration:none}.detail-card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.detail-section{padding:20px;border-bottom:1px solid #dbe3ec}.detail-section:last-child{border:0}.detail-section h2{margin:0 0 16px;font-size:17px}.detail-section small{display:block;color:#64748b;margin-top:-12px;margin-bottom:16px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.value{min-height:36px;box-sizing:border-box;padding:8px 10px;border:1px solid #b8c7d7;border-radius:8px;background:#f2f6f9;color:#1f2937;font-size:14px}.checks{display:flex;gap:24px;flex-wrap:wrap}.check{font-size:14px;color:#334155}.check strong{color:#0f766e}.table{width:100%;border-collapse:collapse;border:1px solid #94a3b8}.table th,.table td{padding:9px 10px;border:1px solid #94a3b8;text-align:left;font-size:13px}.table th{background:#f4f8fc;color:#334155}.status{padding:4px 9px;border-radius:999px;background:#e8f3f3;color:#0f766e;font-size:12px;font-weight:700}@@media(max-width:800px){.payroll-detail{padding:12px}.detail-grid{grid-template-columns:1fr}.detail-section{overflow:auto}.table{min-width:720px}}
+</style>
+<div class="payroll-detail">
+@if (doc != null)
+{
+    <header class="detail-head"><div><div style="font-size:12px;opacity:.75">Payroll / Payroll Entry</div><h1>@V("name")</h1></div><div><span class="status">@V("status")</span> &nbsp; <a asp-action="PayrollEntry">Back to Payroll Entries</a></div></header>
+    <main class="detail-card">
+        <section class="detail-section"><h2>Payroll Period</h2><div class="detail-grid">
+            <div class="field"><label>Posting Date</label><div class="value">@V("posting_date")</div></div>
+            <div class="field"><label>Company</label><div class="value">@V("company")</div></div>
+            <div class="field"><label>Currency</label><div class="value">@V("currency")</div></div>
+            <div class="field"><label>Exchange Rate</label><div class="value">@V("exchange_rate")</div></div>
+            <div class="field"><label>Payroll Payable Account</label><div class="value">@V("payroll_payable_account")</div></div>
+            <div class="field"><label>Number of Employees</label><div class="value">@V("number_of_employees")</div></div>
+        </div></section>
+        <section class="detail-section"><h2>Salary Slip Settings</h2><div class="detail-grid">
+            <div class="field"><label>Payroll Frequency</label><div class="value">@V("payroll_frequency")</div></div>
+            <div class="field"><label>Start Date</label><div class="value">@V("start_date")</div></div>
+            <div class="field"><label>End Date</label><div class="value">@V("end_date")</div></div>
+            <div class="field"><label>Cost Center</label><div class="value">@V("cost_center")</div></div>
+        </div><div class="checks" style="margin-top:18px">
+            <span class="check">Salary Slip Based on Timesheet: <strong>@(V("salary_slip_based_on_timesheet") == "1" ? "Yes" : "No")</strong></span>
+            <span class="check">Validate Attendance: <strong>@(V("validate_attendance") == "1" ? "Yes" : "No")</strong></span>
+            <span class="check">Deduct Tax for Unclaimed Benefits: <strong>@(V("deduct_tax_for_unclaimed_employee_benefits") == "1" ? "Yes" : "No")</strong></span>
+        </div></section>
+        <section class="detail-section"><h2>Employee Filters</h2><div class="detail-grid">
+            <div class="field"><label>Branch</label><div class="value">@V("branch")</div></div>
+            <div class="field"><label>Department</label><div class="value">@V("department")</div></div>
+            <div class="field"><label>Designation</label><div class="value">@V("designation")</div></div>
+            <div class="field"><label>Grade</label><div class="value">@V("grade")</div></div>
+        </div></section>
+        <section class="detail-section"><h2>Accounting and Payment</h2><div class="detail-grid">
+            <div class="field"><label>Project</label><div class="value">@V("project")</div></div>
+            <div class="field"><label>Payment Account</label><div class="value">@V("payment_account")</div></div>
+            <div class="field"><label>Bank Account</label><div class="value">@V("bank_account")</div></div>
+        </div></section>
+        <section class="detail-section"><h2>Employees</h2><small>Employees loaded by ERPNext for this Payroll Entry.</small>
+            <table class="table"><thead><tr><th>Employee</th><th>Employee Name</th><th>Department</th><th>Designation</th><th>Salary Withheld</th></tr></thead><tbody>
+            @if (employees.Any()) { foreach (var employee in employees) { <tr><td>@employee["employee"]</td><td>@employee["employee_name"]</td><td>@employee["department"]</td><td>@employee["designation"]</td><td>@(employee["salary_withheld"]?.ToString() == "1" ? "Yes" : "No")</td></tr> } }
+            else { <tr><td colspan="5">No employee rows have been generated by ERPNext yet.</td></tr> }
+            </tbody></table>
+        </section>
+    </main>
+}
+else
+{
+    <div class="alert alert-danger">Payroll Entry details are unavailable.</div>
+}
+</div>

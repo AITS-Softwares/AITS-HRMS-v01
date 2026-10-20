@@ -17,6 +17,10 @@
       "PackagePath": "staticwebassets\\js\\site.js"
     },
     {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\js\\tax-exemption-category-amount.js",
+      "PackagePath": "staticwebassets\\js\\tax-exemption-category-amount.js"
+    },
+    {
       "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\lib\\bootstrap\\LICENSE",
       "PackagePath": "staticwebassets\\lib\\bootstrap"
     },

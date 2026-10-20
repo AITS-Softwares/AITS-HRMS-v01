@@ -1,4 +1,51 @@
 @using Erp_Aits.Models
-@{ViewBag.Title="New Employee Tax Exemption Declaration";var employees=ViewBag.TaxEmployees as List<PayrollEmployeeOption>??new List<PayrollEmployeeOption>();var periods=ViewBag.TaxPeriods as List<string>??new List<string>();var currencies=ViewBag.TaxCurrencies as List<string>??new List<string>();var cats=ViewBag.TaxDeclarationCategories as List<string>??new List<string>();var subs=ViewBag.TaxDeclarationSubCategories as List<string>??new List<string>();}
-<style>.p{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.save{border:0;background:#0f766e;color:#fff;padding:9px 17px;border-radius:7px;font-weight:650}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.s{padding:20px;border-bottom:1px solid #dbe3ec}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.i,.sel{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff}.i[readonly]{background:#f2f6f9}.t{width:100%;border-collapse:collapse}.t th,.t td{padding:8px;border:1px solid #dbe3ec}.t select,.t input{width:100%;height:34px;box-sizing:border-box}.add{border:0;background:#dce8f1;border-radius:6px;padding:7px 12px;margin-top:10px}</style>
-<div class="p"><form method="post" asp-action="CreateEmployeeTaxExemptionDeclaration">@Html.AntiForgeryToken()<header class="h"><h1>New Employee Tax Exemption Declaration</h1><button class="save">Save</button></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}<main class="card"><section class="s"><div class="g"><div class="f"><label>Employee *</label><select name="Employee" id="e" class="sel" required><option value="">Select employee</option>@foreach(var x in employees){<option value="@x.Id" data-name="@x.EmployeeName" data-department="@x.Department" data-company="@x.Company">@x.Id</option>}</select></div><div class="f"><label>Employee Name</label><input id="n" class="i" readonly/></div><div class="f"><label>Department</label><input id="d" class="i" readonly/></div><div class="f"><label>Company</label><input id="co" class="i" readonly/></div><div class="f"><label>Payroll Period *</label><select name="PayrollPeriod" class="sel" required><option value="">Select payroll period</option>@foreach(var x in periods){<option value="@x">@x</option>}</select></div><div class="f"><label>Currency *</label><select name="Currency" class="sel" required><option value="">Select currency</option>@foreach(var x in currencies){<option value="@x">@x</option>}</select></div><div class="f"><label>Amended From</label><input class="i" readonly/></div></div></section><section class="s"><h2>Tax Exemption Declaration</h2><table class="t"><thead><tr><th>Tax Exemption Category</th><th>Tax Exemption Sub Category</th><th>Amount</th></tr></thead><tbody id="rows"><tr><td><select name="DeclarationCategories"><option value="">Select category</option>@foreach(var x in cats){<option value="@x">@x</option>}</select></td><td><select name="DeclarationSubCategories"><option value="">Select sub category</option>@foreach(var x in subs){<option value="@x">@x</option>}</select></td><td><input name="DeclarationAmounts" type="number" step="0.01"/></td></tr></tbody></table><button class="add" type="button" id="add">Add Row</button></section><section class="s"><h2>HRA Exemption</h2><div class="g">@foreach(var x in new[]{"Monthly House Rent","Rented in Metro City","HRA as per Salary Structure","Annual HRA Exemption","Monthly HRA Exemption","Total Declared Amount","Total Exemption Amount"}){<div class="f"><label>@x</label><input class="i" readonly/></div>}</div></section></main></form></div><script>e.onchange=()=>{let o=e.options[e.selectedIndex];n.value=o.dataset.name||'';d.value=o.dataset.department||'';co.value=o.dataset.company||''};add.onclick=()=>{let r=rows.children[0].cloneNode(true);r.querySelectorAll('select').forEach(x=>x.selectedIndex=0);r.querySelector('input').value='';rows.append(r)};</script>
+@{
+    ViewBag.Title = "New Employee Tax Exemption Declaration";
+    var employees = ViewBag.TaxEmployees as List<PayrollEmployeeOption> ?? new List<PayrollEmployeeOption>();
+    var periods = ViewBag.TaxPeriods as List<string> ?? new List<string>();
+    var currencies = ViewBag.TaxCurrencies as List<string> ?? new List<string>();
+    var subs = ViewBag.TaxDeclarationSubCategories as List<string> ?? new List<string>();
+}
+<style>
+    .tax-page{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.tax-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.tax-header h1{font-size:22px;margin:0}.tax-save{border:0;background:#0f766e;color:#fff;padding:9px 17px;border-radius:7px;font-weight:650}.tax-card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.tax-section{padding:20px;border-bottom:1px solid #dbe3ec}.tax-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.tax-field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.tax-input,.tax-select{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff}.tax-input[readonly]{background:#f2f6f9}.tax-table{width:100%;border-collapse:collapse}.tax-table th,.tax-table td{padding:8px;border:1px solid #dbe3ec}.tax-table th{background:#f4f8fc;text-align:left}.tax-table select,.tax-table input{width:100%;height:34px;box-sizing:border-box;border:1px solid #b8c7d7;border-radius:5px;padding:5px}.tax-add{border:0;background:#dce8f1;border-radius:6px;padding:7px 12px;margin-top:10px}
+</style>
+<div class="tax-page">
+    <form method="post" asp-action="CreateEmployeeTaxExemptionDeclaration">
+        @Html.AntiForgeryToken()
+        <header class="tax-header"><h1>New Employee Tax Exemption Declaration</h1><button class="tax-save" type="submit">Save</button></header>
+        @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div> }
+        <main class="tax-card">
+            <section class="tax-section"><div class="tax-grid">
+                <div class="tax-field"><label>Employee *</label><select name="Employee" id="taxEmployee" class="tax-select" required><option value="">Select employee</option>@foreach (var employee in employees) { <option value="@employee.Id" data-name="@employee.EmployeeName" data-department="@employee.Department" data-company="@employee.Company">@employee.Id</option> }</select></div>
+                <div class="tax-field"><label>Employee Name</label><input id="taxEmployeeName" class="tax-input" readonly /></div>
+                <div class="tax-field"><label>Department</label><input id="taxDepartment" class="tax-input" readonly /></div>
+                <div class="tax-field"><label>Company</label><input id="taxCompany" class="tax-input" readonly /></div>
+                <div class="tax-field"><label>Payroll Period *</label><select name="PayrollPeriod" class="tax-select" required><option value="">Select payroll period</option>@foreach (var period in periods) { <option value="@period">@period</option> }</select></div>
+                <div class="tax-field"><label>Currency *</label><select name="Currency" class="tax-select" required><option value="">Select currency</option>@foreach (var currency in currencies) { <option value="@currency">@currency</option> }</select></div>
+            </div></section>
+            <section class="tax-section">
+                <h2>Tax Exemption Declaration</h2>
+                <table class="tax-table"><thead><tr><th>Exemption Sub Category</th><th>Exemption Category</th><th>Amount</th></tr></thead><tbody id="taxRows"><tr class="tax-row"><td><select name="DeclarationSubCategories" class="tax-sub-category"><option value="">Select sub category</option>@foreach (var sub in subs) { <option value="@sub">@sub</option> }</select></td><td><input name="DeclarationCategories" class="tax-category" readonly /></td><td><input name="DeclarationAmounts" class="tax-amount" type="number" min="0" step="0.01" /></td></tr></tbody></table>
+                <button class="tax-add" type="button" id="addTaxRow">Add Row</button>
+            </section>
+            <section class="tax-section"><h2>HRA Exemption</h2><div class="tax-grid"><div class="tax-field"><label for="monthlyHouseRent">Monthly House Rent</label><input id="monthlyHouseRent" name="MonthlyHouseRent" class="tax-input" type="number" min="0" step="0.01" /></div></div></section>
+        </main>
+    </form>
+</div>
+<script>
+    (() => {
+        const employee = document.getElementById('taxEmployee'), rows = document.getElementById('taxRows');
+        employee.addEventListener('change', () => { const option = employee.options[employee.selectedIndex]; document.getElementById('taxEmployeeName').value = option.dataset.name || ''; document.getElementById('taxDepartment').value = option.dataset.department || ''; document.getElementById('taxCompany').value = option.dataset.company || ''; });
+        async function populateFromSubCategory(row) {
+            const subCategory = row.querySelector('.tax-sub-category').value, category = row.querySelector('.tax-category'), amount = row.querySelector('.tax-amount');
+            category.value = ''; amount.value = '';
+            if (!subCategory) return;
+            const response = await fetch('@Url.Action("TaxExemptionSubCategoryDetails", "HR")?subCategory=' + encodeURIComponent(subCategory));
+            const data = await response.json();
+            if (!response.ok || !data.success) { alert(data.message || 'The exemption sub-category could not be loaded.'); return; }
+            category.value = data.category || ''; amount.value = data.amount || '0';
+        }
+        rows.addEventListener('change', event => { if (event.target.classList.contains('tax-sub-category')) populateFromSubCategory(event.target.closest('.tax-row')); });
+        document.getElementById('addTaxRow').addEventListener('click', () => { const row = rows.querySelector('.tax-row').cloneNode(true); row.querySelector('.tax-sub-category').selectedIndex = 0; row.querySelector('.tax-category').value = ''; row.querySelector('.tax-amount').value = ''; rows.append(row); });
+    })();
+</script>

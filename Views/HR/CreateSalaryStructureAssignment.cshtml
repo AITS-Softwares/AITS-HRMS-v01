@@ -23,16 +23,16 @@
         <main class="card">
             <section class="section">
                 <div class="grid">
-                    <div class="field"><label>Employee *</label><select name="Employee" id="employee" class="select searchable" required><option value="">Select employee</option>@foreach (var x in employees) { <option value="@x.Id" data-name="@x.EmployeeName" data-department="@x.Department" data-designation="@x.Designation" data-grade="@x.Grade" data-branch="@x.Branch" data-employee-type="@x.EmployeeType" data-company="@x.Company">@x.Id</option> }</select></div>
+                    <div class="field"><label>Employee *</label><select name="Employee" id="employee" class="select" required><option value="">Select employee</option>@foreach (var x in employees) { <option value="@x.Id" data-name="@x.EmployeeName" data-department="@x.Department" data-designation="@x.Designation" data-grade="@x.Grade" data-branch="@x.Branch" data-employee-type="@x.EmployeeType" data-company="@x.Company">@x.Id - @x.EmployeeName</option> }</select></div>
                     <div class="field"><label>Employee Name</label><input id="employeeName" class="input" readonly /></div>
                     <div class="field"><label>Branch</label><select name="Branch" id="branch" class="select searchable"><option value="">Select branch</option>@foreach (var x in branches) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>Department</label><select name="Department" id="department" class="select searchable"><option value="">Select department</option>@foreach (var x in departments) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>Designation</label><select name="Designation" id="designation" class="select searchable"><option value="">Select designation</option>@foreach (var x in designations) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>Employee Grade</label><select name="EmployeeGrade" id="employeeGrade" class="select searchable"><option value="">Select employee grade</option>@foreach (var x in grades) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>Employee Type</label><select name="EmployeeType" id="employeeType" class="select searchable"><option value="">Select employee type</option>@foreach (var x in employeeTypes) { <option value="@x">@x</option> }</select></div>
-                    <div class="field"><label>Salary Structure *</label><select name="SalaryStructure" class="select searchable" required><option value="">Select salary structure</option>@foreach (var x in structures) { <option value="@x">@x</option> }</select></div>
+                    <div class="field"><label>Salary Structure *</label><select name="SalaryStructure" id="salaryStructure" class="select" required><option value="">Select salary structure</option><option value="__create_salary_structure__">+ Create new Salary Structure</option>@foreach (var x in structures) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>From Date *</label><input name="FromDate" type="date" class="input" required /></div>
-                    <div class="field"><label>Income Tax Slab</label><select name="IncomeTaxSlab" class="select searchable"><option value="">Select Income Tax Slab</option>@foreach (var x in slabs) { <option value="@x">@x</option> }</select></div>
+                    <div class="field"><label>Income Tax Slab</label><select name="IncomeTaxSlab" id="incomeTaxSlab" class="select searchable"><option value="">Select Income Tax Slab</option>@foreach (var x in slabs) { <option value="@x">@x</option> }<option value="__create_income_tax_slab__">+ Create new Income Tax Slab</option></select></div>
                     <div class="field"><label>Company *</label><select name="Company" id="company" class="select searchable" required><option value="">Select company</option>@foreach (var x in companies) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>Payroll Payable Account</label><select name="PayrollPayableAccount" class="select searchable"><option value="">Select account</option>@foreach (var x in accounts) { <option value="@x">@x</option> }</select></div>
                     <div class="field"><label>Currency *</label><select name="Currency" class="select searchable" required><option value="">Select currency</option>@foreach (var x in currencies) { <option value="@x">@x</option> }</select></div>
@@ -75,6 +75,17 @@ document.getElementById('addCost').addEventListener('click', () => {
     document.getElementById('costRows').appendChild(tr);
 });
 
+document.getElementById('salaryStructure').addEventListener('change', function () {
+    if (this.value === '__create_salary_structure__') {
+        window.location.href = '/HR/CreateSalaryStructure?returnUrl=' + encodeURIComponent('/HR/CreateSalaryStructureAssignment');
+    }
+});
+document.getElementById('incomeTaxSlab').addEventListener('change', function () {
+    if (this.value === '__create_income_tax_slab__') {
+        window.location.href = '/HR/CreateIncomeTaxSlab?returnUrl=' + encodeURIComponent('/HR/CreateSalaryStructureAssignment');
+    }
+});
+
 document.querySelectorAll('select.searchable').forEach(select => {
     if (select.options.length <= 11) return;
     const wrap = document.createElement('div'), input = document.createElement('input'), menu = document.createElement('div');
@@ -105,4 +116,8 @@ document.querySelectorAll('select.searchable').forEach(select => {
     input.addEventListener('input', draw);
     document.addEventListener('click', e => { if (!wrap.contains(e.target)) menu.style.display = 'none'; });
 });
+
+const returnedSelection = new URLSearchParams(window.location.search);
+setSelectValue('salaryStructure', returnedSelection.get('selectedSalaryStructure'));
+setSelectValue('incomeTaxSlab', returnedSelection.get('selectedIncomeTaxSlab'));
 </script>

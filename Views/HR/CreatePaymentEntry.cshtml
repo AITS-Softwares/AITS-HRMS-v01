@@ -19,6 +19,11 @@
     </div>
 }
 
+@if (ViewBag.PaymentEntryMasterError != null)
+{
+    <div class="alert alert-warning">@ViewBag.PaymentEntryMasterError</div>
+}
+
 
 <!-- ============================================================= -->
 <!-- MASTER DATALISTS -->
@@ -36,6 +41,9 @@
 
 
 <datalist id="dynamicPartyList"></datalist>
+<datalist id="paymentContactList"></datalist>
+<datalist id="paymentLetterHeads">@foreach (var item in ViewBag.LetterHeads ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="paymentPrintHeadings">@foreach (var item in ViewBag.PrintHeadings ?? new object[0]) { <option value="@item.name"></option> }</datalist>
 
 <datalist id="dynamicAccountList"></datalist>
 
@@ -152,6 +160,8 @@
                 <select asp-for="Series"
                         class="form-select"
                         required>
+
+                    <option value="">Select series</option>
 
                     @if (ViewBag.NamingSeries != null)
                     {
@@ -391,9 +401,9 @@
                     Contact
                 </label>
 
-                <input asp-for="ContactPerson"
-                       id="ContactPerson"
-                       class="form-control" />
+                <select asp-for="ContactPerson" id="ContactPerson" class="form-select">
+                    <option value="">Select contact</option>
+                </select>
 
             </div>
 
@@ -644,6 +654,18 @@
     <!-- Only Customer / Supplier -->
     <!-- ========================================================= -->
 
+    <div class="card border rounded-3 p-4 mb-3" id="paymentReferencesSection">
+        <h6>Payment References</h6>
+        <div class="d-flex gap-2 mb-2"><button type="button" class="btn btn-outline-secondary btn-sm" id="getOutstandingInvoices">Get Outstanding Invoices</button><button type="button" class="btn btn-outline-secondary btn-sm" id="getOutstandingOrders">Get Outstanding Orders</button></div>
+        <div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Type</th><th>Name</th><th>Grand Total</th><th>Outstanding</th><th>Allocated</th><th></th></tr></thead><tbody id="paymentReferencesBody"></tbody></table></div>
+        <div><button type="button" class="btn btn-outline-secondary btn-sm" id="addPaymentReference">Add Row</button></div>
+        <div class="row g-3 mt-1">
+            <div class="col-md-6"><label class="form-label">Total Allocated Amount</label><input asp-for="TotalAllocatedAmount" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Unallocated Amount</label><input asp-for="UnallocatedAmount" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Difference Amount (Company Currency)</label><input asp-for="DifferenceAmount" class="form-control" readonly /></div>
+        </div>
+    </div>
+
     <div class="card border rounded-3 p-4 mb-3"
          id="taxSection"
          style="display:none;">
@@ -760,6 +782,8 @@
 
         </div>
 
+        <div class="row"><div class="col-md-6 ms-auto"><label class="form-label">Total Taxes and Charges</label><input asp-for="TotalTaxesAndCharges" class="form-control" readonly /></div></div>
+
     </div>
 
 
@@ -767,6 +791,7 @@
     <!-- GST -->
     <!-- ========================================================= -->
 
+    <div class="card border rounded-3 p-4 mb-3"><h6>Deductions or Loss</h6><div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Account</th><th>Cost Center</th><th>Amount</th><th></th></tr></thead><tbody id="paymentDeductionsBody"></tbody></table></div><div><button type="button" class="btn btn-outline-secondary btn-sm" id="addPaymentDeduction">Add Row</button></div></div>
     <div class="card border rounded-3 p-4 mb-3">
 
         <h6 class="mb-3">
@@ -950,6 +975,15 @@
 
     </div>
 
+    <div class="card border rounded-3 p-4 mb-3">
+        <h6>More Information</h6>
+        <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Status</label><input class="form-control" value="Draft" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Letter Head</label><input asp-for="LetterHead" list="paymentLetterHeads" class="form-control" /></div>
+            <div class="col-md-6"><label><input asp-for="CustomRemarks" /> Custom Remarks</label><textarea asp-for="Remarks" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">Print Heading</label><input asp-for="PrintHeading" list="paymentPrintHeadings" class="form-control" /></div>
+        </div>
+    </div>
 </form>
 
 
@@ -1123,6 +1157,7 @@
                     );
 
 
+                if (!response.ok) throw new Error("Could not load accounts from ERPNext.");
                 const data =
                     await response.json();
 
@@ -1147,6 +1182,7 @@
             catch(error)
             {
                 console.error(error);
+                alert(error.message || "Could not load accounts from ERPNext.");
             }
         }
 
@@ -1190,6 +1226,7 @@
                     );
 
 
+                if (!response.ok) throw new Error("Could not load parties from ERPNext.");
                 const data =
                     await response.json();
 
@@ -1224,6 +1261,7 @@
             catch(error)
             {
                 console.error(error);
+                alert(error.message || "Could not load parties from ERPNext.");
             }
 
 
@@ -1282,32 +1320,23 @@
                 document.getElementById("PartyBankAccount").value =
                     data.partyBankAccount || "";
 
-                document.getElementById("ContactPerson").value =
-                    data.contactPerson || "";
-
-                document.getElementById("ContactEmail").value =
-                    data.contactEmail || "";
-
                 if (data.paidFrom)
                     paidFrom.value = data.paidFrom;
 
                 if (data.paidTo)
                     paidTo.value = data.paidTo;
 
-                document.getElementById("PaidFromAccountCurrency").value =
-                    data.paidFromAccountCurrency || "";
-
-                document.getElementById("PaidToAccountCurrency").value =
-                    data.paidToAccountCurrency || "";
-
-                document.getElementById("PaidFromAccountBalance").value =
-                    data.paidFromAccountBalance || 0;
+                if (data.paidFrom) {
+                    document.getElementById("PaidFromAccountCurrency").value = data.paidFromAccountCurrency || "";
+                    document.getElementById("PaidFromAccountBalance").value = data.paidFromAccountBalance || 0;
+                }
 
                 const paidToBalance =
                     document.getElementById("PaidToAccountBalance");
 
-                if (paidToBalance)
+                if (paidToBalance && data.paidTo)
                 {
+                    document.getElementById("PaidToAccountCurrency").value = data.paidToAccountCurrency || "";
                     paidToBalance.value =
                         data.paidToAccountBalance || 0;
                 }
@@ -1422,7 +1451,7 @@
                         "/HR/GetPaymentEntryAccountDetails?account="
                         + encodeURIComponent(
                             account
-                        )
+                        ) + "&date=" + encodeURIComponent(document.getElementById("PostingDate").value || "")
                     );
 
 
@@ -1454,6 +1483,7 @@
                     "PaidFromAccountCurrency"
                 ).value =
                     data.currency || "";
+                document.getElementById("PaidFromAccountBalance").value = data.balance ?? "";
             }
 
 
@@ -1478,6 +1508,7 @@
                     "PaidToAccountCurrency"
                 ).value =
                     data.currency || "";
+                document.getElementById("PaidToAccountBalance").value = data.balance ?? "";
             }
 
 
@@ -1577,8 +1608,8 @@
                             Actual
                         </option>
 
-                        <option value="On Net Total">
-                            On Net Total
+                        <option value="On Paid Amount">
+                            On Paid Amount
                         </option>
 
                         <option value="On Previous Row Amount">
@@ -1590,6 +1621,9 @@
                         </option>
 
                     </select>
+                    <select name="Taxes[${index}].AddDeductTax" class="form-select form-select-sm"><option value="Add">Add</option><option value="Deduct">Deduct</option></select>
+                    <input name="Taxes[${index}].RowId" type="number" min="1" class="form-control form-control-sm" placeholder="Previous row" />
+                    <label><input name="Taxes[${index}].IncludedInPaidAmount" type="checkbox" value="true" /> Included in paid amount</label>
                 </td>
 
                 <td>
@@ -1634,7 +1668,164 @@
             body.appendChild(row);
 
             reindexTaxRows();
+            updateReferenceAmounts();
         }
+
+        async function loadPaymentContacts() {
+            const list = document.getElementById("ContactPerson");
+            list.replaceChildren(new Option("Select contact", ""));
+            document.getElementById("ContactPerson").value = "";
+            document.getElementById("ContactEmail").value = "";
+            if (!party.value || !partyType.value) return;
+            try {
+                const selectedParty = party.value, selectedType = partyType.value;
+                const url = "/HR/PaymentEntryContacts?partyType=" + encodeURIComponent(selectedType) + "&party=" + encodeURIComponent(selectedParty);
+                const data = await (await fetch(url)).json();
+                if (party.value !== selectedParty || partyType.value !== selectedType) return;
+                if (!data.success) throw new Error(data.message || "Contacts could not be loaded.");
+                data.contacts.forEach(name => list.add(new Option(name, name)));
+                if (!data.contacts.length) list.options[0].text = "No linked contacts";
+            } catch (error) { alert(error.message); }
+        }
+        document.getElementById("ContactPerson").addEventListener("change", async function () {
+            const email = document.getElementById("ContactEmail");
+            email.value = "";
+            if (!this.value) return;
+            try {
+                const data = await (await fetch("/HR/PaymentEntryContacts?contact=" + encodeURIComponent(this.value))).json();
+                if (!data.success) throw new Error(data.message || "Contact email could not be loaded.");
+                email.value = data.email || "";
+            } catch (error) { alert(error.message); }
+        });
+        party.addEventListener("change", loadPaymentContacts);
+        partyType.addEventListener("change", loadPaymentContacts);
+
+        async function loadPaymentGstDetails() {
+            const fields = ["CompanyAddress", "CompanyGstin", "CustomerAddress", "BillingAddressGstin", "PlaceOfSupply", "GstCategory"];
+            fields.forEach(id => document.getElementById(id).value = "");
+            if (!company.value) return;
+            const requestCompany = company.value, requestParty = party.value, requestType = partyType.value;
+            try {
+                const params = new URLSearchParams({ company: requestCompany, partyType: requestType, party: requestParty });
+                const result = await (await fetch("/HR/PaymentEntryGstDetails?" + params)).json();
+                if (requestCompany !== company.value || requestParty !== party.value || requestType !== partyType.value) return;
+                if (!result.success) throw new Error(result.message || "GST details could not be loaded.");
+                document.getElementById("CompanyAddress").value = result.companyAddress || "";
+                document.getElementById("CompanyGstin").value = result.companyGstin || "";
+                document.getElementById("CustomerAddress").value = result.customerAddress || "";
+                document.getElementById("BillingAddressGstin").value = result.customerGstin || "";
+                document.getElementById("PlaceOfSupply").value = result.placeOfSupply || "";
+                document.getElementById("GstCategory").value = result.gstCategory || "";
+            } catch (error) { alert(error.message); }
+        }
+        party.addEventListener("change", loadPaymentGstDetails);
+        company.addEventListener("change", loadPaymentGstDetails);
+
+        const referencesBody = document.getElementById("paymentReferencesBody");
+        const deductionsBody = document.getElementById("paymentDeductionsBody");
+        const number = element => Number(element?.value) || 0;
+        function updateReferenceAmounts() {
+            let allocated = 0;
+            referencesBody.querySelectorAll("tr").forEach((row, index) => {
+                row.querySelectorAll("input").forEach(input => input.name = input.name.replace(/References\[\d+\]/, "References[" + index + "]"));
+                allocated += number(row.querySelector(".reference-allocated"));
+            });
+            allocated = Math.abs(allocated);
+            let deductions = 0;
+            deductionsBody.querySelectorAll("tr").forEach((row, index) => {
+                row.querySelectorAll("input").forEach(input => input.name = input.name.replace(/Deductions\[\d+\]/, "Deductions[" + index + "]"));
+                deductions += number(row.querySelector(".deduction-amount"));
+            });
+            const source = number(document.getElementById("SourceExchangeRate")) || 1;
+            const target = number(document.getElementById("TargetExchangeRate")) || 1;
+            const basePaid = number(document.getElementById("PaidAmount")) * source;
+            const baseReceived = number(document.getElementById("ReceivedAmount")) * target;
+            const taxRows = [...document.querySelectorAll("#taxBody tr:not(#noTaxRow)")];
+            let fractions = [], cumulative = [], includedFraction = 0, invalid = false;
+            taxRows.forEach((row, index) => {
+                const type = row.querySelector('[name$=".Type"]').value;
+                const rate = number(row.querySelector('[name$=".TaxRate"]')) / 100;
+                const sign = row.querySelector('[name$=".AddDeductTax"]').value === "Deduct" ? -1 : 1;
+                const included = row.querySelector('[name$=".IncludedInPaidAmount"]').checked;
+                const ref = number(row.querySelector('[name$=".RowId"]')) || index;
+                if ((type === "On Previous Row Amount" || type === "On Previous Row Total") && (ref < 1 || ref > index)) invalid = true;
+                let fraction = 0;
+                if (included && type === "Actual") invalid = true;
+                if (included && type === "On Paid Amount") fraction = rate;
+                if (included && type === "On Previous Row Amount") fraction = rate * (fractions[ref - 1] || 0);
+                if (included && type === "On Previous Row Total") fraction = rate * (cumulative[ref - 1] || 0);
+                fraction *= sign; fractions.push(fraction); cumulative.push((cumulative[index - 1] ?? 1) + fraction); includedFraction += fraction;
+            });
+            let net = basePaid / (1 + includedFraction), running = net, baseTax = 0, includedTax = 0, taxes = [];
+            taxRows.forEach((row, index) => {
+                const type = row.querySelector('[name$=".Type"]').value;
+                const rate = number(row.querySelector('[name$=".TaxRate"]')) / 100;
+                const sign = row.querySelector('[name$=".AddDeductTax"]').value === "Deduct" ? -1 : 1;
+                const included = row.querySelector('[name$=".IncludedInPaidAmount"]').checked;
+                const ref = number(row.querySelector('[name$=".RowId"]')) || index;
+                const amountInput = row.querySelector('[name$=".Amount"]');
+                let amount = type === "Actual" ? number(amountInput) : type === "On Paid Amount" ? net * rate : type === "On Previous Row Amount" ? (taxes[ref - 1]?.amount || 0) * rate : (taxes[ref - 1]?.total || 0) * rate;
+                amount = Math.round((amount + Number.EPSILON) * 100) / 100;
+                if (type !== "Actual") amountInput.value = amount.toFixed(2);
+                running += sign * amount; baseTax += sign * amount; if (included) includedTax += sign * amount;
+                row.querySelector('[name$=".Total"]').value = invalid ? "" : running.toFixed(2);
+                taxes.push({ amount, total: running });
+            });
+            const rate = paymentType.value === "Pay" ? target : source;
+            const baseAllocated = allocated * rate;
+            let unallocated = 0;
+            if (party.value && paymentType.value === "Receive" && baseAllocated < basePaid + deductions) unallocated = (basePaid + deductions - baseAllocated - includedTax) / source;
+            if (party.value && paymentType.value === "Pay" && baseAllocated < baseReceived - deductions) unallocated = (baseReceived - deductions - baseAllocated - includedTax) / target;
+            const baseParty = baseAllocated + unallocated * rate;
+            let difference = paymentType.value === "Receive" ? baseParty - baseReceived : paymentType.value === "Pay" ? basePaid - baseParty : basePaid - baseReceived;
+            difference += baseTax - deductions;
+            document.getElementById("TotalAllocatedAmount").value = allocated.toFixed(2);
+            document.getElementById("UnallocatedAmount").value = invalid ? "" : unallocated.toFixed(2);
+            document.getElementById("DifferenceAmount").value = invalid ? "" : difference.toFixed(2);
+            document.getElementById("TotalTaxesAndCharges").value = invalid ? "" : (baseTax / rate).toFixed(2);
+        }
+        function addPaymentReference(data = {}) {
+            const row = document.createElement("tr");
+            row.innerHTML = '<td><input class="form-control" name="References[0].ReferenceDoctype" required></td><td><input class="form-control" name="References[0].ReferenceName" required><input type="hidden" name="References[0].PaymentTerm"><input type="hidden" name="References[0].DueDate"><input type="hidden" name="References[0].ExchangeRate"></td><td><input class="form-control" name="References[0].GrandTotal" readonly></td><td><input class="form-control" name="References[0].OutstandingAmount" readonly></td><td><input class="form-control reference-allocated" name="References[0].AllocatedAmount" type="number" step="0.01"></td><td><button type="button" class="btn btn-outline-danger remove-reference" aria-label="Remove reference">&times;</button></td>';
+            const set = (field, value) => row.querySelector('[name$=".' + field + '"]').value = value ?? "";
+            set("ReferenceDoctype", data.voucher_type); set("ReferenceName", data.voucher_no); set("GrandTotal", data.invoice_amount); set("OutstandingAmount", data.outstanding_amount); set("AllocatedAmount", data.allocated_amount ?? 0); set("PaymentTerm", data.payment_term); set("DueDate", data.due_date); set("ExchangeRate", data.exchange_rate);
+            referencesBody.appendChild(row); updateReferenceAmounts();
+        }
+        document.getElementById("addPaymentReference").addEventListener("click", () => addPaymentReference());
+        async function fetchOutstanding(kind) {
+            const params = new URLSearchParams({ company: company.value, partyType: partyType.value, party: party.value, paymentType: paymentType.value, partyAccount: paymentType.value === "Receive" ? paidFrom.value : paidTo.value, postingDate: document.getElementById("PostingDate").value, costCenter: document.getElementById("CostCenter").value, kind });
+            try {
+                const data = await (await fetch("/HR/PaymentEntryOutstanding?" + params)).json();
+                if (!data.success) throw new Error(data.message || "Unable to load outstanding documents.");
+                const existing = new Set([...referencesBody.querySelectorAll("tr")].map(row => [row.querySelector('[name$=".ReferenceDoctype"]').value, row.querySelector('[name$=".ReferenceName"]').value, row.querySelector('[name$=".PaymentTerm"]').value].join("|")));
+                data.documents.forEach(doc => { const key = [doc.voucher_type, doc.voucher_no, doc.payment_term || ""].join("|"); if (!existing.has(key)) { addPaymentReference(doc); existing.add(key); } });
+                if (!data.documents.length) alert("No outstanding " + kind + " found for these criteria.");
+            } catch (error) { alert(error.message); }
+        }
+        document.getElementById("getOutstandingInvoices").addEventListener("click", () => fetchOutstanding("invoices"));
+        document.getElementById("getOutstandingOrders").addEventListener("click", () => fetchOutstanding("orders"));
+        document.getElementById("addPaymentDeduction").addEventListener("click", () => {
+            const row = document.createElement("tr");
+            row.innerHTML = '<td><input class="form-control" list="dynamicAccountList" name="Deductions[0].Account" required></td><td><input class="form-control" list="costCenterList" name="Deductions[0].CostCenter" required></td><td><input class="form-control deduction-amount" name="Deductions[0].Amount" type="number" step="0.01"></td><td><button type="button" class="btn btn-outline-danger remove-deduction" aria-label="Remove deduction">&times;</button></td>';
+            deductionsBody.appendChild(row); updateReferenceAmounts();
+        });
+        deductionsBody.addEventListener("input", updateReferenceAmounts);
+        deductionsBody.addEventListener("click", event => { if (event.target.classList.contains("remove-deduction")) { event.target.closest("tr").remove(); updateReferenceAmounts(); } });
+        document.getElementById("taxBody").addEventListener("input", updateReferenceAmounts);
+        document.getElementById("taxBody").addEventListener("change", updateReferenceAmounts);
+        document.getElementById("SourceExchangeRate").addEventListener("input", updateReferenceAmounts);
+        document.getElementById("TargetExchangeRate").addEventListener("input", updateReferenceAmounts);
+        referencesBody.addEventListener("input", updateReferenceAmounts);
+        referencesBody.addEventListener("click", event => { if (event.target.classList.contains("remove-reference")) { event.target.closest("tr").remove(); updateReferenceAmounts(); } });
+        document.getElementById("PaidAmount").addEventListener("input", updateReferenceAmounts);
+        document.getElementById("PaidAmount").addEventListener("change", function () {
+            const fromCurrency = document.getElementById("PaidFromAccountCurrency").value;
+            const toCurrency = document.getElementById("PaidToAccountCurrency").value;
+            if (fromCurrency && fromCurrency === toCurrency) document.getElementById("ReceivedAmount").value = this.value;
+            updateReferenceAmounts();
+        });
+        document.getElementById("ReceivedAmount").addEventListener("input", updateReferenceAmounts);
+        paymentType.addEventListener("change", updateReferenceAmounts);
 
 
         function reindexTaxRows()
@@ -1771,6 +1962,7 @@
 
 
                     reindexTaxRows();
+                    updateReferenceAmounts();
                 }
             }
         );
@@ -1785,6 +1977,21 @@
             async function()
             {
                 await loadAccounts();
+                const savedReferences = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.References ?? new List<Erp_Aits.Models.PaymentEntryReference>()));
+                savedReferences.forEach(r => addPaymentReference({ voucher_type: r.ReferenceDoctype, voucher_no: r.ReferenceName, invoice_amount: r.GrandTotal, outstanding_amount: r.OutstandingAmount, allocated_amount: r.AllocatedAmount, payment_term: r.PaymentTerm, due_date: r.DueDate ? r.DueDate.substring(0, 10) : "", exchange_rate: r.ExchangeRate }));
+                const savedTaxes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Taxes ?? new List<Erp_Aits.Models.PaymentEntryTax>()));
+                savedTaxes.forEach(t => {
+                    addTaxRow(); const row = document.querySelector("#taxBody tr:last-child");
+                    const set = (name, value) => { const el = row.querySelector('[name$=".' + name + '"]'); if (el.type === "checkbox") el.checked = !!value; else el.value = value ?? ""; };
+                    set("Type", t.Type); set("AccountHead", t.AccountHead); set("TaxRate", t.TaxRate); set("Amount", t.Amount); set("AddDeductTax", t.AddDeductTax || "Add"); set("RowId", t.RowId); set("IncludedInPaidAmount", t.IncludedInPaidAmount);
+                });
+                const savedDeductions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Deductions ?? new List<Erp_Aits.Models.PaymentEntryDeduction>()));
+                savedDeductions.forEach(d => {
+                    document.getElementById("addPaymentDeduction").click(); const row = deductionsBody.lastElementChild;
+                    row.querySelector('[name$=".Account"]').value = d.Account || ""; row.querySelector('[name$=".CostCenter"]').value = d.CostCenter || ""; row.querySelector('[name$=".Amount"]').value = d.Amount;
+                });
+                if (!document.getElementById("CompanyAddress").value && !document.getElementById("CustomerAddress").value) await loadPaymentGstDetails();
+                updateReferenceAmounts();
 
                 refreshVisibility();
             }

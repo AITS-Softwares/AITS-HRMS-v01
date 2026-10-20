@@ -12,6 +12,15 @@
     var projects = ViewBag.Projects as List<string> ?? new List<string>();
     var bankAccounts = ViewBag.BankAccounts as List<string> ?? new List<string>();
     var employees = ViewBag.Employees as List<Erp_Aits.Models.PayrollEmployeeOption> ?? new List<Erp_Aits.Models.PayrollEmployeeOption>();
+    var isDetail = ViewBag.IsPayrollEntryDetail as bool? ?? false;
+    var detailId = ViewBag.DetailId as string ?? "";
+    var readyToGetEmployees = ViewBag.ReadyToGetEmployees as bool? ?? false;
+    var formAction = isDetail ? Url.Action("UpdatePayrollEntry", "HR", new { id = detailId }) : Url.Action("CreatePayrollEntry", "HR");
+    var getEmployeesAction = Url.Action("GetPayrollEntryEmployees", "HR", new { id = detailId });
+    var submitPayrollEntryAction = Url.Action("SetPayrollEntryStatus", "HR", new { id = detailId, status = 1 });
+    var cancelPayrollEntryAction = Url.Action("SetPayrollEntryStatus", "HR", new { id = detailId, status = 2 });
+    var generatedEmployees = ViewBag.GeneratedEmployees as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var isDraft = Model.DocStatus == 0;
 }
 
 <style>
@@ -26,12 +35,13 @@
     .salary-form__employee { color:#475569; }.salary-form__employee strong { color:#14253d; }.employee-grid { min-width:1100px; background:#fff; }.employee-grid th { background:#e8eff6; color:#475569; font-size:12px; font-weight:750; white-space:nowrap; }.employee-grid td { padding:7px; vertical-align:middle; }.employee-grid input[type="checkbox"] { width:16px; height:16px; }.employee-grid .employee-text,.employee-grid .employee-select,.employee-grid .employee-department,.employee-grid .employee-designation { min-width:150px; height:34px; }.employee-grid .employee-select { min-width:220px; }.employee-remove,.salary-form__add-row { border:0; border-radius:5px; font-size:13px; font-weight:650; padding:7px 10px; }.employee-remove { background:#fee2e2; color:#b91c1c; }.salary-form__add-row { background:#dbeafe; color:#1d4ed8; }.salary-form__attendance-note { margin-top:9px; padding:12px 14px; border:1px solid #a7e1d7; border-radius:5px; background:#e8f8f3; color:#0f766e; font-size:14px; }.smart-select { position:relative; width:100%; }.smart-select__input { width:100%; }.smart-select__menu { display:none; position:fixed; z-index:2000; max-height:250px; overflow:auto; background:#fff; border:1px solid #93a4b8; border-radius:5px; box-shadow:0 8px 18px rgba(15, 35, 56, .15); }.smart-select__menu button { width:100%; text-align:left; padding:8px 10px; border:0; background:#fff; color:#172033; font-size:14px; }.smart-select__menu button:hover { background:#e8f3f3; color:#0f766e; }.smart-select__menu span { display:block; padding:9px 10px; color:#64748b; font-size:13px; }
 </style>
 
-<form asp-action="CreatePayrollEntry" method="post" class="salary-form">
+<form action="@formAction" method="post" class="salary-form">
     @Html.AntiForgeryToken()
     @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
-    <header class="salary-form__head"><div><div class="salary-form__crumb">Payroll / Payroll Entry</div><h2>New Payroll Entry</h2></div><div class="salary-form__actions"><a asp-action="PayrollEntry" class="salary-form__btn">Cancel</a><button type="submit" class="salary-form__btn salary-form__btn-primary">Create Payroll Entry</button></div></header>
+    @if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+    <header class="salary-form__head"><div><div class="salary-form__crumb">Payroll / Payroll Entry</div><h2>@(isDetail ? Model.Name : "New Payroll Entry")</h2></div><div class="salary-form__actions"><a asp-action="PayrollEntry" class="salary-form__btn">Back to Payroll Entries</a>@if(isDetail && isDraft && readyToGetEmployees){<button id="getEmployeesButton" type="submit" formaction="@getEmployeesAction" class="salary-form__btn salary-form__btn-primary">Get Employees</button><button id="submitPayrollEntry" type="submit" formaction="@submitPayrollEntryAction" class="salary-form__btn salary-form__btn-primary" onclick="return confirm('Submit this Payroll Entry? It will become read-only.');">Submit</button>}else if(isDetail && isDraft){<button type="submit" class="salary-form__btn salary-form__btn-primary">Save</button>}else if(isDetail && Model.DocStatus == 1){<button type="submit" formaction="@cancelPayrollEntryAction" class="salary-form__btn salary-form__btn-primary" onclick="return confirm('Cancel this submitted Payroll Entry?');">Cancel</button>}else if(!isDetail){<button type="submit" class="salary-form__btn salary-form__btn-primary">Create Payroll Entry</button>}</div></header>
 
-    <section class="salary-form__section"><div class="salary-form__section-head"><h5>Payroll Period</h5><span>Required account and period information</span></div><div class="salary-form__content"><div class="salary-form__grid">
+    <fieldset disabled="@(!isDraft)"><section class="salary-form__section"><div class="salary-form__section-head"><h5>Payroll Period</h5><span>Required account and period information</span></div><div class="salary-form__content"><div class="salary-form__grid">
         <div><label class="required" asp-for="PostingDate">Posting Date</label><input asp-for="PostingDate" type="date" /></div>
         <div><label class="required" asp-for="Company">Company</label><select asp-for="Company"><option value="">Select company</option>@foreach(var option in companies){<option value="@option">@option</option>}</select></div>
         <div><label class="required" asp-for="Currency">Currency</label><select asp-for="Currency"><option value="">Select currency</option>@foreach(var option in currencies){<option value="@option">@option</option>}</select></div>
@@ -55,6 +65,7 @@
         <div><label asp-for="NumberOfEmployees">Number of Employees</label><input asp-for="NumberOfEmployees" class="salary-form__readonly" placeholder="Calculated by ERPNext" readonly /></div>
     </div>
     <div class="salary-form__employee mt-3"><strong>Employee Details</strong><div class="table-responsive mt-3"><table class="table table-bordered align-middle mb-2 employee-grid"><thead><tr><th><input type="checkbox" aria-label="Select all employees" /></th><th>No.</th><th>Employee</th><th>Employee Name</th><th>Department</th><th>Designation</th><th>Is Salary Withheld</th><th></th></tr></thead><tbody id="employeeRows"><tr><td><input type="checkbox" name="EmployeeSelected" /></td><td class="employee-number">1</td><td><select name="EmployeeIds" class="employee-select"><option value="">Select employee</option>@foreach (var option in employees) { <option value="@option.Id">@option.Id - @option.EmployeeName</option> }</select></td><td><input name="EmployeeNames" class="employee-text salary-form__readonly" placeholder="Employee Name" readonly /></td><td><select name="EmployeeDepartments" class="employee-department"><option value="">Select department</option>@foreach (var option in departments) { <option value="@option">@option</option> }</select></td><td><select name="EmployeeDesignations" class="employee-designation"><option value="">Select designation</option>@foreach (var option in designations) { <option value="@option">@option</option> }</select></td><td class="text-center"><input type="checkbox" name="IsSalaryWithheld" /></td><td><button type="button" class="employee-remove" title="Remove row">Remove</button></td></tr></tbody></table></div><button type="button" id="addEmployeeRow" class="salary-form__add-row">Add Row</button></div>
+    @if (isDetail && generatedEmployees.Any()) { <div class="salary-form__employee mt-3"><strong>Employees Loaded from ERPNext</strong><div class="table-responsive mt-3"><table class="table table-bordered align-middle mb-0 employee-grid"><thead><tr><th>No.</th><th>Employee</th><th>Employee Name</th><th>Department</th><th>Designation</th></tr></thead><tbody>@{ var employeeNumber = 0; }@foreach (var employee in generatedEmployees) { employeeNumber++; <tr><td>@employeeNumber</td><td>@employee["employee"]</td><td>@employee["employee_name"]</td><td>@employee["department"]</td><td>@employee["designation"]</td></tr> }</tbody></table></div></div> }
     <div class="salary-form__check mt-2"><input asp-for="ValidateAttendance" type="checkbox" id="validateAttendance" /><div><label asp-for="ValidateAttendance">Validate Attendance</label><small>Apply attendance validation while processing.</small></div></div>
     <div id="attendanceNote" class="salary-form__attendance-note" style="display:@(Model.ValidateAttendance ? "block" : "none")">Attendance has been marked for all the employees between the selected payroll dates.</div>
     </div></section>
@@ -64,7 +75,7 @@
         <div><label asp-for="Project">Project</label><select asp-for="Project"><option value="">No project</option>@foreach(var option in projects){<option value="@option">@option</option>}</select></div>
         <div><label asp-for="PaymentAccount">Payment Account</label><select asp-for="PaymentAccount"><option value="">Select payment account</option>@foreach(var option in accounts){<option value="@option">@option</option>}</select><div class="salary-form__hint">Select a payment account to create bank entries.</div></div>
         <div><label asp-for="BankAccount">Bank Account</label><select asp-for="BankAccount"><option value="">Select bank account</option>@foreach(var option in bankAccounts){<option value="@option">@option</option>}</select></div>
-    </div></div></section>
+    </div></div></section></fieldset>
 
 </form>
 
@@ -130,5 +141,21 @@
         }
 
         setupSearchableDropdowns(document);
+
+        const getEmployeesButton = document.getElementById('getEmployeesButton');
+        if (getEmployeesButton) {
+            const switchToSave = function () {
+                if (getEmployeesButton.dataset.changed === 'true') return;
+                getEmployeesButton.removeAttribute('formaction');
+                getEmployeesButton.textContent = 'Save';
+                getEmployeesButton.dataset.changed = 'true';
+                const submitButton = document.getElementById('submitPayrollEntry');
+                if (submitButton) submitButton.style.display = 'none';
+            };
+            document.querySelector('.salary-form').addEventListener('input', switchToSave);
+            document.querySelector('.salary-form').addEventListener('change', function (event) {
+                if (event.target !== getEmployeesButton) switchToSave();
+            });
+        }
     })();
 </script>

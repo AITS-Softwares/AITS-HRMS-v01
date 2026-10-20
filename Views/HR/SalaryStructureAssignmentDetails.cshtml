@@ -1,4 +1,106 @@
 @using Newtonsoft.Json.Linq
-@{ ViewBag.Title="Salary Structure Assignment Details"; var doc=ViewBag.Document as JObject; string Value(string key)=>doc?[key]?.ToString()??"";var centers=doc?["payroll_cost_centers"] as JArray??new JArray(); }
-<style>.payroll-form{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.head h1{font-size:22px;margin:0}.head a{color:#fff;text-decoration:none}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.section{padding:20px;border-bottom:1px solid #dbe3ec}.section h2{font-size:17px;margin:0 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.value{min-height:36px;box-sizing:border-box;border:1px solid #b8c7d7;border-radius:8px;padding:8px 10px;background:#fbfdff;color:#172033}.table{width:100%;border-collapse:collapse;border:1px solid #d7e0e9;border-radius:8px;overflow:hidden}.table th,.table td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}.table th{background:#f4f8fc;color:#526375}.empty{text-align:center;color:#64748b;height:54px}@@media(max-width:800px){.payroll-form{padding:12px}.grid{grid-template-columns:1fr}.section{overflow:auto}.table{min-width:600px}}</style>
-<div class="payroll-form"><header class="head"><h1>@(Value("name")==""?"Salary Structure Assignment":Value("name"))</h1><a asp-action="SalaryStructureAssignment">Back to Salary Structure Assignments</a></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}@if(doc!=null){<main class="card"><section class="section"><div class="grid"><div class="field"><label>Employee</label><div class="value">@Value("employee")</div></div><div class="field"><label>Employee Name</label><div class="value">@Value("employee_name")</div></div><div class="field"><label>Department</label><div class="value">@Value("department")</div></div><div class="field"><label>Designation</label><div class="value">@Value("designation")</div></div><div class="field"><label>Grade</label><div class="value">@Value("grade")</div></div><div class="field"><label>Salary Structure</label><div class="value">@Value("salary_structure")</div></div><div class="field"><label>From Date</label><div class="value">@Value("from_date")</div></div><div class="field"><label>Income Tax Slab</label><div class="value">@Value("income_tax_slab")</div></div><div class="field"><label>Company</label><div class="value">@Value("company")</div></div><div class="field"><label>Payroll Payable Account</label><div class="value">@Value("payroll_payable_account")</div></div><div class="field"><label>Currency</label><div class="value">@Value("currency")</div></div></div></section><section class="section"><h2>Base, Variable &amp; Leave Encashment</h2><div class="grid"><div class="field"><label>Base</label><div class="value">@Value("base")</div></div><div class="field"><label>Variable</label><div class="value">@Value("variable")</div></div><div class="field"><label>Leave Encashment Amount Per Day</label><div class="value">@Value("leave_encashment_amount_per_day")</div></div></div></section><section class="section"><h2>Opening Balances</h2><div class="grid"><div class="field"><label>Taxable Earnings Till Date</label><div class="value">@Value("taxable_earnings_till_date")</div></div><div class="field"><label>Tax Deducted Till Date</label><div class="value">@Value("tax_deducted_till_date")</div></div></div></section><section class="section"><h2>Payroll Cost Centers</h2><table class="table"><thead><tr><th>Cost Center</th><th>Percentage</th></tr></thead><tbody>@if(centers.Any()){foreach(var row in centers){<tr><td>@row["cost_center"]</td><td>@row["percentage"]</td></tr>}}else{<tr><td colspan="2" class="empty">No cost centers configured.</td></tr>}</tbody></table></section></main>}</div>
+@{
+    var doc = ViewBag.Document as JObject;
+    string V(string key) => doc?[key]?.ToString() ?? "";
+    var structures = ViewBag.AssignmentStructures as List<string> ?? new();
+    var employees = ViewBag.AssignmentEmployees as List<Erp_Aits.Models.PayrollEmployeeOption> ?? new();
+    var slabs = ViewBag.AssignmentTaxSlabs as List<string> ?? new();
+    var companies = ViewBag.AssignmentCompanies as List<string> ?? new();
+    var accounts = ViewBag.AssignmentAccounts as List<string> ?? new();
+    var currencies = ViewBag.AssignmentCurrencies as List<string> ?? new();
+    var costCenterOptions = ViewBag.AssignmentCostCenters as List<string> ?? new();
+    var costCenters = doc?["payroll_cost_centers"] as JArray ?? new();
+    var isDraft = V("docstatus") == "0";
+    var readyToSubmit = ViewBag.ReadyToSubmit as bool? ?? false;
+    var id = V("name");
+}
+<style>
+.assignment{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.head h1{margin:0;font-size:22px}.actions{display:flex;gap:14px;align-items:center}.actions a{color:#fff;text-decoration:none}.btn{border:0;border-radius:7px;padding:9px 17px;color:#fff;font-weight:650}.save{background:#0f766e}.submit{background:#2563eb}.cancel{background:#b91c1c}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5}.section{padding:20px;border-bottom:1px solid #dbe3ec}.section:last-child{border-bottom:0}.section h2{font-size:17px;margin:0 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.field label{display:block;font-size:13px;margin-bottom:7px}.input,.select{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fff}.input[readonly],fieldset:disabled .input,fieldset:disabled .select{background:#edf2f7}.table{width:100%;border-collapse:collapse;border:1px solid #94a3b8}.table th,.table td{padding:9px 10px;border:1px solid #94a3b8;text-align:left}.table th{background:#f4f8fc;color:#334155;font-size:13px}.table .input,.table .select{height:34px}.add{margin-top:10px;border:0;border-radius:6px;padding:7px 12px;background:#dce8f1;color:#172033}@@media(max-width:800px){.assignment{padding:12px}.grid{grid-template-columns:1fr}.section{overflow:auto}.table{min-width:590px}}
+</style>
+<div class="assignment">
+@if (doc != null)
+{
+    <form method="post" action="/HR/SalaryStructureAssignmentDetails/@id">
+        @Html.AntiForgeryToken()
+        <header class="head">
+            <h1>@id</h1>
+            <div class="actions">
+                <a asp-action="SalaryStructureAssignment">Back to Assignments</a>
+                @if (isDraft && !readyToSubmit)
+                {
+                    <button class="btn save" type="submit">Save</button>
+                }
+                else if (isDraft) { <button id="submitAssignment" class="btn submit" type="submit" formaction="/HR/SalaryStructureAssignmentStatus/@id/1" onclick="return confirm('Submit this assignment? It will become read-only.');">Submit</button> }
+                else if (V("docstatus") == "1")
+                {
+                    <button class="btn cancel" type="submit" formaction="/HR/SalaryStructureAssignmentStatus/@id/2" onclick="return confirm('Cancel this submitted assignment?');">Cancel</button>
+                }
+            </div>
+        </header>
+        @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div> }
+        @if (TempData["Success"] != null) { <div class="alert alert-success mt-3">@TempData["Success"]</div> }
+        <main class="card"><fieldset disabled="@(!isDraft)">
+            <section class="section"><div class="grid">
+                <div class="field"><label>Employee *</label><select name="Employee" class="select">@foreach (var employee in employees) { <option value="@employee.Id" selected="@(employee.Id == V("employee"))">@employee.Id - @employee.EmployeeName</option> }</select></div>
+                <div class="field"><label>Employee Name</label><input class="input" value="@V("employee_name")" readonly /></div>
+                <div class="field"><label>Salary Structure *</label><select name="SalaryStructure" id="salaryStructure" class="select"><option value="__create_salary_structure__">+ Create new Salary Structure</option>@foreach (var x in structures) { <option value="@x" selected="@(x == V("salary_structure"))">@x</option> }</select></div>
+                <div class="field"><label>From Date *</label><input name="FromDate" class="input" type="date" value="@V("from_date").Split('T')[0]" /></div>
+                <div class="field"><label>Income Tax Slab</label><select name="IncomeTaxSlab" id="incomeTaxSlab" class="select"><option value="">Select</option>@foreach (var x in slabs) { <option value="@x" selected="@(x == V("income_tax_slab"))">@x</option> }<option value="__create_income_tax_slab__">+ Create new Income Tax Slab</option></select></div>
+                <div class="field"><label>Company *</label><select name="Company" class="select">@foreach (var x in companies) { <option value="@x" selected="@(x == V("company"))">@x</option> }</select></div>
+                <div class="field"><label>Payroll Payable Account</label><select name="PayrollPayableAccount" class="select"><option value="">Select</option>@foreach (var x in accounts) { <option value="@x" selected="@(x == V("payroll_payable_account"))">@x</option> }</select></div>
+                <div class="field"><label>Currency *</label><select name="Currency" class="select">@foreach (var x in currencies) { <option value="@x" selected="@(x == V("currency"))">@x</option> }</select></div>
+            </div></section>
+            <section class="section"><div class="grid">
+                <div class="field"><label>Base</label><input name="Base" class="input" value="@V("base")" /></div>
+                <div class="field"><label>Variable</label><input name="Variable" class="input" value="@V("variable")" /></div>
+                <div class="field"><label>Leave Encashment Amount Per Day</label><input name="LeaveEncashmentAmountPerDay" class="input" value="@V("leave_encashment_amount_per_day")" /></div>
+                <div class="field"><label>Taxable Earnings Till Date</label><input name="TaxableEarningsTillDate" class="input" value="@V("taxable_earnings_till_date")" /></div>
+                <div class="field"><label>Tax Deducted Till Date</label><input name="TaxDeductedTillDate" class="input" value="@V("tax_deducted_till_date")" /></div>
+            </div></section>
+            <section class="section"><h2>Payroll Cost Centers</h2>
+                <table class="table"><thead><tr><th>Cost Center</th><th>Percentage</th></tr></thead><tbody id="costCenterRows">
+                @foreach (var row in costCenters) { <tr><td><select name="CostCenters" class="select"><option value="">Select cost center</option>@foreach (var x in costCenterOptions) { <option value="@x" selected="@(x == row["cost_center"]?.ToString())">@x</option> }</select></td><td><input name="CostCenterPercentages" class="input" type="number" step="0.01" value="@row["percentage"]" /></td></tr> }
+                @if (!costCenters.Any()) { <tr><td><select name="CostCenters" class="select"><option value="">Select cost center</option>@foreach (var x in costCenterOptions) { <option value="@x">@x</option> }</select></td><td><input name="CostCenterPercentages" class="input" type="number" step="0.01" value="100" /></td></tr> }
+                </tbody></table>
+                @if (isDraft) { <button class="add" type="button" id="addCostCenter">Add Row</button> }
+            </section>
+        </fieldset></main>
+    </form>
+}
+</div>
+@if (isDraft)
+{
+<script>
+document.getElementById('addCostCenter')?.addEventListener('click', () => {
+    const row = document.querySelector('#costCenterRows tr').cloneNode(true);
+    row.querySelector('select').value = '';
+    row.querySelector('input').value = '0';
+    document.getElementById('costCenterRows').appendChild(row);
+    showSaveButton();
+});
+function showSaveButton() {
+    const submit = document.getElementById('submitAssignment');
+    if (!submit) return;
+    submit.removeAttribute('formaction');
+    submit.removeAttribute('onclick');
+    submit.id = 'saveAssignment';
+    submit.textContent = 'Save';
+    submit.classList.remove('submit');
+    submit.classList.add('save');
+}
+document.querySelector('.assignment form')?.addEventListener('input', showSaveButton);
+document.querySelector('.assignment form')?.addEventListener('change', showSaveButton);
+const returnUrl = '/HR/SalaryStructureAssignmentDetails/@id';
+const selectSalaryStructure = document.getElementById('salaryStructure');
+const selectIncomeTaxSlab = document.getElementById('incomeTaxSlab');
+const query = new URLSearchParams(window.location.search);
+if (query.get('selectedSalaryStructure')) selectSalaryStructure.value = query.get('selectedSalaryStructure');
+if (query.get('selectedIncomeTaxSlab')) selectIncomeTaxSlab.value = query.get('selectedIncomeTaxSlab');
+selectSalaryStructure?.addEventListener('change', function () {
+    if (this.value === '__create_salary_structure__') window.location.href = '/HR/CreateSalaryStructure?returnUrl=' + encodeURIComponent(returnUrl);
+});
+selectIncomeTaxSlab?.addEventListener('change', function () {
+    if (this.value === '__create_income_tax_slab__') window.location.href = '/HR/CreateIncomeTaxSlab?returnUrl=' + encodeURIComponent(returnUrl);
+});
+</script>
+}

@@ -108,6 +108,14 @@
 </style>
 
 <div class="payment-detail-page">
+    @if (TempData["ErpNextError"] != null || ViewBag.PaymentEntryRefreshError != null)
+    {
+        <div class="alert alert-danger">@(TempData["ErpNextError"] ?? ViewBag.PaymentEntryRefreshError)</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-1">Payment Entry - @Model.Id</h4>
@@ -122,9 +130,20 @@
             </span>
         </div>
 
+        <div class="d-flex gap-2">
         <a href="@Url.Action("PaymentEntry", "HR")" class="btn btn-outline-secondary">
             Back
         </a>
+        @if (ViewBag.PaymentEntryRefreshError == null && !string.IsNullOrWhiteSpace(Model.ErpNextId) && Model.DocStatus != 2)
+        {
+            <form action="@Url.Action("ChangePaymentEntryStatus", "HR")" method="post" onsubmit="return confirm('Confirm this payment entry status change?');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="actionType" value="@(Model.DocStatus == 0 ? "submit" : "cancel")" />
+                <button class="btn btn-dark" type="submit">@(Model.DocStatus == 0 ? "Submit" : "Cancel")</button>
+            </form>
+        }
+        </div>
     </div>
 
     <div class="payment-section">

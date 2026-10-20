@@ -141,6 +141,10 @@ namespace Erp_Aits.Models
         public decimal? Amount { get; set; }
 
         public decimal? Total { get; set; }
+
+        public string AddDeductTax { get; set; } = "Add";
+        public int? RowId { get; set; }
+        public bool IncludedInPaidAmount { get; set; }
     }
 
     public class PaymentEntryReference
@@ -158,6 +162,10 @@ namespace Erp_Aits.Models
         public decimal OutstandingAmount { get; set; }
 
         public decimal AllocatedAmount { get; set; }
+
+        public string PaymentTerm { get; set; }
+        public DateTime? DueDate { get; set; }
+        public decimal? ExchangeRate { get; set; }
     }
 
     public class PaymentEntryDeduction

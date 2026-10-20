@@ -1,4 +1,57 @@
 @using Newtonsoft.Json.Linq
-@{ViewBag.Title="Retention Bonus Details";var doc=ViewBag.Document as JObject;string V(string k)=>doc?[k]?.ToString()??"";}
-<style>.p{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.h a{color:#fff;text-decoration:none}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.s{padding:20px;border-bottom:1px solid #dbe3ec}.s h2{font-size:17px;margin:0 0 16px}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.v{min-height:36px;box-sizing:border-box;border:1px solid #b8c7d7;border-radius:8px;padding:8px 10px;background:#fbfdff;color:#172033}@@media(max-width:800px){.p{padding:12px}.g{grid-template-columns:1fr}}</style>
-<div class="p"><header class="h"><h1>@(V("name")==""?"Retention Bonus":V("name"))</h1><a asp-action="RetentionBonus">Back to Retention Bonus</a></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}@if(doc!=null){<main class="card"><section class="s"><h2>Employee</h2><div class="g"><div class="f"><label>Employee</label><div class="v">@V("employee")</div></div><div class="f"><label>Employee Name</label><div class="v">@V("employee_name")</div></div><div class="f"><label>Department</label><div class="v">@V("department")</div></div><div class="f"><label>Company</label><div class="v">@V("company")</div></div><div class="f"><label>Date of Joining</label><div class="v">@V("date_of_joining")</div></div><div class="f"><label>Amended From</label><div class="v">@V("amended_from")</div></div></div></section><section class="s"><h2>Bonus</h2><div class="g"><div class="f"><label>Salary Component</label><div class="v">@V("salary_component")</div></div><div class="f"><label>Bonus Amount</label><div class="v">@V("bonus_amount")</div></div><div class="f"><label>Bonus Payment Date</label><div class="v">@V("bonus_payment_date")</div></div><div class="f"><label>Currency</label><div class="v">@V("currency")</div></div></div></section></main>}</div>
+@using Erp_Aits.Models
+@{
+    ViewBag.Title = "Retention Bonus Details";
+    var doc = ViewBag.Document as JObject;
+    string V(string key) => doc?[key]?.ToString() ?? "";
+    var id = V("name"); var status = doc?["docstatus"]?.Value<int>() ?? -1; var draft = status == 0;
+    var ready = ViewBag.ReadyToSubmit as bool? ?? false;
+    var employees = ViewBag.RetentionEmployees as List<PayrollEmployeeOption> ?? new();
+    var companies = ViewBag.RetentionCompanies as List<string> ?? new();
+    var departments = ViewBag.RetentionDepartments as List<string> ?? new();
+    var components = ViewBag.RetentionComponents as List<string> ?? new();
+    var currencies = ViewBag.RetentionCurrencies as List<string> ?? new();
+    var links = ViewBag.CancellationLinks as JArray;
+    var saveAction = Url.Action("UpdateRetentionBonus", "HR", new { id });
+    var submitAction = Url.Action("SetRetentionBonusStatus", "HR", new { id, status = 1 });
+    var cancelAction = Url.Action("SetRetentionBonusStatus", "HR", new { id, status = 2 });
+    var cancelAllAction = Url.Action("CancelRetentionBonusAndLinks", "HR", new { id });
+}
+<style>
+.p{max-width:1210px;margin:auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.h{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.h h1{font-size:22px;margin:0}.actions{display:flex;align-items:center;gap:14px}.actions a{color:#fff;text-decoration:none}.action{border:0;background:#0f766e;color:#fff;padding:9px 17px;border-radius:7px;font-weight:650}.cancel{background:#b91c1c}.card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.s{padding:20px;border-bottom:1px solid #dbe3ec}.s h2{font-size:17px;margin:0 0 16px}.g{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.f label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.i,.sel{box-sizing:border-box;width:100%;height:36px;border:1px solid #b8c7d7;border-radius:8px;padding:7px 10px;background:#fbfdff;font-size:14px}.i[readonly],fieldset:disabled .i,fieldset:disabled .sel{background:#edf2f7;color:#526375}fieldset{border:0;padding:0;margin:0;min-width:0}.overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px}.dialog{background:#fff;border-radius:8px;padding:24px;width:min(100%,620px);color:#172033}.dialog h2{font-size:20px}.dialog footer{display:flex;justify-content:flex-end;gap:10px}.dialog li{overflow-wrap:anywhere}@@media(max-width:800px){.p{padding:12px}.g{grid-template-columns:1fr}.h,.actions{flex-wrap:wrap}}
+</style>
+<div class="p">
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (doc != null) {
+<form method="post" action="@saveAction" id="bonusForm">@Html.AntiForgeryToken()
+<header class="h"><h1>@id</h1><div class="actions"><a asp-action="RetentionBonus">Back to Retention Bonus</a>
+@if (draft && ready) { <button class="action" id="submitBonus" type="submit" formaction="@submitAction" onclick="return confirm('Submit this bonus? It will become read-only.');">Submit</button> }
+else if (draft) { <button class="action" type="submit">Save</button> }
+else if (status == 1) { <button class="action cancel" type="submit" formnovalidate formaction="@cancelAction" onclick="return confirm('Check this bonus for cancellation?');">Cancel</button> }
+</div></header>
+<fieldset disabled="@(!draft)"><main class="card"><section class="s"><h2>Employee</h2><div class="g">
+<div class="f"><label>Employee *</label><select name="Employee" id="employee" class="sel" required><option value="">Select employee</option>@foreach(var x in employees){<option value="@x.Id" selected="@(x.Id == V("employee"))" data-name="@x.EmployeeName" data-department="@x.Department" data-company="@x.Company" data-joining="@x.DateOfJoining">@x.Id</option>}</select></div>
+<div class="f"><label>Employee Name</label><input id="employeeName" class="i" value="@V("employee_name")" readonly /></div>
+<div class="f"><label>Department</label><select name="Department" id="department" class="sel"><option value="">Select department</option>@foreach(var x in departments){<option value="@x" selected="@(x == V("department"))">@x</option>}</select></div>
+<div class="f"><label>Company *</label><select name="Company" id="company" class="sel" required><option value="">Select company</option>@foreach(var x in companies){<option value="@x" selected="@(x == V("company"))">@x</option>}</select></div>
+<div class="f"><label>Date of Joining</label><input id="joining" class="i" value="@V("date_of_joining")" readonly /></div>
+<div class="f"><label>Amended From</label><input class="i" value="@V("amended_from")" readonly /></div>
+<div class="f"><label>Status</label><input class="i" value="@(status == 0 ? "Draft" : status == 1 ? "Submitted" : "Cancelled")" readonly /></div>
+</div></section><section class="s"><h2>Bonus</h2><div class="g">
+<div class="f"><label>Salary Component *</label><select name="SalaryComponent" class="sel" required><option value="">Select salary component</option>@foreach(var x in components){<option value="@x" selected="@(x == V("salary_component"))">@x</option>}</select></div>
+<div class="f"><label>Bonus Amount *</label><input name="BonusAmount" class="i" type="number" step="0.01" value="@V("bonus_amount")" required /></div>
+<div class="f"><label>Bonus Payment Date *</label><input name="BonusPaymentDate" class="i" type="date" value="@V("bonus_payment_date")" required /></div>
+<div class="f"><label>Currency *</label><select name="Currency" class="sel" required><option value="">Select currency</option>@foreach(var x in currencies){<option value="@x" selected="@(x == V("currency"))">@x</option>}</select></div>
+</div></section></main></fieldset></form>
+@if (status == 1 && links != null && links.Count > 0) {
+<div class="overlay" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelTitle"><div class="dialog"><h2 id="cancelTitle">Cancel All Documents</h2><p>Retention Bonus <strong>@id</strong> is linked with these submitted documents:</p><ul>@foreach(var link in links){<li><strong>@link["doctype"]</strong>: @link["name"]</li>}</ul><p>Cancel the bonus and all listed documents?</p><footer><button type="button" class="action" onclick="document.getElementById('cancelDialog').remove()">Go Back</button><form method="post" action="@cancelAllAction">@Html.AntiForgeryToken()<button type="submit" class="action cancel">Cancel All</button></form></footer></div></div>
+}
+<script>
+const employee = document.getElementById('employee');
+employee.addEventListener('change', () => { const option = employee.options[employee.selectedIndex]; document.getElementById('employeeName').value = option.dataset.name || ''; document.getElementById('joining').value = option.dataset.joining || ''; document.getElementById('department').value = option.dataset.department || ''; if (option.dataset.company) document.getElementById('company').value = option.dataset.company; });
+const submitButton = document.getElementById('submitBonus');
+if (submitButton) { const form = document.getElementById('bonusForm'); const dirty = () => { submitButton.textContent = 'Save'; submitButton.removeAttribute('formaction'); submitButton.removeAttribute('onclick'); }; form.addEventListener('input', dirty); form.addEventListener('change', dirty); }
+</script>
+}
+</div>

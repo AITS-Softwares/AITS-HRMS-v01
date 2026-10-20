@@ -47,8 +47,8 @@
     <tbody>
         @foreach (var p in Model)
         {
-            <tr style="cursor:pointer" onclick="window.location='@Url.Action("PaymentEntryDetails", "HR", new { id = p.Id })'">
-                <td>@p.Id</td>
+            <tr>
+                <td>@(p.Id > 0 ? p.Id.ToString() : "-")</td>
                 <td>@p.PaymentType</td>
                 <td>@p.PartyType</td>
                 <td>@p.Party</td>
@@ -95,12 +95,6 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Payment Entry</h4>
     <div class="d-flex gap-2">
-        <form action="/HR/SyncPaymentEntriesFromErpNext" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-primary btn-sm">⚡ Sync from ERPNext</button>
-        </form>
-        <form action="/HR/SyncPaymentEntriesToServerToErpNext" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-success btn-sm">⬆ Push to ERPNext</button>
-        </form>
         <a href="@Url.Action("CreatePaymentEntry", "HR")" class="btn btn-dark btn-sm">+ Add Payment Entry</a>
     </div>
 </div>
@@ -145,16 +139,16 @@
     <tbody>
         @foreach (var p in Model)
         {
-            <tr style="cursor:pointer" onclick="window.location='@Url.Action("PaymentEntryDetails", "HR", new { id = p.Id })'">
-                <td>@p.Id</td>
+            <tr>
+                <td>@(p.Id > 0 ? p.Id.ToString() : "-")</td>
                 <td>
                     @if (!string.IsNullOrEmpty(p.ErpNextId))
                     {
-                        <span class="badge bg-success-subtle text-success">@p.ErpNextId</span>
+                        <a href="@Url.Action("OpenErpPaymentEntry", "HR", new { name = p.ErpNextId })" class="badge bg-success-subtle text-success">@p.ErpNextId</a>
                     }
                     else
                     {
-                        <span class="badge bg-secondary-subtle text-muted">Local</span>
+                        <a href="@Url.Action("PaymentEntryDetails", "HR", new { id = p.Id })" class="badge bg-secondary-subtle text-muted">Local</a>
                     }
                 </td>
                 <td>@p.PaymentType</td>
@@ -165,6 +159,21 @@
         }
     </tbody>
 </table>
+
+@if (ViewBag.PaymentEntryPage != null)
+{
+    <div class="d-flex align-items-center gap-2">
+        @if ((int)ViewBag.PaymentEntryPage > 1)
+        {
+            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("PaymentEntry", new { id = ViewBag.IdFilter, paymentType = ViewBag.PaymentTypeFilter, partyType = ViewBag.PartyTypeFilter, party = ViewBag.PartyFilter, title = ViewBag.TitleFilter, page = (int)ViewBag.PaymentEntryPage - 1 })">Previous</a>
+        }
+        <span>Page @ViewBag.PaymentEntryPage</span>
+        @if (ViewBag.PaymentEntryHasNext == true)
+        {
+            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("PaymentEntry", new { id = ViewBag.IdFilter, paymentType = ViewBag.PaymentTypeFilter, partyType = ViewBag.PartyTypeFilter, party = ViewBag.PartyFilter, title = ViewBag.TitleFilter, page = (int)ViewBag.PaymentEntryPage + 1 })">Next</a>
+        }
+    </div>
+}
 
 @if (!Model.Any())
 {

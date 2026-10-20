@@ -5,6 +5,7 @@ namespace Erp_Aits.Models
     public class SalaryRegister
     {
         public string Name { get; set; } = "";
+        public int DocStatus { get; set; }
         public DateTime PostingDate { get; set; } = DateTime.Today;
         public string Company { get; set; } = "";
         public string Currency { get; set; } = "INR";
@@ -45,6 +46,7 @@ namespace Erp_Aits.Models
         public string Company { get; set; } = "";
         public string DateOfJoining { get; set; } = "";
         public string RelievingDate { get; set; } = "";
+        public string Status { get; set; } = "";
     }
 
     public class SalarySlipListItem

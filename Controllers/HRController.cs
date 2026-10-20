@@ -362,9 +362,9 @@ namespace Erp_Aits.Controllers
                     bank_account = string.IsNullOrWhiteSpace(model.BankAccount) ? null : model.BankAccount
                 };
 
-                await _erpNextService.PostAsync("/api/resource/Payroll%20Entry", payload);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Payroll%20Entry", payload));
                 TempData["Success"] = "Payroll Entry created in ERPNext.";
-                return RedirectToAction("PayrollEntry");
+                return RedirectToAction(nameof(PayrollEntryDetails), new { id = response["data"]?["name"]?.ToString(), readyToGetEmployees = true });
             }
             catch (Exception ex)
             {
@@ -372,6 +372,99 @@ namespace Erp_Aits.Controllers
                 await LoadSalaryRegisterOptionsAsync();
                 return View("~/Views/HR/CreateSalaryRegister.cshtml", model);
             }
+        }
+
+        [HttpGet]
+        [Route("HR/PayrollEntryDetails/{id}")]
+        public async Task<ActionResult> PayrollEntryDetails(string id, bool readyToGetEmployees = false)
+        {
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Payroll%20Entry/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (doc == null) throw new InvalidOperationException("Payroll Entry was not found in ERPNext.");
+                await LoadSalaryRegisterOptionsAsync();
+                ViewBag.IsPayrollEntryDetail = true;
+                ViewBag.DetailId = id;
+                ViewBag.ReadyToGetEmployees = readyToGetEmployees;
+                ViewBag.GeneratedEmployees = doc["employees"] as JArray ?? new JArray();
+                return View("~/Views/HR/CreateSalaryRegister.cshtml", new SalaryRegister
+                {
+                    Name = doc["name"]?.ToString() ?? id, DocStatus = doc["docstatus"]?.ToObject<int?>() ?? 0,
+                    PostingDate = ParseErpDate(doc["posting_date"]?.ToString()), Company = doc["company"]?.ToString() ?? "", Currency = doc["currency"]?.ToString() ?? "",
+                    ExchangeRate = doc["exchange_rate"]?.ToObject<decimal?>() ?? 1, PayrollPayableAccount = doc["payroll_payable_account"]?.ToString() ?? "", Status = doc["status"]?.ToString() ?? "Draft",
+                    SalarySlipBasedOnTimesheet = doc["salary_slip_based_on_timesheet"]?.ToString() == "1", PayrollFrequency = doc["payroll_frequency"]?.ToString() ?? "Monthly",
+                    StartDate = ParseErpDate(doc["start_date"]?.ToString()), EndDate = ParseErpDate(doc["end_date"]?.ToString()), Branch = doc["branch"]?.ToString() ?? "",
+                    Department = doc["department"]?.ToString() ?? "", Designation = doc["designation"]?.ToString() ?? "", Grade = doc["grade"]?.ToString() ?? "", CostCenter = doc["cost_center"]?.ToString() ?? "",
+                    Project = doc["project"]?.ToString() ?? "", PaymentAccount = doc["payment_account"]?.ToString() ?? "", BankAccount = doc["bank_account"]?.ToString() ?? "", NumberOfEmployees = doc["number_of_employees"]?.ToObject<int?>()
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = "Payroll Entry details could not be loaded: " + ShortErpNextError(ex.Message);
+            }
+            return RedirectToAction(nameof(PayrollEntry));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/PayrollEntryDetails/{id}")]
+        public async Task<ActionResult> UpdatePayrollEntry(string id, SalaryRegister model)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(model.Company) || string.IsNullOrWhiteSpace(model.Currency) || string.IsNullOrWhiteSpace(model.PayrollPayableAccount) || string.IsNullOrWhiteSpace(model.CostCenter) || model.StartDate == default || model.EndDate == default || model.EndDate < model.StartDate)
+                    throw new InvalidOperationException("Complete the required company, currency, payable account, cost center, and valid payroll dates.");
+                var payload = new JObject { ["posting_date"] = model.PostingDate.ToString("yyyy-MM-dd"), ["company"] = model.Company, ["currency"] = model.Currency, ["exchange_rate"] = model.ExchangeRate, ["payroll_payable_account"] = model.PayrollPayableAccount, ["salary_slip_based_on_timesheet"] = model.SalarySlipBasedOnTimesheet ? 1 : 0, ["payroll_frequency"] = model.SalarySlipBasedOnTimesheet ? null : model.PayrollFrequency, ["start_date"] = model.StartDate.ToString("yyyy-MM-dd"), ["end_date"] = model.EndDate.ToString("yyyy-MM-dd"), ["branch"] = model.Branch, ["department"] = model.Department, ["designation"] = model.Designation, ["grade"] = model.Grade, ["validate_attendance"] = model.ValidateAttendance ? 1 : 0, ["cost_center"] = model.CostCenter, ["project"] = model.Project, ["payment_account"] = model.PaymentAccount, ["bank_account"] = model.BankAccount };
+                await _erpNextService.PutAsync("/api/resource/Payroll%20Entry/" + Uri.EscapeDataString(id), payload);
+                TempData["Success"] = "Payroll Entry saved in ERPNext. You can now get eligible employees.";
+                return RedirectToAction(nameof(PayrollEntryDetails), new { id, readyToGetEmployees = true });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Payroll Entry update failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(PayrollEntryDetails), new { id }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/PayrollEntryGetEmployees/{id}")]
+        public async Task<ActionResult> GetPayrollEntryEmployees(string id)
+        {
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Payroll%20Entry/" + Uri.EscapeDataString(id)))["data"] as JObject ?? throw new InvalidOperationException("Payroll Entry was not found in ERPNext.");
+                var start = doc["start_date"]?.ToObject<DateTime?>() ?? throw new InvalidOperationException("Set the payroll Start Date first.");
+                var end = doc["end_date"]?.ToObject<DateTime?>() ?? throw new InvalidOperationException("Set the payroll End Date first.");
+                var company = doc["company"]?.ToString() ?? throw new InvalidOperationException("Set the Company first.");
+                var assignmentResponse = await _erpNextService.GetAsync("/api/resource/Salary%20Structure%20Assignment?fields=[\"employee\",\"employee_name\",\"department\",\"designation\",\"from_date\"]&filters=" + Uri.EscapeDataString(new JArray(new JArray("company", "=", company), new JArray("from_date", "<=", end.ToString("yyyy-MM-dd"))).ToString(Formatting.None)) + "&limit_page_length=500");
+                var assignedEmployeeIds = new HashSet<string>((JObject.Parse(assignmentResponse)["data"] as JArray ?? new JArray()).Select(x => x["employee"]?.ToString() ?? ""));
+                var employees = (await GetPayrollEmployeeOptionsAsync()).Where(employee => assignedEmployeeIds.Contains(employee.Id) && string.Equals(employee.Status, "Active", StringComparison.OrdinalIgnoreCase) && string.Equals(employee.Company, company, StringComparison.Ordinal) && (string.IsNullOrWhiteSpace(employee.DateOfJoining) || DateTime.Parse(employee.DateOfJoining) <= end) && (string.IsNullOrWhiteSpace(employee.RelievingDate) || DateTime.Parse(employee.RelievingDate) >= start) && (string.IsNullOrWhiteSpace(doc["branch"]?.ToString()) || employee.Branch == doc["branch"]?.ToString()) && (string.IsNullOrWhiteSpace(doc["department"]?.ToString()) || employee.Department == doc["department"]?.ToString()) && (string.IsNullOrWhiteSpace(doc["designation"]?.ToString()) || employee.Designation == doc["designation"]?.ToString()) && (string.IsNullOrWhiteSpace(doc["grade"]?.ToString()) || employee.Grade == doc["grade"]?.ToString())).ToList();
+                var rows = new JArray(employees.Select(employee => new JObject { ["employee"] = employee.Id, ["employee_name"] = employee.EmployeeName, ["department"] = employee.Department, ["designation"] = employee.Designation }));
+                await _erpNextService.PutAsync("/api/resource/Payroll%20Entry/" + Uri.EscapeDataString(id), new JObject { ["employees"] = rows });
+                TempData["Success"] = employees.Any() ? $"Loaded {employees.Count} eligible employee(s) from ERPNext criteria." : "No eligible employees matched the saved ERPNext criteria.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Get Employees failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(PayrollEntryDetails), new { id, readyToGetEmployees = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/PayrollEntryStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetPayrollEntryStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return RedirectToAction(nameof(PayrollEntryDetails), new { id });
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Payroll%20Entry/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (document == null) throw new InvalidOperationException("Payroll Entry was not found in ERPNext.");
+                if (status == 1)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Payroll Entry", name = id });
+                TempData["Success"] = status == 1 ? "Payroll Entry submitted in ERPNext." : "Payroll Entry cancelled in ERPNext.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = "Payroll Entry status update failed: " + ShortErpNextError(ex.Message);
+            }
+            return RedirectToAction(nameof(PayrollEntryDetails), new { id });
         }
 
         private async Task LoadSalaryRegisterOptionsAsync()
@@ -394,9 +487,9 @@ namespace Erp_Aits.Controllers
             try
             {
                 var response = await _erpNextService.GetAsync(
-                    "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"department\",\"designation\",\"grade\",\"branch\",\"employee_type\",\"company\",\"date_of_joining\",\"relieving_date\"]&filters=[[\"status\",\"=\",\"Active\"]]&limit_page_length=500");
+                    "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"department\",\"designation\",\"company\",\"status\",\"date_of_joining\",\"relieving_date\"]&limit_page_length=500");
 
-                return (JObject.Parse(response)["data"] as JArray ?? new JArray())
+                var employees = (JObject.Parse(response)["data"] as JArray ?? new JArray())
                     .Select(item => new PayrollEmployeeOption
                     {
                         Id = item["name"]?.ToString() ?? "",
@@ -408,10 +501,27 @@ namespace Erp_Aits.Controllers
                         EmployeeType = item["employee_type"]?.ToString() ?? "",
                         Company = item["company"]?.ToString() ?? "",
                         DateOfJoining = item["date_of_joining"]?.ToString() ?? "",
-                        RelievingDate = item["relieving_date"]?.ToString() ?? ""
+                        RelievingDate = item["relieving_date"]?.ToString() ?? "",
+                        Status = item["status"]?.ToString() ?? ""
                     })
                     .Where(employee => !string.IsNullOrWhiteSpace(employee.Id))
                     .ToList();
+
+                try
+                {
+                    var optionalResponse = await _erpNextService.GetAsync("/api/resource/Employee?fields=[\"name\",\"grade\",\"branch\",\"employment_type\"]&limit_page_length=500");
+                    var optionalValues = (JObject.Parse(optionalResponse)["data"] as JArray ?? new JArray()).ToDictionary(item => item["name"]?.ToString() ?? "");
+                    foreach (var employee in employees)
+                        if (optionalValues.TryGetValue(employee.Id, out var value))
+                        {
+                            employee.Grade = value["grade"]?.ToString() ?? "";
+                            employee.Branch = value["branch"]?.ToString() ?? "";
+                            employee.EmployeeType = value["employment_type"]?.ToString() ?? "";
+                        }
+                }
+                catch { }
+
+                return employees;
             }
             catch
             {
@@ -748,18 +858,19 @@ namespace Erp_Aits.Controllers
         [Route("HR/CreatePayrollPeriod")]
         public async Task<ActionResult> CreatePayrollPeriod(IFormCollection form)
         {
-            if (string.IsNullOrWhiteSpace(form["Company"]) || string.IsNullOrWhiteSpace(form["StartDate"]) || string.IsNullOrWhiteSpace(form["EndDate"]))
+            if (string.IsNullOrWhiteSpace(form["Name"]) || string.IsNullOrWhiteSpace(form["Company"]) || string.IsNullOrWhiteSpace(form["StartDate"]) || string.IsNullOrWhiteSpace(form["EndDate"]))
             {
-                TempData["ErpNextError"] = "Company, Start Date, and End Date are required.";
+                TempData["ErpNextError"] = "Name, Company, Start Date, and End Date are required.";
                 ViewBag.PayrollPeriodCompanies = await GetSalaryRegisterLinkOptionsAsync("Company");
                 return View("~/Views/HR/CreatePayrollPeriod.cshtml");
             }
             try
             {
-                var payload = new JObject { ["company"] = form["Company"].ToString(), ["start_date"] = form["StartDate"].ToString(), ["end_date"] = form["EndDate"].ToString() };
-                await _erpNextService.PostAsync("/api/resource/Payroll%20Period", payload);
+                var payload = new JObject { ["name"] = form["Name"].ToString(), ["company"] = form["Company"].ToString(), ["start_date"] = form["StartDate"].ToString(), ["end_date"] = form["EndDate"].ToString() };
+                var response = await _erpNextService.PostAsync("/api/resource/Payroll%20Period", payload);
                 TempData["Success"] = "Payroll Period created in ERPNext.";
-                return RedirectToAction(nameof(PayrollPeriod));
+                var name = JObject.Parse(response)["data"]?["name"]?.ToString() ?? form["Name"].ToString();
+                return RedirectToAction(nameof(PayrollPeriodDetails), new { id = name });
             }
             catch (Exception ex)
             {
@@ -775,7 +886,48 @@ namespace Erp_Aits.Controllers
         {
             try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Payroll%20Period/" + Uri.EscapeDataString(id)))["data"] as JObject; }
             catch (Exception ex) { TempData["ErpNextError"] = "Payroll Period details could not be loaded: " + ShortErpNextError(ex.Message); }
+            ViewBag.PayrollPeriodCompanies = await GetSalaryRegisterLinkOptionsAsync("Company");
             return View("~/Views/HR/PayrollPeriodDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/PayrollPeriodDetails/{id}")]
+        public async Task<ActionResult> UpdatePayrollPeriod(string id, IFormCollection form)
+        {
+            if (string.IsNullOrWhiteSpace(form["Company"]) || string.IsNullOrWhiteSpace(form["StartDate"]) || string.IsNullOrWhiteSpace(form["EndDate"]))
+            {
+                TempData["ErpNextError"] = "Company, Start Date, and End Date are required.";
+                return RedirectToAction(nameof(PayrollPeriodDetails), new { id });
+            }
+
+            try
+            {
+                var payload = new JObject { ["company"] = form["Company"].ToString(), ["start_date"] = form["StartDate"].ToString(), ["end_date"] = form["EndDate"].ToString() };
+                await _erpNextService.PutAsync("/api/resource/Payroll%20Period/" + Uri.EscapeDataString(id), payload);
+                TempData["Success"] = "Payroll Period updated in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Payroll Period update failed: " + ShortErpNextError(ex.Message); }
+
+            return RedirectToAction(nameof(PayrollPeriodDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/DeletePayrollPeriod/{id}")]
+        public async Task<ActionResult> DeletePayrollPeriod(string id)
+        {
+            try
+            {
+                await _erpNextService.DeleteAsync("/api/resource/Payroll%20Period/" + Uri.EscapeDataString(id));
+                TempData["Success"] = "Payroll Period deleted from ERPNext.";
+                return RedirectToAction(nameof(PayrollPeriod));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = "Payroll Period delete failed: " + ShortErpNextError(ex.Message);
+                return RedirectToAction(nameof(PayrollPeriodDetails), new { id });
+            }
         }
 
 
@@ -812,9 +964,11 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/CreateIncomeTaxSlab")]
-        public async Task<ActionResult> CreateIncomeTaxSlab()
+        public async Task<ActionResult> CreateIncomeTaxSlab(string returnUrl)
         {
             ViewBag.Title = "New Income Tax Slab";
+            ViewBag.ReturnUrl = returnUrl;
+            if (Url.IsLocalUrl(returnUrl)) TempData["IncomeTaxSlabReturnUrl"] = returnUrl;
             await LoadIncomeTaxSlabOptionsAsync();
             return View("~/Views/HR/CreateIncomeTaxSlab.cshtml");
         }
@@ -839,16 +993,20 @@ namespace Erp_Aits.Controllers
                     ["currency"] = form["Currency"].ToString(),
                     ["company"] = form["Company"].ToString(),
                     ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0,
-                    ["standard_tax_exemption_amount"] = form["StandardTaxExemptionAmount"].ToString(),
+                    ["standard_tax_exemption_amount"] = IncomeTaxNumber(form["StandardTaxExemptionAmount"].ToString()),
                     ["allow_tax_exemption"] = form.ContainsKey("AllowTaxExemption") ? 1 : 0,
-                    ["tax_relief_limit"] = form["TaxReliefLimit"].ToString(),
-                    ["marginal_relief_limit"] = form["MarginalReliefLimit"].ToString(),
+                    ["tax_relief_limit"] = IncomeTaxNumber(form["TaxReliefLimit"].ToString()),
+                    ["marginal_relief_limit"] = IncomeTaxNumber(form["MarginalReliefLimit"].ToString()),
                     ["slabs"] = BuildIncomeTaxSlabRows(form["FromAmounts"], form["ToAmounts"], form["PercentDeductions"], form["Conditions"]),
                     ["other_taxes_and_charges"] = BuildIncomeTaxChargeRows(form["ChargeDescriptions"], form["ChargePercents"], form["MinTaxableIncomes"], form["MaxTaxableIncomes"])
                 };
-                await _erpNextService.PostAsync("/api/resource/Income%20Tax%20Slab", payload);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Income%20Tax%20Slab", payload));
                 TempData["Success"] = "Income Tax Slab created in ERPNext.";
-                return RedirectToAction(nameof(IncomeTaxSlab));
+                var returnUrl = TempData["IncomeTaxSlabReturnUrl"]?.ToString();
+                var createdName = response["data"]?["name"]?.ToString() ?? form["Name"].ToString();
+                if (Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl + (returnUrl.Contains('?') ? "&" : "?") + "selectedIncomeTaxSlab=" + Uri.EscapeDataString(createdName));
+                return RedirectToAction(nameof(IncomeTaxSlabDetails), new { id = createdName });
             }
             catch (Exception ex)
             {
@@ -862,9 +1020,45 @@ namespace Erp_Aits.Controllers
         [Route("HR/IncomeTaxSlabDetails/{id}")]
         public async Task<ActionResult> IncomeTaxSlabDetails(string id)
         {
-            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Income%20Tax%20Slab/" + Uri.EscapeDataString(id)))["data"] as JObject; }
+            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Income%20Tax%20Slab/" + Uri.EscapeDataString(id)))["data"] as JObject; await LoadIncomeTaxSlabOptionsAsync(); }
             catch (Exception ex) { TempData["ErpNextError"] = "Income Tax Slab details could not be loaded: " + ShortErpNextError(ex.Message); }
             return View("~/Views/HR/IncomeTaxSlabDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdateIncomeTaxSlab(string id, IFormCollection form)
+        {
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Income%20Tax%20Slab/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (doc == null || doc["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only a draft Income Tax Slab can be edited.");
+                if (string.IsNullOrWhiteSpace(form["EffectiveFrom"]) || string.IsNullOrWhiteSpace(form["Currency"])) throw new InvalidOperationException("Effective From and Currency are required.");
+                decimal Number(string field) { var text = form[field].ToString(); if (string.IsNullOrWhiteSpace(text)) return 0; if (!decimal.TryParse(text, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var value)) throw new InvalidOperationException("Enter a valid amount."); return value; }
+                var payload = new JObject { ["effective_from"] = form["EffectiveFrom"].ToString(), ["currency"] = form["Currency"].ToString(), ["company"] = form["Company"].ToString(), ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0, ["standard_tax_exemption_amount"] = Number("StandardTaxExemptionAmount"), ["allow_tax_exemption"] = form.ContainsKey("AllowTaxExemption") ? 1 : 0, ["tax_relief_limit"] = Number("TaxReliefLimit"), ["marginal_relief_limit"] = Number("MarginalReliefLimit"), ["slabs"] = BuildIncomeTaxSlabRows(form["FromAmounts"], form["ToAmounts"], form["PercentDeductions"], form["Conditions"]), ["other_taxes_and_charges"] = BuildIncomeTaxChargeRows(form["ChargeDescriptions"], form["ChargePercents"], form["MinTaxableIncomes"], form["MaxTaxableIncomes"]) };
+                await _erpNextService.PutAsync("/api/resource/Income%20Tax%20Slab/" + Uri.EscapeDataString(id), payload);
+                TempData["Success"] = "Income Tax Slab draft saved in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Income Tax Slab update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(IncomeTaxSlabDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> SetIncomeTaxSlabStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return BadRequest();
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Income%20Tax%20Slab/" + Uri.EscapeDataString(id)))["data"] as JObject ?? throw new InvalidOperationException("Income Tax Slab not found in ERPNext.");
+                var current = doc["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && current == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc });
+                else if (status == 2 && current == 1) await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Income Tax Slab", name = id });
+                else throw new InvalidOperationException("The document status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Income Tax Slab submitted in ERPNext." : "Income Tax Slab cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Income Tax Slab status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(IncomeTaxSlabDetails), new { id });
         }
 
         private async Task LoadIncomeTaxSlabOptionsAsync()
@@ -877,7 +1071,7 @@ namespace Erp_Aits.Controllers
         {
             var rows = new JArray(); var from = fromAmounts.ToList(); var to = toAmounts.ToList(); var percent = percentages.ToList(); var condition = conditions.ToList();
             for (var i = 0; i < from.Count; i++)
-                if (!string.IsNullOrWhiteSpace(from[i])) rows.Add(new JObject { ["from_amount"] = from[i], ["to_amount"] = i < to.Count ? to[i] : "", ["percent_deduction"] = i < percent.Count ? percent[i] : "0", ["condition"] = i < condition.Count ? condition[i] : "" });
+                if (!string.IsNullOrWhiteSpace(from[i])) rows.Add(new JObject { ["from_amount"] = IncomeTaxNumber(from[i]), ["to_amount"] = IncomeTaxNumber(i < to.Count ? to[i] : ""), ["percent_deduction"] = IncomeTaxNumber(i < percent.Count ? percent[i] : ""), ["condition"] = i < condition.Count ? condition[i] : "" });
             return rows;
         }
 
@@ -885,8 +1079,15 @@ namespace Erp_Aits.Controllers
         {
             var rows = new JArray(); var description = descriptions.ToList(); var percent = percents.ToList(); var min = minimums.ToList(); var max = maximums.ToList();
             for (var i = 0; i < description.Count; i++)
-                if (!string.IsNullOrWhiteSpace(description[i])) rows.Add(new JObject { ["description"] = description[i], ["percent"] = i < percent.Count ? percent[i] : "0", ["min_taxable_income"] = i < min.Count ? min[i] : "", ["max_taxable_income"] = i < max.Count ? max[i] : "" });
+                if (!string.IsNullOrWhiteSpace(description[i])) rows.Add(new JObject { ["description"] = description[i], ["percent"] = IncomeTaxNumber(i < percent.Count ? percent[i] : ""), ["min_taxable_income"] = IncomeTaxNumber(i < min.Count ? min[i] : ""), ["max_taxable_income"] = IncomeTaxNumber(i < max.Count ? max[i] : "") });
             return rows;
+        }
+
+        private static decimal IncomeTaxNumber(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return 0;
+            if (decimal.TryParse(value, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var number)) return number;
+            throw new InvalidOperationException("Enter valid numeric amounts and percentages.");
         }
 
         [HttpGet]
@@ -915,9 +1116,11 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/CreateSalaryStructure")]
-        public async Task<ActionResult> CreateSalaryStructure()
+        public async Task<ActionResult> CreateSalaryStructure(string returnUrl)
         {
             ViewBag.Title = "New Salary Structure";
+            ViewBag.ReturnUrl = returnUrl;
+            if (Url.IsLocalUrl(returnUrl)) TempData["SalaryStructureReturnUrl"] = returnUrl;
             await LoadSalaryStructureOptionsAsync();
             return View("~/Views/HR/CreateSalaryStructure.cshtml");
         }
@@ -939,8 +1142,12 @@ namespace Erp_Aits.Controllers
                     ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["max_benefits"] = form["MaxBenefitsAmount"].ToString(), ["salary_slip_based_on_timesheet"] = form.ContainsKey("SalarySlipBasedOnTimesheet") ? 1 : 0, ["payroll_frequency"] = form["PayrollFrequency"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["hour_rate"] = form["HourRate"].ToString(),
                     ["mode_of_payment"] = form["ModeOfPayment"].ToString(), ["payment_account"] = form["PaymentAccount"].ToString(), ["earnings"] = BuildSalaryComponentRows(form["EarningsComponents"], form["EarningsAmounts"]), ["deductions"] = BuildSalaryComponentRows(form["DeductionsComponents"], form["DeductionsAmounts"])
                 };
-                await _erpNextService.PostAsync("/api/resource/Salary%20Structure", payload);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Salary%20Structure", payload));
                 TempData["Success"] = "Salary Structure created in ERPNext.";
+                var returnUrl = TempData["SalaryStructureReturnUrl"]?.ToString();
+                var createdName = response["data"]?["name"]?.ToString() ?? form["Name"].ToString();
+                if (Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl + (returnUrl.Contains('?') ? "&" : "?") + "selectedSalaryStructure=" + Uri.EscapeDataString(createdName));
                 return RedirectToAction(nameof(SalaryStructure));
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure creation failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(CreateSalaryStructure)); }
@@ -1072,20 +1279,112 @@ namespace Erp_Aits.Controllers
             try
             {
                 var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["company"] = form["Company"].ToString(), ["department"] = form["Department"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["currency"] = form["Currency"].ToString(), ["payroll_date"] = form["PayrollDate"].ToString(), ["incentive_amount"] = form["IncentiveAmount"].ToString() };
-                await _erpNextService.PostAsync("/api/resource/Employee%20Incentive", payload);
+                var result = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Employee%20Incentive", payload));
                 TempData["Success"] = "Employee Incentive created in ERPNext.";
-                return RedirectToAction(nameof(EmployeeIncentive));
+                return RedirectToAction(nameof(EmployeeIncentiveDetails), new { id = result["data"]?["name"]?.ToString(), readyToSubmit = true });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Employee Incentive creation failed: " + ShortErpNextError(ex.Message); await LoadEmployeeIncentiveOptionsAsync(); return View("~/Views/HR/CreateEmployeeIncentive.cshtml"); }
         }
 
         [HttpGet]
         [Route("HR/EmployeeIncentiveDetails/{id}")]
-        public async Task<ActionResult> EmployeeIncentiveDetails(string id)
+        public async Task<ActionResult> EmployeeIncentiveDetails(string id, bool readyToSubmit = false)
         {
             try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Incentive/" + Uri.EscapeDataString(id)))["data"] as JObject; }
             catch (Exception ex) { TempData["ErpNextError"] = "Employee Incentive details could not be loaded: " + ShortErpNextError(ex.Message); }
+            ViewBag.ReadyToSubmit = readyToSubmit;
+            var cancellationPreview = TempData.Peek("IncentiveCancellationPreview") as string;
+            if (!string.IsNullOrEmpty(cancellationPreview))
+            {
+                var preview = JObject.Parse(cancellationPreview);
+                if (preview["id"]?.ToString() == id) ViewBag.CancellationLinks = preview["docs"] as JArray;
+            }
+            await LoadEmployeeIncentiveOptionsAsync();
             return View("~/Views/HR/EmployeeIncentiveDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeIncentiveDetails/{id}")]
+        public async Task<ActionResult> UpdateEmployeeIncentive(string id, IFormCollection form)
+        {
+            try
+            {
+                var url = "/api/resource/Employee%20Incentive/" + Uri.EscapeDataString(id);
+                var doc = JObject.Parse(await _erpNextService.GetAsync(url))["data"] as JObject ?? throw new InvalidOperationException("Employee Incentive not found.");
+                if (doc["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only draft incentives can be edited.");
+                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["company"] = form["Company"].ToString(), ["department"] = form["Department"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["currency"] = form["Currency"].ToString(), ["payroll_date"] = form["PayrollDate"].ToString(), ["incentive_amount"] = form["IncentiveAmount"].ToString() };
+                await _erpNextService.PutAsync(url, payload);
+                TempData["Success"] = "Employee Incentive saved in ERPNext.";
+                return RedirectToAction(nameof(EmployeeIncentiveDetails), new { id, readyToSubmit = true });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Employee Incentive update failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(EmployeeIncentiveDetails), new { id }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeIncentiveStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetEmployeeIncentiveStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return BadRequest();
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Incentive/" + Uri.EscapeDataString(id)))["data"] as JObject ?? throw new InvalidOperationException("Employee Incentive not found.");
+                var currentStatus = doc["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && currentStatus == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc });
+                else if (status == 2 && currentStatus == 1)
+                {
+                    var links = await GetIncentiveCancellationLinks(id);
+                    if (links.Count > 0)
+                    {
+                        TempData["IncentiveCancellationPreview"] = new JObject { ["id"] = id, ["docs"] = links }.ToString(Formatting.None);
+                        return RedirectToAction(nameof(EmployeeIncentiveDetails), new { id });
+                    }
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Employee Incentive", name = id });
+                }
+                else throw new InvalidOperationException("The document status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Employee Incentive submitted in ERPNext." : "Employee Incentive cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Employee Incentive status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeIncentiveDetails), new { id, readyToSubmit = status == 1 });
+        }
+
+        private async Task<JArray> GetIncentiveCancellationLinks(string id)
+        {
+            var response = JObject.Parse(await _erpNextService.PostMethodAsync("/api/method/frappe.desk.form.linked_with.get_submitted_linked_docs", new { doctype = "Employee Incentive", name = id }));
+            return response["message"]?["docs"] as JArray ?? throw new InvalidOperationException("ERPNext did not return the linked documents. Nothing was cancelled.");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeIncentiveCancelAll/{id}")]
+        public async Task<ActionResult> CancelEmployeeIncentiveAndLinks(string id)
+        {
+            var linksCancelled = false;
+            try
+            {
+                var previewJson = TempData["IncentiveCancellationPreview"] as string;
+                if (string.IsNullOrEmpty(previewJson)) throw new InvalidOperationException("Cancellation confirmation expired. Click Cancel again.");
+                var preview = JObject.Parse(previewJson);
+                if (preview["id"]?.ToString() != id) throw new InvalidOperationException("Cancellation confirmation does not match this incentive.");
+                var displayed = preview["docs"] as JArray ?? throw new InvalidOperationException("Cancellation confirmation is invalid.");
+                var current = await GetIncentiveCancellationLinks(id);
+                var displayedKeys = displayed.Select(x => (x["doctype"]?.ToString() ?? "") + "\n" + (x["name"]?.ToString() ?? "")).OrderBy(x => x).ToArray();
+                var currentKeys = current.Select(x => (x["doctype"]?.ToString() ?? "") + "\n" + (x["name"]?.ToString() ?? "")).OrderBy(x => x).ToArray();
+                if (!displayedKeys.SequenceEqual(currentKeys)) throw new InvalidOperationException("Linked documents changed. Click Cancel again to review the updated list.");
+                if (current.Count > 0)
+                {
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.desk.form.linked_with.cancel_all_linked_docs", new { docs = current.ToString(Formatting.None), ignore_doctypes_on_cancel_all = "[]" });
+                    linksCancelled = true;
+                }
+                await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Employee Incentive", name = id });
+                TempData["Success"] = "Employee Incentive and its linked submitted documents were cancelled in ERPNext.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = (linksCancelled ? "Linked documents were cancelled, but the incentive could not be cancelled. Check ERPNext before retrying: " : "Cancellation failed: ") + ShortErpNextError(ex.Message);
+            }
+            return RedirectToAction(nameof(EmployeeIncentiveDetails), new { id });
         }
 
         private async Task LoadEmployeeIncentiveOptionsAsync()
@@ -1125,15 +1424,96 @@ namespace Erp_Aits.Controllers
             try
             {
                 var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["company"] = form["Company"].ToString(), ["department"] = form["Department"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["bonus_amount"] = form["BonusAmount"].ToString(), ["bonus_payment_date"] = form["BonusPaymentDate"].ToString(), ["currency"] = form["Currency"].ToString() };
-                await _erpNextService.PostAsync("/api/resource/Retention%20Bonus", payload); TempData["Success"] = "Retention Bonus created in ERPNext."; return RedirectToAction(nameof(RetentionBonus));
+                var result = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Retention%20Bonus", payload)); TempData["Success"] = "Retention Bonus created in ERPNext."; return RedirectToAction(nameof(RetentionBonusDetails), new { id = result["data"]?["name"]?.ToString(), readyToSubmit = true });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Retention Bonus creation failed: " + ShortErpNextError(ex.Message); await LoadRetentionBonusOptionsAsync(); return View("~/Views/HR/CreateRetentionBonus.cshtml"); }
         }
 
         [HttpGet]
         [Route("HR/RetentionBonusDetails/{id}")]
-        public async Task<ActionResult> RetentionBonusDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Retention%20Bonus/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Retention Bonus details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/RetentionBonusDetails.cshtml"); }
+        public async Task<ActionResult> RetentionBonusDetails(string id, bool readyToSubmit = false)
+        {
+            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Retention%20Bonus/" + Uri.EscapeDataString(id)))["data"] as JObject; }
+            catch (Exception ex) { TempData["ErpNextError"] = "Retention Bonus details could not be loaded: " + ShortErpNextError(ex.Message); }
+            ViewBag.ReadyToSubmit = readyToSubmit;
+            var raw = TempData.Peek("RetentionCancellationPreview") as string;
+            if (!string.IsNullOrEmpty(raw)) { var preview = JObject.Parse(raw); if (preview["id"]?.ToString() == id) ViewBag.CancellationLinks = preview["docs"] as JArray; }
+            await LoadRetentionBonusOptionsAsync();
+            return View("~/Views/HR/RetentionBonusDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/RetentionBonusDetails/{id}")]
+        public async Task<ActionResult> UpdateRetentionBonus(string id, IFormCollection form)
+        {
+            try
+            {
+                var url = "/api/resource/Retention%20Bonus/" + Uri.EscapeDataString(id);
+                var doc = JObject.Parse(await _erpNextService.GetAsync(url))["data"] as JObject ?? throw new InvalidOperationException("Retention Bonus not found.");
+                if (doc["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only draft bonuses can be edited.");
+                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["company"] = form["Company"].ToString(), ["department"] = form["Department"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["bonus_amount"] = form["BonusAmount"].ToString(), ["bonus_payment_date"] = form["BonusPaymentDate"].ToString(), ["currency"] = form["Currency"].ToString() };
+                await _erpNextService.PutAsync(url, payload);
+                TempData["Success"] = "Retention Bonus saved in ERPNext.";
+                return RedirectToAction(nameof(RetentionBonusDetails), new { id, readyToSubmit = true });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Retention Bonus update failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(RetentionBonusDetails), new { id }); }
+        }
+
+        private async Task<JArray> GetRetentionCancellationLinks(string id)
+        {
+            var result = JObject.Parse(await _erpNextService.PostMethodAsync("/api/method/frappe.desk.form.linked_with.get_submitted_linked_docs", new { doctype = "Retention Bonus", name = id }));
+            return result["message"]?["docs"] as JArray ?? throw new InvalidOperationException("ERPNext did not return linked documents. Nothing was cancelled.");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/RetentionBonusStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetRetentionBonusStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return BadRequest();
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Retention%20Bonus/" + Uri.EscapeDataString(id)))["data"] as JObject ?? throw new InvalidOperationException("Retention Bonus not found.");
+                var current = doc["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && current == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc });
+                else if (status == 2 && current == 1)
+                {
+                    var links = await GetRetentionCancellationLinks(id);
+                    if (links.Count > 0) { TempData["RetentionCancellationPreview"] = new JObject { ["id"] = id, ["docs"] = links }.ToString(Formatting.None); return RedirectToAction(nameof(RetentionBonusDetails), new { id }); }
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Retention Bonus", name = id });
+                }
+                else throw new InvalidOperationException("Document status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Retention Bonus submitted in ERPNext." : "Retention Bonus cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Retention Bonus status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(RetentionBonusDetails), new { id, readyToSubmit = status == 1 });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/RetentionBonusCancelAll/{id}")]
+        public async Task<ActionResult> CancelRetentionBonusAndLinks(string id)
+        {
+            var linksCancelled = false;
+            try
+            {
+                var raw = TempData["RetentionCancellationPreview"] as string;
+                if (string.IsNullOrEmpty(raw)) throw new InvalidOperationException("Confirmation expired. Click Cancel again.");
+                var preview = JObject.Parse(raw);
+                if (preview["id"]?.ToString() != id) throw new InvalidOperationException("Confirmation does not match this bonus.");
+                var displayed = preview["docs"] as JArray ?? throw new InvalidOperationException("Confirmation is invalid.");
+                var current = await GetRetentionCancellationLinks(id);
+                var oldKeys = displayed.Select(x => (x["doctype"]?.ToString() ?? "") + "\n" + (x["name"]?.ToString() ?? "")).OrderBy(x => x).ToArray();
+                var newKeys = current.Select(x => (x["doctype"]?.ToString() ?? "") + "\n" + (x["name"]?.ToString() ?? "")).OrderBy(x => x).ToArray();
+                if (!oldKeys.SequenceEqual(newKeys)) throw new InvalidOperationException("Linked documents changed. Click Cancel to review them again.");
+                if (current.Count > 0) { await _erpNextService.PostMethodAsync("/api/method/frappe.desk.form.linked_with.cancel_all_linked_docs", new { docs = current.ToString(Formatting.None), ignore_doctypes_on_cancel_all = "[]" }); linksCancelled = true; }
+                await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Retention Bonus", name = id });
+                TempData["Success"] = "Retention Bonus and linked submitted documents cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = (linksCancelled ? "Linked documents were cancelled, but the bonus could not be cancelled. Check ERPNext before retrying: " : "Cancellation failed: ") + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(RetentionBonusDetails), new { id });
+        }
 
         private async Task LoadRetentionBonusOptionsAsync()
         { ViewBag.RetentionEmployees = await GetPayrollEmployeeOptionsAsync(); ViewBag.RetentionCompanies = await GetSalaryRegisterLinkOptionsAsync("Company"); ViewBag.RetentionDepartments = await GetSalaryRegisterLinkOptionsAsync("Department"); ViewBag.RetentionComponents = await GetSalaryRegisterLinkOptionsAsync("Salary Component"); ViewBag.RetentionCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency"); }
@@ -1151,7 +1531,13 @@ namespace Erp_Aits.Controllers
                 foreach (var item in JObject.Parse(response)["data"] as JArray ?? new JArray())
                     accounts.Add(new AccountListItem { Name = item["name"]?.ToString() ?? "", AccountName = item["account_name"]?.ToString() ?? "", AccountNumber = item["account_number"]?.ToString() ?? "", Modified = item["modified"]?.ToString() ?? "", Disabled = item["disabled"]?.Value<int>() == 1 });
             }
-            catch (Exception ex) { TempData["ErpNextError"] = "Accounts could not be loaded: " + ShortErpNextError(ex.Message); }
+            catch (Exception ex)
+            {
+                var message = ex.Message.StartsWith("Could not connect to ERPNext.", StringComparison.Ordinal) || ex.Message.StartsWith("ERPNext request timed out.", StringComparison.Ordinal)
+                    ? "Could not connect to ERPNext: " + ex.GetBaseException().Message
+                    : ShortErpNextError(ex.Message);
+                TempData["ErpNextError"] = "Accounts could not be loaded: " + message;
+            }
             ViewBag.Accounts = accounts;
             return View("~/Views/HR/Account.cshtml");
         }
@@ -1176,9 +1562,9 @@ namespace Erp_Aits.Controllers
                     ["parent_account"] = form["ParentAccount"].ToString(), ["account_type"] = form["AccountType"].ToString(), ["tax_rate"] = form["TaxRate"].ToString(), ["freeze_account"] = form["FreezeAccount"].ToString(),
                     ["balance_must_be"] = form["BalanceMustBe"].ToString(), ["include_in_gross"] = form.ContainsKey("IncludeInGross") ? 1 : 0
                 };
-                await _erpNextService.PostAsync("/api/resource/Account", payload);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Account", payload));
                 TempData["Success"] = "Account created in ERPNext.";
-                return RedirectToAction(nameof(Account));
+                return RedirectToAction(nameof(AccountDetails), new { id = response["data"]?["name"]?.ToString() });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Account creation failed: " + ShortErpNextError(ex.Message); await LoadAccountOptionsAsync(); return View("~/Views/HR/CreateAccount.cshtml"); }
         }
@@ -1189,7 +1575,25 @@ namespace Erp_Aits.Controllers
         {
             try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Account/" + Uri.EscapeDataString(id)))["data"] as JObject; }
             catch (Exception ex) { TempData["ErpNextError"] = "Account details could not be loaded: " + ShortErpNextError(ex.Message); }
+            await LoadAccountOptionsAsync();
             return View("~/Views/HR/AccountDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/AccountDetails/{id}")]
+        public async Task<ActionResult> UpdateAccount(string id, IFormCollection form)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(form["AccountName"]) || string.IsNullOrWhiteSpace(form["ParentAccount"]))
+                    throw new InvalidOperationException("Account Name and Parent Account are required.");
+                var payload = new JObject { ["account_name"] = form["AccountName"].ToString(), ["account_number"] = form["AccountNumber"].ToString(), ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0, ["is_group"] = form.ContainsKey("IsGroup") ? 1 : 0, ["parent_account"] = form["ParentAccount"].ToString(), ["account_type"] = form["AccountType"].ToString(), ["account_currency"] = form["AccountCurrency"].ToString(), ["tax_rate"] = form["TaxRate"].ToString(), ["freeze_account"] = form["FreezeAccount"].ToString(), ["balance_must_be"] = form["BalanceMustBe"].ToString(), ["include_in_gross"] = form.ContainsKey("IncludeInGross") ? 1 : 0 };
+                var result = JObject.Parse(await _erpNextService.PutAsync("/api/resource/Account/" + Uri.EscapeDataString(id), payload));
+                TempData["Success"] = "Account saved in ERPNext.";
+                return RedirectToAction(nameof(AccountDetails), new { id = result["data"]?["name"]?.ToString() ?? id });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Account update failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(AccountDetails), new { id }); }
         }
 
         private async Task LoadAccountOptionsAsync()
@@ -1231,9 +1635,9 @@ namespace Erp_Aits.Controllers
             try
             {
                 var payload = new JObject { ["cost_center_name"] = form["CostCenterName"].ToString(), ["cost_center_number"] = form["CostCenterNumber"].ToString(), ["parent_cost_center"] = form["ParentCostCenter"].ToString(), ["company"] = form["Company"].ToString(), ["is_group"] = form.ContainsKey("IsGroup") ? 1 : 0, ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0 };
-                await _erpNextService.PostAsync("/api/resource/Cost%20Center", payload);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Cost%20Center", payload));
                 TempData["Success"] = "Cost Center created in ERPNext.";
-                return RedirectToAction(nameof(CostCenter));
+                return RedirectToAction(nameof(CostCenterDetails), new { id = response["data"]?["name"]?.ToString() });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Cost Center creation failed: " + ShortErpNextError(ex.Message); await LoadCostCenterOptionsAsync(); return View("~/Views/HR/CreateCostCenter.cshtml"); }
         }
@@ -1244,7 +1648,38 @@ namespace Erp_Aits.Controllers
         {
             try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Cost%20Center/" + Uri.EscapeDataString(id)))["data"] as JObject; }
             catch (Exception ex) { TempData["ErpNextError"] = "Cost Center details could not be loaded: " + ShortErpNextError(ex.Message); }
+            await LoadCostCenterOptionsAsync();
             return View("~/Views/HR/CostCenterDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/CostCenterDetails/{id}")]
+        public async Task<ActionResult> UpdateCostCenter(string id, IFormCollection form)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(form["CostCenterName"])) throw new InvalidOperationException("Cost Center Name is required.");
+                var payload = new JObject { ["cost_center_name"] = form["CostCenterName"].ToString(), ["cost_center_number"] = form["CostCenterNumber"].ToString(), ["parent_cost_center"] = form["ParentCostCenter"].ToString(), ["is_group"] = form.ContainsKey("IsGroup") ? 1 : 0, ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0 };
+                var result = JObject.Parse(await _erpNextService.PutAsync("/api/resource/Cost%20Center/" + Uri.EscapeDataString(id), payload));
+                TempData["Success"] = "Cost Center saved in ERPNext.";
+                return RedirectToAction(nameof(CostCenterDetails), new { id = result["data"]?["name"]?.ToString() ?? id });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Cost Center update failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(CostCenterDetails), new { id }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/DeleteCostCenter/{id}")]
+        public async Task<ActionResult> DeleteCostCenter(string id)
+        {
+            try
+            {
+                await _erpNextService.DeleteAsync("/api/resource/Cost%20Center/" + Uri.EscapeDataString(id));
+                TempData["Success"] = "Cost Center deleted from ERPNext.";
+                return RedirectToAction(nameof(CostCenter));
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Cost Center could not be deleted: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(CostCenterDetails), new { id }); }
         }
 
         private async Task LoadCostCenterOptionsAsync()
@@ -1261,7 +1696,7 @@ namespace Erp_Aits.Controllers
             try
             {
                 var filters = new JArray(); if (!string.IsNullOrWhiteSpace(id)) filters.Add(new JArray("name", "like", "%" + id + "%"));
-                var response = await _erpNextService.GetAsync("/api/resource/Currency?fields=[\"name\",\"enabled\",\"fraction\",\"fraction_units\"]&filters=" + Uri.EscapeDataString(filters.ToString(Formatting.None)) + "&limit_page_length=100");
+                var response = await _erpNextService.GetAsync("/api/resource/Currency?fields=[\"name\",\"enabled\",\"fraction\",\"fraction_units\"]&filters=" + Uri.EscapeDataString(filters.ToString(Formatting.None)) + "&order_by=modified%20desc&limit_page_length=500");
                 foreach (var item in JObject.Parse(response)["data"] as JArray ?? new JArray()) currencies.Add(new CurrencyListItem { Name = item["name"]?.ToString() ?? "", Enabled = item["enabled"]?.Value<int>() == 1, Fraction = item["fraction"]?.ToString() ?? "", FractionUnits = item["fraction_units"]?.ToString() ?? "" });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Currencies could not be loaded: " + ShortErpNextError(ex.Message); }
@@ -1281,7 +1716,7 @@ namespace Erp_Aits.Controllers
             try
             {
                 var payload = new JObject { ["currency_name"] = form["CurrencyName"].ToString(), ["enabled"] = form.ContainsKey("Enabled") ? 1 : 0, ["fraction"] = form["Fraction"].ToString(), ["fraction_units"] = form["FractionUnits"].ToString(), ["smallest_currency_fraction_value"] = form["SmallestCurrencyFractionValue"].ToString(), ["symbol"] = form["Symbol"].ToString(), ["symbol_on_right"] = form.ContainsKey("SymbolOnRight") ? 1 : 0, ["number_format"] = form["NumberFormat"].ToString() };
-                await _erpNextService.PostAsync("/api/resource/Currency", payload); TempData["Success"] = "Currency created in ERPNext."; return RedirectToAction(nameof(Currency));
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Currency", payload)); TempData["Success"] = "Currency created in ERPNext."; return RedirectToAction(nameof(CurrencyDetails), new { id = response["data"]?["name"]?.ToString() ?? form["CurrencyName"].ToString() });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Currency creation failed: " + ShortErpNextError(ex.Message); return View("~/Views/HR/CreateCurrency.cshtml"); }
         }
@@ -1289,7 +1724,48 @@ namespace Erp_Aits.Controllers
         [HttpGet]
         [Route("HR/CurrencyDetails/{id}")]
         public async Task<ActionResult> CurrencyDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Currency/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Currency details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/CurrencyDetails.cshtml"); }
+        {
+            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Currency/" + Uri.EscapeDataString(id)))["data"] as JObject; }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("DoesNotExist", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["Success"] = "That Currency was deleted from ERPNext.";
+                    return RedirectToAction(nameof(Currency));
+                }
+                TempData["ErpNextError"] = "Currency details could not be loaded: " + ShortErpNextError(ex.Message);
+            }
+            return View("~/Views/HR/CurrencyDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/CurrencyDetails/{id}")]
+        public async Task<ActionResult> UpdateCurrency(string id, IFormCollection form)
+        {
+            try
+            {
+                var payload = new JObject { ["enabled"] = form.ContainsKey("Enabled") ? 1 : 0, ["fraction"] = form["Fraction"].ToString(), ["fraction_units"] = form["FractionUnits"].ToString(), ["smallest_currency_fraction_value"] = form["SmallestCurrencyFractionValue"].ToString(), ["symbol"] = form["Symbol"].ToString(), ["symbol_on_right"] = form.ContainsKey("SymbolOnRight") ? 1 : 0, ["number_format"] = form["NumberFormat"].ToString() };
+                await _erpNextService.PutAsync("/api/resource/Currency/" + Uri.EscapeDataString(id), payload);
+                TempData["Success"] = "Currency saved in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Currency update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(CurrencyDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/DeleteCurrency/{id}")]
+        public async Task<ActionResult> DeleteCurrency(string id)
+        {
+            try
+            {
+                await _erpNextService.DeleteAsync("/api/resource/Currency/" + Uri.EscapeDataString(id));
+                TempData["Success"] = "Currency deleted from ERPNext.";
+                return RedirectToAction(nameof(Currency));
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Currency could not be deleted: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(CurrencyDetails), new { id }); }
+        }
 
         [HttpGet]
         [Route("HR/AccountingDimension")]
@@ -1308,19 +1784,20 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/CreateAccountingDimension")]
-        public async Task<ActionResult> CreateAccountingDimension() { ViewBag.DimensionDocTypes = await GetSalaryRegisterLinkOptionsAsync("DocType"); ViewBag.DimensionCompanies = await GetSalaryRegisterLinkOptionsAsync("Company"); return View("~/Views/HR/CreateAccountingDimension.cshtml"); }
+        public async Task<ActionResult> CreateAccountingDimension() { await LoadAccountingDimensionOptionsAsync(); return View("~/Views/HR/CreateAccountingDimension.cshtml"); }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("HR/CreateAccountingDimension")]
         public async Task<ActionResult> CreateAccountingDimension(IFormCollection form)
         {
-            if (string.IsNullOrWhiteSpace(form["DocumentType"]) || string.IsNullOrWhiteSpace(form["Label"])) { TempData["ErpNextError"] = "Reference Document Type and Dimension Name are required."; return await CreateAccountingDimension(); }
+            if (string.IsNullOrWhiteSpace(form["DocumentType"])) { TempData["ErpNextError"] = "Reference Document Type is required."; return await CreateAccountingDimension(); }
             try
             {
-                var defaults = new JArray(); var companies = form["DefaultCompanies"].ToArray(); var mandatoryBs = form["MandatoryBs"].ToArray(); var mandatoryPl = form["MandatoryPl"].ToArray(); for (var i = 0; i < companies.Length; i++) if (!string.IsNullOrWhiteSpace(companies[i])) defaults.Add(new JObject { ["company"] = companies[i], ["mandatory_for_bs"] = i < mandatoryBs.Length && mandatoryBs[i] == "on" ? 1 : 0, ["mandatory_for_pl"] = i < mandatoryPl.Length && mandatoryPl[i] == "on" ? 1 : 0 });
-                await _erpNextService.PostAsync("/api/resource/Accounting%20Dimension", new JObject { ["document_type"] = form["DocumentType"].ToString(), ["label"] = form["Label"].ToString(), ["dimension_defaults"] = defaults, ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0 });
-                TempData["Success"] = "Accounting Dimension created in ERPNext."; return RedirectToAction(nameof(AccountingDimension));
+                var documentType = form["DocumentType"].ToString();
+                var defaults = BuildAccountingDimensionDefaults(form, documentType);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Accounting%20Dimension", new JObject { ["document_type"] = documentType, ["label"] = documentType, ["dimension_defaults"] = defaults, ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0 }));
+                TempData["Success"] = "Accounting Dimension created in ERPNext."; return RedirectToAction(nameof(AccountingDimensionDetails), new { id = response["data"]?["name"]?.ToString() });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Accounting Dimension creation failed: " + ShortErpNextError(ex.Message); return await CreateAccountingDimension(); }
         }
@@ -1328,7 +1805,75 @@ namespace Erp_Aits.Controllers
         [HttpGet]
         [Route("HR/AccountingDimensionDetails/{id}")]
         public async Task<ActionResult> AccountingDimensionDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Accounting%20Dimension/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Accounting Dimension details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/AccountingDimensionDetails.cshtml"); }
+        {
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Accounting%20Dimension/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                ViewBag.Document = document;
+                await LoadAccountingDimensionOptionsAsync(document?["document_type"]?.ToString());
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Accounting Dimension details could not be loaded: " + ShortErpNextError(ex.Message); }
+            return View("~/Views/HR/AccountingDimensionDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/AccountingDimensionDetails/{id}")]
+        public async Task<ActionResult> UpdateAccountingDimension(string id, IFormCollection form)
+        {
+            try
+            {
+                var current = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Accounting%20Dimension/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (current == null) throw new InvalidOperationException("Accounting Dimension was not found in ERPNext.");
+                var documentType = current["document_type"]?.ToString() ?? "";
+                await _erpNextService.PutAsync("/api/resource/Accounting%20Dimension/" + Uri.EscapeDataString(id), new JObject
+                {
+                    ["document_type"] = documentType,
+                    ["label"] = documentType,
+                    ["dimension_defaults"] = BuildAccountingDimensionDefaults(form, documentType),
+                    ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0
+                });
+                TempData["Success"] = "Accounting Dimension saved in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Accounting Dimension update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(AccountingDimensionDetails), new { id });
+        }
+
+        [HttpGet]
+        [Route("HR/AccountingDimensionDefaultOptions")]
+        public async Task<IActionResult> AccountingDimensionDefaultOptions(string documentType)
+        {
+            if (string.IsNullOrWhiteSpace(documentType)) return Json(Array.Empty<string>());
+            try { return Json(await GetSalaryRegisterLinkOptionsAsync(documentType)); }
+            catch (Exception ex) { return StatusCode(502, new { message = ShortErpNextError(ex.Message) }); }
+        }
+
+        private async Task LoadAccountingDimensionOptionsAsync(string documentType = null)
+        {
+            ViewBag.DimensionDocTypes = await GetSalaryRegisterLinkOptionsAsync("DocType");
+            ViewBag.DimensionCompanies = await GetSalaryRegisterLinkOptionsAsync("Company");
+            ViewBag.DefaultDimensionOptions = string.IsNullOrWhiteSpace(documentType) ? new List<string>() : await GetSalaryRegisterLinkOptionsAsync(documentType);
+        }
+
+        private static JArray BuildAccountingDimensionDefaults(IFormCollection form, string documentType)
+        {
+            var defaults = new JArray(); var companies = form["DefaultCompanies"].ToArray(); var dimensions = form["DefaultDimensions"].ToArray(); var mandatoryBs = form["MandatoryBs"].ToArray(); var mandatoryPl = form["MandatoryPl"].ToArray();
+            bool IsChecked(string name, int index, string[] fallback)
+            {
+                var value = form[$"{name}[{index}]"].FirstOrDefault() ?? (index < fallback.Length ? fallback[index] : "");
+                return value == "on" || value == "true" || value == "1";
+            }
+            for (var i = 0; i < companies.Length; i++)
+            {
+                var company = companies[i];
+                var dimension = i < dimensions.Length ? dimensions[i] : "";
+                if (string.IsNullOrWhiteSpace(company) && string.IsNullOrWhiteSpace(dimension)) continue;
+                if (string.IsNullOrWhiteSpace(company) || string.IsNullOrWhiteSpace(dimension))
+                    throw new InvalidOperationException("Each Dimension Defaults row needs both Company and Default Dimension.");
+                defaults.Add(new JObject { ["company"] = company, ["reference_document"] = documentType, ["default_dimension"] = dimension, ["mandatory_for_bs"] = IsChecked("MandatoryBs", i, mandatoryBs) ? 1 : 0, ["mandatory_for_pl"] = IsChecked("MandatoryPl", i, mandatoryPl) ? 1 : 0 });
+            }
+            return defaults;
+        }
 
         [HttpGet]
         [Route("HR/EmployeeTaxExemptionDeclaration")]
@@ -1357,10 +1902,11 @@ namespace Erp_Aits.Controllers
             if (string.IsNullOrWhiteSpace(form["Employee"]) || string.IsNullOrWhiteSpace(form["PayrollPeriod"]) || string.IsNullOrWhiteSpace(form["Currency"])) { TempData["ErpNextError"] = "Employee, Payroll Period, and Currency are required."; await LoadTaxDeclarationOptionsAsync(); return View("~/Views/HR/CreateEmployeeTaxExemptionDeclaration.cshtml"); }
             try
             {
-                var declarations = new JArray(); var categories = form["DeclarationCategories"].ToArray(); var subCategories = form["DeclarationSubCategories"].ToArray(); var amounts = form["DeclarationAmounts"].ToArray();
-                for (var i = 0; i < categories.Length; i++) if (!string.IsNullOrWhiteSpace(categories[i])) declarations.Add(new JObject { ["exemption_category"] = categories[i], ["exemption_sub_category"] = i < subCategories.Length ? subCategories[i] : "", ["amount"] = i < amounts.Length ? amounts[i] : "0" });
-                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["payroll_period"] = form["PayrollPeriod"].ToString(), ["currency"] = form["Currency"].ToString(), ["declarations"] = declarations };
-                await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration", payload); TempData["Success"] = "Employee Tax Exemption Declaration created in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionDeclaration));
+                var response = await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration", BuildTaxExemptionDeclarationPayload(form));
+                var name = JObject.Parse(response)["data"]?["name"]?.ToString();
+                if (string.IsNullOrWhiteSpace(name)) throw new InvalidOperationException("ERPNext did not return the declaration name.");
+                TempData["Success"] = "Draft saved in ERPNext. You can continue editing it or submit it when ready.";
+                return RedirectToAction(nameof(EmployeeTaxExemptionDeclarationDetails), new { id = name });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Declaration creation failed: " + ShortErpNextError(ex.Message); await LoadTaxDeclarationOptionsAsync(); return View("~/Views/HR/CreateEmployeeTaxExemptionDeclaration.cshtml"); }
         }
@@ -1368,7 +1914,85 @@ namespace Erp_Aits.Controllers
         [HttpGet]
         [Route("HR/EmployeeTaxExemptionDeclarationDetails/{id}")]
         public async Task<ActionResult> EmployeeTaxExemptionDeclarationDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Declaration details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/EmployeeTaxExemptionDeclarationDetails.cshtml"); }
+        {
+            try
+            {
+                await LoadTaxDeclarationOptionsAsync();
+                ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration/" + Uri.EscapeDataString(id)))["data"] as JObject;
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Declaration details could not be loaded: " + ShortErpNextError(ex.Message); }
+            return View("~/Views/HR/EmployeeTaxExemptionDeclarationDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeTaxExemptionDeclarationDetails/{id}")]
+        public async Task<ActionResult> UpdateEmployeeTaxExemptionDeclaration(string id, IFormCollection form)
+        {
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (document == null || document["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only a draft declaration can be edited.");
+                if (string.IsNullOrWhiteSpace(form["Employee"]) || string.IsNullOrWhiteSpace(form["PayrollPeriod"]) || string.IsNullOrWhiteSpace(form["Currency"])) throw new InvalidOperationException("Employee, Payroll Period, and Currency are required.");
+                await _erpNextService.PutAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration/" + Uri.EscapeDataString(id), BuildTaxExemptionDeclarationPayload(form));
+                TempData["Success"] = "Draft changes saved in ERPNext. You can still edit this declaration.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Declaration update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeTaxExemptionDeclarationDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeTaxExemptionDeclarationStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetEmployeeTaxExemptionDeclarationStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return RedirectToAction(nameof(EmployeeTaxExemptionDeclarationDetails), new { id });
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Declaration/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (document == null) throw new InvalidOperationException("Declaration was not found in ERPNext.");
+                var currentStatus = document["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && currentStatus == 0)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else if (status == 2 && currentStatus == 1)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Employee Tax Exemption Declaration", name = id });
+                else
+                    throw new InvalidOperationException("The declaration status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Declaration submitted in ERPNext and is now locked." : "Declaration cancelled in ERPNext and HRMS.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Declaration status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeTaxExemptionDeclarationDetails), new { id });
+        }
+
+        [HttpGet]
+        [Route("HR/TaxExemptionSubCategoryDetails")]
+        public async Task<ActionResult> TaxExemptionSubCategoryDetails(string subCategory)
+        {
+            if (string.IsNullOrWhiteSpace(subCategory)) return Json(new { success = false, message = "Select an exemption sub-category first." });
+            try
+            {
+                var data = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category/" + Uri.EscapeDataString(subCategory)))["data"] as JObject;
+                if (data == null) throw new InvalidOperationException("Sub-category was not found.");
+                return Json(new { success = true, category = data["exemption_category"]?.ToString() ?? "", amount = data["max_amount"]?.ToString() ?? "0" });
+            }
+            catch (Exception ex) { return StatusCode(502, new { success = false, message = ShortErpNextError(ex.Message) }); }
+        }
+
+        private static JObject BuildTaxExemptionDeclarationPayload(IFormCollection form)
+        {
+            var declarations = new JArray();
+            var categories = form["DeclarationCategories"].ToArray();
+            var subCategories = form["DeclarationSubCategories"].ToArray();
+            var amounts = form["DeclarationAmounts"].ToArray();
+            for (var i = 0; i < subCategories.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(subCategories[i])) continue;
+                var category = i < categories.Length ? categories[i] : "";
+                if (string.IsNullOrWhiteSpace(category)) throw new InvalidOperationException("Each exemption sub-category must have an exemption category.");
+                declarations.Add(new JObject { ["exemption_category"] = category, ["exemption_sub_category"] = subCategories[i], ["amount"] = i < amounts.Length && !string.IsNullOrWhiteSpace(amounts[i]) ? amounts[i] : "0" });
+            }
+            return new JObject { ["employee"] = form["Employee"].ToString(), ["payroll_period"] = form["PayrollPeriod"].ToString(), ["currency"] = form["Currency"].ToString(), ["monthly_house_rent"] = string.IsNullOrWhiteSpace(form["MonthlyHouseRent"]) ? "0" : form["MonthlyHouseRent"].ToString(), ["declarations"] = declarations };
+        }
 
         [HttpGet]
         [Route("HR/EmployeeTaxExemptionProofSubmission")]
@@ -1398,13 +2022,12 @@ namespace Erp_Aits.Controllers
             { TempData["ErpNextError"] = "Employee, Currency, Submission Date, and Payroll Period are required."; await LoadTaxProofSubmissionOptionsAsync(); return View("~/Views/HR/CreateEmployeeTaxExemptionProofSubmission.cshtml"); }
             try
             {
-                var proofs = new JArray(); var categories = form["ProofCategories"].ToArray(); var subCategories = form["ProofSubCategories"].ToArray(); var amounts = form["ProofAmounts"].ToArray();
-                for (var i = 0; i < categories.Length; i++) if (!string.IsNullOrWhiteSpace(categories[i])) proofs.Add(new JObject { ["exemption_category"] = categories[i], ["exemption_sub_category"] = i < subCategories.Length ? subCategories[i] : "", ["amount"] = i < amounts.Length ? amounts[i] : "0" });
-                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["currency"] = form["Currency"].ToString(), ["submission_date"] = form["SubmissionDate"].ToString(), ["payroll_period"] = form["PayrollPeriod"].ToString(), ["tax_exemption_proofs"] = proofs };
-                var created = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission", payload))["data"] as JObject;
+                var created = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission", BuildTaxProofSubmissionPayload(form)))["data"] as JObject;
                 var documentName = created?["name"]?.ToString() ?? "";
                 if (attachments?.Length > 0 && !string.IsNullOrWhiteSpace(documentName)) await _erpNextService.UploadFileAsync(attachments, "Employee Tax Exemption Proof Submission", documentName, "attachments");
-                TempData["Success"] = "Employee Tax Exemption Proof Submission created in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionProofSubmission));
+                if (created != null) await UploadTaxProofRowAttachmentsAsync(created, Request.Form.Files.GetFiles("ProofAttachments"));
+                TempData["Success"] = "Draft saved in ERPNext. You can continue editing it or submit it when ready.";
+                return RedirectToAction(nameof(EmployeeTaxExemptionProofSubmissionDetails), new { id = documentName });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Proof Submission creation failed: " + ShortErpNextError(ex.Message); await LoadTaxProofSubmissionOptionsAsync(); return View("~/Views/HR/CreateEmployeeTaxExemptionProofSubmission.cshtml"); }
         }
@@ -1412,7 +2035,124 @@ namespace Erp_Aits.Controllers
         [HttpGet]
         [Route("HR/EmployeeTaxExemptionProofSubmissionDetails/{id}")]
         public async Task<ActionResult> EmployeeTaxExemptionProofSubmissionDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Proof Submission details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/EmployeeTaxExemptionProofSubmissionDetails.cshtml"); }
+        {
+            try
+            {
+                await LoadTaxProofSubmissionOptionsAsync();
+                ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission/" + Uri.EscapeDataString(id)))["data"] as JObject;
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Proof Submission details could not be loaded: " + ShortErpNextError(ex.Message); }
+            return View("~/Views/HR/EmployeeTaxExemptionProofSubmissionDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeTaxExemptionProofSubmissionDetails/{id}")]
+        public async Task<ActionResult> UpdateEmployeeTaxExemptionProofSubmission(string id, IFormCollection form, IFormFile? attachments)
+        {
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (document == null || document["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only a draft proof submission can be edited.");
+                ValidateTaxProofSubmission(form);
+                var updated = JObject.Parse(await _erpNextService.PutAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission/" + Uri.EscapeDataString(id), BuildTaxProofSubmissionPayload(form)))["data"] as JObject;
+                if (attachments?.Length > 0) await _erpNextService.UploadFileAsync(attachments, "Employee Tax Exemption Proof Submission", id, "attachments");
+                if (updated != null) await UploadTaxProofRowAttachmentsAsync(updated, Request.Form.Files.GetFiles("ProofAttachments"));
+                TempData["Success"] = "Draft changes saved in ERPNext. You can still edit this proof submission.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Proof Submission update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeTaxExemptionProofSubmissionDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeTaxExemptionProofSubmissionStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetEmployeeTaxExemptionProofSubmissionStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return RedirectToAction(nameof(EmployeeTaxExemptionProofSubmissionDetails), new { id });
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Proof%20Submission/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (document == null) throw new InvalidOperationException("Proof submission was not found in ERPNext.");
+                var currentStatus = document["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && currentStatus == 0)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else if (status == 2 && currentStatus == 1)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Employee Tax Exemption Proof Submission", name = id });
+                else
+                    throw new InvalidOperationException("The proof submission status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Proof submission submitted in ERPNext and is now locked." : "Proof submission cancelled in ERPNext and HRMS.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Tax Exemption Proof Submission status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeTaxExemptionProofSubmissionDetails), new { id });
+        }
+
+        private static void ValidateTaxProofSubmission(IFormCollection form)
+        {
+            if (string.IsNullOrWhiteSpace(form["Employee"]) || string.IsNullOrWhiteSpace(form["PayrollPeriod"]) || string.IsNullOrWhiteSpace(form["Currency"]) || string.IsNullOrWhiteSpace(form["SubmissionDate"]))
+                throw new InvalidOperationException("Employee, Currency, Submission Date, and Payroll Period are required.");
+            var categories = form["ProofCategories"].ToArray();
+            var subCategories = form["ProofSubCategories"].ToArray();
+            var maxAmounts = form["ProofMaxAmounts"].ToArray();
+            var amounts = form["ProofAmounts"].ToArray();
+            var proofTypes = form["ProofTypes"].ToArray();
+            for (var i = 0; i < Math.Max(categories.Length, subCategories.Length); i++)
+            {
+                var category = i < categories.Length ? categories[i] : "";
+                var subCategory = i < subCategories.Length ? subCategories[i] : "";
+                if (string.IsNullOrWhiteSpace(category) && string.IsNullOrWhiteSpace(subCategory)) continue;
+                if (string.IsNullOrWhiteSpace(category) || string.IsNullOrWhiteSpace(subCategory)) throw new InvalidOperationException("Each proof row must include both an exemption category and sub-category.");
+                if (IncomeTaxNumber(i < maxAmounts.Length ? maxAmounts[i] : "") < 0) throw new InvalidOperationException("Maximum exemption amounts cannot be negative.");
+                if (IncomeTaxNumber(i < amounts.Length ? amounts[i] : "") < 0) throw new InvalidOperationException("Proof amounts cannot be negative.");
+                if (string.IsNullOrWhiteSpace(i < proofTypes.Length ? proofTypes[i] : "")) throw new InvalidOperationException("Each proof row requires a Type of Proof.");
+            }
+        }
+
+        private static JObject BuildTaxProofSubmissionPayload(IFormCollection form)
+        {
+            ValidateTaxProofSubmission(form);
+            var proofs = new JArray();
+            var categories = form["ProofCategories"].ToArray();
+            var subCategories = form["ProofSubCategories"].ToArray();
+            var maxAmounts = form["ProofMaxAmounts"].ToArray();
+            var amounts = form["ProofAmounts"].ToArray();
+            var proofTypes = form["ProofTypes"].ToArray();
+            for (var i = 0; i < Math.Max(categories.Length, subCategories.Length); i++)
+            {
+                var category = i < categories.Length ? categories[i] : "";
+                var subCategory = i < subCategories.Length ? subCategories[i] : "";
+                if (string.IsNullOrWhiteSpace(category) && string.IsNullOrWhiteSpace(subCategory)) continue;
+                proofs.Add(new JObject
+                {
+                    ["exemption_category"] = category,
+                    ["exemption_sub_category"] = subCategory,
+                    ["max_amount"] = IncomeTaxNumber(i < maxAmounts.Length ? maxAmounts[i] : ""),
+                    ["amount"] = IncomeTaxNumber(i < amounts.Length ? amounts[i] : ""),
+                    ["type_of_proof"] = i < proofTypes.Length ? proofTypes[i] : ""
+                });
+            }
+            return new JObject
+            {
+                ["employee"] = form["Employee"].ToString(),
+                ["currency"] = form["Currency"].ToString(),
+                ["submission_date"] = form["SubmissionDate"].ToString(),
+                ["payroll_period"] = form["PayrollPeriod"].ToString(),
+                ["tax_exemption_proofs"] = proofs
+            };
+        }
+
+        private async Task UploadTaxProofRowAttachmentsAsync(JObject document, IReadOnlyList<IFormFile> files)
+        {
+            if (files.Count == 0) return;
+            var rows = document["tax_exemption_proofs"] as JArray ?? new JArray();
+            for (var i = 0; i < files.Count && i < rows.Count; i++)
+            {
+                var file = files[i];
+                var rowName = rows[i]?["name"]?.ToString();
+                if (file.Length > 0 && !string.IsNullOrWhiteSpace(rowName))
+                    await _erpNextService.UploadFileAsync(file, "Employee Tax Exemption Proof Submission Detail", rowName, "attach_proof");
+            }
+        }
 
         private async Task LoadTaxProofSubmissionOptionsAsync() { ViewBag.TaxProofEmployees = await GetPayrollEmployeeOptionsAsync(); ViewBag.TaxProofPeriods = await GetSalaryRegisterLinkOptionsAsync("Payroll Period"); ViewBag.TaxProofCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency"); ViewBag.TaxProofCategories = await GetSalaryRegisterLinkOptionsAsync("Employee Tax Exemption Category"); ViewBag.TaxProofSubCategories = await GetSalaryRegisterLinkOptionsAsync("Employee Tax Exemption Sub Category"); }
 
@@ -1444,20 +2184,138 @@ namespace Erp_Aits.Controllers
             { TempData["ErpNextError"] = "Employee, Date, Payroll Period, Company, and Currency are required."; await LoadEmployeeBenefitApplicationOptionsAsync(); return View("~/Views/HR/CreateEmployeeBenefitApplication.cshtml"); }
             try
             {
-                var benefits = new JArray(); var components = form["BenefitComponents"].ToArray(); var amounts = form["BenefitAmounts"].ToArray();
-                for (var i = 0; i < components.Length; i++) if (!string.IsNullOrWhiteSpace(components[i])) benefits.Add(new JObject { ["salary_component"] = components[i], ["amount"] = i < amounts.Length ? amounts[i] : "0" });
-                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["date"] = form["Date"].ToString(), ["payroll_period"] = form["PayrollPeriod"].ToString(), ["company"] = form["Company"].ToString(), ["currency"] = form["Currency"].ToString(), ["employee_benefits"] = benefits };
-                await _erpNextService.PostAsync("/api/resource/Employee%20Benefit%20Application", payload); TempData["Success"] = "Employee Benefit Application created in ERPNext."; return RedirectToAction(nameof(EmployeeBenefitApplication));
+                var benefits = new JArray(); var components = form["EarningComponents"].ToArray(); var maxAmounts = form["BenefitMaxAmounts"].ToArray(); var amounts = form["BenefitAmounts"].ToArray();
+                for (var i = 0; i < components.Length; i++) if (!string.IsNullOrWhiteSpace(components[i])) benefits.Add(new JObject { ["earning_component"] = components[i], ["max_benefit_amount"] = IncomeTaxNumber(i < maxAmounts.Length ? maxAmounts[i] : ""), ["amount"] = IncomeTaxNumber(i < amounts.Length ? amounts[i] : "") });
+                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["date"] = form["Date"].ToString(), ["payroll_period"] = form["PayrollPeriod"].ToString(), ["company"] = form["Company"].ToString(), ["currency"] = form["Currency"].ToString(), ["max_benefits"] = IncomeTaxNumber(form["MaxBenefits"].ToString()), ["remaining_benefit"] = IncomeTaxNumber(form["RemainingBenefit"].ToString()), ["employee_benefits"] = benefits };
+                var created = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Employee%20Benefit%20Application", payload))["data"] as JObject;
+                var id = created?["name"]?.ToString() ?? throw new InvalidOperationException("ERPNext did not return the Employee Benefit Application name.");
+                TempData["Success"] = "Employee Benefit Application saved in ERPNext.";
+                return RedirectToAction(nameof(EmployeeBenefitApplicationDetails), new { id, readyToSubmit = true });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Employee Benefit Application creation failed: " + ShortErpNextError(ex.Message); await LoadEmployeeBenefitApplicationOptionsAsync(); return View("~/Views/HR/CreateEmployeeBenefitApplication.cshtml"); }
         }
 
         [HttpGet]
         [Route("HR/EmployeeBenefitApplicationDetails/{id}")]
-        public async Task<ActionResult> EmployeeBenefitApplicationDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Benefit%20Application/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Employee Benefit Application details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/EmployeeBenefitApplicationDetails.cshtml"); }
+        public async Task<ActionResult> EmployeeBenefitApplicationDetails(string id, bool readyToSubmit = false)
+        {
+            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Benefit%20Application/" + Uri.EscapeDataString(id)))["data"] as JObject; }
+            catch (Exception ex) { TempData["ErpNextError"] = "Employee Benefit Application details could not be loaded: " + ShortErpNextError(ex.Message); }
+            ViewBag.ReadyToSubmit = readyToSubmit;
+            await LoadEmployeeBenefitApplicationOptionsAsync();
+            return View("~/Views/HR/EmployeeBenefitApplicationDetails.cshtml");
+        }
 
-        private async Task LoadEmployeeBenefitApplicationOptionsAsync() { ViewBag.BenefitEmployees = await GetPayrollEmployeeOptionsAsync(); ViewBag.BenefitPeriods = await GetSalaryRegisterLinkOptionsAsync("Payroll Period"); ViewBag.BenefitCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency"); ViewBag.BenefitComponents = await GetSalaryRegisterLinkOptionsAsync("Salary Component"); }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeBenefitApplicationDetails/{id}")]
+        public async Task<ActionResult> UpdateEmployeeBenefitApplication(string id, IFormCollection form)
+        {
+            try
+            {
+                var url = "/api/resource/Employee%20Benefit%20Application/" + Uri.EscapeDataString(id);
+                var document = JObject.Parse(await _erpNextService.GetAsync(url))["data"] as JObject ?? throw new InvalidOperationException("Employee Benefit Application was not found.");
+                if (document["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only draft Employee Benefit Applications can be edited.");
+                var components = form["EarningComponents"].ToArray(); var maxAmounts = form["BenefitMaxAmounts"].ToArray(); var amounts = form["BenefitAmounts"].ToArray();
+                var benefits = new JArray();
+                for (var i = 0; i < components.Length; i++) if (!string.IsNullOrWhiteSpace(components[i])) benefits.Add(new JObject { ["earning_component"] = components[i], ["max_benefit_amount"] = IncomeTaxNumber(i < maxAmounts.Length ? maxAmounts[i] : ""), ["amount"] = IncomeTaxNumber(i < amounts.Length ? amounts[i] : "") });
+                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["date"] = form["Date"].ToString(), ["payroll_period"] = form["PayrollPeriod"].ToString(), ["company"] = form["Company"].ToString(), ["currency"] = form["Currency"].ToString(), ["max_benefits"] = IncomeTaxNumber(form["MaxBenefits"].ToString()), ["remaining_benefit"] = IncomeTaxNumber(form["RemainingBenefit"].ToString()), ["employee_benefits"] = benefits };
+                await _erpNextService.PutAsync(url, payload);
+                TempData["Success"] = "Employee Benefit Application saved in ERPNext.";
+                return RedirectToAction(nameof(EmployeeBenefitApplicationDetails), new { id, readyToSubmit = true });
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Employee Benefit Application update failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(EmployeeBenefitApplicationDetails), new { id }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeBenefitApplicationStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetEmployeeBenefitApplicationStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return BadRequest();
+            try
+            {
+                var url = "/api/resource/Employee%20Benefit%20Application/" + Uri.EscapeDataString(id);
+                var document = JObject.Parse(await _erpNextService.GetAsync(url))["data"] as JObject ?? throw new InvalidOperationException("Employee Benefit Application was not found.");
+                var currentStatus = document["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && currentStatus == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else if (status == 2 && currentStatus == 1) await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Employee Benefit Application", name = id });
+                else throw new InvalidOperationException("The document status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Employee Benefit Application submitted in ERPNext." : "Employee Benefit Application cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Employee Benefit Application status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeBenefitApplicationDetails), new { id, readyToSubmit = status == 1 });
+        }
+
+        [HttpGet]
+        [Route("HR/BenefitComponentMaxAmount")]
+        public async Task<ActionResult> BenefitComponentMaxAmount(string earningComponent)
+        {
+            if (string.IsNullOrWhiteSpace(earningComponent)) return Json(new { success = false, message = "Select an earning component first." });
+            try
+            {
+                var component = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Component/" + Uri.EscapeDataString(earningComponent)))["data"] as JObject;
+                if (component == null) throw new InvalidOperationException("Earning component was not found.");
+                return Json(new { success = true, maxBenefitAmount = component["max_benefit_amount"]?.ToString() ?? "0" });
+            }
+            catch (Exception ex) { return StatusCode(502, new { success = false, message = ShortErpNextError(ex.Message) }); }
+        }
+
+        [HttpGet]
+        [Route("HR/BenefitApplicationEmployeeLimits")]
+        public async Task<ActionResult> BenefitApplicationEmployeeLimits(string employee, string date)
+        {
+            if (string.IsNullOrWhiteSpace(employee)) return Json(new { success = false, message = "Select an employee first." });
+            try
+            {
+                var effectiveDate = DateTime.TryParse(date, out var parsedDate) ? parsedDate.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd");
+                var filters = new JArray(new JArray("employee", "=", employee), new JArray("docstatus", "=", 1), new JArray("from_date", "<=", effectiveDate));
+                var response = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure%20Assignment?fields=[\"name\"]&filters=" + Uri.EscapeDataString(filters.ToString(Formatting.None)) + "&order_by=from_date%20desc&limit_page_length=1"));
+                var assignmentName = (response["data"] as JArray)?.FirstOrDefault()?["name"]?.ToString();
+                if (string.IsNullOrWhiteSpace(assignmentName)) throw new InvalidOperationException("No submitted Salary Structure Assignment was found for this employee on the selected date.");
+                var assignment = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure%20Assignment/" + Uri.EscapeDataString(assignmentName)))["data"] as JObject;
+                if (assignment == null) throw new InvalidOperationException("Salary Structure Assignment was not found.");
+                var salaryStructureName = assignment["salary_structure"]?.ToString();
+                if (string.IsNullOrWhiteSpace(salaryStructureName)) throw new InvalidOperationException("The submitted Salary Structure Assignment has no Salary Structure.");
+
+                var salaryStructure = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(salaryStructureName)))["data"] as JObject;
+                if (salaryStructure == null) throw new InvalidOperationException("Salary Structure was not found.");
+
+                // This ERPNext instance keeps the annual benefit cap on Salary Structure, not on its assignment.
+                var maxBenefits = salaryStructure["max_benefits"]?.Value<decimal?>()
+                    ?? assignment["max_benefits"]?.Value<decimal?>()
+                    ?? 0m;
+
+                var claimFilters = new JArray(
+                    new JArray("employee", "=", employee),
+                    new JArray("docstatus", "=", 1));
+                var claimResponse = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Employee%20Benefit%20Claim?fields=[\"claimed_amount\"]&filters=" +
+                    Uri.EscapeDataString(claimFilters.ToString(Formatting.None)) + "&limit_page_length=500"));
+                var claimedAmount = (claimResponse["data"] as JArray ?? new JArray())
+                    .Sum(claim => claim["claimed_amount"]?.Value<decimal?>() ?? 0m);
+                var remainingBenefit = Math.Max(0m, maxBenefits - claimedAmount);
+
+                var benefits = assignment["employee_benefits"] as JArray ?? new JArray();
+                return Json(new
+                {
+                    success = true,
+                    maxBenefits,
+                    remainingBenefit,
+                    currency = salaryStructure["currency"]?.ToString() ?? assignment["currency"]?.ToString() ?? "",
+                    benefits = benefits.Select(row => new { earningComponent = row["salary_component"]?.ToString() ?? "", maxBenefitAmount = row["amount"]?.ToString() ?? "0" }).Where(row => !string.IsNullOrWhiteSpace(row.earningComponent)).ToList()
+                });
+            }
+            catch (Exception ex) { return StatusCode(502, new { success = false, message = ShortErpNextError(ex.Message) }); }
+        }
+
+        private async Task LoadEmployeeBenefitApplicationOptionsAsync()
+        {
+            ViewBag.BenefitEmployees = await GetPayrollEmployeeOptionsAsync();
+            ViewBag.BenefitPeriods = await GetSalaryRegisterLinkOptionsAsync("Payroll Period");
+            ViewBag.BenefitCurrencies = await GetSalaryRegisterLinkOptionsAsync("Currency");
+            ViewBag.BenefitComponents = ExtractNamesList(await _erpNextService.GetAsync("/api/resource/Salary%20Component?fields=[\"name\"]&filters=[[\"type\",\"=\",\"Earning\"]]&limit_page_length=500"));
+        }
 
         [HttpGet]
         [Route("HR/EmployeeBenefitClaim")]
@@ -1530,7 +2388,7 @@ namespace Erp_Aits.Controllers
         public async Task<ActionResult> CreateEmployeeTaxExemptionCategory(IFormCollection form)
         {
             if (string.IsNullOrWhiteSpace(form["CategoryName"])) { TempData["ErpNextError"] = "Category Name is required."; return View("~/Views/HR/CreateEmployeeTaxExemptionCategory.cshtml"); }
-            try { await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Category", new JObject { ["name"] = form["CategoryName"].ToString(), ["max_amount"] = form["MaxAmount"].ToString(), ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 }); TempData["Success"] = "Employee Tax Exemption Category created in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionCategory)); }
+            try { var amount = IncomeTaxNumber(form["MaxAmount"].ToString()); if (amount < 0) throw new InvalidOperationException("Max Exemption Amount cannot be negative."); var result = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Category", new JObject { ["name"] = form["CategoryName"].ToString(), ["max_amount"] = amount, ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 })); var name = result["data"]?["name"]?.ToString(); if (string.IsNullOrWhiteSpace(name)) throw new InvalidOperationException("ERPNext did not return the category name."); TempData["Success"] = "Employee Tax Exemption Category saved in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionCategoryDetails), new { id = name }); }
             catch (Exception ex) { TempData["ErpNextError"] = "Category creation failed: " + ShortErpNextError(ex.Message); return View("~/Views/HR/CreateEmployeeTaxExemptionCategory.cshtml"); }
         }
 
@@ -1538,6 +2396,22 @@ namespace Erp_Aits.Controllers
         [Route("HR/EmployeeTaxExemptionCategoryDetails/{id}")]
         public async Task<ActionResult> EmployeeTaxExemptionCategoryDetails(string id)
         { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Category/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Category details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/EmployeeTaxExemptionCategoryDetails.cshtml"); }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/EmployeeTaxExemptionCategoryDetails/{id}")]
+        public async Task<ActionResult> UpdateEmployeeTaxExemptionCategory(string id, IFormCollection form)
+        {
+            try
+            {
+                var amount = IncomeTaxNumber(form["MaxAmount"].ToString());
+                if (amount < 0) throw new InvalidOperationException("Max Exemption Amount cannot be negative.");
+                await _erpNextService.PutAsync("/api/resource/Employee%20Tax%20Exemption%20Category/" + Uri.EscapeDataString(id), new JObject { ["max_amount"] = amount, ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 });
+                TempData["Success"] = "Employee Tax Exemption Category updated in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Category update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeTaxExemptionCategoryDetails), new { id });
+        }
 
         [HttpGet]
         [Route("HR/EmployeeTaxExemptionSubCategory")]
@@ -1559,14 +2433,46 @@ namespace Erp_Aits.Controllers
         public async Task<ActionResult> CreateEmployeeTaxExemptionSubCategory(IFormCollection form)
         {
             if (string.IsNullOrWhiteSpace(form["ExemptionCategory"])) { TempData["ErpNextError"] = "Tax Exemption Category is required."; return await CreateEmployeeTaxExemptionSubCategory(); }
-            try { await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category", new JObject { ["exemption_category"] = form["ExemptionCategory"].ToString(), ["max_amount"] = form["MaxAmount"].ToString(), ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 }); TempData["Success"] = "Employee Tax Exemption Sub Category created in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionSubCategory)); }
+            try { var amount = IncomeTaxNumber(form["MaxAmount"].ToString()); if (amount < 0) throw new InvalidOperationException("Max Exemption Amount cannot be negative."); var result = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category", new JObject { ["exemption_category"] = form["ExemptionCategory"].ToString(), ["max_amount"] = amount, ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 })); var name = result["data"]?["name"]?.ToString(); if (string.IsNullOrWhiteSpace(name)) throw new InvalidOperationException("ERPNext did not return the sub-category name."); TempData["Success"] = "Employee Tax Exemption Sub Category saved in ERPNext."; return RedirectToAction(nameof(EmployeeTaxExemptionSubCategoryDetails), new { id = name }); }
             catch (Exception ex) { TempData["ErpNextError"] = "Sub Category creation failed: " + ShortErpNextError(ex.Message); return await CreateEmployeeTaxExemptionSubCategory(); }
         }
 
         [HttpGet]
         [Route("HR/EmployeeTaxExemptionSubCategoryDetails/{id}")]
         public async Task<ActionResult> EmployeeTaxExemptionSubCategoryDetails(string id)
-        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Sub Category details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/EmployeeTaxExemptionSubCategoryDetails.cshtml"); }
+        { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category/" + Uri.EscapeDataString(id)))["data"] as JObject; ViewBag.TaxCategories = await GetSalaryRegisterLinkOptionsAsync("Employee Tax Exemption Category"); } catch (Exception ex) { TempData["ErpNextError"] = "Sub Category details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/EmployeeTaxExemptionSubCategoryDetails.cshtml"); }
+
+        [HttpGet]
+        public async Task<ActionResult> TaxExemptionCategoryAmount(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category)) return BadRequest(new { message = "Select a category." });
+            try { var data = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee%20Tax%20Exemption%20Category/" + Uri.EscapeDataString(category)))["data"] as JObject ?? throw new InvalidOperationException("Category not found."); return Json(new { amount = data["max_amount"]?.Value<decimal>() ?? 0 }); }
+            catch (Exception ex) { return StatusCode(502, new { message = ShortErpNextError(ex.Message) }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdateEmployeeTaxExemptionSubCategory(string id, IFormCollection form)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(form["ExemptionCategory"])) throw new InvalidOperationException("Tax Exemption Category is required.");
+                var amount = IncomeTaxNumber(form["MaxAmount"].ToString());
+                if (amount < 0) throw new InvalidOperationException("Max Exemption Amount cannot be negative.");
+                await _erpNextService.PutAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category/" + Uri.EscapeDataString(id), new JObject { ["exemption_category"] = form["ExemptionCategory"].ToString(), ["max_amount"] = amount, ["is_active"] = form.ContainsKey("IsActive") ? 1 : 0 });
+                TempData["Success"] = "Sub Category updated in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Sub Category update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(EmployeeTaxExemptionSubCategoryDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> DeleteEmployeeTaxExemptionSubCategory(string id)
+        {
+            try { await _erpNextService.DeleteAsync("/api/resource/Employee%20Tax%20Exemption%20Sub%20Category/" + Uri.EscapeDataString(id)); TempData["Success"] = "Sub Category deleted from ERPNext and removed from the HRMS list."; return RedirectToAction(nameof(EmployeeTaxExemptionSubCategory)); }
+            catch (Exception ex) { TempData["ErpNextError"] = "Sub Category could not be deleted: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(EmployeeTaxExemptionSubCategoryDetails), new { id }); }
+        }
 
         [HttpGet]
         [Route("HR/JournalEntry")]
@@ -1599,7 +2505,15 @@ namespace Erp_Aits.Controllers
                 var rows = new JArray(); var accounts = form["Accounts"].ToArray(); var parties = form["Parties"].ToArray(); var types = form["PartyTypes"].ToArray(); var debits = form["Debits"].ToArray(); var credits = form["Credits"].ToArray();
                 for (var i = 0; i < accounts.Length; i++) if (!string.IsNullOrWhiteSpace(accounts[i])) rows.Add(new JObject { ["account"] = accounts[i], ["party_type"] = i < types.Length ? types[i] : "", ["party"] = i < parties.Length ? parties[i] : "", ["debit_in_account_currency"] = i < debits.Length ? debits[i] : "0", ["credit_in_account_currency"] = i < credits.Length ? credits[i] : "0" });
                 if (!rows.Any()) { TempData["ErpNextError"] = "Add at least one Accounting Entry."; await LoadJournalEntryOptionsAsync(); return View("~/Views/HR/CreateJournalEntry.cshtml"); }
+                var stockEntry = form["StockEntry"].ToString();
+                if (!string.IsNullOrWhiteSpace(stockEntry))
+                {
+                    var stockDocument = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Stock%20Entry/" + Uri.EscapeDataString(stockEntry)))["data"] as JObject;
+                    if (stockDocument?["docstatus"]?.Value<int>() != 1)
+                        throw new InvalidOperationException("Select a submitted Stock Entry or leave Stock Entry blank.");
+                }
                 var p = new JObject { ["is_system_generated"] = form.ContainsKey("IsSystemGenerated") ? 1 : 0, ["voucher_type"] = form["VoucherType"].ToString(), ["ineligibility_reason"] = form["IneligibilityReason"].ToString(), ["naming_series"] = form["NamingSeries"].ToString(), ["finance_book"] = form["FinanceBook"].ToString(), ["process_deferred_accounting"] = form["ProcessDeferredAccounting"].ToString(), ["reversal_of"] = form["ReversalOf"].ToString(), ["tax_withholding_category"] = form["TaxWithholdingCategory"].ToString(), ["from_template"] = form["FromTemplate"].ToString(), ["company"] = form["Company"].ToString(), ["posting_date"] = form["PostingDate"].ToString(), ["apply_tds"] = form.ContainsKey("ApplyTds") ? 1 : 0, ["accounts"] = rows, ["cheque_no"] = form["ChequeNo"].ToString(), ["cheque_date"] = form["ChequeDate"].ToString(), ["user_remark"] = form["UserRemark"].ToString(), ["multi_currency"] = form.ContainsKey("MultiCurrency") ? 1 : 0, ["clearance_date"] = form["ClearanceDate"].ToString(), ["remark"] = form["Remark"].ToString(), ["paid_loan"] = form["PaidLoan"].ToString(), ["inter_company_journal_entry_reference"] = form["InterCompanyReference"].ToString(), ["bill_no"] = form["BillNo"].ToString(), ["bill_date"] = form["BillDate"].ToString(), ["due_date"] = form["DueDate"].ToString(), ["write_off_based_on"] = form["WriteOffBasedOn"].ToString(), ["write_off_amount"] = form["WriteOffAmount"].ToString(), ["pay_to_recd_from"] = form["PayToRecdFrom"].ToString(), ["letter_head"] = form["LetterHead"].ToString(), ["select_print_heading"] = form["PrintHeading"].ToString(), ["mode_of_payment"] = form["ModeOfPayment"].ToString(), ["payment_order"] = form["PaymentOrder"].ToString(), ["party_not_required"] = form.ContainsKey("PartyNotRequired") ? 1 : 0, ["is_opening"] = form["IsOpening"].ToString(), ["stock_entry"] = form["StockEntry"].ToString(), ["auto_repeat"] = form["AutoRepeat"].ToString() };
+                if (!string.IsNullOrWhiteSpace(form["CompanyGstin"])) p["company_gstin"] = form["CompanyGstin"].ToString();
                 var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Journal%20Entry", p)); TempData["Success"] = "Journal Entry created in ERPNext."; return RedirectToAction(nameof(JournalEntryDetails), new { id = response["data"]?["name"]?.ToString() });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Journal Entry creation failed: " + ShortErpNextError(ex.Message); await LoadJournalEntryOptionsAsync(); return View("~/Views/HR/CreateJournalEntry.cshtml"); }
@@ -1610,8 +2524,89 @@ namespace Erp_Aits.Controllers
         public async Task<ActionResult> JournalEntryDetails(string id)
         { try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Journal%20Entry/" + Uri.EscapeDataString(id)))["data"] as JObject; } catch (Exception ex) { TempData["ErpNextError"] = "Journal Entry details could not be loaded: " + ShortErpNextError(ex.Message); } return View("~/Views/HR/JournalEntryDetails.cshtml"); }
 
+        [HttpGet]
+        [Route("HR/JournalAccountPartyType")]
+        public async Task<IActionResult> JournalAccountPartyType(string account)
+        {
+            if (string.IsNullOrWhiteSpace(account)) return BadRequest();
+            try
+            {
+                var data = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Account/" + Uri.EscapeDataString(account)))["data"];
+                var type = data?["account_type"]?.ToString();
+                return Json(new { partyType = type == "Receivable" ? "Customer" : type == "Payable" ? "Supplier" : "" });
+            }
+            catch (Exception ex) { return StatusCode(502, new { message = ShortErpNextError(ex.Message) }); }
+        }
+
+        [HttpGet]
+        [Route("HR/JournalCompanyGstins")]
+        public async Task<IActionResult> JournalCompanyGstins(string company)
+        {
+            if (string.IsNullOrWhiteSpace(company)) return Json(Array.Empty<string>());
+            try
+            {
+                // In current ERPNext this Link field points to the Company GSTIN
+                // DocType. Use those records first so the dropdown mirrors ERPNext.
+                var gstins = new List<string>();
+                try
+                {
+                    var filters = new JArray(new JArray("company", "=", company));
+                    var companyGstinUrl = "/api/resource/Company%20GSTIN?fields=[\"name\",\"gstin\"]&filters="
+                        + Uri.EscapeDataString(filters.ToString(Formatting.None))
+                        + "&limit_page_length=500";
+                    var companyGstinRows = JObject.Parse(await _erpNextService.GetAsync(companyGstinUrl))["data"] as JArray ?? new JArray();
+                    gstins.AddRange(companyGstinRows
+                        .Select(row => row["name"]?.ToString() ?? row["gstin"]?.ToString())
+                        .Where(value => !string.IsNullOrWhiteSpace(value))
+                        .Select(value => value!));
+                }
+                catch
+                {
+                    // Older sites can have company_gstin without the standalone DocType.
+                }
+
+                async Task<JObject> GetDefaultAddress()
+                {
+                    var url = "/api/method/frappe.contacts.doctype.address.address.get_default_address?doctype=Company&name=" + Uri.EscapeDataString(company);
+                    var addressName = JObject.Parse(await _erpNextService.GetAsync(url))["message"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(addressName)) return null;
+                    return JObject.Parse(await _erpNextService.GetAsync("/api/resource/Address/" + Uri.EscapeDataString(addressName)))["data"] as JObject;
+                }
+
+                var address = await GetDefaultAddress();
+                var addressGstin = address?["gstin"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(addressGstin) && !gstins.Contains(addressGstin)) gstins.Add(addressGstin);
+
+                // Some ERPNext installations keep the GSTIN directly on Company.
+                var companyDoc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Company/" + Uri.EscapeDataString(company)))["data"] as JObject;
+                var taxId = companyDoc?["tax_id"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(taxId) && !gstins.Contains(taxId)) gstins.Add(taxId);
+                return Json(gstins);
+            }
+            catch (Exception ex) { return StatusCode(502, new { message = ShortErpNextError(ex.Message) }); }
+        }
+
         private async Task LoadJournalEntryOptionsAsync()
-        { ViewBag.JournalCompanies = await GetSalaryRegisterLinkOptionsAsync("Company"); ViewBag.JournalAccounts = await GetSalaryRegisterLinkOptionsAsync("Account"); ViewBag.JournalFinanceBooks = await GetSalaryRegisterLinkOptionsAsync("Finance Book"); ViewBag.JournalTemplates = await GetSalaryRegisterLinkOptionsAsync("Journal Entry Template"); ViewBag.JournalEntriesForLink = await GetSalaryRegisterLinkOptionsAsync("Journal Entry"); ViewBag.JournalTaxCategories = await GetSalaryRegisterLinkOptionsAsync("Tax Withholding Category"); ViewBag.JournalLetterHeads = await GetSalaryRegisterLinkOptionsAsync("Letter Head"); ViewBag.JournalPrintHeadings = await GetSalaryRegisterLinkOptionsAsync("Print Heading"); ViewBag.JournalModes = await GetSalaryRegisterLinkOptionsAsync("Mode of Payment"); ViewBag.JournalPaymentOrders = await GetSalaryRegisterLinkOptionsAsync("Payment Order"); ViewBag.JournalStockEntries = await GetSalaryRegisterLinkOptionsAsync("Stock Entry"); ViewBag.JournalRepeats = await GetSalaryRegisterLinkOptionsAsync("Auto Repeat"); }
+        { ViewBag.JournalCompanies = await GetSalaryRegisterLinkOptionsAsync("Company"); ViewBag.JournalAccounts = await GetSalaryRegisterLinkOptionsAsync("Account"); ViewBag.JournalFinanceBooks = await GetSalaryRegisterLinkOptionsAsync("Finance Book"); ViewBag.JournalTemplates = await GetSalaryRegisterLinkOptionsAsync("Journal Entry Template"); ViewBag.JournalEntriesForLink = await GetSalaryRegisterLinkOptionsAsync("Journal Entry"); ViewBag.JournalTaxCategories = await GetSalaryRegisterLinkOptionsAsync("Tax Withholding Category"); ViewBag.JournalLetterHeads = await GetSalaryRegisterLinkOptionsAsync("Letter Head"); ViewBag.JournalPrintHeadings = await GetSalaryRegisterLinkOptionsAsync("Print Heading"); ViewBag.JournalModes = await GetSalaryRegisterLinkOptionsAsync("Mode of Payment"); ViewBag.JournalPaymentOrders = await GetSalaryRegisterLinkOptionsAsync("Payment Order"); ViewBag.JournalStockEntries = await GetSubmittedJournalStockEntriesAsync(); ViewBag.JournalRepeats = await GetSalaryRegisterLinkOptionsAsync("Auto Repeat"); }
+
+        private async Task<List<string>> GetSubmittedJournalStockEntriesAsync()
+        {
+            try
+            {
+                var filters = new JArray(new JArray("docstatus", "=", 1));
+                var response = await _erpNextService.GetAsync("/api/resource/Stock%20Entry?fields=[\"name\"]&filters=" + Uri.EscapeDataString(filters.ToString(Formatting.None)) + "&order_by=modified%20desc&limit_page_length=500");
+                return (JObject.Parse(response)["data"] as JArray ?? new JArray())
+                    .Select(item => item["name"]?.ToString())
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name!)
+                    .ToList();
+            }
+            catch
+            {
+                // Stock Entry is optional and may not be installed or accessible.
+                return new List<string>();
+            }
+        }
 
         [HttpGet]
         [Route("HR/SalaryStructureAssignment")]
@@ -1634,9 +2629,11 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/CreateSalaryStructureAssignment")]
-        public async Task<ActionResult> CreateSalaryStructureAssignment()
+        public async Task<ActionResult> CreateSalaryStructureAssignment(string selectedSalaryStructure, string selectedIncomeTaxSlab)
         {
             ViewBag.Title = "New Salary Structure Assignment";
+            ViewBag.SelectedSalaryStructure = selectedSalaryStructure;
+            ViewBag.SelectedIncomeTaxSlab = selectedIncomeTaxSlab;
             await LoadSalaryStructureAssignmentOptionsAsync();
             return View("~/Views/HR/CreateSalaryStructureAssignment.cshtml");
         }
@@ -1658,20 +2655,60 @@ namespace Erp_Aits.Controllers
                 {
                     ["employee"] = form["Employee"].ToString(), ["salary_structure"] = form["SalaryStructure"].ToString(), ["from_date"] = form["FromDate"].ToString(), ["income_tax_slab"] = form["IncomeTaxSlab"].ToString(), ["company"] = form["Company"].ToString(), ["payroll_payable_account"] = form["PayrollPayableAccount"].ToString(), ["currency"] = form["Currency"].ToString(), ["branch"] = form["Branch"].ToString(), ["department"] = form["Department"].ToString(), ["designation"] = form["Designation"].ToString(), ["employee_grade"] = form["EmployeeGrade"].ToString(), ["grade"] = form["EmployeeGrade"].ToString(), ["employee_type"] = form["EmployeeType"].ToString(), ["base"] = form["Base"].ToString(), ["variable"] = form["Variable"].ToString(), ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["taxable_earnings_till_date"] = form["TaxableEarningsTillDate"].ToString(), ["tax_deducted_till_date"] = form["TaxDeductedTillDate"].ToString(), ["payroll_cost_centers"] = BuildAssignmentCostCenters(form["CostCenters"], form["CostCenterPercentages"])
                 };
-                await _erpNextService.PostAsync("/api/resource/Salary%20Structure%20Assignment", payload);
+                var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Salary%20Structure%20Assignment", payload));
                 TempData["Success"] = "Salary Structure Assignment created in ERPNext.";
-                return RedirectToAction(nameof(SalaryStructureAssignment));
+                return RedirectToAction(nameof(SalaryStructureAssignmentDetails), new { id = response["data"]?["name"]?.ToString() });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure Assignment creation failed: " + ShortErpNextError(ex.Message); await LoadSalaryStructureAssignmentOptionsAsync(); return View("~/Views/HR/CreateSalaryStructureAssignment.cshtml"); }
         }
 
         [HttpGet]
         [Route("HR/SalaryStructureAssignmentDetails/{id}")]
-        public async Task<ActionResult> SalaryStructureAssignmentDetails(string id)
+        public async Task<ActionResult> SalaryStructureAssignmentDetails(string id, bool readyToSubmit = false, string selectedSalaryStructure = null, string selectedIncomeTaxSlab = null)
         {
             try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure%20Assignment/" + Uri.EscapeDataString(id)))["data"] as JObject; }
             catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure Assignment details could not be loaded: " + ShortErpNextError(ex.Message); }
+            await LoadSalaryStructureAssignmentOptionsAsync();
+            ViewBag.ReadyToSubmit = readyToSubmit;
+            ViewBag.SelectedSalaryStructure = selectedSalaryStructure;
+            ViewBag.SelectedIncomeTaxSlab = selectedIncomeTaxSlab;
             return View("~/Views/HR/SalaryStructureAssignmentDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/SalaryStructureAssignmentDetails/{id}")]
+        public async Task<ActionResult> UpdateSalaryStructureAssignment(string id, IFormCollection form)
+        {
+            try
+            {
+                var payload = new JObject { ["employee"] = form["Employee"].ToString(), ["salary_structure"] = form["SalaryStructure"].ToString(), ["from_date"] = form["FromDate"].ToString(), ["income_tax_slab"] = form["IncomeTaxSlab"].ToString(), ["company"] = form["Company"].ToString(), ["payroll_payable_account"] = form["PayrollPayableAccount"].ToString(), ["currency"] = form["Currency"].ToString(), ["base"] = form["Base"].ToString(), ["variable"] = form["Variable"].ToString(), ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["taxable_earnings_till_date"] = form["TaxableEarningsTillDate"].ToString(), ["tax_deducted_till_date"] = form["TaxDeductedTillDate"].ToString() };
+                if (form.ContainsKey("CostCenters")) payload["payroll_cost_centers"] = BuildAssignmentCostCenters(form["CostCenters"], form["CostCenterPercentages"]);
+                await _erpNextService.PutAsync("/api/resource/Salary%20Structure%20Assignment/" + Uri.EscapeDataString(id), payload);
+                TempData["Success"] = "Salary Structure Assignment updated in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure Assignment update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(SalaryStructureAssignmentDetails), new { id, readyToSubmit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/SalaryStructureAssignmentStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetSalaryStructureAssignmentStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return RedirectToAction(nameof(SalaryStructureAssignmentDetails), new { id });
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure%20Assignment/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (document == null) throw new InvalidOperationException("Salary Structure Assignment was not found in ERPNext.");
+                if (status == 1)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Salary Structure Assignment", name = id });
+                TempData["Success"] = status == 1 ? "Salary Structure Assignment submitted in ERPNext." : "Salary Structure Assignment cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure Assignment status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(SalaryStructureAssignmentDetails), new { id });
         }
 
         private async Task LoadSalaryStructureAssignmentOptionsAsync()
@@ -1714,25 +2751,55 @@ namespace Erp_Aits.Controllers
             var selectedEmployees = form["EmployeeIds"].Where(value => !string.IsNullOrWhiteSpace(value)).ToList();
             var salaryStructure = form["SalaryStructure"].ToString();
             var fromDate = form["FromDate"].ToString();
-            if (!selectedEmployees.Any() || string.IsNullOrWhiteSpace(salaryStructure) || string.IsNullOrWhiteSpace(fromDate))
+            var company = form["Company"].ToString();
+            if (!selectedEmployees.Any() || string.IsNullOrWhiteSpace(salaryStructure) || string.IsNullOrWhiteSpace(fromDate) || string.IsNullOrWhiteSpace(company))
             {
-                TempData["ErpNextError"] = "Select at least one employee and complete Salary Structure and From Date.";
+                TempData["ErpNextError"] = "Select at least one employee and complete Salary Structure, Company, and Effective From.";
                 await LoadBulkSalaryStructureAssignmentOptionsAsync();
                 return View("~/Views/HR/BulkSalaryStructureAssignment.cshtml");
             }
 
             try
             {
-                var baseValues = form["BaseValues"].ToList();
-                var variableValues = form["VariableValues"].ToList();
-                foreach (var employee in selectedEmployees.Select((value, index) => new { value, index }))
+                if (!DateTime.TryParse(fromDate, out var effectiveFrom)) throw new InvalidOperationException("Effective From must be a valid date.");
+                var structure = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(salaryStructure)))["data"] as JObject;
+                if (structure == null || structure["docstatus"]?.ToObject<int>() == 2 || string.Equals(structure["is_active"]?.ToString(), "No", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("Select an active Salary Structure from ERPNext.");
+                var structureCompany = structure["company"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(structureCompany) && !string.Equals(structureCompany, company, StringComparison.Ordinal))
+                    throw new InvalidOperationException("The selected Salary Structure belongs to a different company.");
+
+                var eligibleEmployees = new List<string>();
+                var invalidEmployees = new List<string>();
+                foreach (var employeeId in selectedEmployees.Distinct())
+                {
+                    var employee = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee/" + Uri.EscapeDataString(employeeId)))["data"] as JObject;
+                    var joiningDate = employee?["date_of_joining"]?.ToObject<DateTime?>();
+                    var relievingDate = employee?["relieving_date"]?.ToObject<DateTime?>();
+                    var matchesQuickFilters = (string.IsNullOrWhiteSpace(form["Branch"]) || string.Equals(employee?["branch"]?.ToString(), form["Branch"].ToString(), StringComparison.Ordinal))
+                        && (string.IsNullOrWhiteSpace(form["Department"]) || string.Equals(employee?["department"]?.ToString(), form["Department"].ToString(), StringComparison.Ordinal))
+                        && (string.IsNullOrWhiteSpace(form["Designation"]) || string.Equals(employee?["designation"]?.ToString(), form["Designation"].ToString(), StringComparison.Ordinal))
+                        && (string.IsNullOrWhiteSpace(form["EmployeeGrade"]) || string.Equals(employee?["grade"]?.ToString(), form["EmployeeGrade"].ToString(), StringComparison.Ordinal))
+                        && (string.IsNullOrWhiteSpace(form["EmploymentType"]) || string.Equals(employee?["employment_type"]?.ToString() ?? employee?["employee_type"]?.ToString(), form["EmploymentType"].ToString(), StringComparison.Ordinal));
+                    var isEligible = employee != null && string.Equals(employee["status"]?.ToString(), "Active", StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(employee["company"]?.ToString(), company, StringComparison.Ordinal)
+                        && (!joiningDate.HasValue || joiningDate.Value.Date <= effectiveFrom.Date)
+                        && (!relievingDate.HasValue || relievingDate.Value.Date >= effectiveFrom.Date)
+                        && matchesQuickFilters;
+                    if (isEligible) eligibleEmployees.Add(employeeId); else invalidEmployees.Add(employeeId);
+                }
+                if (invalidEmployees.Any())
+                    throw new InvalidOperationException("These employees are not eligible for the selected company/effective date: " + string.Join(", ", invalidEmployees) + ".");
+
+                var failures = new List<string>();
+                foreach (var employeeId in eligibleEmployees)
                 {
                     var payload = new JObject
                     {
-                        ["employee"] = employee.value,
+                        ["employee"] = employeeId,
                         ["salary_structure"] = salaryStructure,
                         ["from_date"] = fromDate,
-                        ["company"] = form["Company"].ToString(),
+                        ["company"] = company,
                         ["payroll_payable_account"] = form["PayrollPayableAccount"].ToString(),
                         ["branch"] = form["Branch"].ToString(),
                         ["department"] = form["Department"].ToString(),
@@ -1740,13 +2807,16 @@ namespace Erp_Aits.Controllers
                         ["employee_grade"] = form["EmployeeGrade"].ToString(),
                         ["grade"] = form["EmployeeGrade"].ToString(),
                         ["employee_type"] = form["EmploymentType"].ToString(),
-                        ["base"] = employee.index < baseValues.Count ? baseValues[employee.index] : "",
-                        ["variable"] = employee.index < variableValues.Count ? variableValues[employee.index] : ""
+                        ["base"] = form["BaseByEmployee[" + employeeId + "]"].ToString(),
+                        ["variable"] = form["VariableByEmployee[" + employeeId + "]"].ToString()
                     };
-                    await _erpNextService.PostAsync("/api/resource/Salary%20Structure%20Assignment", payload);
+                    try { await _erpNextService.PostAsync("/api/resource/Salary%20Structure%20Assignment", payload); }
+                    catch (Exception ex) { failures.Add(employeeId + ": " + ShortErpNextError(ex.Message)); }
                 }
 
-                TempData["Success"] = $"Created {selectedEmployees.Count} salary structure assignment(s) in ERPNext.";
+                if (failures.Any())
+                    throw new InvalidOperationException("Some assignments could not be created: " + string.Join(" | ", failures));
+                TempData["Success"] = $"Created {eligibleEmployees.Count} salary structure assignment(s) in ERPNext.";
                 return RedirectToAction(nameof(SalaryStructureAssignment));
             }
             catch (Exception ex)
@@ -3722,7 +4792,7 @@ namespace Erp_Aits.Controllers
             }
             catch
             {
-                // Keep endpoint clean.
+                Response.StatusCode = 502;
             }
 
 
@@ -3809,6 +4879,7 @@ namespace Erp_Aits.Controllers
             }
             catch
             {
+                Response.StatusCode = 502;
             }
 
 
@@ -3823,7 +4894,7 @@ namespace Erp_Aits.Controllers
         [Route("HR/GetPaymentEntryAccountDetails")]
         public async Task<JsonResult>
     GetPaymentEntryAccountDetails(
-        string account)
+        string account, string date = null)
         {
             if (string.IsNullOrWhiteSpace(account))
             {
@@ -3860,11 +4931,18 @@ namespace Erp_Aits.Controllers
                     );
                 }
 
+                var balanceJson = await _erpNextService.GetAsync(
+                    "/api/method/erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details?account="
+                    + Uri.EscapeDataString(account) + "&date=" + Uri.EscapeDataString(string.IsNullOrWhiteSpace(date) ? DateTime.Today.ToString("yyyy-MM-dd") : date));
+                var balance = JObject.Parse(balanceJson)["message"]?["account_balance"]?.ToObject<decimal?>() ?? 0;
+
 
                 return Json(
                     new
                     {
                         success = true,
+
+                        balance,
 
                         currency =
                             doc["account_currency"]
@@ -3940,8 +5018,7 @@ namespace Erp_Aits.Controllers
                 { "company", company },
                 { "party_type", partyType },
                 { "party", party },
-                { "payment_type", paymentType },
-                { "posting_date", postingDate }
+                { "date", postingDate }
                     };
 
                 string json =
@@ -3980,22 +5057,22 @@ namespace Erp_Aits.Controllers
                             message["party_balance"]?.ToObject<decimal?>() ?? 0,
 
                         paidFrom =
-                            message["paid_from"]?.ToString() ?? "",
+                            paymentType == "Receive" ? message["party_account"]?.ToString() ?? "" : "",
 
                         paidTo =
-                            message["paid_to"]?.ToString() ?? "",
+                            paymentType == "Pay" ? message["party_account"]?.ToString() ?? "" : "",
 
                         paidFromAccountCurrency =
-                            message["paid_from_account_currency"]?.ToString() ?? "",
+                            paymentType == "Receive" ? message["party_account_currency"]?.ToString() ?? "" : "",
 
                         paidToAccountCurrency =
-                            message["paid_to_account_currency"]?.ToString() ?? "",
+                            paymentType == "Pay" ? message["party_account_currency"]?.ToString() ?? "" : "",
 
                         paidFromAccountBalance =
-                            message["paid_from_account_balance"]?.ToObject<decimal?>() ?? 0,
+                            paymentType == "Receive" ? message["account_balance"]?.ToObject<decimal?>() ?? 0 : 0,
 
                         paidToAccountBalance =
-                            message["paid_to_account_balance"]?.ToObject<decimal?>() ?? 0,
+                            paymentType == "Pay" ? message["account_balance"]?.ToObject<decimal?>() ?? 0 : 0,
 
                         sourceExchangeRate =
                             message["source_exchange_rate"]?.ToObject<decimal?>() ?? 1,
@@ -4027,6 +5104,84 @@ namespace Erp_Aits.Controllers
                     }
                 );
             }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> PaymentEntryContacts(string partyType, string party, string contact)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(contact))
+                {
+                    var json = await _erpNextService.GetAsync("/api/method/frappe.contacts.doctype.contact.contact.get_contact_details?contact=" + Uri.EscapeDataString(contact));
+                    return Json(new { success = true, email = JObject.Parse(json)["message"]?["contact_email"]?.ToString() ?? "" });
+                }
+                if (string.IsNullOrWhiteSpace(partyType) || string.IsNullOrWhiteSpace(party))
+                    return Json(new { success = true, contacts = new string[0] });
+                var filters = JsonConvert.SerializeObject(new { link_doctype = partyType, link_name = party });
+                var url = "/api/method/frappe.contacts.doctype.contact.contact.contact_query?doctype=Contact&txt=&searchfield=name&start=0&page_len=100&filters=" + Uri.EscapeDataString(filters);
+                var rows = JObject.Parse(await _erpNextService.GetAsync(url))["message"] as JArray ?? new JArray();
+                return Json(new { success = true, contacts = rows.Select(r => r[0]?.ToString()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = CleanPaymentEntryErpError(ex.Message) }); }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> PaymentEntryOutstanding(string company, string partyType, string party, string paymentType, string partyAccount, string postingDate, string costCenter, string kind)
+        {
+            if (string.IsNullOrWhiteSpace(company) || string.IsNullOrWhiteSpace(partyType) || string.IsNullOrWhiteSpace(party) || string.IsNullOrWhiteSpace(partyAccount) || (kind != "invoices" && kind != "orders") || (paymentType != "Pay" && paymentType != "Receive"))
+                return Json(new { success = false, message = "Select company, payment type, party and party account first." });
+            try
+            {
+                var args = new Dictionary<string, object> {
+                    ["company"] = company, ["party_type"] = partyType, ["party"] = party,
+                    ["payment_type"] = paymentType, ["party_account"] = partyAccount,
+                    ["posting_date"] = postingDate, ["cost_center"] = costCenter,
+                    [kind == "invoices" ? "get_outstanding_invoices" : "get_orders_to_be_billed"] = true
+                };
+                var json = await _erpNextService.PostMethodAsync("/api/method/erpnext.accounts.doctype.payment_entry.payment_entry.get_outstanding_reference_documents", new { args });
+                var rows = JObject.Parse(json)["message"] as JArray ?? new JArray();
+                var documents = rows.Select(r => new {
+                    voucher_type = r["voucher_type"]?.ToString(), voucher_no = r["voucher_no"]?.ToString(),
+                    invoice_amount = r["invoice_amount"]?.ToObject<decimal?>() ?? 0,
+                    outstanding_amount = r["outstanding_amount"]?.ToObject<decimal?>() ?? 0,
+                    allocated_amount = r["allocated_amount"]?.ToObject<decimal?>() ?? 0,
+                    payment_term = r["payment_term"]?.ToString(), due_date = r["due_date"]?.ToString(),
+                    exchange_rate = r["exchange_rate"]?.ToObject<decimal?>()
+                }).ToList();
+                return Json(new { success = true, documents });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = CleanPaymentEntryErpError(ex.Message) }); }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> PaymentEntryGstDetails(string company, string partyType, string party)
+        {
+            try
+            {
+                async Task<JObject> GetDefaultAddress(string doctype, string name)
+                {
+                    if (string.IsNullOrWhiteSpace(name)) return null;
+                    var url = "/api/method/frappe.contacts.doctype.address.address.get_default_address?doctype=" + Uri.EscapeDataString(doctype) + "&name=" + Uri.EscapeDataString(name);
+                    var addressName = JObject.Parse(await _erpNextService.GetAsync(url))["message"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(addressName)) return null;
+                    return JObject.Parse(await _erpNextService.GetAsync("/api/resource/Address/" + Uri.EscapeDataString(addressName)))["data"] as JObject;
+                }
+                var companyAddress = await GetDefaultAddress("Company", company);
+                var customerAddress = partyType == "Customer" ? await GetDefaultAddress(partyType, party) : null;
+                JObject customer = null;
+                if (partyType == "Customer" && !string.IsNullOrWhiteSpace(party))
+                    customer = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Customer/" + Uri.EscapeDataString(party)))["data"] as JObject;
+                var stateNumber = customerAddress?["gst_state_number"]?.ToString();
+                var state = customerAddress?["gst_state"]?.ToString() ?? customerAddress?["state"]?.ToString();
+                return Json(new {
+                    success = true, companyAddress = companyAddress?["name"]?.ToString(), companyGstin = companyAddress?["gstin"]?.ToString(),
+                    customerAddress = customerAddress?["name"]?.ToString(), customerGstin = customerAddress?["gstin"]?.ToString(),
+                    gstCategory = customerAddress?["gst_category"]?.ToString() ?? customer?["gst_category"]?.ToString(),
+                    placeOfSupply = !string.IsNullOrWhiteSpace(stateNumber) && !string.IsNullOrWhiteSpace(state) ? stateNumber + "-" + state : ""
+                });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = CleanPaymentEntryErpError(ex.Message) }); }
         }
 
 
@@ -20579,19 +21734,62 @@ VALUES
             }
             try
             {
-                var payload = new JObject { ["naming_series"] = form["NamingSeries"].ToString(), ["employee"] = form["Employee"].ToString(), ["company"] = form["Company"].ToString(), ["is_recurring"] = form.ContainsKey("IsRecurring") ? 1 : 0, ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0, ["from_date"] = form["FromDate"].ToString(), ["to_date"] = form["ToDate"].ToString(), ["payroll_date"] = form["PayrollDate"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["currency"] = form["Currency"].ToString(), ["amount"] = form["Amount"].ToString(), ["deduct_full_tax_on_selected_payroll_date"] = form.ContainsKey("DeductFullTax") ? 1 : 0, ["overwrite_salary_structure_amount"] = form.ContainsKey("OverwriteSalaryStructureAmount") ? 1 : 0, ["ref_doctype"] = form["ReferenceDocumentType"].ToString(), ["ref_docname"] = form["ReferenceDocument"].ToString() };
-                await _erpNextService.PostAsync("/api/resource/Additional%20Salary", payload);
+                var result = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Additional%20Salary", BuildAdditionalSalaryPayload(form)));
+                var name = result["data"]?["name"]?.ToString();
+                if (string.IsNullOrWhiteSpace(name)) throw new InvalidOperationException("ERPNext did not return the document name.");
                 TempData["Success"] = "Additional Salary created in ERPNext.";
-                return RedirectToAction(nameof(AdditionalSalary));
+                return RedirectToAction(nameof(AdditionalSalaryDetails), new { id = name });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Additional Salary creation failed: " + ShortErpNextError(ex.Message); await LoadAdditionalSalaryOptionsAsync(); return View(); }
         }
 
+        [HttpGet]
         public async Task<ActionResult> AdditionalSalaryDetails(string id)
         {
-            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Additional%20Salary/" + Uri.EscapeDataString(id)))["data"] as JObject; }
+            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Additional%20Salary/" + Uri.EscapeDataString(id)))["data"] as JObject; await LoadAdditionalSalaryOptionsAsync(); }
             catch (Exception ex) { TempData["ErpNextError"] = "Additional Salary details could not be loaded: " + ShortErpNextError(ex.Message); }
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdateAdditionalSalary(string id, IFormCollection form)
+        {
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Additional%20Salary/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (doc == null || doc["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only a draft Additional Salary can be edited.");
+                if (string.IsNullOrWhiteSpace(form["Employee"]) || string.IsNullOrWhiteSpace(form["Company"]) || string.IsNullOrWhiteSpace(form["SalaryComponent"]) || string.IsNullOrWhiteSpace(form["Currency"]) || string.IsNullOrWhiteSpace(form["Amount"])) throw new InvalidOperationException("Employee, Company, Salary Component, Currency, and Amount are required.");
+                await _erpNextService.PutAsync("/api/resource/Additional%20Salary/" + Uri.EscapeDataString(id), BuildAdditionalSalaryPayload(form));
+                TempData["Success"] = "Draft saved in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Additional Salary update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(AdditionalSalaryDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> SetAdditionalSalaryStatus(string id, int status)
+        {
+            if (status is not (1 or 2)) return BadRequest();
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Additional%20Salary/" + Uri.EscapeDataString(id)))["data"] as JObject ?? throw new InvalidOperationException("Additional Salary not found in ERPNext.");
+                var current = doc["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && current == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc });
+                else if (status == 2 && current == 1) await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Additional Salary", name = id });
+                else throw new InvalidOperationException("The document status has changed. Refresh and try again.");
+                TempData["Success"] = status == 1 ? "Additional Salary submitted in ERPNext." : "Additional Salary cancelled in ERPNext.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Additional Salary status update failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(AdditionalSalaryDetails), new { id });
+        }
+
+        private static JObject BuildAdditionalSalaryPayload(IFormCollection form)
+        {
+            if (!decimal.TryParse(form["Amount"].ToString(), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var amount))
+                throw new InvalidOperationException("Enter a valid amount.");
+            return new JObject { ["naming_series"] = form["NamingSeries"].ToString(), ["employee"] = form["Employee"].ToString(), ["company"] = form["Company"].ToString(), ["is_recurring"] = form.ContainsKey("IsRecurring") ? 1 : 0, ["disabled"] = form.ContainsKey("Disabled") ? 1 : 0, ["from_date"] = form["FromDate"].ToString(), ["to_date"] = form["ToDate"].ToString(), ["payroll_date"] = form["PayrollDate"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["currency"] = form["Currency"].ToString(), ["amount"] = amount, ["deduct_full_tax_on_selected_payroll_date"] = form.ContainsKey("DeductFullTax") ? 1 : 0, ["overwrite_salary_structure_amount"] = form.ContainsKey("OverwriteSalaryStructureAmount") ? 1 : 0, ["ref_doctype"] = form["ReferenceDocumentType"].ToString(), ["ref_docname"] = form["ReferenceDocument"].ToString() };
         }
 
         private async Task LoadAdditionalSalaryOptionsAsync()
@@ -21022,7 +22220,7 @@ VALUES
 
         [HttpGet]
         [Route("HR/PaymentEntry")]
-        public async Task<ActionResult> PaymentEntry(string id, string paymentType, string partyType, string party, string title)
+        public async Task<ActionResult> PaymentEntry(string id, string paymentType, string partyType, string party, string title, int page = 1)
         {
             ViewBag.IdFilter = id;
             ViewBag.PaymentTypeFilter = paymentType;
@@ -21032,8 +22230,33 @@ VALUES
 
             try
             {
-                // Keep the local detail records current before the list is rendered.
-                await RefreshPaymentEntriesFromErpNextAsync();
+                const int pageSize = 50;
+                page = Math.Max(1, Math.Min(page, 100000));
+                var filters = new JArray();
+                if (!string.IsNullOrWhiteSpace(id)) filters.Add(new JArray("name", "like", "%" + id.Trim() + "%"));
+                if (!string.IsNullOrWhiteSpace(paymentType)) filters.Add(new JArray("payment_type", "=", paymentType));
+                if (!string.IsNullOrWhiteSpace(partyType)) filters.Add(new JArray("party_type", "=", partyType));
+                if (!string.IsNullOrWhiteSpace(party)) filters.Add(new JArray("party", "like", "%" + party.Trim() + "%"));
+                if (!string.IsNullOrWhiteSpace(title)) filters.Add(new JArray("party_name", "like", "%" + title.Trim() + "%"));
+                var fields = new JArray("name", "payment_type", "party_type", "party", "party_name", "docstatus", "status");
+                var url = "/api/resource/Payment%20Entry?fields=" + Uri.EscapeDataString(fields.ToString(Formatting.None))
+                    + "&filters=" + Uri.EscapeDataString(filters.ToString(Formatting.None))
+                    + "&order_by=modified%20desc&limit_start=" + ((page - 1) * pageSize)
+                    + "&limit_page_length=" + (pageSize + 1);
+                var rows = JObject.Parse(await _erpNextService.GetAsync(url))["data"] as JArray ?? new JArray();
+                ViewBag.PaymentEntryPage = page;
+                ViewBag.PaymentEntryHasNext = rows.Count > pageSize;
+                var entries = rows.Take(pageSize).Select(row => new PaymentEntryListRow
+                {
+                    ErpNextId = row["name"]?.ToString(),
+                    PaymentType = row["payment_type"]?.ToString(),
+                    PartyType = row["party_type"]?.ToString(),
+                    Party = row["party"]?.ToString(),
+                    PartyName = row["party_name"]?.ToString(),
+                    DocStatus = row.Value<int?>("docstatus") ?? 0,
+                    Status = row["status"]?.ToString()
+                }).ToList();
+                return View("~/Views/HR/PaymentEntry.cshtml", entries);
             }
             catch (Exception ex)
             {
@@ -21044,6 +22267,25 @@ VALUES
 
             var list = _paymentEntryService.GetAll(id, paymentType, partyType, party, title);
             return View("~/Views/HR/PaymentEntry.cshtml", list);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> OpenErpPaymentEntry(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return BadRequest();
+            try
+            {
+                var json = await _erpNextService.GetAsync("/api/resource/Payment%20Entry/" + Uri.EscapeDataString(name));
+                var entry = MapErpPaymentEntry(JObject.Parse(json)["data"]);
+                if (entry == null) throw new Exception("ERPNext returned an empty payment entry.");
+                var localId = _paymentEntryService.InsertOrUpdate(entry);
+                return RedirectToAction("PaymentEntryDetails", new { id = localId });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = "Payment Entry could not be opened: " + CleanPaymentEntryErpError(ex.Message);
+                return RedirectToAction("PaymentEntry");
+            }
         }
 
 
@@ -21062,7 +22304,7 @@ VALUES
                 "~/Views/HR/CreatePaymentEntry.cshtml",
                 new PaymentEntry
                 {
-                    Series = "ACC-PAY-.YYYY.-",
+                    Series = (ViewBag.NamingSeries as List<string>)?.FirstOrDefault() ?? "",
                     PostingDate = DateTime.Today,
                     PaymentType = "Receive",
                     Company = "Vinod Cookware India Private Limited",
@@ -21075,11 +22317,7 @@ VALUES
         }
         private async Task LoadPaymentEntryMasterDataAsync()
         {
-            ViewBag.NamingSeries =
-                new List<string>
-                {
-            "ACC-PAY-.YYYY.-"
-                };
+            ViewBag.NamingSeries = new List<string>();
 
             ViewBag.Companies = new List<object>();
             ViewBag.ModesOfPayment = new List<object>();
@@ -21090,107 +22328,52 @@ VALUES
             ViewBag.BankAccounts = new List<object>();
 
 
+            var errors = new List<string>();
             try
             {
-                string companyJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Company" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.Companies =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        companyJson
-                    )?.data;
-
-
-                string mopJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Mode%20of%20Payment" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.ModesOfPayment =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        mopJson
-                    )?.data;
-
-
-                string projectJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Project" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.Projects =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        projectJson
-                    )?.data;
-
-
-                string costCenterJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Cost%20Center" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.CostCenters =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        costCenterJson
-                    )?.data;
-
-
-                string salesTaxJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Sales%20Taxes%20and%20Charges%20Template" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.SalesTaxTemplates =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        salesTaxJson
-                    )?.data;
-
-
-                string purchaseTaxJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Purchase%20Taxes%20and%20Charges%20Template" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.PurchaseTaxTemplates =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        purchaseTaxJson
-                    )?.data;
-
-
-                string bankJson =
-                    await _erpNextService.GetAsync(
-                        "/api/resource/Bank%20Account" +
-                        "?fields=[\"name\"]" +
-                        "&limit_page_length=5000"
-                    );
-
-                ViewBag.BankAccounts =
-                    JsonConvert.DeserializeObject<dynamic>(
-                        bankJson
-                    )?.data;
+                var metadata = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/method/frappe.desk.form.load.getdoctype?doctype=Payment%20Entry&with_parent=1"));
+                var document = (metadata["docs"] as JArray)?.FirstOrDefault(d => d["name"]?.ToString() == "Payment Entry");
+                var seriesField = (document?["fields"] as JArray)?.FirstOrDefault(f => f["fieldname"]?.ToString() == "naming_series");
+                var options = seriesField?["options"]?.ToString();
+                ViewBag.NamingSeries = (options ?? "").Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim()).Where(s => s.Length > 0).Distinct().ToList();
+                if (((List<string>)ViewBag.NamingSeries).Count == 0)
+                    errors.Add("Naming series: ERPNext returned no options.");
             }
             catch (Exception ex)
             {
-                TempData["ErpNextError"] =
-                    "Unable to load Payment Entry masters: "
-                    + CleanPaymentEntryErpError(
-                        ex.Message
-                    );
+                errors.Add("Naming series: " + CleanPaymentEntryErpError(ex.Message));
             }
+
+            async Task<JArray> LoadMaster(string label, string doctype)
+            {
+                try
+                {
+                    var json = await _erpNextService.GetAsync("/api/resource/" + Uri.EscapeDataString(doctype)
+                        + "?fields=[\"name\"]&limit_page_length=5000");
+                    return JObject.Parse(json)["data"] as JArray ?? new JArray();
+                }
+                catch (Exception ex)
+                {
+                    errors.Add(label + ": " + CleanPaymentEntryErpError(ex.Message));
+                    return new JArray();
+                }
+            }
+
+            ViewBag.Companies = await LoadMaster("Companies", "Company");
+            ViewBag.ModesOfPayment = await LoadMaster("Modes of payment", "Mode of Payment");
+            ViewBag.Projects = await LoadMaster("Projects", "Project");
+            ViewBag.CostCenters = await LoadMaster("Cost centers", "Cost Center");
+            ViewBag.SalesTaxTemplates = await LoadMaster("Sales tax templates", "Sales Taxes and Charges Template");
+            ViewBag.PurchaseTaxTemplates = await LoadMaster("Purchase tax templates", "Purchase Taxes and Charges Template");
+            ViewBag.BankAccounts = await LoadMaster("Bank accounts", "Bank Account");
+            ViewBag.LetterHeads = await LoadMaster("Letter heads", "Letter Head");
+            ViewBag.PrintHeadings = await LoadMaster("Print headings", "Print Heading");
+            if (errors.Count > 0)
+                ViewBag.PaymentEntryMasterError = "Some ERPNext options could not be loaded: " + string.Join(" ", errors);
         }
+
 
 
         [HttpPost]
@@ -21302,32 +22485,39 @@ VALUES
 
         private async Task RefreshPaymentEntriesFromErpNextAsync()
         {
-            string listJson = await _erpNextService.GetAsync(
-                "/api/resource/Payment%20Entry"
-                + "?fields=[\"name\"]"
-                + "&order_by=modified%20desc"
-                + "&limit_page_length=100");
-
-            var rows = JObject.Parse(listJson)["data"] as JArray ?? new JArray();
-            foreach (JToken row in rows)
+            const int pageSize = 100;
+            int offset = 0;
+            var errors = new List<string>();
+            JArray rows;
+            do
             {
-                string erpId = row["name"]?.ToString();
-                if (string.IsNullOrWhiteSpace(erpId))
-                    continue;
-
-                try
+                string listJson = await _erpNextService.GetAsync(
+                    "/api/resource/Payment%20Entry?fields=[\"name\"]"
+                    + "&order_by=name%20asc&limit_page_length=" + pageSize
+                    + "&limit_start=" + offset);
+                rows = JObject.Parse(listJson)["data"] as JArray ?? new JArray();
+                foreach (JToken row in rows)
                 {
-                    string detailJson = await _erpNextService.GetAsync(
-                        "/api/resource/Payment%20Entry/" + Uri.EscapeDataString(erpId));
-                    var entry = MapErpPaymentEntry(JObject.Parse(detailJson)["data"]);
-                    if (entry != null)
+                    string erpId = row["name"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(erpId)) continue;
+                    try
+                    {
+                        string detailJson = await _erpNextService.GetAsync(
+                            "/api/resource/Payment%20Entry/" + Uri.EscapeDataString(erpId));
+                        var entry = MapErpPaymentEntry(JObject.Parse(detailJson)["data"]);
+                        if (entry == null) throw new Exception("ERPNext returned an empty document.");
                         _paymentEntryService.InsertOrUpdate(entry);
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add(erpId + ": " + CleanPaymentEntryErpError(ex.Message));
+                    }
                 }
-                catch
-                {
-                    // A malformed document must not prevent other ERPNext entries from loading.
-                }
+                offset += rows.Count;
             }
+            while (rows.Count == pageSize);
+            if (errors.Count > 0)
+                throw new Exception($"{errors.Count} payment entries could not be refreshed. " + errors[0]);
         }
 
         private string CleanPaymentEntryErpError(
@@ -21916,7 +23106,10 @@ VALUES
 
                                 account_head = tax.AccountHead,
                                 rate = tax.TaxRate ?? 0,
-                                tax_amount = tax.Amount ?? 0
+                                tax_amount = tax.Amount ?? 0,
+                                add_deduct_tax = tax.AddDeductTax,
+                                row_id = tax.RowId,
+                                included_in_paid_amount = tax.IncludedInPaidAmount ? 1 : 0
                             }
                         );
                     }
@@ -21977,6 +23170,16 @@ VALUES
             { "received_amount", model.ReceivedAmount },
             { "source_exchange_rate", model.SourceExchangeRate },
             { "target_exchange_rate", model.TargetExchangeRate },
+            { "letter_head", model.LetterHead },
+            { "print_heading", model.PrintHeading },
+            { "custom_remarks", model.CustomRemarks ? 1 : 0 },
+            { "remarks", model.Remarks },
+            { "company_address", model.CompanyAddress },
+            { "company_gstin", model.CompanyGstin },
+            { "customer_address", model.CustomerAddress },
+            { "billing_address_gstin", model.BillingAddressGstin },
+            { "place_of_supply", model.PlaceOfSupply },
+            { "gst_category", model.GstCategory },
 
             {
                 "project",
@@ -22028,6 +23231,25 @@ VALUES
                 if (taxRows.Count > 0)
                 {
                     payload["taxes"] = taxRows;
+                }
+
+                if (model.References != null && model.References.Any(r => !string.IsNullOrWhiteSpace(r.ReferenceDoctype) || !string.IsNullOrWhiteSpace(r.ReferenceName)))
+                {
+                    if (model.References.Any(r => string.IsNullOrWhiteSpace(r.ReferenceDoctype) || string.IsNullOrWhiteSpace(r.ReferenceName)))
+                        throw new Exception("Payment references require both type and name.");
+                    payload["references"] = model.References.Select(r => new {
+                        reference_doctype = r.ReferenceDoctype, reference_name = r.ReferenceName,
+                        allocated_amount = r.AllocatedAmount,
+                        payment_term = r.PaymentTerm,
+                        due_date = r.DueDate?.ToString("yyyy-MM-dd"),
+                        exchange_rate = r.ExchangeRate
+                    }).ToList();
+                }
+                if (model.Deductions != null && model.Deductions.Count > 0)
+                {
+                    if (model.Deductions.Any(d => string.IsNullOrWhiteSpace(d.Account) || string.IsNullOrWhiteSpace(d.CostCenter)))
+                        throw new Exception("Each deduction requires an account and cost center.");
+                    payload["deductions"] = model.Deductions.Select(d => new { account = d.Account, cost_center = d.CostCenter, amount = d.Amount }).ToList();
                 }
 
                 string createJson =
@@ -25085,11 +26307,57 @@ VALUES
 
 
 
-        public ActionResult PaymentEntryDetails(int id)
+        public async Task<ActionResult> PaymentEntryDetails(int id)
         {
             var model = _paymentEntryService.GetById(id);
             if (model == null) return NotFound();
+            if (!string.IsNullOrWhiteSpace(model.ErpNextId))
+            {
+                try
+                {
+                    var response = JObject.Parse(await _erpNextService.GetAsync(
+                        "/api/resource/Payment%20Entry/" + Uri.EscapeDataString(model.ErpNextId)));
+                    var refreshed = MapErpPaymentEntry(response["data"]);
+                    if (refreshed == null) throw new Exception("ERPNext returned an empty payment entry.");
+                    _paymentEntryService.InsertOrUpdate(refreshed);
+                    refreshed.Id = id;
+                    model = refreshed;
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.PaymentEntryRefreshError = CleanPaymentEntryErpError(ex.Message);
+                }
+            }
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ChangePaymentEntryStatus(int id, string actionType)
+        {
+            var local = _paymentEntryService.GetById(id);
+            if (local == null) return NotFound();
+            try
+            {
+                if (string.IsNullOrWhiteSpace(local.ErpNextId))
+                    throw new Exception("This payment entry is not linked to ERPNext.");
+                var url = "/api/resource/Payment%20Entry/" + Uri.EscapeDataString(local.ErpNextId);
+                var document = JObject.Parse(await _erpNextService.GetAsync(url))["data"] as JObject;
+                if (document == null) throw new Exception("ERPNext returned an empty payment entry.");
+                var status = document.Value<int?>("docstatus") ?? 0;
+                if (actionType == "submit" && status == 0)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else if (actionType == "cancel" && status == 1)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Payment Entry", name = local.ErpNextId });
+                else
+                    throw new Exception("The ERPNext status has changed. Refresh the page and try again.");
+                TempData["Success"] = actionType == "submit" ? "Payment Entry submitted." : "Payment Entry cancelled.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = CleanPaymentEntryErpError(ex.Message);
+            }
+            return RedirectToAction("PaymentEntryDetails", new { id });
         }
 
         public async Task<ActionResult> PurposeOfTravel(string id)

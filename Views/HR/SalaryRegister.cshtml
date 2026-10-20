@@ -63,7 +63,7 @@
             @foreach (var item in Model)
             {
                 var statusClass = "status-" + (item.Status ?? "Draft").ToLowerInvariant().Replace(" ", "-");
-                <tr><td class="salary-register__code">@item.Name</td><td>@item.Company</td><td><div>@item.StartDate.ToString("dd MMM yyyy") - @item.EndDate.ToString("dd MMM yyyy")</div><small class="salary-register__muted">Posted @item.PostingDate.ToString("dd MMM yyyy")</small></td><td>@item.PayrollFrequency</td><td>@(item.NumberOfEmployees?.ToString() ?? "-")</td><td><span class="salary-register__status @statusClass">@item.Status</span></td></tr>
+                <tr><td class="salary-register__code"><a asp-action="PayrollEntryDetails" asp-route-id="@item.Name">@item.Name</a></td><td>@item.Company</td><td><div>@item.StartDate.ToString("dd MMM yyyy") - @item.EndDate.ToString("dd MMM yyyy")</div><small class="salary-register__muted">Posted @item.PostingDate.ToString("dd MMM yyyy")</small></td><td>@item.PayrollFrequency</td><td>@(item.NumberOfEmployees?.ToString() ?? "-")</td><td><span class="salary-register__status @statusClass">@item.Status</span></td></tr>
             }
             </tbody></table></div>
         }
