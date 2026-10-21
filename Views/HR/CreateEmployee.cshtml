@@ -632,11 +632,11 @@
 }
 
 @* <form asp-action="CreateEmployee" asp-controller="HR" method="post"> *@
-<form asp-action="CreateEmployee" asp-controller="HR" method="post" autocomplete="off">
+<form asp-action="CreateEmployee" asp-controller="HR" method="post" autocomplete="off" class="employee-workflow-shell employee-create-shell">
     @Html.AntiForgeryToken()
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="employee-workflow-header d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">New Employee</h4>
-        <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+        <button type="submit" class="btn btn-dark btn-sm px-4 employee-primary-action">Save</button>
     </div>
 
     @if (TempData["ErpNextError"] != null)

@@ -195,16 +195,16 @@
 }
 
 @* <form asp-action="EditEmployee" asp-controller="HR" method="post"> *@
-<form asp-action="EditEmployee" asp-controller="HR" method="post" id="employeeEditForm" novalidate>
+<form asp-action="EditEmployee" asp-controller="HR" method="post" id="employeeEditForm" novalidate class="employee-workflow-shell employee-edit-shell">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="EmployeeCode" />
     <input type="hidden" asp-for="ErpNextId" />
     <input type="hidden" asp-for="FullName" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="employee-workflow-header d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Edit Employee</h4>
-        <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+        <button type="submit" class="btn btn-dark btn-sm px-4 employee-primary-action">Save</button>
     </div>
 
     @if (TempData["ErpNextError"] != null)

@@ -102,12 +102,57 @@
 <input type="hidden" name="ChildTablesPosted" value="true" />
 
 <style>
+    .employee-workflow-shell {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #eaf1fb;
+        border: 1px solid #c4d5ed;
+        border-radius: 8px;
+        box-shadow: 0 14px 32px rgba(24, 54, 94, 0.08);
+    }
+
+    .employee-workflow-header {
+        min-height: 76px;
+        margin-bottom: 18px !important;
+        padding: 18px 22px;
+        color: #ffffff;
+        background: #142c4d;
+        border: 1px solid #0e223d;
+        border-radius: 7px;
+    }
+
+    .employee-workflow-header h4 {
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .employee-workflow-shell .alert {
+        border-radius: 6px;
+        border-width: 1px;
+    }
+
+    .employee-primary-action {
+        min-width: 92px;
+        min-height: 38px;
+        color: #ffffff !important;
+        background: #0b8d83 !important;
+        border-color: #0b8d83 !important;
+        font-weight: 700;
+    }
+
+    .employee-primary-action:hover {
+        background: #087268 !important;
+        border-color: #087268 !important;
+    }
+
     .employee-form-card {
         max-width: 1260px;
         margin: 0 auto;
-        background: #fff;
-        border: 1px solid #dfe3e8;
-        border-radius: 6px;
+        background: #fdfefe;
+        border: 1px solid #c5d6ec;
+        border-radius: 7px;
         overflow: hidden;
     }
 
@@ -115,8 +160,8 @@
         display: flex;
         gap: 22px;
         padding: 0 20px;
-        border-bottom: 1px solid #dfe3e8;
-        background: #fff;
+        border-bottom: 1px solid #c5d6ec;
+        background: #dce8f7;
         white-space: nowrap;
     }
 
@@ -125,14 +170,15 @@
             background: transparent;
             padding: 14px 0 12px;
             font-size: 14px;
-            color: #364152;
+            color: #284666;
+            font-weight: 600;
             cursor: pointer;
         }
 
             .employee-tabs button.active {
-                color: #111827;
+                color: #0b6d74;
                 font-weight: 600;
-                border-bottom: 2px solid #111827;
+                border-bottom: 3px solid #0b8d83;
             }
 
     .employee-pane {
@@ -157,7 +203,7 @@
         } */
 
     .employee-section {
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid #d7e2f0;
         padding-top: 18px;
         margin-top: 18px;
     }
@@ -172,7 +218,7 @@
         font-size: 18px;
         font-weight: 600;
         margin: 0 0 16px;
-        color: #111827;
+        color: #193b61;
     }
 
     .employee-grid {
@@ -193,7 +239,7 @@
         display: block;
         font-size: 13px;
         margin-bottom: 6px;
-        color: #374151;
+        color: #294866;
         font-weight: 500;
     }
 
@@ -202,11 +248,11 @@
     .employee-field textarea {
         width: 100%;
         min-height: 34px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
+        border: 1px solid #b9cce3;
+        border-radius: 5px;
         padding: 6px 10px;
-        background: #f8fafc;
-        color: #111827;
+        background: #f7faff;
+        color: #172e4d;
     }
 
     .employee-field textarea {
@@ -234,24 +280,26 @@
         }
 
         .employee-table th {
-            background: #f3f4f6;
-            font-weight: 600;
+            background: #dbe8f8;
+            color: #1e456e;
+            font-weight: 700;
         }
 
         .employee-table input,
         .employee-table select {
             width: 100%;
             min-height: 30px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #b9cce3;
             border-radius: 4px;
             padding: 4px 8px;
-            background: #fff;
+            background: #fbfdff;
         }
 
     .employee-small-btn {
         margin-top: 8px;
-        border: 1px solid #d1d5db;
-        background: #f9fafb;
+        border: 1px solid #92b9d7;
+        background: #e8f4f1;
+        color: #0b675f;
         border-radius: 5px;
         padding: 5px 10px;
         font-size: 13px;
@@ -266,7 +314,22 @@
         padding: 3px 8px;
     }
 
+    .employee-workflow-shell input:focus,
+    .employee-workflow-shell select:focus,
+    .employee-workflow-shell textarea:focus {
+        outline: none;
+        border-color: #0b8d83;
+        box-shadow: 0 0 0 3px rgba(11, 141, 131, 0.14);
+    }
+
     @@media (max-width: 900px) {
+        .employee-workflow-shell {
+            padding: 14px;
+        }
+
+        .employee-workflow-header {
+            padding: 14px 16px;
+        }
         .employee-grid,
         .employee-grid.two {
             grid-template-columns: 1fr;

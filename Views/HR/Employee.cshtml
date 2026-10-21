@@ -209,6 +209,7 @@
     ViewBag.Title = "Employee";
 }
 
+<div class="employee-page">
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -224,8 +225,11 @@
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Employee</h4>
+<header class="employee-page-header">
+    <div>
+        <div class="employee-page-eyebrow">People directory</div>
+        <h1 class="employee-page-title">Employee</h1>
+    </div>
     @* <div class="d-flex gap-2">
         <form asp-action="SyncEmployeesFromErpNext" asp-controller="HR" method="post" style="display:inline-block !important; margin:0 !important;">
             <button type="submit" class="btn btn-primary btn-sm fw-bold">Sync from ERPNext</button>
@@ -235,23 +239,24 @@
         </form>
         <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
     </div> *@
-    <div class="d-flex gap-2">
-        <a href="@Url.Action("CreateEmployee", "HR")" class="btn btn-dark btn-sm">+ Add Employee</a>
+    <div class="employee-header-actions">
+        <a href="@Url.Action("CreateEmployee", "HR")" class="employee-add-button">Add Employee</a>
     </div>
-</div>
+</header>
 
-<div class="mb-3">
-    <div class="btn-group" role="group">
-        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Active" ? "active" : "")"
+<div class="employee-filter-bar">
+    <span class="employee-filter-label">Employee status</span>
+    <div class="employee-status-tabs" role="group">
+        <a class="employee-status-tab @(ViewBag.StatusFilter == "Active" ? "active" : "")"
            href="@Url.Action("Employee", "HR", new { status = "Active" })">Active</a>
-        <a class="btn btn-outline-secondary btn-sm @(ViewBag.StatusFilter == "Inactive" ? "active" : "")"
+        <a class="employee-status-tab @(ViewBag.StatusFilter == "Inactive" ? "active" : "")"
            href="@Url.Action("Employee", "HR", new { status = "Inactive" })">Inactive</a>
-        <a class="btn btn-outline-secondary btn-sm @(string.IsNullOrEmpty(ViewBag.StatusFilter as string) ? "active" : "")"
+        <a class="employee-status-tab @(string.IsNullOrEmpty(ViewBag.StatusFilter as string) ? "active" : "")"
            href="@Url.Action("Employee", "HR", new { status = "" })">All</a>
     </div>
 </div>
 
-<table class="table table-hover align-middle">
+<section class="employee-table-panel"><table class="table employee-table align-middle mb-0">
     <thead>
         <tr>
             <th>Full Name</th>
@@ -263,21 +268,26 @@
     <tbody>
         @foreach (var emp in Model)
         {
-            <tr style="cursor:pointer" onclick="location.href='@Url.Action("EmployeeDetails", "HR", new { id = emp.Id })'">
-                <td>@(string.IsNullOrWhiteSpace(emp.FullName) ? $"{emp.FirstName} {emp.LastName}".Trim() : emp.FullName)</td>
+            <tr onclick="location.href='@Url.Action("EmployeeDetails", "HR", new { id = emp.Id })'">
+                <td><span class="employee-name">@(string.IsNullOrWhiteSpace(emp.FullName) ? $"{emp.FirstName} {emp.LastName}".Trim() : emp.FullName)</span></td>
                 <td>
-                    <span class="badge @(emp.Status == "Active" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                    <span class="employee-status-badge @(emp.Status == "Active" ? "is-active" : "is-inactive")">
                         @emp.Status
                     </span>
                 </td>
                 <td>@(string.IsNullOrEmpty(emp.Designation) ? "-" : emp.Designation)</td>
-                <td><strong>@(string.IsNullOrEmpty(emp.EmployeeCode) ? emp.ErpNextId : emp.EmployeeCode)</strong></td>
+                <td><span class="employee-id">@(string.IsNullOrEmpty(emp.EmployeeCode) ? emp.ErpNextId : emp.EmployeeCode)</span></td>
             </tr>
         }
     </tbody>
-</table>
+</table></section>
 
 @if (!Model.Any())
 {
-    <p class="text-muted">No employees found.</p>
+    <div class="employee-empty-state">No employees found for this status.</div>
 }
+
+<style>
+    .employee-page{max-width:1480px;margin:0 auto;padding:8px 6px 38px;color:#173050}.employee-page .alert{border-radius:8px;border:0;box-shadow:0 8px 18px rgba(20,45,79,.08)}.employee-page-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px 26px;margin-bottom:18px;background:#142d4f;border:1px solid #173d6b;border-radius:8px;box-shadow:0 14px 28px rgba(20,45,79,.16)}.employee-page-eyebrow{margin-bottom:5px;color:#84dfcc;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.employee-page-title{margin:0;color:#fff;font-size:28px;font-weight:780}.employee-header-actions{display:flex;align-items:center}.employee-add-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 15px;border:1px solid #58cfb5;border-radius:7px;background:#16a085;color:#fff;text-decoration:none;font-size:13px;font-weight:750;box-shadow:0 5px 14px rgba(0,0,0,.16)}.employee-add-button:hover{background:#108a74;color:#fff}.employee-filter-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;padding:12px 15px;border:1px solid #cbdcf0;border-radius:8px;background:#eaf2ff}.employee-filter-label{color:#23446d;font-size:13px;font-weight:740}.employee-status-tabs{display:flex;gap:5px;padding:3px;border-radius:7px;background:#d6e4f7}.employee-status-tab{padding:7px 13px;border-radius:5px;color:#3d587a;text-decoration:none;font-size:13px;font-weight:700}.employee-status-tab:hover{color:#173b6e}.employee-status-tab.active{background:#fff;color:#174c9f;box-shadow:0 2px 7px rgba(26,66,120,.14)}.employee-table-panel{overflow:hidden;border:1px solid #cddbea;border-radius:8px;background:#fff;box-shadow:0 10px 22px rgba(22,47,85,.08)}.employee-table{color:#2d4565}.employee-table thead th{padding:14px 18px;border:0;background:#1d4778;color:#fff;font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase}.employee-table tbody tr{cursor:pointer;transition:background-color 160ms ease}.employee-table tbody tr:nth-child(even){background:#f2f8ff}.employee-table tbody tr:hover{background:#dff3ef}.employee-table tbody td{padding:15px 18px;border-color:#e1eaf3;vertical-align:middle}.employee-name{color:#183b68;font-size:14px;font-weight:740}.employee-id{display:inline-block;padding:4px 8px;border-radius:5px;background:#e9f0fb;color:#31567f;font-size:12px;font-weight:760}.employee-status-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:750}.employee-status-badge.is-active{background:#d9f4ea;color:#08715c}.employee-status-badge.is-inactive{background:#fff0df;color:#a55a0a}.employee-empty-state{padding:28px;border:1px dashed #b7cbe2;border-radius:8px;background:#f4f8fd;color:#58708e;text-align:center}@@media(max-width:640px){.employee-page{padding:0 2px 24px}.employee-page-header{align-items:flex-start;flex-direction:column;padding:20px}.employee-filter-bar{align-items:stretch;flex-direction:column}.employee-status-tabs{width:100%}.employee-status-tab{flex:1;text-align:center}.employee-table-panel{overflow-x:auto}.employee-table{min-width:620px}}
+</style>
+</div>

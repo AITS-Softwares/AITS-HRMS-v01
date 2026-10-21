@@ -39783,7 +39783,7 @@ VALUES
             string fields = Uri.EscapeDataString("[\"name\"]");
 
             string filtersJson = new JArray(
-                new JArray(doctype, "employee", "=", employeeId)
+                new JArray("employee", "=", employeeId)
             ).ToString(Newtonsoft.Json.Formatting.None);
 
             string filters = Uri.EscapeDataString(filtersJson);

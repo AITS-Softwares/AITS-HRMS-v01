@@ -100,7 +100,97 @@
     var unsubscribedText = Model.Unsubscribed ? "Yes" : "No";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<style>
+    .employee-details-shell {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 22px;
+        background: #eaf1fb;
+        border: 1px solid #c4d5ed;
+        border-radius: 8px;
+        box-shadow: 0 14px 32px rgba(24, 54, 94, 0.08);
+    }
+
+    .employee-details-shell > .employee-details-header {
+        min-height: 76px;
+        margin-bottom: 20px !important;
+        padding: 18px 22px;
+        color: #ffffff;
+        background: #142c4d;
+        border: 1px solid #0e223d;
+        border-radius: 7px;
+    }
+
+    .employee-details-header h4 {
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .employee-details-shell .btn-outline-dark {
+        color: #0b6d74;
+        background: #eefaf8;
+        border-color: #86c7c1;
+        font-weight: 700;
+    }
+
+    .employee-details-shell .btn-outline-danger {
+        font-weight: 700;
+        background: #fff4f4;
+    }
+
+    .employee-details-shell > .row {
+        margin: 0;
+        padding: 20px;
+        background: #fdfefe;
+        border: 1px solid #c5d6ec;
+        border-radius: 7px;
+    }
+
+    .employee-details-shell .form-label {
+        margin-bottom: 6px;
+        color: #294866;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .employee-details-shell .form-control {
+        min-height: 38px;
+        color: #183b60;
+        background: #f3f8fe;
+        border: 1px solid #bdd0e7;
+        border-radius: 5px;
+    }
+
+    .employee-details-shell hr {
+        margin: 8px 0 14px;
+        border-color: #d4e0ee;
+        opacity: 1;
+    }
+
+    .employee-details-shell h6.text-muted {
+        color: #0b6d74 !important;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .employee-details-shell .alert {
+        border-radius: 6px;
+    }
+
+    @@media (max-width: 900px) {
+        .employee-details-shell {
+            padding: 14px;
+        }
+
+        .employee-details-shell > .employee-details-header {
+            padding: 14px 16px;
+        }
+    }
+</style>
+
+<section class="employee-details-shell">
+<div class="employee-details-header d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Employee - @Model.FullName</h4>
     <div>
         <a href="@Url.Action("EditEmployee", "HR", new { id = Model.Id })" class="btn btn-outline-dark btn-sm me-2">Edit</a>
@@ -1036,7 +1126,7 @@
 
 
 
-</div>
+</section>
 @* <div class="col-12"><hr /><h6 class="text-muted">Educational Qualification</h6></div>
 
 <div class="col-12">
