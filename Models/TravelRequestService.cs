@@ -343,11 +343,11 @@ namespace Erp_Aits.Services
                 IdentificationDocumentNumber =
                     Read("personal_id_number", "identification_document_number"),
 
-                ContactNumber = Read("cell_number", "contact_number"),
+                ContactNumber = Read("contact_no", "contact_number", "cell_number"),
 
-                ContactEmail = Read("prefered_email", "contact_email"),
+                ContactEmail = Read("contact_email", "prefered_email"),
 
-                PassportNumber = Read("passport_number"),
+                PassportNumber = Read("passport_no", "passport_number"),
 
                 Company = Read("company"),
 

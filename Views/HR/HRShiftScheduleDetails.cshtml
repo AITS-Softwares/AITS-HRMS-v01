@@ -8,6 +8,7 @@
     bool canEdit = !isSubmitted && !isCancelled;
     var rows = Model.Days.Any() ? Model.Days : new List<Erp_Aits.Models.HRShiftScheduleDay> { new Erp_Aits.Models.HRShiftScheduleDay() };
 }
+<partial name="_ShiftModuleUi" />
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">@Model.Name</h4>

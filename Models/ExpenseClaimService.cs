@@ -237,6 +237,43 @@ namespace Erp_Aits.Services
             _connectionString = connectionString;
         }
 
+        private bool EnsureAccountingDimensionColumns()
+        {
+            const string sql = @"
+                IF COL_LENGTH('dbo.ExpenseClaims', 'Dunning') IS NULL
+                    ALTER TABLE dbo.ExpenseClaims ADD Dunning NVARCHAR(255) NULL;
+                IF COL_LENGTH('dbo.ExpenseClaims', 'AiAuditLog') IS NULL
+                    ALTER TABLE dbo.ExpenseClaims ADD AiAuditLog NVARCHAR(255) NULL;
+                IF COL_LENGTH('dbo.ExpenseClaims', 'AllowedToTransactWith') IS NULL
+                    ALTER TABLE dbo.ExpenseClaims ADD AllowedToTransactWith NVARCHAR(255) NULL;
+                IF COL_LENGTH('dbo.ExpenseClaims', 'AppraisalTemplate') IS NULL
+                    ALTER TABLE dbo.ExpenseClaims ADD AppraisalTemplate NVARCHAR(255) NULL;";
+
+            using (var conn = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                try
+                {
+                    // Do not let a schema lock prevent ordinary page requests.
+                    cmd.CommandTimeout = 5;
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SqlException ex) when (ex.Number == -2)
+                {
+                    return false;
+                }
+            }
+        }
+
+        private void RequireAccountingDimensionColumns()
+        {
+            if (!EnsureAccountingDimensionColumns())
+                throw new InvalidOperationException(
+                    "Expense Claim accounting-dimension fields are waiting for SQL Server. Please retry the save in a few seconds.");
+        }
+
         public HashSet<string> GetExistingErpNextIds()
         {
             var ids = new HashSet<string>();
@@ -281,6 +318,8 @@ namespace Erp_Aits.Services
 
         public int InsertExpenseClaim(ExpenseClaim claim)
         {
+            RequireAccountingDimensionColumns();
+
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
@@ -293,12 +332,12 @@ namespace Erp_Aits.Services
                         string headerQuery = @"
                             INSERT INTO ExpenseClaims
                                 (ExpenseClaimCode, ExpenseApprover, Employee, EmployeeName, ApprovalStatus, Department, Company,
-                                 PostingDate, ClearanceDate, IsPaid, Remark, PayableAccount, Project, CostCenter,
+                                 PostingDate, ClearanceDate, IsPaid, Remark, PayableAccount, Project, CostCenter, Dunning, AiAuditLog, AllowedToTransactWith, AppraisalTemplate,
                                  Status, Task, ErpNextId)
                             OUTPUT INSERTED.Id
                             VALUES
                                 (@ExpenseClaimCode, @ExpenseApprover, @Employee, @EmployeeName, @ApprovalStatus, @Department, @Company,
-                                 @PostingDate, @ClearanceDate, @IsPaid, @Remark, @PayableAccount, @Project, @CostCenter,
+                                 @PostingDate, @ClearanceDate, @IsPaid, @Remark, @PayableAccount, @Project, @CostCenter, @Dunning, @AiAuditLog, @AllowedToTransactWith, @AppraisalTemplate,
                                  @Status, @Task, @ErpNextId)";
 
                         using (var cmd = new SqlCommand(headerQuery, conn, transaction))
@@ -317,6 +356,10 @@ namespace Erp_Aits.Services
                             cmd.Parameters.AddWithValue("@PayableAccount", claim.PayableAccount ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Project", claim.Project ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@CostCenter", claim.CostCenter ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Dunning", claim.Dunning ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@AiAuditLog", claim.AiAuditLog ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@AllowedToTransactWith", claim.AllowedToTransactWith ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@AppraisalTemplate", claim.AppraisalTemplate ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Status", claim.Status ?? "Draft");
                             cmd.Parameters.AddWithValue("@Task", claim.Task ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@ErpNextId", claim.ErpNextId ?? (object)DBNull.Value);
@@ -441,6 +484,8 @@ namespace Erp_Aits.Services
 
         public int InsertOrUpdateExpenseClaim(ExpenseClaim claim)
         {
+            RequireAccountingDimensionColumns();
+
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
@@ -491,6 +536,10 @@ namespace Erp_Aits.Services
                                     PayableAccount = @PayableAccount,
                                     Project = @Project,
                                     CostCenter = @CostCenter,
+                                    Dunning = @Dunning,
+                                    AiAuditLog = @AiAuditLog,
+                                    AllowedToTransactWith = @AllowedToTransactWith,
+                                    AppraisalTemplate = @AppraisalTemplate,
                                     Status = @Status,
                                     Task = @Task,
                                     ErpNextId = @ErpNextId
@@ -512,12 +561,12 @@ namespace Erp_Aits.Services
                             using (var cmd = new SqlCommand(@"
                                 INSERT INTO ExpenseClaims
                                     (ExpenseClaimCode, ExpenseApprover, Employee, EmployeeName, ApprovalStatus, Department, Company,
-                                     PostingDate, ClearanceDate, IsPaid, Remark, PayableAccount, Project, CostCenter,
+                                     PostingDate, ClearanceDate, IsPaid, Remark, PayableAccount, Project, CostCenter, Dunning, AiAuditLog, AllowedToTransactWith, AppraisalTemplate,
                                      Status, Task, ErpNextId)
                                 OUTPUT INSERTED.Id
                                 VALUES
                                     (@ExpenseClaimCode, @ExpenseApprover, @Employee, @EmployeeName, @ApprovalStatus, @Department, @Company,
-                                     @PostingDate, @ClearanceDate, @IsPaid, @Remark, @PayableAccount, @Project, @CostCenter,
+                                     @PostingDate, @ClearanceDate, @IsPaid, @Remark, @PayableAccount, @Project, @CostCenter, @Dunning, @AiAuditLog, @AllowedToTransactWith, @AppraisalTemplate,
                                      @Status, @Task, @ErpNextId)",
                                 conn,
                                 transaction))
@@ -558,6 +607,10 @@ namespace Erp_Aits.Services
             cmd.Parameters.AddWithValue("@PayableAccount", claim.PayableAccount ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@Project", claim.Project ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@CostCenter", claim.CostCenter ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Dunning", claim.Dunning ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@AiAuditLog", claim.AiAuditLog ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@AllowedToTransactWith", claim.AllowedToTransactWith ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@AppraisalTemplate", claim.AppraisalTemplate ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@Status", claim.Status ?? "Draft");
             cmd.Parameters.AddWithValue("@Task", claim.Task ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@ErpNextId", claim.ErpNextId ?? (object)DBNull.Value);
@@ -731,6 +784,10 @@ namespace Erp_Aits.Services
                                 PayableAccount = reader["PayableAccount"]?.ToString(),
                                 Project = reader["Project"]?.ToString(),
                                 CostCenter = reader["CostCenter"]?.ToString(),
+                                Dunning = GetOptionalString(reader, "Dunning"),
+                                AiAuditLog = GetOptionalString(reader, "AiAuditLog"),
+                                AllowedToTransactWith = GetOptionalString(reader, "AllowedToTransactWith"),
+                                AppraisalTemplate = GetOptionalString(reader, "AppraisalTemplate"),
 
                                 Status = reader["Status"]?.ToString(),
                                 Task = reader["Task"]?.ToString()
@@ -817,6 +874,17 @@ namespace Erp_Aits.Services
             }
 
             return claim;
+        }
+
+        private static string GetOptionalString(SqlDataReader reader, string columnName)
+        {
+            for (int index = 0; index < reader.FieldCount; index++)
+            {
+                if (string.Equals(reader.GetName(index), columnName, StringComparison.OrdinalIgnoreCase))
+                    return reader.IsDBNull(index) ? null : reader.GetValue(index)?.ToString();
+            }
+
+            return null;
         }
 
 

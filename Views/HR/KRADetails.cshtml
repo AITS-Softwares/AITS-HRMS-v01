@@ -29,11 +29,12 @@
       asp-action="UpdateKRA"
       asp-route-id="@Model.Id"
       method="post"
-      id="kraDetailsForm">
+      id="kraDetailsForm"
+      class="performance-ui performance-form-shell">
 
     @Html.AntiForgeryToken()
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <div>
             <h4 class="mb-0">@Model.Title</h4>
             <small class="text-muted">
@@ -100,6 +101,8 @@
       class="d-none">
     @Html.AntiForgeryToken()
 </form>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

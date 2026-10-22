@@ -1,62 +1,179 @@
-﻿@model Erp_Aits.Models.EnergyPointRule
+@model Erp_Aits.Models.EnergyPointRule
 @{
     ViewBag.Title = "Energy Point Rule " + Model.Id;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Energy Point Rule - @Model.Id</h4>
-</div>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
-<div class="form-check mb-4">
-    <input class="form-check-input" type="checkbox" checked="@Model.Enabled" disabled />
-    <label class="form-check-label">Enabled</label>
-</div>
+<form asp-action="UpdateEnergyPointRule" asp-controller="HR" asp-route-id="@Model.Id" method="post" class="energy-point-ui energy-point-shell">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
 
-<div class="row g-4">
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label class="form-label">Rule Name</label>
-            <input class="form-control" value="@Model.RuleName" readonly />
+    <div class="energy-point-page-header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1">Energy Point Rule - @Model.RuleName</h4>
+            <small class="text-muted">ERPNext ID: @(string.IsNullOrWhiteSpace(Model.ErpNextId) ? "Not synced" : Model.ErpNextId)</small>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Reference Document Type</label>
-            <input class="form-control" value="@Model.ReferenceDocumentType" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">For Document Event</label>
-            <input class="form-control" value="@Model.ForDocumentEvent" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Points</label>
-            <input class="form-control" value="@Model.Points" readonly />
-        </div>
-
-        <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" checked="@Model.AllotPointsToAssignedUsers" disabled />
-            <label class="form-check-label">Allot Points To Assigned Users</label>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">User Field</label>
-            <input class="form-control" value="@Model.UserField" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Multiplier Field</label>
-            <input class="form-control" value="@Model.MultiplierField" readonly />
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("EnergyPointRule", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteEnergyPointRule()">Delete</button>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" checked="@Model.ApplyOnlyOnce" disabled />
-            <label class="form-check-label">Apply Only Once</label>
+    <div class="energy-point-section p-4">
+        <div class="form-check mb-4">
+            <input asp-for="Enabled" class="form-check-input" type="checkbox" />
+            <label class="form-check-label" asp-for="Enabled">Enabled</label>
         </div>
 
-        <label class="form-label">Condition</label>
-        <textarea class="form-control" rows="12" style="font-family: monospace;" readonly>@Model.Condition</textarea>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Rule Name <span class="text-danger">*</span></label>
+                    <input asp-for="RuleName" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Reference Document Type <span class="text-danger">*</span></label>
+                    <select asp-for="ReferenceDocumentType" id="ReferenceDocumentType" class="form-select" required>
+                        <option value="">Select Reference Document Type</option>
+                        @if (ViewBag.DocTypes != null)
+                        {
+                            foreach (var item in ViewBag.DocTypes)
+                            {
+                                <option value="@item.name">@item.name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">For Document Event</label>
+                    <select asp-for="ForDocumentEvent" class="form-select">
+                        <option value="Custom">Custom</option>
+                        <option value="New">New</option>
+                        <option value="Submit">Submit</option>
+                        <option value="Cancel">Cancel</option>
+                        <option value="Value Change">Value Change</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Field To Check</label>
+                    <select asp-for="FieldToCheck" id="FieldToCheck" class="form-select" data-selected="@Model.FieldToCheck">
+                        <option value="">Select field after choosing a document type</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Points <span class="text-danger">*</span></label>
+                    <input asp-for="Points" type="number" class="form-control" required />
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="AllotPointsToAssignedUsers" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label" asp-for="AllotPointsToAssignedUsers">Allot Points To Assigned Users</label>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">User Field</label>
+                    <select asp-for="UserField" id="UserField" class="form-select" data-selected="@Model.UserField">
+                        <option value="">Select field after choosing a document type</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Multiplier Field</label>
+                    <select asp-for="MultiplierField" id="MultiplierField" class="form-select" data-selected="@Model.MultiplierField">
+                        <option value="">Select numeric field after choosing a document type</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Maximum Points</label>
+                    <input asp-for="MaxPoints" type="number" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mb-3">
+                    <input asp-for="ApplyOnlyOnce" class="form-check-input" type="checkbox" />
+                    <label class="form-check-label" asp-for="ApplyOnlyOnce">Apply Only Once</label>
+                </div>
+                <label class="form-label">Condition</label>
+                <textarea asp-for="Condition" class="form-control" rows="14" style="font-family:monospace;"></textarea>
+                <div class="form-text">ERPNext validates this condition when the rule is saved.</div>
+            </div>
+        </div>
     </div>
-</div>
+</form>
+
+<partial name="_EnergyPointUi" />
+
+<form asp-action="DeleteEnergyPointRule" asp-controller="HR" asp-route-id="@Model.Id" method="post" id="deleteEnergyPointRuleForm" class="d-none">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+    const referenceDocumentType = document.getElementById('ReferenceDocumentType');
+    const ruleFieldToCheck = document.getElementById('FieldToCheck');
+    const ruleUserField = document.getElementById('UserField');
+    const ruleMultiplierField = document.getElementById('MultiplierField');
+
+    function populateRuleFieldOptions(select, fields, placeholder, numericOnly) {
+        const selected = select.dataset.selected || select.value || '';
+        select.innerHTML = '<option value="">' + placeholder + '</option>';
+        fields.filter(function (field) { return !numericOnly || field.isNumeric; }).forEach(function (field) {
+            const option = document.createElement('option');
+            option.value = field.value;
+            option.textContent = field.text;
+            option.selected = field.value === selected;
+            select.appendChild(option);
+        });
+        if (selected && select.value !== selected) {
+            const existingOption = document.createElement('option');
+            existingOption.value = selected;
+            existingOption.textContent = selected;
+            existingOption.selected = true;
+            select.appendChild(existingOption);
+        }
+        select.dataset.selected = '';
+    }
+
+    async function loadEnergyPointRuleFields() {
+        const doctype = referenceDocumentType.value;
+        if (!doctype) return;
+
+        try {
+            const response = await fetch('@Url.Action("GetEnergyPointRuleDocFields", "HR")?doctype=' + encodeURIComponent(doctype));
+            if (!response.ok) throw new Error('Unable to load fields.');
+            const fields = await response.json();
+            populateRuleFieldOptions(ruleFieldToCheck, fields, 'Select field', false);
+            populateRuleFieldOptions(ruleUserField, fields, 'Select user field', false);
+            populateRuleFieldOptions(ruleMultiplierField, fields, 'Select numeric multiplier field', true);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function deleteEnergyPointRule() {
+        if (confirm('Delete this Energy Point Rule from ERPNext and HRMS?')) {
+            document.getElementById('deleteEnergyPointRuleForm').submit();
+        }
+    }
+
+    referenceDocumentType.addEventListener('change', function () {
+        ruleFieldToCheck.dataset.selected = '';
+        ruleUserField.dataset.selected = '';
+        ruleMultiplierField.dataset.selected = '';
+        loadEnergyPointRuleFields();
+    });
+
+    if (referenceDocumentType.value) loadEnergyPointRuleFields();
+</script>

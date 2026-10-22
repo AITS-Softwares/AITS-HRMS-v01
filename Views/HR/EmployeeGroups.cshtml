@@ -111,18 +111,19 @@
     ViewBag.Title = "Employee Groups List";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-
-    <h4 class="mb-0 fw-bold">
-        Employee Groups
-    </h4>
+<div class="employee-groups-page">
+<header class="groups-page-header">
+    <div>
+        <div class="groups-page-eyebrow">People directory</div>
+        <h1 class="groups-page-title">Employee Groups</h1>
+    </div>
 
     <a href="@Url.Action("CreateEmployeeGroup", "HR")"
-       class="btn btn-dark btn-sm px-4 fw-bold">
-        + Add Employee Group
+       class="groups-add-button">
+        Add Employee Group
     </a>
 
-</div>
+</header>
 
 <!-- Success message -->
 @if (TempData["Success"] != null)
@@ -172,13 +173,16 @@
     </div>
 }
 
-<div class="card border rounded-3 p-4 shadow-sm bg-white">
+<section class="groups-table-panel" aria-labelledby="groups-list-title">
+    <div class="groups-panel-heading">
+        <h2 id="groups-list-title">Employee Groups List</h2>
+    </div>
 
     <div class="table-responsive">
 
-        <table class="table table-bordered align-middle mb-0">
+        <table class="table groups-table align-middle mb-0">
 
-            <thead class="table-light">
+            <thead>
 
                 <tr>
                     <th style="width:80px;"
@@ -208,20 +212,23 @@
                 {
                     foreach (var group in Model)
                     {
-                        <tr>
+                        <tr class="groups-clickable-row"
+                            data-details-url="@Url.Action("EmployeeGroupDetails", "HR", new { id = group.Id })"
+                            tabindex="0"
+                            aria-label="Open employee group @group.GroupName">
 
                             <td class="text-center text-muted small">
                                 @group.Id
                             </td>
 
                             <td>
-                                <span class="fw-bold text-dark">
+                                <span class="groups-name">
                                     @group.GroupName
                                 </span>
                             </td>
 
                             <td>
-                                <span class="text-muted">
+                                <span class="groups-id">
                                     @group.ErpNextId
                                 </span>
                             </td>
@@ -232,7 +239,7 @@
                                                                        "EmployeeGroupDetails",
                                                                        "HR",
                                                                        new { id = group.Id })"
-                           class="btn btn-sm btn-outline-dark">
+                           class="groups-edit-button">
                             Edit
                         </a>
 
@@ -257,4 +264,46 @@
 
     </div>
 
+</section>
+
+<style>
+    .employee-groups-page{max-width:1480px;margin:0 auto;padding:8px 6px 38px;color:#173050}
+    .employee-groups-page .alert{border-radius:8px;border:0;box-shadow:0 8px 18px rgba(20,45,79,.08)}
+    .employee-groups-page .groups-page-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px 26px;margin-bottom:18px;background:#142d4f;border:1px solid #173d6b;border-radius:8px;box-shadow:0 14px 28px rgba(20,45,79,.16)}
+    .employee-groups-page .groups-page-eyebrow{margin-bottom:5px;color:#84dfcc;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .employee-groups-page .groups-page-title{margin:0;color:#fff;font-size:28px;font-weight:780}
+    .employee-groups-page .groups-add-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 15px;border:1px solid #58cfb5;border-radius:7px;background:#16a085;color:#fff;text-decoration:none;font-size:13px;font-weight:750;box-shadow:0 5px 14px rgba(0,0,0,.16)}
+    .employee-groups-page .groups-add-button:hover{background:#108a74;color:#fff}
+    .employee-groups-page .groups-table-panel{overflow:hidden;border:1px solid #cddbea;border-radius:8px;background:#fff;box-shadow:0 10px 22px rgba(22,47,85,.08)}
+    .employee-groups-page .groups-panel-heading{padding:15px 18px;background:#eaf2ff;border-bottom:1px solid #cbdcf0}
+    .employee-groups-page .groups-panel-heading h2{margin:0;color:#23446d;font-size:14px;font-weight:740}
+    .employee-groups-page .groups-table{color:#2d4565}
+    .employee-groups-page .groups-table thead th{padding:14px 18px;border:0;background:#1d4778;color:#fff!important;font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase}
+    .employee-groups-page .groups-table tbody td{padding:15px 18px;border-color:#e1eaf3;vertical-align:middle;background:transparent}
+    .employee-groups-page .groups-table tbody tr:nth-child(even){background:#f2f8ff}
+    .employee-groups-page .groups-clickable-row{cursor:pointer;transition:background-color 160ms ease}
+    .employee-groups-page .groups-table .groups-clickable-row:hover{background:#dff3ef}
+    .employee-groups-page .groups-clickable-row:focus-visible{outline:2px solid #16a085;outline-offset:-2px;background:#dff3ef}
+    .employee-groups-page .groups-name{color:#183b68;font-size:14px;font-weight:740}
+    .employee-groups-page .groups-id{display:inline-block;padding:4px 8px;border-radius:5px;background:#e9f0fb;color:#31567f;font-size:12px;font-weight:760}
+    .employee-groups-page .groups-edit-button{display:inline-flex;padding:5px 12px;border:1px solid #cbdcf0;border-radius:6px;background:#eaf2ff;color:#23446d;text-decoration:none;font-size:12px;font-weight:700}
+    .employee-groups-page .groups-edit-button:hover{background:#dff3ef;border-color:#16a085;color:#08715c}
+    .employee-groups-page a:focus-visible{outline:2px solid #16a085;outline-offset:3px}
+    @@media(max-width:640px){.employee-groups-page{padding:0 2px 24px}.employee-groups-page .groups-page-header{align-items:flex-start;flex-direction:column;padding:20px}.employee-groups-page .groups-table{min-width:620px}}
+</style>
+
+<script>
+    document.querySelectorAll('.employee-groups-page .groups-clickable-row').forEach(function (row) {
+        row.addEventListener('click', function (event) {
+            if (event.target.closest('a, button, input, select, textarea, label')) return;
+            if (window.getSelection().toString()) return;
+            window.location.href = row.dataset.detailsUrl;
+        });
+        row.addEventListener('keydown', function (event) {
+            if (event.target !== row || (event.key !== 'Enter' && event.key !== ' ')) return;
+            event.preventDefault();
+            window.location.href = row.dataset.detailsUrl;
+        });
+    });
+</script>
 </div>

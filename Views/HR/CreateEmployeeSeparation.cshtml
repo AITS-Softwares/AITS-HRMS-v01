@@ -19,11 +19,12 @@
     </div>
 }
 
+<div class="lifecycle-ui">
 <form method="post"
       action="/HR/CreateEmployeeSeparation"
       id="employeeSeparationForm">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="lifecycle-ui__header d-flex justify-content-between align-items-center mb-3">
 
         <div class="d-flex align-items-center gap-2">
 
@@ -296,6 +297,8 @@
     </div>
 
 </form>
+</div>
+@await Html.PartialAsync("_LifecycleUi")
 
 
 <select id="erpUserMaster"

@@ -1,78 +1,46 @@
-﻿@model Erp_Aits.Models.Designation
-@{
-    ViewBag.Title = "New Designation";
-}
+@model Erp_Aits.Models.Designation
+@{ ViewBag.Title = "New Designation"; }
 
-<datalist id="templateList">
-    @if (ViewBag.AppraisalTemplates != null)
-    {
-        foreach (var at in ViewBag.AppraisalTemplates)
-        {
-            <option value="@at.name"></option>
-        }
-    }
-</datalist>
+<datalist id="templateList">@if (ViewBag.AppraisalTemplates != null) { foreach (var template in ViewBag.AppraisalTemplates) { <option value="@template.name"></option> } }</datalist>
+<datalist id="skillList">@if (ViewBag.Skills != null) { foreach (var skill in ViewBag.Skills) { <option value="@skill.name"></option> } }</datalist>
 
-<datalist id="skillList">
-    @if (ViewBag.Skills != null)
-    {
-        foreach (var sk in ViewBag.Skills)
-        {
-            <option value="@sk.name"></option>
-        }
-    }
-</datalist>
+<style>
+    .designation-form { --des-ink:#10334a; --des-teal:#008c88; color:var(--des-ink); }
+    .designation-form .des-hero { background:linear-gradient(110deg,#10334a,#0b726f); color:#fff; padding:24px 28px; border-radius:8px; }
+    .designation-form .des-section { background:#fff; border:1px solid #bcdce5; border-radius:8px; padding:24px; }
+    .designation-form .des-section-title { color:#0b726f; font-size:1rem; font-weight:700; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #d8e8ec; }
+    .designation-form .form-control { border-color:#b9d4dc; min-height:42px; }
+    .designation-form .form-control:focus { border-color:#008c88; box-shadow:0 0 0 .2rem rgba(0,140,136,.13); }
+    .designation-form textarea.form-control { min-height:120px; }
+    .designation-form .table thead th { background:#eaf6fb; color:#174b64; font-size:.78rem; text-transform:uppercase; }
+</style>
 
-<form action="@Url.Action("CreateDesignation", "HR")" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Designation</h4>
-        <button type="submit" class="btn btn-dark btn-sm">Save</button>
-    </div>
+<form asp-action="CreateDesignation" method="post" class="designation-form">
+    <header class="des-hero d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div><div class="small text-uppercase opacity-75">HRMS / Organization</div><h3 class="mb-1">New Designation</h3><p class="mb-0 opacity-75">Define the role and its appraisal setup.</p></div>
+        <div class="d-flex gap-2"><a asp-action="Designation" class="btn btn-outline-light">Cancel</a><button type="submit" class="btn btn-light fw-semibold">Save Designation</button></div>
+    </header>
 
-    <div class="card p-4 mb-3">
-        <div class="mb-3">
-            <label class="form-label">Designation *</label>
-            <input asp-for="DesignationName" class="form-control" required autofocus placeholder="e.g. Software Engineer" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-        </div>
-
-        <div>
-            <label class="form-label">Appraisal Template</label>
-            <input asp-for="AppraisalTemplate" class="form-control" list="templateList" placeholder="Select or type appraisal template..." />
+    <div class="des-section mb-3">
+        <div class="des-section-title">Role Details</div>
+        <div class="row g-3">
+            <div class="col-md-6"><label asp-for="DesignationName" class="form-label">Designation <span class="text-danger">*</span></label><input asp-for="DesignationName" class="form-control" required autofocus placeholder="e.g. Software Engineer" /></div>
+            <div class="col-md-6"><label asp-for="AppraisalTemplate" class="form-label">Appraisal Template</label><input asp-for="AppraisalTemplate" class="form-control" list="templateList" placeholder="Select or type an appraisal template" /></div>
+            <div class="col-12"><label asp-for="Description" class="form-label">Description</label><textarea asp-for="Description" class="form-control" placeholder="Describe this designation"></textarea></div>
         </div>
     </div>
 
-    <div class="card p-4">
-        <h6 class="mb-3">Required Skills</h6>
-        <table class="table table-bordered align-middle mb-1" id="skillsTable">
-            <thead>
-                <tr>
-                    <th style="width:40px"><input type="checkbox" disabled /></th>
-                    <th style="width:60px">No.</th>
-                    <th>Skill</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSkillRow('skillsTable')">+ Add Row</button>
+    <div class="des-section">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3"><div class="des-section-title mb-0 border-0 p-0">Required Skills</div><button type="button" class="btn btn-outline-primary btn-sm" onclick="addSkillRow()">Add Skill</button></div>
+        <div class="table-responsive"><table class="table align-middle mb-0" id="skillsTable"><thead><tr><th style="width:70px">No.</th><th>Skill</th></tr></thead><tbody></tbody></table></div>
     </div>
 </form>
 
 <script>
-    function addSkillRow(tableId) {
-        var tbody = document.getElementById(tableId).querySelector('tbody');
-        var rowNum = tbody.rows.length + 1;
-
-        var row = document.createElement('tr');
-        row.innerHTML = `
-            <td><input type="checkbox" /></td>
-            <td>${rowNum}</td>
-            <td><input type="text" name="Skills" list="skillList" class="form-control form-control-sm border-0" placeholder="Type skill..." required /></td>
-        `;
+    function addSkillRow() {
+        const tbody = document.querySelector('#skillsTable tbody');
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${tbody.rows.length + 1}</td><td><input type="text" name="Skills" list="skillList" class="form-control" placeholder="Select or type a skill" /></td>`;
         tbody.appendChild(row);
     }
 </script>

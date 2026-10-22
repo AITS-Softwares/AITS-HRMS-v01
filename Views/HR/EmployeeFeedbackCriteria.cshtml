@@ -3,7 +3,7 @@
     ViewBag.Title = "Employee Feedback Criteria";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
     <h4 class="mb-0">Employee Feedback Criteria</h4>
 
     <div class="d-flex gap-2">
@@ -29,7 +29,7 @@
     </div>
 }
 
-<form method="get" asp-action="EmployeeFeedbackCriteria" asp-controller="HR" class="row g-2 mb-3">
+<form method="get" asp-action="EmployeeFeedbackCriteria" asp-controller="HR" class="row g-2 mb-3 performance-ui performance-filter-panel">
     <div class="col-md-3">
         <input type="text"
                name="id"
@@ -45,10 +45,10 @@
     </div>
 </form>
 
-<div class="card p-0">
+<div class="card p-0 performance-ui performance-section">
     @if (Model != null && Model.Any())
     {
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0 performance-ui performance-data-table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -80,6 +80,8 @@
         </div>
     }
 </div>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <div class="modal fade" id="newCriteriaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

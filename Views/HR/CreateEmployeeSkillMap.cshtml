@@ -43,15 +43,16 @@
 
 <form asp-action="CreateEmployeeSkillMap"
       asp-controller="HR"
-      method="post">
+      method="post"
+      class="skill-create-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="skill-create-page__header d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0 d-inline">New Employee Skill Map</h4>
             <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
         </div>
 
-        <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+        <button type="submit" class="btn skill-create-page__save btn-sm px-4"><i class="fa-solid fa-floppy-disk"></i> Save Draft</button>
     </div>
 
     <!-- Employee Section -->
@@ -147,6 +148,9 @@
         </div>
     </div>
 </form>
+<style>
+ .skill-create-page{background:linear-gradient(135deg,#eef7fb,#f7fbfa 65%,#edf3fb);border:1px solid #d5e5ee;border-radius:8px;padding:24px;color:#183247}.skill-create-page__header{background:#15324b;color:#fff;border-radius:8px;padding:19px 21px;box-shadow:0 12px 26px rgba(21,50,75,.16)}.skill-create-page__save{background:#0f877d;border:0;color:#fff;font-weight:700}.skill-create-page__save i{margin-right:5px}.skill-create-page .card{border-color:#cfe0eb!important;box-shadow:none!important}.skill-create-page .card:first-of-type{border-top:3px solid #1d6fa5!important}.skill-create-page .form-label{color:#315369;font-size:13px;font-weight:700}.skill-create-page .form-control,.skill-create-page .form-select{border-color:#bcd4e2;border-radius:6px;min-height:38px}.skill-create-page .table thead th{background:#e7f4f9;color:#15324b}.skill-create-page .btn-outline-secondary{border-color:#acc7d7;color:#15324b}
+</style>
 
 <!-- Hidden master dropdowns -->
 <select id="skillMaster" style="display:none;">

@@ -642,6 +642,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRGVzaWduYXRpb24uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/DesignationDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRGVzaWduYXRpb25EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Driver.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRHJpdmVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -1370,6 +1374,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX0VtcGxveWVlRm9ybUZpZWxkcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/_EnergyPointUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX0VuZXJneVBvaW50VWkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/_LifecycleUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX0xpZmVjeWNsZVVpLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/_PerformanceModuleUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX1BlcmZvcm1hbmNlTW9kdWxlVWkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/LeadEvents/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGVhZEV2ZW50c1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -1442,8 +1458,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9DcmVhdGVUYXNrTW9kYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_ExpenseClaimsWorkspaceUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9FeHBlbnNlQ2xhaW1zV29ya3NwYWNlVWkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_RichTextEditor.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9SaWNoVGV4dEVkaXRvci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_ShiftModuleUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9TaGlmdE1vZHVsZVVpLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_TimeAttendanceUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9UaW1lQXR0ZW5kYW5jZVVpLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_ValidationScriptsPartial.cshtml]

@@ -4,7 +4,7 @@
     ViewBag.Title = "Appraisal Template";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
 
     <h4 class="mb-0">Appraisal Template</h4>
 
@@ -46,7 +46,7 @@
 <!-- Search -->
 <form method="get"
       action="@Url.Action("AppraisalTemplate", "HR")"
-      class="row g-2 mb-3">
+      class="row g-2 mb-3 performance-ui performance-filter-panel">
 
     <div class="col-auto">
         <input type="text"
@@ -74,7 +74,7 @@
 <!-- Appraisal Template List -->
 <div class="table-responsive">
 
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle performance-ui performance-data-table">
 
         <thead>
             <tr>
@@ -112,3 +112,5 @@
         No Appraisal Template found with matching filters.
     </p>
 }
+
+@await Html.PartialAsync("_PerformanceModuleUi")

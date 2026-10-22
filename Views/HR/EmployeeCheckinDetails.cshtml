@@ -12,6 +12,7 @@
         : "";
 }
 
+<div class="workforce-ui checkin-details">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h4 class="mb-0">@Model.EmployeeName</h4>
@@ -176,6 +177,12 @@
         }
     </div>
 </form>
+
+</div>
+
+<style>
+    .workforce-ui.checkin-details { max-width: 1080px; margin: 8px auto 40px; padding: 26px; border: 1px solid #c7daea; border-radius: 8px; background: #edf5fb; box-shadow: 0 16px 34px rgba(19,55,91,.10); }.workforce-ui.checkin-details > .d-flex:first-child { margin: -26px -26px 24px; padding: 20px 26px; background: #14365d; border-radius: 8px 8px 0 0; }.workforce-ui.checkin-details h4 { color: #fff; font-weight: 760; }.workforce-ui.checkin-details .text-muted { color: #b7d0e7!important; }.workforce-ui.checkin-details .btn { border-radius: 6px; font-weight: 700; }.workforce-ui.checkin-details .btn-dark { border-color: #16a085; background: #108c77; }.workforce-ui.checkin-details .btn-outline-secondary { border-color: #91acc7; color: #e7f1fb; }.workforce-ui.checkin-details .btn-outline-secondary:hover { background: #fff; color: #163d64; }.workforce-ui.checkin-details .card { border: 1px solid #c8ddec; border-radius: 8px; box-shadow: 0 8px 20px rgba(16,49,82,.07); }.workforce-ui.checkin-details .form-label { color: #315879; font-weight: 720; }.workforce-ui.checkin-details .form-control, .workforce-ui.checkin-details .form-select { min-height: 42px; border-color: #b9cee2; border-radius: 6px; }.workforce-ui.checkin-details .form-control:focus, .workforce-ui.checkin-details .form-select:focus { border-color: #159b84; box-shadow: 0 0 0 3px rgba(21,155,132,.14); }.workforce-ui.checkin-details .form-control[readonly] { background: #f2f7fb; }.workforce-ui.checkin-details .form-check-input:checked { background-color: #159b84; border-color: #159b84; }
+</style>
 
 @if (editMode)
 {

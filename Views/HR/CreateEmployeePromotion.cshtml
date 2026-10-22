@@ -5,8 +5,8 @@
     var companies = ViewBag.Companies as List<string>;
 }
 
-<form asp-action="CreateEmployeePromotion" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<form asp-action="CreateEmployeePromotion" method="post" class="performance-ui performance-form-shell">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <div>
             <h4 class="mb-0 d-inline">New Employee Promotion</h4>
             <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
@@ -350,3 +350,5 @@
             .replace(/>/g, '&gt;');
     }
 </script>
+
+@await Html.PartialAsync("_PerformanceModuleUi")

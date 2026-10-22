@@ -3,10 +3,14 @@
     ViewBag.Title = "Employee Promotion Details";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Employee Promotion Details</h4>
-    <a asp-action="EmployeePromotion" class="btn btn-outline-secondary btn-sm">Back</a>
-</div>
+<section class="promotion-detail-page">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
+        <div>
+            <div class="promotion-detail-page__eyebrow">Employee Lifecycle / Promotion</div>
+            <h4 class="mb-0">Employee Promotion Details</h4>
+        </div>
+        <a asp-action="EmployeePromotion" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
 
 @if (TempData["Success"] != null)
 {
@@ -17,23 +21,33 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
-<div class="card mb-3">
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-6"><strong>Employee:</strong> @Model.Employee</div>
-            <div class="col-md-6"><strong>Employee Name:</strong> @Model.EmployeeName</div>
-            <div class="col-md-6"><strong>Promotion Date:</strong> @Model.PromotionDate.ToString("dd-MM-yyyy")</div>
-            <div class="col-md-6"><strong>Current CTC:</strong> @(Model.CurrentCTC?.ToString() ?? "-")</div>
-            <div class="col-md-6"><strong>Salary Currency:</strong> @Model.SalaryCurrency</div>
-            <div class="col-md-6"><strong>Company:</strong> @Model.Company</div>
+    <div class="card mb-3 performance-ui performance-section promotion-summary-card">
+        <div class="card-body">
+            <div class="promotion-summary-card__heading">
+                <div>
+                    <span>Promotion Snapshot</span>
+                    <h5>Employee and compensation details</h5>
+                </div>
+            </div>
+            <div class="promotion-summary-grid">
+                <div class="promotion-summary-item"><span>Employee</span><strong>@Model.Employee</strong></div>
+                <div class="promotion-summary-item"><span>Employee Name</span><strong>@Model.EmployeeName</strong></div>
+                <div class="promotion-summary-item"><span>Promotion Date</span><strong>@Model.PromotionDate.ToString("dd-MM-yyyy")</strong></div>
+                <div class="promotion-summary-item"><span>Current CTC</span><strong>@(Model.CurrentCTC?.ToString() ?? "-")</strong></div>
+                <div class="promotion-summary-item"><span>Salary Currency</span><strong>@Model.SalaryCurrency</strong></div>
+                <div class="promotion-summary-item promotion-summary-item--wide"><span>Company</span><strong>@Model.Company</strong></div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-header">Promotion Details</div>
-    <div class="card-body p-0">
-        <table class="table table-striped mb-0">
+    <div class="card performance-ui performance-section promotion-change-card">
+        <div class="card-header">
+            <span>Promotion Changes</span>
+            <small>Current values compared with the new values</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
             <thead><tr><th>Field</th><th>Property</th><th>Current</th><th>New</th></tr></thead>
             <tbody>
             @foreach (var detail in Model.Details)
@@ -41,6 +55,31 @@
                 <tr><td>@detail.FieldName</td><td>@detail.Property</td><td>@detail.CurrentValue</td><td>@detail.NewValue</td></tr>
             }
             </tbody>
-        </table>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
+
+    @await Html.PartialAsync("_PerformanceModuleUi")
+</section>
+
+<style>
+    .promotion-detail-page { padding:20px; border:1px solid #d1e3eb; border-radius:8px; background:linear-gradient(135deg,#eef7fa 0%,#f8fcfd 100%); }
+    .promotion-detail-page__eyebrow { margin-bottom:3px; color:#91cddd; font-size:12px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; }
+    .promotion-summary-card .card-body { padding:20px; }
+    .promotion-summary-card__heading { margin-bottom:16px; padding-bottom:13px; border-bottom:1px solid #dbeaf0; }
+    .promotion-summary-card__heading span { color:#0f877d; font-size:12px; font-weight:700; text-transform:uppercase; }
+    .promotion-summary-card__heading h5 { margin:3px 0 0; color:#183247; font-size:16px; font-weight:700; }
+    .promotion-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .promotion-summary-item { min-height:76px; padding:13px 14px; border:1px solid #d6e6ed; border-radius:7px; background:#f8fcfd; }
+    .promotion-summary-item span { display:block; margin-bottom:6px; color:#5f7b8d; font-size:12px; font-weight:700; }
+    .promotion-summary-item strong { display:block; color:#183247; font-size:15px; font-weight:700; overflow-wrap:anywhere; }
+    .promotion-summary-item--wide { grid-column:span 2; }
+    .promotion-change-card .card-header { display:flex; flex-direction:column; gap:3px; padding:16px 20px; border-bottom:1px solid #cfe1e9; background:#fff; color:#183247; font-weight:700; }
+    .promotion-change-card .card-header small { color:#5f7b8d; font-size:12px; font-weight:400; }
+    .promotion-change-card .table th { padding:13px 16px; border-color:#d7e7ee; background:#eaf5f8; color:#24485e; font-size:12px; font-weight:700; text-transform:uppercase; }
+    .promotion-change-card .table td { padding:14px 16px; border-color:#e5eef2; color:#24455b; vertical-align:middle; }
+    .promotion-change-card .table tbody tr:hover { background:#edf8f7; }
+    @@media (max-width:900px) { .promotion-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .promotion-summary-item--wide { grid-column:span 1; } }
+    @@media (max-width:620px) { .promotion-detail-page { padding:14px; } .promotion-summary-grid { grid-template-columns:1fr; } }
+</style>

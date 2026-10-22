@@ -1,7 +1,23 @@
 @model Erp_Aits.Models.AppraisalTemplate
 @{
     ViewBag.Title = "Appraisal Template " + Model.Id;
+    var kraOptions = (IEnumerable<SelectListItem>)ViewBag.KraOptions ?? new List<SelectListItem>();
+    var criteriaOptions = (IEnumerable<SelectListItem>)ViewBag.CriteriaOptions ?? new List<SelectListItem>();
 }
+
+<datalist id="kraOptionList">
+    @foreach (var option in kraOptions)
+    {
+        <option value="@option.Value"></option>
+    }
+</datalist>
+
+<datalist id="criteriaOptionList">
+    @foreach (var option in criteriaOptions)
+    {
+        <option value="@option.Value"></option>
+    }
+</datalist>
 
 <style>
     .erp-dropdown {
@@ -59,11 +75,12 @@
       asp-controller="HR"
       asp-route-id="@Model.Id"
       method="post"
-      id="appraisalTemplateForm">
+      id="appraisalTemplateForm"
+      class="performance-ui performance-form-shell">
 
     @Html.AntiForgeryToken()
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <div>
             <h4 class="mb-0 d-inline">Appraisal Template - @Model.Id</h4>
             <span class="badge bg-success-subtle text-success ms-2">
@@ -130,6 +147,7 @@
                                            data-field="key_result_area"
                                            class="form-control form-control-sm erp-link"
                                            value="@kra.KRA"
+                                           list="kraOptionList"
                                            autocomplete="off"
                                            required />
                                     <div class="erp-dropdown-menu"></div>
@@ -196,6 +214,7 @@
                                            data-field="criteria"
                                            class="form-control form-control-sm erp-link"
                                            value="@criterion.Criteria"
+                                           list="criteriaOptionList"
                                            autocomplete="off"
                                            required />
                                     <div class="erp-dropdown-menu"></div>
@@ -240,6 +259,8 @@
       class="d-none">
     @Html.AntiForgeryToken()
 </form>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     const ERP_URL =
@@ -359,6 +380,7 @@
                            name="${nameField}"
                            data-field="${erpField}"
                            class="form-control form-control-sm erp-link"
+                           list="${erpField === 'key_result_area' ? 'kraOptionList' : 'criteriaOptionList'}"
                            placeholder="Click to load ERPNext dropdown"
                            autocomplete="off"
                            required />

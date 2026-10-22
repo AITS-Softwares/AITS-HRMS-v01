@@ -7868,8 +7868,20 @@ namespace Erp_Aits.Controllers
         [HttpGet]
         [Route("HR/Designation")]
         [Route("HR/Designations")]
-        public ActionResult Designation()
+        public async Task<ActionResult> Designation()
         {
+            if (ShouldRefreshFromErpNext())
+            {
+                try
+                {
+                    await SyncDesignationsFromErpNextInternal();
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErpNextError"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
+                }
+            }
+
             var list = _designationService.GetAllDesignations();
             // FORCE MVC to load Views/HR/Designation.cshtml regardless of the URL requested
             return View("~/Views/HR/Designation.cshtml", list);
@@ -7891,40 +7903,8 @@ namespace Erp_Aits.Controllers
         {
             try
             {
-                var json = await _erpNextService.GetAsync("/api/resource/Designation?fields=[\"name\",\"designation_name\",\"description\",\"appraisal_template\"]&limit_page_length=1000");
-                dynamic parsed = JsonConvert.DeserializeObject(json);
-                var erpList = parsed?.data;
-
-                if (erpList != null)
-                {
-                    var existingNames = _designationService.GetExistingNames();
-                    int inserted = 0, updated = 0;
-
-                    foreach (var item in erpList)
-                    {
-                        string name = item.designation_name ?? item.name;
-                        var des = new Designation
-                        {
-                            DesignationCode = item.name,
-                            DesignationName = name,
-                            Description = item.description,
-                            AppraisalTemplate = item.appraisal_template
-                        };
-
-                        if (existingNames.Contains(name))
-                        {
-                            _designationService.UpdateDesignationByName(des);
-                            updated++;
-                        }
-                        else
-                        {
-                            _designationService.InsertDesignation(des);
-                            inserted++;
-                        }
-                    }
-
-                    TempData["Success"] = $"Designation sync completed! Inserted: {inserted}, Updated: {updated}";
-                }
+                var result = await SyncDesignationsFromErpNextInternal();
+                TempData["Success"] = $"Designation sync completed! Inserted: {result.inserted}, Updated: {result.updated}";
             }
             catch (Exception ex)
             {
@@ -7932,6 +7912,43 @@ namespace Erp_Aits.Controllers
             }
 
             return RedirectToAction("Designation");
+        }
+
+        private async Task<(int inserted, int updated)> SyncDesignationsFromErpNextInternal()
+        {
+            var json = await _erpNextService.GetAsync(
+                "/api/resource/Designation?fields=[\"name\",\"designation_name\",\"description\",\"appraisal_template\"]&limit_page_length=1000");
+            dynamic parsed = JsonConvert.DeserializeObject(json);
+            var erpList = parsed?.data;
+            int inserted = 0;
+            int updated = 0;
+
+            if (erpList == null)
+                return (inserted, updated);
+
+            foreach (var item in erpList)
+            {
+                string erpName = item.name?.ToString();
+                string designationName = item.designation_name?.ToString() ?? erpName;
+                if (string.IsNullOrWhiteSpace(erpName) || string.IsNullOrWhiteSpace(designationName))
+                    continue;
+
+                bool exists = _designationService.GetByName(designationName) != null;
+                _designationService.UpsertFromErpNext(new Designation
+                {
+                    DesignationCode = erpName,
+                    DesignationName = designationName,
+                    Description = item.description?.ToString(),
+                    AppraisalTemplate = item.appraisal_template?.ToString()
+                });
+
+                if (exists)
+                    updated++;
+                else
+                    inserted++;
+            }
+
+            return (inserted, updated);
         }
 
         // GET: HR/CreateDesignation
@@ -7958,6 +7975,7 @@ namespace Erp_Aits.Controllers
         [Route("HR/CreateDesignation")]
         public async Task<ActionResult> CreateDesignation(Designation model, string[] Skills)
         {
+            int localId = 0;
             model.Skills = new List<DesignationSkill>();
             if (Skills != null)
             {
@@ -8043,34 +8061,15 @@ namespace Erp_Aits.Controllers
                 dynamic parsed = JsonConvert.DeserializeObject(resultJson);
                 string erpNextId = parsed?.data?.name;
 
-                // 5. Upsert locally to prevent duplicate key crashes
-                var existing = _designationService.GetByName(model.DesignationName);
-                if (existing != null)
-                {
-                    model.DesignationCode = erpNextId ?? existing.DesignationCode;
-                    _designationService.UpdateDesignationByName(model);
-                    TempData["Success"] = $"Designation updated locally and synced to ERPNext (ID: {erpNextId})!";
-                }
-                else
-                {
-                    model.DesignationCode = erpNextId;
-                    _designationService.InsertDesignation(model);
-                    TempData["Success"] = $"Designation created locally and synced to ERPNext (ID: {erpNextId})!";
-                }
+                model.DesignationCode = erpNextId;
+                localId = _designationService.UpsertFromErpNext(model);
+                TempData["Success"] = $"Designation saved in HRMS and ERPNext (ID: {erpNextId}).";
             }
             catch (Exception ex)
             {
                 try
                 {
-                    var existing = _designationService.GetByName(model.DesignationName);
-                    if (existing != null)
-                    {
-                        _designationService.UpdateDesignationByName(model);
-                    }
-                    else
-                    {
-                        _designationService.InsertDesignation(model);
-                    }
+                    localId = _designationService.UpsertFromErpNext(model);
                     TempData["ErpNextError"] = "Saved locally, but ERPNext sync failed: " + ex.Message;
                 }
                 catch (Exception dbEx)
@@ -8079,7 +8078,17 @@ namespace Erp_Aits.Controllers
                 }
             }
 
-            return RedirectToAction("Designation");
+            return localId > 0
+                ? RedirectToAction("DesignationDetails", new { id = localId })
+                : RedirectToAction("Designation");
+        }
+
+        [HttpGet]
+        [Route("HR/DesignationDetails/{id:int}")]
+        public ActionResult DesignationDetails(int id)
+        {
+            var designation = _designationService.GetById(id);
+            return designation == null ? NotFound() : View("DesignationDetails", designation);
         }
         //// GET: HR/Department
         //[HttpGet]
@@ -10955,6 +10964,10 @@ namespace Erp_Aits.Controllers
                 PayableAccount = doc["payable_account"]?.ToString(),
                 Project = doc["project"]?.ToString(),
                 CostCenter = doc["cost_center"]?.ToString(),
+                Dunning = doc["dunning"]?.ToString(),
+                AiAuditLog = doc["ai_audit_log"]?.ToString(),
+                AllowedToTransactWith = doc["allowed_to_transact_with"]?.ToString(),
+                AppraisalTemplate = doc["appraisal_template"]?.ToString(),
                 Status = doc["status"]?.ToString() ?? "Draft",
                 Task = doc["task"]?.ToString()
             };
@@ -11185,6 +11198,23 @@ namespace Erp_Aits.Controllers
                     );
                 ViewBag.Tasks =
                     JsonConvert.DeserializeObject<dynamic>(taskJson)?.data;
+
+                async Task<object> LoadLinkedOptionsAsync(string doctype)
+                {
+                    string json = await _erpNextService.GetAsync(
+                        "/api/resource/" + Uri.EscapeDataString(doctype) +
+                        "?fields=[\"name\"]&limit_page_length=1000");
+                    return JsonConvert.DeserializeObject<dynamic>(json)?.data;
+                }
+
+                try { ViewBag.Dunnings = await LoadLinkedOptionsAsync("Dunning"); }
+                catch { ViewBag.Dunnings = new List<object>(); }
+                try { ViewBag.AiAuditLogs = await LoadLinkedOptionsAsync("AI Audit Log"); }
+                catch { ViewBag.AiAuditLogs = new List<object>(); }
+                try { ViewBag.AllowedToTransactWithOptions = await LoadLinkedOptionsAsync("Allowed To Transact With"); }
+                catch { ViewBag.AllowedToTransactWithOptions = new List<object>(); }
+                try { ViewBag.AppraisalTemplates = await LoadLinkedOptionsAsync("Appraisal Template"); }
+                catch { ViewBag.AppraisalTemplates = new List<object>(); }
             }
             catch
             {
@@ -11198,6 +11228,10 @@ namespace Erp_Aits.Controllers
                 ViewBag.Projects = null;
                 ViewBag.CostCenters = null;
                 ViewBag.Tasks = null;
+                ViewBag.Dunnings = null;
+                ViewBag.AiAuditLogs = null;
+                ViewBag.AllowedToTransactWithOptions = null;
+                ViewBag.AppraisalTemplates = null;
             }
         }
 
@@ -11480,6 +11514,10 @@ namespace Erp_Aits.Controllers
                 ["payable_account"] = string.IsNullOrWhiteSpace(model.PayableAccount) ? null : model.PayableAccount,
                 ["project"] = string.IsNullOrWhiteSpace(model.Project) ? null : model.Project,
                 ["cost_center"] = string.IsNullOrWhiteSpace(model.CostCenter) ? null : model.CostCenter,
+                ["dunning"] = string.IsNullOrWhiteSpace(model.Dunning) ? null : model.Dunning,
+                ["ai_audit_log"] = string.IsNullOrWhiteSpace(model.AiAuditLog) ? null : model.AiAuditLog,
+                ["allowed_to_transact_with"] = string.IsNullOrWhiteSpace(model.AllowedToTransactWith) ? null : model.AllowedToTransactWith,
+                ["appraisal_template"] = string.IsNullOrWhiteSpace(model.AppraisalTemplate) ? null : model.AppraisalTemplate,
                 ["task"] = string.IsNullOrWhiteSpace(model.Task) ? null : model.Task,
                 ["expenses"] = expensesList,
                 ["taxes"] = taxesList,
@@ -31280,24 +31318,35 @@ VALUES
                 if (model == null || string.IsNullOrWhiteSpace(model.Title))
                     throw new Exception("KRA Title is required.");
 
-                var payload = new
+                string erpName = await ResolveKraErpNameAsync(existing);
+                string titleField = await GetKraTitleFieldAsync();
+                var payload = new Dictionary<string, object>
                 {
-                    title = model.Title.Trim(),
-                    description = model.Description ?? ""
+                    [titleField] = model.Title.Trim(),
+                    ["description"] = model.Description ?? ""
                 };
 
-                string response = await _erpNextService.PutAsync(
-                    "/api/resource/KRA/" + Uri.EscapeDataString(existing.ErpName),
+                if (!string.Equals(existing.ErpName, erpName, StringComparison.OrdinalIgnoreCase))
+                {
+                    _kraService.UpdateErpName(existing.Id, erpName);
+                }
+
+                await _erpNextService.PutAsync(
+                    "/api/resource/KRA/" + Uri.EscapeDataString(erpName),
                     payload
                 );
 
-                string erpName =
-                    ExtractErpDocName(response) ?? existing.ErpName;
+                var savedDocument = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/KRA/" + Uri.EscapeDataString(erpName)))["data"] as JObject;
+                string savedTitle = ReadKraTitle(savedDocument);
 
-                int localId = await _kraService.SyncOneFromErpNextAsync(
-                    _erpNextService,
-                    erpName
-                );
+                if (!string.Equals(savedTitle, model.Title.Trim(), StringComparison.OrdinalIgnoreCase))
+                    throw new Exception("ERPNext did not save the KRA title. Please verify the KRA field configuration in ERPNext.");
+
+                existing.ErpName = erpName;
+                existing.Title = savedTitle;
+                existing.Description = savedDocument?["description"]?.ToString() ?? model.Description ?? "";
+                int localId = _kraService.InsertOrUpdateFromErpNext(existing);
 
                 TempData["Success"] =
                     "KRA updated in ERPNext and HRMS successfully.";
@@ -31312,6 +31361,71 @@ VALUES
 
                 return RedirectToAction("KRADetails", new { id });
             }
+        }
+
+        private async Task<string> ResolveKraErpNameAsync(KRA kra)
+        {
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/KRA/" + Uri.EscapeDataString(kra.ErpName)))["data"] as JObject;
+
+                // A legacy local ID can point to another valid ERP document. Only reuse it
+                // when it still represents this KRA title.
+                if (string.Equals(ReadKraTitle(document), kra.Title, StringComparison.OrdinalIgnoreCase))
+                    return kra.ErpName;
+            }
+            catch
+            {
+            }
+
+            string response = await _erpNextService.GetAsync(
+                "/api/resource/KRA?fields=[\"name\",\"title\"]&limit_page_length=1000");
+            var records = JObject.Parse(response)["data"] as JArray;
+            string resolvedName = records?
+                .FirstOrDefault(record => string.Equals(
+                    ReadKraTitle(record as JObject),
+                    kra.Title,
+                    StringComparison.OrdinalIgnoreCase))?["name"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(resolvedName))
+                throw new Exception("KRA '" + kra.Title + "' was not found in ERPNext. Refresh the KRA list, then try again.");
+
+            return resolvedName;
+        }
+
+        private async Task<string> GetKraTitleFieldAsync()
+        {
+            try
+            {
+                var fields = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/DocType/KRA"))["data"]?["fields"] as JArray;
+                var available = new HashSet<string>(
+                    fields?.Select(field => field["fieldname"]?.ToString())
+                           .Where(field => !string.IsNullOrWhiteSpace(field))
+                    ?? Enumerable.Empty<string>(),
+                    StringComparer.OrdinalIgnoreCase);
+
+                foreach (string field in new[] { "title", "kra", "key_result_area" })
+                {
+                    if (available.Contains(field))
+                        return field;
+                }
+            }
+            catch
+            {
+                // ERP metadata access is optional; title is the standard fallback.
+            }
+
+            return "title";
+        }
+
+        private static string ReadKraTitle(JObject document)
+        {
+            return document?["title"]?.ToString()
+                ?? document?["kra"]?.ToString()
+                ?? document?["key_result_area"]?.ToString()
+                ?? string.Empty;
         }
 
         [HttpPost]
@@ -32578,84 +32692,7 @@ VALUES
         {
             try
             {
-                string listJson = await _erpNextService.GetAsync(
-                    "/api/resource/Appraisal%20Cycle?fields=[\"name\"]&limit_page_length=1000"
-                );
-
-                dynamic listParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(listJson);
-                int count = 0;
-
-                if (listParsed?.data != null)
-                {
-                    foreach (var row in listParsed.data)
-                    {
-                        string erpName = row.name?.ToString();
-
-                        if (string.IsNullOrWhiteSpace(erpName))
-                            continue;
-
-                        string detailJson = await _erpNextService.GetAsync(
-                            "/api/resource/Appraisal%20Cycle/" + Uri.EscapeDataString(erpName)
-                        );
-
-                        dynamic detailParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(detailJson);
-                        var d = detailParsed?.data;
-
-                        if (d == null)
-                            continue;
-
-                        var model = new AppraisalCycle
-                        {
-                            ErpNextId = erpName,
-                            CycleName = d.cycle_name?.ToString(),
-                            Company = d.company?.ToString(),
-                            Status = d.status?.ToString() ?? "Not Started",
-                            StartDate = d.start_date != null ? Convert.ToDateTime(d.start_date.ToString()) : DateTime.Now,
-                            EndDate = d.end_date != null ? Convert.ToDateTime(d.end_date.ToString()) : DateTime.Now.AddMonths(1),
-                            //Description = d.description?.ToString(),
-                            Description = StripHtml(d.description?.ToString()),
-                            KRAEvaluationMethod = d.kra_evaluation_method?.ToString() ?? "Automated Based on Goal Progress",
-                            CalculateFinalScoreFormula = d.calculate_final_score_based_on_formula != null && d.calculate_final_score_based_on_formula.ToString() == "1",
-                            FinalScoreFormula = d.final_score_formula?.ToString(),
-                            Branch = d.branch?.ToString(),
-                            Department = d.department?.ToString(),
-                            Designation = d.designation?.ToString()
-                        };
-
-                        var empCodes = new List<string>();
-                        var empNames = new List<string>();
-                        var empTemplates = new List<string>();
-                        var empDepts = new List<string>();
-                        var empDesigs = new List<string>();
-                        var empBranches = new List<string>();
-
-                        if (d.appraisees != null)
-                        {
-                            foreach (var item in d.appraisees)
-                            {
-                                empCodes.Add(item.employee?.ToString());
-                                empNames.Add(item.employee_name?.ToString());
-                                empTemplates.Add(item.appraisal_template?.ToString());
-                                empDepts.Add(item.department?.ToString());
-                                empDesigs.Add(item.designation?.ToString());
-                                empBranches.Add(item.branch?.ToString());
-                            }
-                        }
-
-                        _appraisalCycleService.UpsertFromErpNext(
-                            model,
-                            empCodes,
-                            empNames,
-                            empTemplates,
-                            empDepts,
-                            empDesigs,
-                            empBranches
-                        );
-
-                        count++;
-                    }
-                }
-
+                int count = await SyncAppraisalCyclesFromErpNextInternal();
                 TempData["Success"] = count + " Appraisal Cycles synced from ERPNext.";
             }
             catch (Exception ex)
@@ -32664,6 +32701,74 @@ VALUES
             }
 
             return RedirectToAction("AppraisalCycle");
+        }
+
+        private async Task<int> SyncAppraisalCyclesFromErpNextInternal()
+        {
+            string listJson = await _erpNextService.GetAsync(
+                "/api/resource/Appraisal%20Cycle?fields=[\"name\"]&limit_page_length=1000");
+            dynamic listParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(listJson);
+            int count = 0;
+
+            if (listParsed?.data == null)
+                return count;
+
+            foreach (var row in listParsed.data)
+            {
+                string erpName = row.name?.ToString();
+                if (string.IsNullOrWhiteSpace(erpName))
+                    continue;
+
+                string detailJson = await _erpNextService.GetAsync(
+                    "/api/resource/Appraisal%20Cycle/" + Uri.EscapeDataString(erpName));
+                dynamic detailParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(detailJson);
+                var d = detailParsed?.data;
+                if (d == null)
+                    continue;
+
+                var model = new AppraisalCycle
+                {
+                    ErpNextId = erpName,
+                    CycleName = d.cycle_name?.ToString(),
+                    Company = d.company?.ToString(),
+                    Status = d.status?.ToString() ?? "Not Started",
+                    StartDate = d.start_date != null ? Convert.ToDateTime(d.start_date.ToString()) : DateTime.Now,
+                    EndDate = d.end_date != null ? Convert.ToDateTime(d.end_date.ToString()) : DateTime.Now.AddMonths(1),
+                    Description = StripHtml(d.description?.ToString()),
+                    KRAEvaluationMethod = d.kra_evaluation_method?.ToString() ?? "Automated Based on Goal Progress",
+                    CalculateFinalScoreFormula = d.calculate_final_score_based_on_formula != null && d.calculate_final_score_based_on_formula.ToString() == "1",
+                    FinalScoreFormula = d.final_score_formula?.ToString(),
+                    Branch = d.branch?.ToString(),
+                    Department = d.department?.ToString(),
+                    Designation = d.designation?.ToString()
+                };
+
+                var empCodes = new List<string>();
+                var empNames = new List<string>();
+                var empTemplates = new List<string>();
+                var empDepts = new List<string>();
+                var empDesigs = new List<string>();
+                var empBranches = new List<string>();
+
+                if (d.appraisees != null)
+                {
+                    foreach (var item in d.appraisees)
+                    {
+                        empCodes.Add(item.employee?.ToString());
+                        empNames.Add(item.employee_name?.ToString());
+                        empTemplates.Add(item.appraisal_template?.ToString());
+                        empDepts.Add(item.department?.ToString());
+                        empDesigs.Add(item.designation?.ToString());
+                        empBranches.Add(item.branch?.ToString());
+                    }
+                }
+
+                _appraisalCycleService.UpsertFromErpNext(
+                    model, empCodes, empNames, empTemplates, empDepts, empDesigs, empBranches);
+                count++;
+            }
+
+            return count;
         }
 
         private string StripHtml(string html)
@@ -32968,6 +33073,18 @@ VALUES
         {
             await LoadEnergyPointSettingsDropdowns();
 
+            if (ShouldRefreshFromErpNext())
+            {
+                try
+                {
+                    await SyncEnergyPointSettingsFromErpNextAsync();
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
+                }
+            }
+
             var model = _energyPointSettingsService.GetSettings();
             return View(model);
         }
@@ -33004,44 +33121,7 @@ VALUES
         {
             try
             {
-                string json = await _erpNextService.GetAsync(
-                    "/api/resource/Energy%20Point%20Settings/Energy%20Point%20Settings"
-                );
-
-                dynamic parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-                var d = parsed?.data;
-
-                if (d == null)
-                    throw new Exception("Energy Point Settings data not found in ERPNext.");
-
-                var model = new EnergyPointSettings
-                {
-                    Enabled = d.enabled != null && d.enabled.ToString() == "1",
-                    PointAllocationPeriodicity = d.point_allocation_periodicity?.ToString() ?? "Weekly",
-                    LastPointAllocationDate = d.last_point_allocation_date == null ||
-                                              string.IsNullOrWhiteSpace(d.last_point_allocation_date.ToString())
-                        ? null
-                        : Convert.ToDateTime(d.last_point_allocation_date.ToString())
-                };
-
-                var levelNames = new List<string>();
-                var roles = new List<string>();
-                var points = new List<int>();
-
-                if (d.review_levels != null)
-                {
-                    foreach (var row in d.review_levels)
-                    {
-                        levelNames.Add(row.level_name?.ToString() ?? string.Empty);
-                        roles.Add(row.role?.ToString() ?? string.Empty);
-
-                        int reviewPoint = 0;
-                        int.TryParse(row.review_points?.ToString(), out reviewPoint);
-                        points.Add(reviewPoint);
-                    }
-                }
-
-                _energyPointSettingsService.SaveSettings(model, levelNames, roles, points);
+                await SyncEnergyPointSettingsFromErpNextAsync();
 
                 TempData["Success"] = "Energy Point Settings synced from ERPNext.";
             }
@@ -33051,6 +33131,48 @@ VALUES
             }
 
             return RedirectToAction("EnergyPointSettings");
+        }
+
+        private async Task SyncEnergyPointSettingsFromErpNextAsync()
+        {
+            string json = await _erpNextService.GetAsync(
+                "/api/resource/Energy%20Point%20Settings/Energy%20Point%20Settings"
+            );
+
+            dynamic parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+            var d = parsed?.data;
+
+            if (d == null)
+                throw new Exception("Energy Point Settings data not found in ERPNext.");
+
+            var model = new EnergyPointSettings
+            {
+                Enabled = d.enabled != null && d.enabled.ToString() == "1",
+                PointAllocationPeriodicity = d.point_allocation_periodicity?.ToString() ?? "Weekly",
+                LastPointAllocationDate = d.last_point_allocation_date == null ||
+                                          string.IsNullOrWhiteSpace(d.last_point_allocation_date.ToString())
+                    ? null
+                    : Convert.ToDateTime(d.last_point_allocation_date.ToString())
+            };
+
+            var levelNames = new List<string>();
+            var roles = new List<string>();
+            var points = new List<int>();
+
+            if (d.review_levels != null)
+            {
+                foreach (var row in d.review_levels)
+                {
+                    levelNames.Add(row.level_name?.ToString() ?? string.Empty);
+                    roles.Add(row.role?.ToString() ?? string.Empty);
+
+                    int reviewPoint = 0;
+                    int.TryParse(row.review_points?.ToString(), out reviewPoint);
+                    points.Add(reviewPoint);
+                }
+            }
+
+            _energyPointSettingsService.SaveSettings(model, levelNames, roles, points);
         }
 
         [HttpPost]
@@ -33093,6 +33215,18 @@ VALUES
         public async Task<ActionResult> CreateEnergyPointSettings()
         {
             await LoadEnergyPointSettingsDropdowns();
+
+            if (ShouldRefreshFromErpNext())
+            {
+                try
+                {
+                    await SyncEnergyPointSettingsFromErpNextAsync();
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
+                }
+            }
 
             var model = _energyPointSettingsService.GetSettings();
             return View(model);
@@ -33186,8 +33320,20 @@ VALUES
 
 
 
-        public ActionResult EnergyPointRule(string id, string status, bool? enabled, string ruleName, string referenceDocumentType, string condition)
+        public async Task<ActionResult> EnergyPointRule(string id, string status, bool? enabled, string ruleName, string referenceDocumentType, string condition)
         {
+            if (ShouldRefreshFromErpNext())
+            {
+                try
+                {
+                    await SyncEnergyPointRulesFromErpNextAsync();
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
+                }
+            }
+
             var list = _energyPointRuleService.GetAll(id, status, enabled, ruleName, referenceDocumentType, condition);
             ViewBag.IdFilter = id;
             ViewBag.StatusFilter = status;
@@ -33204,54 +33350,7 @@ VALUES
         {
             try
             {
-                string listJson = await _erpNextService.GetAsync(
-                    "/api/resource/Energy%20Point%20Rule?fields=[\"name\"]&limit_page_length=1000"
-                );
-
-                dynamic listParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(listJson);
-                int count = 0;
-
-                if (listParsed?.data != null)
-                {
-                    foreach (var row in listParsed.data)
-                    {
-                        string erpName = row.name?.ToString();
-
-                        if (string.IsNullOrWhiteSpace(erpName))
-                            continue;
-
-                        string detailJson = await _erpNextService.GetAsync(
-                            "/api/resource/Energy%20Point%20Rule/" + Uri.EscapeDataString(erpName)
-                        );
-
-                        dynamic detailParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(detailJson);
-                        var d = detailParsed?.data;
-
-                        if (d == null)
-                            continue;
-
-                        var model = new EnergyPointRule
-                        {
-                            ErpNextId = erpName,
-                            Enabled = d.enabled != null && d.enabled.ToString() == "1",
-                            RuleName = d.rule_name?.ToString(),
-                            ReferenceDocumentType = d.reference_doctype?.ToString(),
-                            ForDocumentEvent = d.for_doc_event?.ToString() ?? "Custom",
-                            FieldToCheck = d.field_to_check?.ToString(),
-                            Points = d.points == null ? 0 : Convert.ToInt32(d.points.ToString()),
-                            ApplyOnlyOnce = d.apply_only_once != null && d.apply_only_once.ToString() == "1",
-                            AllotPointsToAssignedUsers = d.for_assigned_users != null && d.for_assigned_users.ToString() == "1",
-                            UserField = d.user_field?.ToString(),
-                            MultiplierField = d.multiplier_field?.ToString(),
-                            MaxPoints = d.max_points == null || string.IsNullOrWhiteSpace(d.max_points.ToString()) ? null : Convert.ToInt32(d.max_points.ToString()),
-                            Condition = d.condition?.ToString(),
-                            Status = (d.enabled != null && d.enabled.ToString() == "1") ? "Active" : "Inactive"
-                        };
-
-                        _energyPointRuleService.UpsertFromErpNext(model);
-                        count++;
-                    }
-                }
+                int count = await SyncEnergyPointRulesFromErpNextAsync();
 
                 TempData["Success"] = count + " Energy Point Rules synced from ERPNext.";
             }
@@ -33261,6 +33360,69 @@ VALUES
             }
 
             return RedirectToAction("EnergyPointRule");
+        }
+
+        private async Task<int> SyncEnergyPointRulesFromErpNextAsync()
+        {
+            string listJson = await _erpNextService.GetAsync(
+                "/api/resource/Energy%20Point%20Rule?fields=[\"name\"]&limit_page_length=1000"
+            );
+
+            dynamic listParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(listJson);
+            var erpNextIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            int count = 0;
+
+            if (listParsed?.data != null)
+            {
+                foreach (var row in listParsed.data)
+                {
+                    string erpName = row.name?.ToString();
+
+                    if (string.IsNullOrWhiteSpace(erpName))
+                        continue;
+
+                    string detailJson = await _erpNextService.GetAsync(
+                        "/api/resource/Energy%20Point%20Rule/" + Uri.EscapeDataString(erpName)
+                    );
+
+                    dynamic detailParsed = Newtonsoft.Json.JsonConvert.DeserializeObject(detailJson);
+                    var d = detailParsed?.data;
+
+                    if (d == null)
+                        continue;
+
+                    bool isEnabled = d.enabled != null && d.enabled.ToString() == "1";
+                    int points = 0;
+                    int.TryParse(d.points?.ToString(), out points);
+
+                    int maxPoints = 0;
+                    bool hasMaxPoints = int.TryParse(d.max_points?.ToString(), out maxPoints);
+
+                    _energyPointRuleService.UpsertFromErpNext(new EnergyPointRule
+                    {
+                        ErpNextId = erpName,
+                        Enabled = isEnabled,
+                        RuleName = d.rule_name?.ToString(),
+                        ReferenceDocumentType = d.reference_doctype?.ToString(),
+                        ForDocumentEvent = d.for_doc_event?.ToString() ?? "Custom",
+                        FieldToCheck = d.field_to_check?.ToString(),
+                        Points = points,
+                        ApplyOnlyOnce = d.apply_only_once != null && d.apply_only_once.ToString() == "1",
+                        AllotPointsToAssignedUsers = d.for_assigned_users != null && d.for_assigned_users.ToString() == "1",
+                        UserField = d.user_field?.ToString(),
+                        MultiplierField = d.multiplier_field?.ToString(),
+                        MaxPoints = hasMaxPoints ? maxPoints : null,
+                        Condition = d.condition?.ToString(),
+                        Status = isEnabled ? "Active" : "Inactive"
+                    });
+
+                    erpNextIds.Add(erpName);
+                    count++;
+                }
+            }
+
+            _energyPointRuleService.MarkDeletedIfMissingFromErpNext(erpNextIds);
+            return count;
         }
 
 
@@ -33359,19 +33521,26 @@ VALUES
                         if (string.IsNullOrWhiteSpace(fieldname))
                             continue;
 
-                        if (fieldtype == "Int" ||
-                            fieldtype == "Float" ||
-                            fieldtype == "Currency" ||
-                            fieldtype == "Percent")
+                        if (fieldtype == "Section Break" ||
+                            fieldtype == "Column Break" ||
+                            fieldtype == "Tab Break" ||
+                            fieldtype == "Table" ||
+                            fieldtype == "Table MultiSelect")
+                            continue;
+
+                        bool isNumeric = fieldtype == "Int" ||
+                                         fieldtype == "Float" ||
+                                         fieldtype == "Currency" ||
+                                         fieldtype == "Percent";
+
+                        fields.Add(new
                         {
-                            fields.Add(new
-                            {
-                                value = fieldname,
-                                text = string.IsNullOrWhiteSpace(label)
-                                    ? fieldname
-                                    : label + " (" + fieldname + ")"
-                            });
-                        }
+                            value = fieldname,
+                            text = string.IsNullOrWhiteSpace(label)
+                                ? fieldname
+                                : label + " (" + fieldname + ")",
+                            isNumeric
+                        });
                     }
                 }
 
@@ -33407,11 +33576,84 @@ VALUES
             return RedirectToAction("EnergyPointRuleDetails", new { id = newId });
         }
 
-        public ActionResult EnergyPointRuleDetails(int id)
+        public async Task<ActionResult> EnergyPointRuleDetails(int id)
         {
+            await LoadEnergyPointRuleDropdowns();
+
+            if (ShouldRefreshFromErpNext())
+            {
+                try
+                {
+                    await SyncEnergyPointRulesFromErpNextAsync();
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
+                }
+            }
+
             var model = _energyPointRuleService.GetById(id);
             if (model == null) return NotFound();
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdateEnergyPointRule(int id, EnergyPointRule model)
+        {
+            var existing = _energyPointRuleService.GetById(id);
+            if (existing == null)
+                return NotFound();
+
+            model.Id = id;
+            model.ErpNextId = existing.ErpNextId;
+            model.Status = model.Enabled ? "Active" : "Inactive";
+
+            try
+            {
+                string erpNextId = await PushEnergyPointRuleToErpNext(model);
+                if (!string.IsNullOrWhiteSpace(erpNextId))
+                    model.ErpNextId = erpNextId;
+
+                _energyPointRuleService.Update(model);
+
+                TempData["Success"] = "Energy Point Rule updated in ERPNext and HRMS.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Energy Point Rule update failed: " + ExtractErpNextErrorMessage(ex.Message);
+            }
+
+            return RedirectToAction("EnergyPointRuleDetails", new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> DeleteEnergyPointRule(int id)
+        {
+            var existing = _energyPointRuleService.GetById(id);
+            if (existing == null)
+                return NotFound();
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(existing.ErpNextId))
+                {
+                    await _erpNextService.DeleteAsync(
+                        "/api/resource/Energy%20Point%20Rule/" +
+                        Uri.EscapeDataString(existing.ErpNextId)
+                    );
+                }
+
+                _energyPointRuleService.MarkDeletedById(id);
+                TempData["Success"] = "Energy Point Rule deleted from ERPNext and HRMS.";
+                return RedirectToAction("EnergyPointRule");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Energy Point Rule delete failed: " + ExtractErpNextErrorMessage(ex.Message);
+                return RedirectToAction("EnergyPointRuleDetails", new { id });
+            }
         }
 
         public async Task<ActionResult> AppraisalTemplate(string id)
@@ -33589,11 +33831,40 @@ VALUES
 
 
 
-        public ActionResult AppraisalTemplateDetails(int id)
+        public async Task<ActionResult> AppraisalTemplateDetails(int id)
         {
             var model = _appraisalTemplateService.GetById(id);
             if (model == null) return NotFound();
+
+            await LoadAppraisalTemplateDetailDropdownsAsync();
             return View(model);
+        }
+
+        private async Task LoadAppraisalTemplateDetailDropdownsAsync()
+        {
+            try
+            {
+                var kras = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/KRA?fields=[\"name\"]&limit_page_length=1000"))["data"] as JArray ?? new JArray();
+                var criteria = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Employee%20Feedback%20Criteria?fields=[\"name\"]&limit_page_length=1000"))["data"] as JArray ?? new JArray();
+
+                ViewBag.KraOptions = kras
+                    .Select(row => row["name"]?.ToString())
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => new SelectListItem { Value = name, Text = name })
+                    .ToList();
+                ViewBag.CriteriaOptions = criteria
+                    .Select(row => row["name"]?.ToString())
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => new SelectListItem { Value = name, Text = name })
+                    .ToList();
+            }
+            catch
+            {
+                ViewBag.KraOptions = new List<SelectListItem>();
+                ViewBag.CriteriaOptions = new List<SelectListItem>();
+            }
         }
 
         [HttpPost]
@@ -33754,8 +34025,20 @@ VALUES
             return rows;
         }
 
-        public ActionResult AppraisalCycle(string id, string company, string status, DateTime? startDate, DateTime? endDate)
+        public async Task<ActionResult> AppraisalCycle(string id, string company, string status, DateTime? startDate, DateTime? endDate)
         {
+            if (ShouldRefreshFromErpNext())
+            {
+                try
+                {
+                    await SyncAppraisalCyclesFromErpNextInternal();
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
+                }
+            }
+
             var list = _appraisalCycleService.GetAll(id, company, status, startDate, endDate);
             ViewBag.IdFilter = id;
             ViewBag.CompanyFilter = company;
@@ -35648,11 +35931,55 @@ VALUES
 
         //    return RedirectToAction("Appraisal");
         //}
-        public ActionResult AppraisalDetails(int id)
+        public async Task<ActionResult> AppraisalDetails(int id)
         {
             var appraisal = _appraisalService.GetById(id);
             if (appraisal == null) return NotFound();
+
+            await LoadAppraisalDetailDropdownsAsync();
             return View(appraisal);
+        }
+
+        private async Task LoadAppraisalDetailDropdownsAsync()
+        {
+            try
+            {
+                var employees = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"status\"]&limit_page_length=1000"))["data"] as JArray ?? new JArray();
+                var companies = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Company?fields=[\"name\"]&limit_page_length=1000"))["data"] as JArray ?? new JArray();
+                var cycles = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Appraisal%20Cycle?fields=[\"name\"]&limit_page_length=1000"))["data"] as JArray ?? new JArray();
+                var templates = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Appraisal%20Template?fields=[\"name\"]&limit_page_length=1000"))["data"] as JArray ?? new JArray();
+
+                ViewBag.EmployeeList = employees
+                    .Select(row => new SelectListItem
+                    {
+                        Value = row["name"]?.ToString(),
+                        Text = (row["name"]?.ToString() ?? "") + " - " +
+                               (row["employee_name"]?.ToString() ?? "")
+                    }).ToList();
+                ViewBag.CompanyList = ToAppraisalSelectList(companies);
+                ViewBag.AppraisalCycleList = ToAppraisalSelectList(cycles);
+                ViewBag.AppraisalTemplateList = ToAppraisalSelectList(templates);
+            }
+            catch
+            {
+                ViewBag.EmployeeList = new List<SelectListItem>();
+                ViewBag.CompanyList = new List<SelectListItem>();
+                ViewBag.AppraisalCycleList = new List<SelectListItem>();
+                ViewBag.AppraisalTemplateList = new List<SelectListItem>();
+            }
+        }
+
+        private static List<SelectListItem> ToAppraisalSelectList(JArray items)
+        {
+            return items
+                .Select(row => row["name"]?.ToString())
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => new SelectListItem { Value = name, Text = name })
+                .ToList();
         }
 
         public ActionResult Performance()
@@ -40820,9 +41147,9 @@ VALUES
                 ["company"] = model.Company,
                 ["personal_id_type"] = model.IdentificationDocumentType,
                 ["personal_id_number"] = model.IdentificationDocumentNumber,
-                ["cell_number"] = model.ContactNumber,
-                ["prefered_email"] = model.ContactEmail,
-                ["passport_number"] = model.PassportNumber,
+                ["contact_no"] = model.ContactNumber,
+                ["contact_email"] = model.ContactEmail,
+                ["passport_no"] = model.PassportNumber,
                 ["description"] = model.OtherDetailsDescription,
                 ["itinerary"] = itinerary,
                 ["costings"] = costing,
@@ -44094,6 +44421,10 @@ VALUES
                     payable_account = string.IsNullOrWhiteSpace(model.PayableAccount) ? null : model.PayableAccount,
                     project = targetProject,
                     cost_center = targetCostCenter,
+                    dunning = string.IsNullOrWhiteSpace(model.Dunning) ? null : model.Dunning,
+                    ai_audit_log = string.IsNullOrWhiteSpace(model.AiAuditLog) ? null : model.AiAuditLog,
+                    allowed_to_transact_with = string.IsNullOrWhiteSpace(model.AllowedToTransactWith) ? null : model.AllowedToTransactWith,
+                    appraisal_template = string.IsNullOrWhiteSpace(model.AppraisalTemplate) ? null : model.AppraisalTemplate,
                     status = string.IsNullOrWhiteSpace(model.Status) ? "Draft" : model.Status,
                     task = string.IsNullOrWhiteSpace(model.Task) ? null : model.Task,
                     expenses = expensesList,
@@ -44513,13 +44844,9 @@ VALUES
         [Route("HR/ExpenseClaims")]
         public ActionResult ExpenseClaims()
         {
-            ViewBag.PendingExpenseClaimCount =
-                _expenseService.GetAllExpenseClaims("Pending").Count;
-
-            ViewBag.UnclaimedAdvanceCount =
-                _employeeAdvanceService.GetAllEmployeeAdvances().Count;
-
-            return View("~/Views/HR/ExpenseClaimsWorkspace.cshtml");
+            ViewBag.PendingExpenseClaimCount = _expenseService.GetAllExpenseClaims("Pending").Count;
+            ViewBag.UnclaimedAdvanceCount = _employeeAdvanceService.GetAllEmployeeAdvances().Count;
+            return View("ExpenseClaimsWorkspace");
         }
 
         [HttpGet]

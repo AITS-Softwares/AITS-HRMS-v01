@@ -1,0 +1,94 @@
+<style>
+    .lifecycle-ui {
+        --life-navy: #15324b;
+        --life-teal: #0f877d;
+        --life-sky: #eaf5fb;
+        --life-line: #cfe0eb;
+        --life-ink: #183247;
+        background: linear-gradient(135deg, #eef7fb 0%, #f7fbfa 66%, #edf3fb 100%);
+        border: 1px solid #d5e5ee;
+        border-radius: 8px;
+        padding: 22px;
+        color: var(--life-ink);
+    }
+
+    .lifecycle-ui > .d-flex.justify-content-between.align-items-center.mb-3,
+    .lifecycle-ui .lifecycle-ui__header {
+        background: var(--life-navy);
+        border-radius: 8px;
+        color: #fff;
+        padding: 18px 20px;
+        box-shadow: 0 10px 24px rgba(21, 50, 75, 0.14);
+    }
+
+    .lifecycle-ui .card {
+        background: rgba(255, 255, 255, 0.94) !important;
+        border: 1px solid var(--life-line) !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
+
+    .lifecycle-ui .card h6,
+    .lifecycle-ui .ea-section-title {
+        color: var(--life-navy);
+        font-weight: 700;
+    }
+
+    .lifecycle-ui .form-label,
+    .lifecycle-ui .ea-form-label {
+        color: #315369;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .lifecycle-ui .form-control,
+    .lifecycle-ui .form-select,
+    .lifecycle-ui .ea-input {
+        border-color: #bcd4e2;
+        border-radius: 6px;
+        min-height: 38px;
+    }
+
+    .lifecycle-ui .table-responsive {
+        border: 1px solid var(--life-line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+    }
+
+    .lifecycle-ui .table thead th {
+        background: var(--life-sky);
+        color: var(--life-navy);
+        border-bottom-color: var(--life-line);
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .lifecycle-ui .table tbody tr { cursor: pointer; }
+    .lifecycle-ui .table tbody tr:hover { background: #f0f9f8; }
+
+    .lifecycle-ui .btn-dark,
+    .lifecycle-ui .btn-primary {
+        background: var(--life-teal);
+        border-color: var(--life-teal);
+        font-weight: 700;
+    }
+
+    .lifecycle-ui .btn-outline-secondary {
+        background: #fff;
+        border-color: #acc7d7;
+        color: var(--life-navy);
+        font-weight: 700;
+    }
+
+    .lifecycle-ui .badge { font-weight: 700; }
+
+    @@media (max-width: 768px) {
+        .lifecycle-ui { padding: 14px; }
+        .lifecycle-ui > .d-flex.justify-content-between.align-items-center.mb-3,
+        .lifecycle-ui .lifecycle-ui__header {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 12px;
+        }
+    }
+</style>

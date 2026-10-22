@@ -8,6 +8,8 @@
     var shifts = ViewBag.Shifts;
 }
 
+<div class="workforce-ui attendance-request-form">
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -235,7 +237,10 @@
     </div>
 </form>
 
+</div>
+
 <style>
+    .workforce-ui.attendance-request-form { max-width: 1180px; margin: 8px auto 40px; padding: 26px; border: 1px solid #c7daea; border-radius: 8px; background: #edf5fb; box-shadow: 0 16px 34px rgba(19,55,91,.10); }.workforce-ui.attendance-request-form > .d-flex { margin: -26px -26px 24px; padding: 20px 26px; background: #14365d; border-radius: 8px 8px 0 0; }.workforce-ui.attendance-request-form h4 { color: #fff; font-size: 27px; font-weight: 760; }.workforce-ui.attendance-request-form .btn { border-radius: 6px; font-weight: 700; }.workforce-ui.attendance-request-form .btn-dark { border-color: #16a085; background: #108c77; }.workforce-ui.attendance-request-form .btn-outline-secondary { border-color: #91acc7; color: #e7f1fb; }.workforce-ui.attendance-request-form .btn-outline-secondary:hover { background: #fff; color: #163d64; }.workforce-ui.attendance-request-form .card { border: 1px solid #c8ddec!important; border-radius: 8px; box-shadow: 0 8px 20px rgba(16,49,82,.07); }.workforce-ui.attendance-request-form .card-body h5 { color: #173f6b; font-weight: 760; }.workforce-ui.attendance-request-form .form-label { color: #315879; font-weight: 720; }.workforce-ui.attendance-request-form .form-control, .workforce-ui.attendance-request-form .form-select { min-height: 42px; border-color: #b9cee2; border-radius: 6px; }.workforce-ui.attendance-request-form .form-control:focus, .workforce-ui.attendance-request-form .form-select:focus { border-color: #159b84; box-shadow: 0 0 0 3px rgba(21,155,132,.14); }.workforce-ui.attendance-request-form .form-check-input:checked { background-color: #159b84; border-color: #159b84; }
     .card {
         border-radius: 8px;
     }

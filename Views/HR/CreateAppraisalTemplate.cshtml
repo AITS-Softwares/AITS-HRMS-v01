@@ -54,11 +54,12 @@
 <form asp-action="CreateAppraisalTemplate"
       asp-controller="HR"
       method="post"
-      id="appraisalForm">
+      id="appraisalForm"
+      class="performance-ui performance-form-shell">
 
     @Html.AntiForgeryToken()
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <div>
             <h4 class="mb-0 d-inline">New Appraisal Template</h4>
             <span class="badge bg-danger-subtle text-danger ms-2">
@@ -145,6 +146,8 @@
     </button>
 
 </form>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     const ERP_URL =

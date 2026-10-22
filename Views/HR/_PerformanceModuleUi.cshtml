@@ -1,0 +1,34 @@
+@* Shared presentation styles for the Performance module only. *@
+<style>
+    .performance-ui.performance-page-header { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:18px; padding:20px 22px; border:1px solid #c9e0ea; border-radius:8px; background:linear-gradient(135deg,#15324b 0%,#204a67 100%); box-shadow:0 10px 24px rgba(21,50,75,.12); color:#fff; }
+    .performance-ui.performance-page-header h4 { margin:0; color:#fff; font-weight:700; }
+    .performance-ui.performance-page-header .text-muted { color:#cce5ee !important; }
+    .performance-ui.performance-page-header .btn-dark { border-color:#0f877d; background:#0f877d; color:#fff; }
+    .performance-ui.performance-page-header .btn-outline-secondary { border-color:#b9dbe5; color:#fff; }
+    .performance-ui.performance-page-header .btn-outline-secondary:hover { background:#fff; color:#15324b; }
+    .performance-ui.performance-page-header .btn-outline-danger { border-color:#f3b7b7; color:#fff; }
+    .performance-ui.performance-filter-panel { display:flex; align-items:end; gap:10px; margin:0 0 18px; padding:16px; border:1px solid #d1e3eb; border-radius:8px; background:#eef7fa; }
+    .performance-ui.performance-filter-panel .col-auto { padding:0; flex:1 1 150px; }
+    .performance-ui.performance-filter-panel .col-auto:last-child { flex:0 0 auto; }
+    .performance-ui.performance-data-table { overflow:hidden; border:1px solid #cfe1e9; border-radius:8px; background:#fff; box-shadow:0 8px 20px rgba(21,50,75,.06); }
+    .performance-ui.performance-data-table thead th { padding:13px 15px; border-bottom:1px solid #bad8e4; background:#15324b; color:#fff; font-size:12px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; }
+    .performance-ui.performance-data-table tbody td { padding:14px 15px; border-color:#e4eef2; color:#24455b; }
+    .performance-ui.performance-data-table tbody tr { transition:background-color .15s ease; }
+    .performance-ui.performance-data-table tbody tr:hover { background:#edf8f7; }
+    .performance-ui.performance-form-shell { padding:22px; border:1px solid #d1e3eb; border-radius:8px; background:linear-gradient(135deg,#eef7fa 0%,#f8fcfd 100%); }
+    .performance-ui.performance-form-shell > .row { margin-left:0; margin-right:0; padding:20px; border:1px solid #cfe1e9; border-radius:8px; background:#fff; box-shadow:0 8px 18px rgba(21,50,75,.05); }
+    .performance-ui.performance-form-shell .performance-page-header { margin-bottom:18px; }
+    .performance-ui.performance-form-shell .card, .performance-ui.performance-section { border:1px solid #cfe1e9 !important; border-radius:8px !important; background:#fff; box-shadow:0 8px 18px rgba(21,50,75,.05); }
+    .performance-ui.performance-form-shell .nav-tabs, .performance-ui.performance-tabs { gap:5px; border-bottom:1px solid #cfe1e9; }
+    .performance-ui.performance-form-shell .nav-tabs .nav-link, .performance-ui.performance-tabs .nav-link { border:0; border-radius:6px 6px 0 0; color:#45667a; font-weight:700; }
+    .performance-ui.performance-form-shell .nav-tabs .nav-link.active, .performance-ui.performance-tabs .nav-link.active { border-bottom:3px solid #0f877d; background:#e5f5f1; color:#0c655e; }
+    .performance-ui.performance-form-shell .form-label, .performance-ui.performance-section .form-label { color:#24485e; font-size:13px; font-weight:700; }
+    .performance-ui.performance-form-shell .form-control, .performance-ui.performance-form-shell .form-select, .performance-ui.performance-section .form-control, .performance-ui.performance-section .form-select, .performance-ui.performance-filter-panel .form-control, .performance-ui.performance-filter-panel .form-select { min-height:38px; border-color:#bcd4e0; border-radius:6px; box-shadow:none; }
+    .performance-ui.performance-form-shell .form-control:focus, .performance-ui.performance-form-shell .form-select:focus, .performance-ui.performance-section .form-control:focus, .performance-ui.performance-section .form-select:focus, .performance-ui.performance-filter-panel .form-control:focus, .performance-ui.performance-filter-panel .form-select:focus { border-color:#0f877d; box-shadow:0 0 0 .18rem rgba(15,135,125,.12); }
+    .performance-ui.performance-form-shell .btn-dark, .performance-ui.performance-section .btn-dark { border-color:#0f877d; background:#0f877d; }
+    .performance-ui.performance-form-shell .btn-outline-secondary, .performance-ui.performance-section .btn-outline-secondary { border-color:#91b2c3; color:#24485e; }
+    .performance-ui.performance-form-shell .table, .performance-ui.performance-section .table { border-color:#d7e7ee; }
+    .performance-ui.performance-form-shell .table thead th, .performance-ui.performance-section .table thead th { background:#eaf5f8; color:#24485e; border-color:#d7e7ee; }
+    .performance-ui.performance-detail-layout { padding:22px; border:1px solid #d1e3eb; border-radius:8px; background:linear-gradient(135deg,#eef7fa 0%,#f8fcfd 100%); }
+    @@media (max-width:767px) { .performance-ui.performance-page-header { align-items:stretch; flex-direction:column; padding:18px; } .performance-ui.performance-page-header > div:last-child, .performance-ui.performance-page-header > a, .performance-ui.performance-page-header > button { width:100%; } .performance-ui.performance-filter-panel { align-items:stretch; flex-direction:column; } .performance-ui.performance-filter-panel .col-auto { flex:1 1 auto; width:100%; } .performance-ui.performance-form-shell { padding:14px; } }
+</style>

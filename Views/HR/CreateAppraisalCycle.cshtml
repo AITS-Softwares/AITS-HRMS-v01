@@ -3,8 +3,8 @@
     ViewBag.Title = "New Appraisal Cycle";
 }
 
-<form asp-action="CreateAppraisalCycle" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<form asp-action="CreateAppraisalCycle" method="post" class="performance-ui performance-form-shell">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <div>
             <h4 class="mb-0 d-inline">New Appraisal Cycle</h4>
             <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
@@ -12,7 +12,7 @@
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
-    <ul class="nav nav-tabs mb-3">
+    <ul class="nav nav-tabs mb-3 performance-tabs">
         <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overviewTab">Overview</a></li>
         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#applicableForTab">Applicable For</a></li>
     </ul>
@@ -169,6 +169,8 @@
         </div>
     </div>
 </form>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     const employees = [

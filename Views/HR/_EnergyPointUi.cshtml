@@ -1,0 +1,163 @@
+<style>
+    .energy-point-ui {
+        --energy-navy: #163b5b;
+        --energy-teal: #087f7b;
+        --energy-sky: #eaf5fb;
+        --energy-line: #c9dce8;
+        --energy-ink: #17324a;
+        --energy-muted: #63778b;
+    }
+
+    .energy-point-ui.energy-point-page-header,
+    .energy-point-page-header {
+        background: linear-gradient(115deg, #163b5b 0%, #1f5578 58%, #087f7b 100%);
+        border: 1px solid #12344e;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(22, 59, 91, .14);
+        color: #fff;
+        padding: 1.05rem 1.25rem;
+    }
+
+    .energy-point-page-header h4,
+    .energy-point-page-header h5,
+    .energy-point-page-header small {
+        color: inherit;
+    }
+
+    .energy-point-page-header .btn-dark,
+    .energy-point-page-header .btn-outline-secondary {
+        background: #fff;
+        border-color: #fff;
+        color: #163b5b;
+        font-weight: 700;
+    }
+
+    .energy-point-page-header .btn-outline-danger {
+        background: #fff5f5;
+        border-color: #ffc4c4;
+        color: #b42318;
+        font-weight: 700;
+    }
+
+    .energy-point-shell,
+    .energy-point-filter-panel {
+        background: #f4f9fc;
+        border: 1px solid var(--energy-line);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .energy-point-section {
+        background: #fff;
+        border: 1px solid var(--energy-line);
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(22, 59, 91, .06);
+    }
+
+    .energy-point-ui .form-label,
+    .energy-point-ui .form-check-label {
+        color: var(--energy-ink);
+        font-weight: 650;
+    }
+
+    .energy-point-ui .form-control,
+    .energy-point-ui .form-select {
+        border-color: #b8cede;
+        border-radius: 6px;
+        color: var(--energy-ink);
+    }
+
+    .energy-point-ui .form-control:focus,
+    .energy-point-ui .form-select:focus {
+        border-color: var(--energy-teal);
+        box-shadow: 0 0 0 .2rem rgba(8, 127, 123, .13);
+    }
+
+    .energy-point-ui .btn-dark {
+        background: var(--energy-teal);
+        border-color: var(--energy-teal);
+        font-weight: 700;
+    }
+
+    .energy-point-ui .btn-dark:hover {
+        background: #066b68;
+        border-color: #066b68;
+    }
+
+    .energy-point-ui .btn-outline-secondary {
+        border-color: #9fb8c9;
+        color: var(--energy-navy);
+        font-weight: 650;
+    }
+
+    .energy-point-data-table {
+        border: 1px solid var(--energy-line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        margin-bottom: 0;
+    }
+
+    .energy-point-data-table thead th {
+        background: #dff0f7;
+        border-bottom: 1px solid #b8d3e0;
+        color: var(--energy-navy);
+        font-size: .78rem;
+        font-weight: 750;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .energy-point-data-table tbody tr {
+        transition: background-color .15s ease;
+    }
+
+    .energy-point-data-table tbody tr:hover {
+        background: #edf8f7;
+    }
+
+    .energy-point-data-table td {
+        color: var(--energy-ink);
+        vertical-align: middle;
+    }
+
+    .energy-point-status {
+        background: #d7f2ea;
+        border: 1px solid #a5ddcb;
+        border-radius: 999px;
+        color: #075e55;
+        display: inline-flex;
+        font-size: .76rem;
+        font-weight: 750;
+        padding: .2rem .55rem;
+    }
+
+    .energy-point-empty-state {
+        background: #fff;
+        border: 1px dashed #aac7d8;
+        border-radius: 8px;
+        color: var(--energy-muted);
+    }
+
+    .energy-point-ui textarea.form-control {
+        background: #fbfdff;
+        line-height: 1.55;
+    }
+
+    @@media (max-width: 767.98px) {
+        .energy-point-page-header {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: .8rem;
+        }
+
+        .energy-point-page-header > div:last-child {
+            flex-wrap: wrap;
+        }
+
+        .energy-point-filter-panel {
+            padding: .8rem;
+        }
+    }
+</style>

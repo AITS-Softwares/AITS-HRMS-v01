@@ -42,6 +42,14 @@ namespace Erp_Aits.Models
 
         public string CostCenter { get; set; }
 
+        public string Dunning { get; set; }
+
+        public string AiAuditLog { get; set; }
+
+        public string AllowedToTransactWith { get; set; }
+
+        public string AppraisalTemplate { get; set; }
+
         // More Info tab
         public string Status { get; set; } = "Draft";
 

@@ -142,6 +142,43 @@
     }
 </datalist>
 
+<datalist id="dunningList">
+    @if (ViewBag.Dunnings != null)
+    {
+        foreach (var item in ViewBag.Dunnings)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+<datalist id="aiAuditLogList">
+    @if (ViewBag.AiAuditLogs != null)
+    {
+        foreach (var item in ViewBag.AiAuditLogs)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+<datalist id="allowedToTransactWithList">
+    @if (ViewBag.AllowedToTransactWithOptions != null)
+    {
+        foreach (var item in ViewBag.AllowedToTransactWithOptions)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+<datalist id="appraisalTemplateList">
+    @if (ViewBag.AppraisalTemplates != null)
+    {
+        foreach (var item in ViewBag.AppraisalTemplates)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
 <datalist id="taskList">
     @if (ViewBag.Tasks != null)
     {
@@ -152,12 +189,13 @@
     }
 </datalist>
 
+<div class="expense-claim-detail">
 <form asp-controller="HR" asp-action="UpdateExpenseClaim" method="post" id="expenseClaimForm">
     <input type="hidden" name="id" value="@Model.Id" />
     <input asp-for="Id" type="hidden" />
     <input asp-for="ErpNextId" type="hidden" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="expense-claim-detail__header d-flex justify-content-between align-items-center mb-3">
         <div>
             <div class="text-muted small">Expense Claim</div>
             <h4 class="mb-0">@Model.ExpenseClaimCode</h4>
@@ -167,10 +205,10 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a href="@Url.Action("ExpenseClaimList", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+            <a href="@Url.Action("ExpenseClaimList", "HR")" class="btn ec-btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back</a>
             @if (isDraft)
             {
-                <button type="submit" class="btn btn-outline-dark btn-sm">Save</button>
+                <button type="submit" class="btn ec-btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
             }
         </div>
     </div>
@@ -261,7 +299,7 @@
                                 <td><input name="Expenses[@i].Description" value="@Model.Expenses[i].Description" class="form-control form-control-sm" /></td>
                                 <td><input type="number" step="0.01" name="Expenses[@i].Amount" value="@Model.Expenses[i].Amount" class="form-control form-control-sm" /></td>
                                 <td><input type="number" step="0.01" name="Expenses[@i].SanctionedAmount" value="@Model.Expenses[i].SanctionedAmount" class="form-control form-control-sm" /></td>
-                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); calculateExpenseClaimTotals();">x</button></td>
                             </tr>
                         }
                     </tbody>
@@ -295,10 +333,10 @@
                             <tr>
                                 <td>@(i + 1)</td>
                                 <td><input name="Taxes[@i].AccountHead" value="@Model.Taxes[i].AccountHead" class="form-control form-control-sm" list="accountList" /></td>
-                                <td><input type="number" step="0.01" name="Taxes[@i].Rate" value="@Model.Taxes[i].Rate" class="form-control form-control-sm" /></td>
-                                <td><input type="number" step="0.01" name="Taxes[@i].Amount" value="@Model.Taxes[i].Amount" class="form-control form-control-sm" /></td>
-                                <td><input type="number" step="0.01" name="Taxes[@i].Total" value="@Model.Taxes[i].Total" class="form-control form-control-sm" /></td>
-                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+                                <td><input type="number" step="0.01" name="Taxes[@i].Rate" value="@Model.Taxes[i].Rate" class="form-control form-control-sm tax-rate" oninput="calculateTaxRow(this)" /></td>
+                                <td><input type="number" step="0.01" name="Taxes[@i].Amount" value="@Model.Taxes[i].Amount" class="form-control form-control-sm tax-amount" readonly /></td>
+                                <td><input type="number" step="0.01" name="Taxes[@i].Total" value="@Model.Taxes[i].Total" class="form-control form-control-sm tax-total" readonly /></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); calculateExpenseClaimTotals();">x</button></td>
                             </tr>
                         }
                     </tbody>
@@ -337,7 +375,7 @@
                                 <td><input type="number" step="0.01" name="Advances[@i].AdvancePaid" value="@Model.Advances[i].AdvancePaid" class="form-control form-control-sm" /></td>
                                 <td><input type="number" step="0.01" name="Advances[@i].UnclaimedAmount" value="@Model.Advances[i].UnclaimedAmount" class="form-control form-control-sm" /></td>
                                 <td><input type="number" step="0.01" name="Advances[@i].AllocatedAmount" value="@Model.Advances[i].AllocatedAmount" class="form-control form-control-sm" /></td>
-                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); calculateExpenseClaimTotals();">x</button></td>
                             </tr>
                         }
                     </tbody>
@@ -380,6 +418,26 @@
                     <input asp-for="CostCenter" id="CostCenter" class="form-control" list="costCenterList" />
                 </div>
 
+                <div class="col-md-6">
+                    <label class="form-label">Dunning</label>
+                    <input asp-for="Dunning" class="form-control" list="dunningList" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">AI Audit Log</label>
+                    <input asp-for="AiAuditLog" class="form-control" list="aiAuditLogList" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Allowed To Transact With</label>
+                    <input asp-for="AllowedToTransactWith" class="form-control" list="allowedToTransactWithList" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Appraisal Template</label>
+                    <input asp-for="AppraisalTemplate" class="form-control" list="appraisalTemplateList" />
+                </div>
+
                 <div class="col-md-12">
                     <label class="form-label">Remark</label>
                     <textarea asp-for="Remark" class="form-control" rows="3"></textarea>
@@ -404,7 +462,19 @@
     </fieldset>
 </form>
 
-<div class="d-flex justify-content-end gap-2 mt-3">
+<div class="card p-4 mb-3 expense-claim-totals">
+    <h6 class="mb-3">Totals</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Total Sanctioned Amount</label><input id="totalSanctionedAmount" class="form-control" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Grand Total</label><input id="grandTotal" class="form-control" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Total Taxes and Charges</label><input id="totalTaxesAndCharges" class="form-control" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Total Claimed Amount</label><input id="totalClaimedAmount" class="form-control" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Total Advance Amount</label><input id="totalAdvanceAmount" class="form-control" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Total Amount Reimbursed</label><input id="totalAmountReimbursed" class="form-control" readonly /></div>
+    </div>
+</div>
+
+<div class="expense-claim-detail__actions d-flex justify-content-end gap-2 mt-3">
     @if (isDraft && !string.IsNullOrWhiteSpace(Model.ErpNextId))
     {
         <form asp-controller="HR" asp-action="SubmitExpenseClaim" method="post">
@@ -421,6 +491,51 @@
         </form>
     }
 </div>
+</div>
+
+<style>
+    .expense-claim-detail {
+        --ec-navy: #15324b;
+        --ec-teal: #0f877d;
+        --ec-sky: #eaf5fb;
+        --ec-line: #cfe0eb;
+        background: linear-gradient(135deg, #eef7fb 0%, #f7fbfa 65%, #edf3fb 100%);
+        border: 1px solid #d5e5ee;
+        border-radius: 8px;
+        padding: 22px;
+        color: #183247;
+    }
+    .expense-claim-detail__header {
+        padding: 18px 20px;
+        background: var(--ec-navy);
+        border-radius: 8px;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(21, 50, 75, 0.14);
+    }
+    .expense-claim-detail__header .text-muted { color: #a8d6e5 !important; }
+    .expense-claim-detail .card {
+        border: 1px solid var(--ec-line);
+        border-radius: 8px;
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.94);
+    }
+    .expense-claim-detail .card h6 { color: var(--ec-navy); font-weight: 700; }
+    .expense-claim-detail .form-label { color: #315369; font-size: 13px; font-weight: 700; }
+    .expense-claim-detail .form-control, .expense-claim-detail .form-select {
+        border-color: #bcd4e2;
+        border-radius: 6px;
+        min-height: 38px;
+    }
+    .expense-claim-detail .table thead th { background: var(--ec-sky); color: var(--ec-navy); white-space: nowrap; }
+    .expense-claim-detail .ec-btn-primary { border: 0; background: var(--ec-teal); color: #fff; font-weight: 700; }
+    .expense-claim-detail .ec-btn-secondary { border: 1px solid #acc7d7; background: #fff; color: var(--ec-navy); font-weight: 700; }
+    .expense-claim-detail .btn i { margin-right: 5px; }
+    .expense-claim-detail__actions .btn-dark { background: var(--ec-teal); border-color: var(--ec-teal); }
+    @@media (max-width: 768px) {
+        .expense-claim-detail { padding: 14px; }
+        .expense-claim-detail__header { align-items: flex-start !important; flex-direction: column; gap: 12px; }
+    }
+</style>
 
 <script>
     let expenseIdx = @Model.Expenses.Count;
@@ -489,11 +604,40 @@
             <tr>
                 <td>${i + 1}</td>
                 <td><input name="Taxes[${i}].AccountHead" class="form-control form-control-sm" list="accountList" /></td>
-                <td><input type="number" step="0.01" name="Taxes[${i}].Rate" value="0.00" class="form-control form-control-sm" /></td>
-                <td><input type="number" step="0.01" name="Taxes[${i}].Amount" value="0.00" class="form-control form-control-sm" /></td>
-                <td><input type="number" step="0.01" name="Taxes[${i}].Total" value="0.00" class="form-control form-control-sm" /></td>
+                <td><input type="number" step="0.01" name="Taxes[${i}].Rate" value="0.00" class="form-control form-control-sm tax-rate" oninput="calculateTaxRow(this)" /></td>
+                <td><input type="number" step="0.01" name="Taxes[${i}].Amount" value="0.00" class="form-control form-control-sm tax-amount" readonly /></td>
+                <td><input type="number" step="0.01" name="Taxes[${i}].Total" value="0.00" class="form-control form-control-sm tax-total" readonly /></td>
                 <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>
             </tr>`);
+    }
+
+    function valueSum(selector) {
+        return Array.from(document.querySelectorAll(selector))
+            .reduce((sum, field) => sum + (parseFloat(field.value) || 0), 0);
+    }
+
+    function calculateTaxRow(input) {
+        const row = input.closest('tr');
+        const claimedAmount = valueSum('#expensesBody input[name$=".Amount"]');
+        const rate = parseFloat(row.querySelector('.tax-rate')?.value || 0);
+        const taxAmount = claimedAmount * rate / 100;
+        row.querySelector('.tax-amount').value = taxAmount.toFixed(2);
+        row.querySelector('.tax-total').value = (claimedAmount + taxAmount).toFixed(2);
+        calculateExpenseClaimTotals();
+    }
+
+    function calculateExpenseClaimTotals() {
+        const claimed = valueSum('#expensesBody input[name$=".Amount"]');
+        const sanctioned = valueSum('#expensesBody input[name$=".SanctionedAmount"]');
+        const taxes = valueSum('#taxesBody .tax-amount');
+        const advances = valueSum('#advancesBody input[name$=".AllocatedAmount"]');
+        const grandTotal = claimed + taxes;
+        document.getElementById('totalClaimedAmount').value = claimed.toFixed(2);
+        document.getElementById('totalSanctionedAmount').value = sanctioned.toFixed(2);
+        document.getElementById('totalTaxesAndCharges').value = taxes.toFixed(2);
+        document.getElementById('totalAdvanceAmount').value = advances.toFixed(2);
+        document.getElementById('grandTotal').value = grandTotal.toFixed(2);
+        document.getElementById('totalAmountReimbursed').value = Math.max(0, grandTotal - advances).toFixed(2);
     }
 
     function addAdvanceRow() {
@@ -514,5 +658,12 @@
         if (!document.getElementById('expensesBody').children.length && @isDraft.ToString().ToLower()) {
             addExpenseRow();
         }
+        calculateExpenseClaimTotals();
+        document.addEventListener('input', function (event) {
+            if (event.target.closest('#expensesBody, #advancesBody')) {
+                calculateExpenseClaimTotals();
+                document.querySelectorAll('#taxesBody .tax-rate').forEach(calculateTaxRow);
+            }
+        });
     });
 </script>

@@ -3,6 +3,8 @@
     ViewBag.Title = "Employee Grade";
 }
 
+<div class="employee-grades-page">
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -29,6 +31,11 @@
         + Add Employee Grade
     </button>
 </div>
+
+<style>
+    .employee-grades-page{max-width:1480px;margin:8px auto 40px;padding:26px;border:1px solid #c7daea;border-radius:8px;background:#edf5fb;box-shadow:0 16px 34px rgba(19,55,91,.10);color:#173555}.employee-grades-page> .d-flex{margin:-26px -26px 22px!important;padding:20px 26px;background:#14365d;border-radius:8px 8px 0 0}.employee-grades-page h4{color:#fff;font-size:26px;font-weight:760}.employee-grades-page .btn{border-radius:6px;font-weight:700}.employee-grades-page .btn-dark{border-color:#16a085;background:#108c77;box-shadow:0 5px 12px rgba(16,140,119,.2)}.employee-grades-page .btn-dark:hover{background:#087361}.employee-grades-page>.table{overflow:hidden;margin:0;border:1px solid #c8ddec;border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(16,49,82,.07)}.employee-grades-page>.table thead th{padding:14px 18px;border-color:#2a5a89;background:#1d4b7d;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.04em}.employee-grades-page>.table tbody td{padding:15px 18px;border-color:#e1ebf4;color:#31516f}.employee-grades-page>.table tbody tr:nth-child(even){background:#f4f9fd}.employee-grades-page>.table tbody tr:hover{background:#e1f3ef}.employee-grades-page>.table strong{color:#173f6b}.employee-grades-page .btn-outline-dark{border-color:#b8cee3;color:#214b73;background:#edf5fc}.employee-grades-page .btn-outline-dark:hover{border-color:#159b84;background:#dff3ed;color:#087361}.employee-grades-page .modal-content{border:1px solid #c8ddec;border-radius:8px;box-shadow:0 20px 42px rgba(15,43,77,.24)}.employee-grades-page .modal-header{background:#14365d;color:#fff;border:0}.employee-grades-page .modal-footer{border-color:#dce8f2;background:#f3f8fc}.employee-grades-page .form-control{min-height:40px;border-color:#b9cee2;border-radius:6px}.employee-grades-page .form-control:focus{border-color:#159b84;box-shadow:0 0 0 3px rgba(21,155,132,.14)}.employee-grades-page .alert{border:0;border-radius:7px;box-shadow:0 6px 16px rgba(20,45,79,.08)}
+    @@media(max-width:640px){.employee-grades-page{padding:16px}.employee-grades-page> .d-flex{align-items:flex-start!important;flex-direction:column;margin:-16px -16px 18px!important;padding:18px}.employee-grades-page>.table{min-width:820px}}
+</style>
 
 <table class="table table-hover align-middle">
     <thead>
@@ -133,4 +140,6 @@
             </form>
         </div>
     </div>
+</div>
+
 </div>

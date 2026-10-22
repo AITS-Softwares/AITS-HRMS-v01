@@ -1,0 +1,26 @@
+@model Erp_Aits.Models.Designation
+@{ ViewBag.Title = "Designation Details"; }
+
+<style>
+    .designation-detail { --des-ink:#10334a; color:var(--des-ink); }
+    .designation-detail .des-hero { background:linear-gradient(110deg,#10334a,#0b726f); color:#fff; padding:24px 28px; border-radius:8px; }
+    .designation-detail .des-section { background:#fff; border:1px solid #bcdce5; border-radius:8px; padding:24px; }
+    .designation-detail .des-label { color:#587483; font-size:.78rem; font-weight:700; letter-spacing:0; text-transform:uppercase; margin-bottom:5px; }
+    .designation-detail .des-value { background:#f3fafb; border:1px solid #d2e7eb; border-radius:5px; min-height:42px; padding:10px 12px; }
+    .designation-detail .des-description { min-height:120px; white-space:pre-wrap; }
+</style>
+
+<section class="designation-detail">
+    <header class="des-hero d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div><div class="small text-uppercase opacity-75">HRMS / Organization</div><h3 class="mb-1">@Model.DesignationName</h3><p class="mb-0 opacity-75">Designation details</p></div>
+        <a asp-action="Designation" class="btn btn-outline-light">Back to Designations</a>
+    </header>
+
+    <div class="des-section">
+        <div class="row g-4">
+            <div class="col-md-6"><div class="des-label">Designation</div><div class="des-value">@Model.DesignationName</div></div>
+            <div class="col-md-6"><div class="des-label">Appraisal Template</div><div class="des-value">@(string.IsNullOrWhiteSpace(Model.AppraisalTemplate) ? "Not assigned" : Model.AppraisalTemplate)</div></div>
+            <div class="col-12"><div class="des-label">Description</div><div class="des-value des-description">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description" : Model.Description)</div></div>
+        </div>
+    </div>
+</section>

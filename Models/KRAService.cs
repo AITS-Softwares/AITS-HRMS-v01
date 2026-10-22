@@ -186,6 +186,21 @@ namespace Erp_Aits.Services
             }
         }
 
+        public void UpdateErpName(int id, string erpName)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand(@"
+                UPDATE KRAs
+                SET ErpName = @ErpName
+                WHERE Id = @Id AND IsDeleted = 0", conn))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@ErpName", erpName ?? (object)DBNull.Value);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         private void MarkMissingErpRecordsDeleted(HashSet<string> erpNames)
         {
             using (var conn = new SqlConnection(_connectionString))
@@ -364,7 +379,10 @@ namespace Erp_Aits.Services
             var model = new KRA
             {
                 ErpName = doc["name"]?.ToString() ?? "",
-                Title = doc["title"]?.ToString() ?? "",
+                Title = doc["title"]?.ToString()
+                    ?? doc["kra"]?.ToString()
+                    ?? doc["key_result_area"]?.ToString()
+                    ?? "",
                 Description = doc["description"]?.ToString() ?? ""
             };
 

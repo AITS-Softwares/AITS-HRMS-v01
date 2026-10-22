@@ -4,7 +4,7 @@
     ViewBag.Title = "KRA";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
 
     <h4 class="mb-0">KRA</h4>
 
@@ -49,7 +49,7 @@
 <form method="get"
       asp-controller="HR"
       asp-action="KRA"
-      class="row g-2 mb-3">
+      class="row g-2 mb-3 performance-ui performance-filter-panel">
 
     <div class="col-md-3">
         <input type="text"
@@ -80,7 +80,7 @@
     {
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 performance-ui performance-data-table">
 
                 <thead>
                     <tr>
@@ -208,6 +208,8 @@
     </div>
 
 </div>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

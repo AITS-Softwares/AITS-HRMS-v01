@@ -36,9 +36,10 @@
 <form asp-action="CreateEmployeePerformanceFeedback"
       asp-controller="HR"
       method="post"
-      id="feedbackForm">
+      id="feedbackForm"
+      class="performance-ui performance-form-shell">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
 
         <div>
             <h4 class="mb-0 d-inline">
@@ -58,7 +59,7 @@
     </div>
 
 
-    <ul class="nav nav-tabs mb-3">
+    <ul class="nav nav-tabs mb-3 performance-tabs">
 
         <li class="nav-item">
             <a class="nav-link active"
@@ -433,6 +434,8 @@
 
 </select>
 
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 @section Scripts
 {

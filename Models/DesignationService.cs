@@ -116,6 +116,84 @@ namespace Erp_Aits.Services
             return null;
         }
 
+        public Designation GetById(int id)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand(@"
+                SELECT Id, DesignationCode, DesignationName, Description, AppraisalTemplate
+                FROM Designations
+                WHERE Id = @Id AND IsDeleted = 0", conn))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (!reader.Read())
+                        return null;
+
+                    return new Designation
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        DesignationCode = reader["DesignationCode"]?.ToString() ?? string.Empty,
+                        DesignationName = reader["DesignationName"]?.ToString() ?? string.Empty,
+                        Description = reader["Description"]?.ToString() ?? string.Empty,
+                        AppraisalTemplate = reader["AppraisalTemplate"]?.ToString() ?? string.Empty
+                    };
+                }
+            }
+        }
+
+        public int UpsertFromErpNext(Designation designation)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                int id = 0;
+
+                using (var find = new SqlCommand(@"
+                    SELECT TOP 1 Id
+                    FROM Designations
+                    WHERE DesignationCode = @DesignationCode
+                       OR (NULLIF(DesignationCode, '') IS NULL AND DesignationName = @DesignationName)
+                    ORDER BY CASE WHEN DesignationCode = @DesignationCode THEN 0 ELSE 1 END", conn))
+                {
+                    find.Parameters.AddWithValue("@DesignationCode", designation.DesignationCode ?? string.Empty);
+                    find.Parameters.AddWithValue("@DesignationName", designation.DesignationName ?? string.Empty);
+                    object value = find.ExecuteScalar();
+                    if (value != null && value != DBNull.Value)
+                        id = Convert.ToInt32(value);
+                }
+
+                if (id > 0)
+                {
+                    using (var update = new SqlCommand(@"
+                        UPDATE Designations
+                        SET DesignationCode = @DesignationCode,
+                            DesignationName = @DesignationName,
+                            Description = @Description,
+                            AppraisalTemplate = @AppraisalTemplate,
+                            IsDeleted = 0
+                        WHERE Id = @Id", conn))
+                    {
+                        AddParameters(update, designation);
+                        update.Parameters.AddWithValue("@Id", id);
+                        update.ExecuteNonQuery();
+                    }
+
+                    return id;
+                }
+
+                using (var insert = new SqlCommand(@"
+                    INSERT INTO Designations (DesignationCode, DesignationName, Description, AppraisalTemplate, IsDeleted)
+                    OUTPUT INSERTED.Id
+                    VALUES (@DesignationCode, @DesignationName, @Description, @AppraisalTemplate, 0)", conn))
+                {
+                    AddParameters(insert, designation);
+                    return Convert.ToInt32(insert.ExecuteScalar());
+                }
+            }
+        }
+
         public void UpdateDesignationByName(Designation d)
         {
             using (var conn = new SqlConnection(_connectionString))
@@ -138,6 +216,14 @@ namespace Erp_Aits.Services
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        private static void AddParameters(SqlCommand cmd, Designation designation)
+        {
+            cmd.Parameters.AddWithValue("@DesignationCode", (object)designation.DesignationCode ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@DesignationName", (object)designation.DesignationName ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Description", (object)designation.Description ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AppraisalTemplate", (object)designation.AppraisalTemplate ?? DBNull.Value);
         }
     }
 }

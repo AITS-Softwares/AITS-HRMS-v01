@@ -1,68 +1,38 @@
-﻿@{
+@{
     ViewBag.Title = "Performance";
 }
 
-<h4 class="mb-4">Performance</h4>
+<main class="performance-hub">
+    <header class="performance-hub__header">
+        <div>
+            <div class="performance-hub__eyebrow">HRMS / Employee Development</div>
+            <h4>Performance</h4>
+            <p>Appraisals, feedback, goals, and recognition in one place.</p>
+        </div>
+        <a href="@Url.Action("Appraisal", "HR")" class="performance-hub__primary-action"><i class="fa-solid fa-chart-line"></i> Open Appraisals</a>
+    </header>
 
-<h5 class="mb-3">Your Shortcuts</h5>
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <li><a href="@Url.Action("Appraisal", "HR")">Appraisal</a></li>
-            <span>Appraisal</span>
-            <span class="badge bg-secondary-subtle text-secondary">0 Pending</span>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="@Url.Action("EmployeePerformanceFeedback", "HR")" class="text-decoration-none text-dark d-flex justify-content-between align-items-center card p-3">
-            <span>Employee Performance Feedback</span>
-            <span class="badge bg-secondary-subtle text-secondary">0</span>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="@Url.Action("Goal", "HR")" class="text-decoration-none text-dark d-flex justify-content-between align-items-center card p-3">
-            <span>Goal</span>
-            <span class="badge bg-secondary-subtle text-secondary">0</span>
-        </a>
-    </div>
-</div>
+    <section class="performance-hub__shortcuts">
+        <div class="performance-hub__section-heading"><div><span>Quick Access</span><h5>Performance work</h5></div></div>
+        <div class="performance-hub__shortcut-grid">
+            <a href="@Url.Action("Appraisal", "HR")" class="performance-shortcut performance-shortcut--blue"><span class="performance-shortcut__icon"><i class="fa-solid fa-clipboard-check"></i></span><span class="performance-shortcut__content"><strong>Appraisal</strong><small>Review employee performance</small></span><span class="performance-shortcut__count">0 Pending</span></a>
+            <a href="@Url.Action("EmployeePerformanceFeedback", "HR")" class="performance-shortcut performance-shortcut--teal"><span class="performance-shortcut__icon"><i class="fa-solid fa-message"></i></span><span class="performance-shortcut__content"><strong>Performance Feedback</strong><small>Collect and review feedback</small></span><span class="performance-shortcut__count">0</span></a>
+            <a href="@Url.Action("Goal", "HR")" class="performance-shortcut performance-shortcut--gold"><span class="performance-shortcut__icon"><i class="fa-solid fa-bullseye"></i></span><span class="performance-shortcut__content"><strong>Goals</strong><small>Track employee objectives</small></span><span class="performance-shortcut__count">0</span></a>
+        </div>
+    </section>
 
-<h5 class="mb-3">Masters &amp; Transactions</h5>
-<div class="row g-4">
-    <div class="col-6 col-md-4">
-        <h6>Masters</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("AppraisalTemplate", "HR")">Appraisal Template</a></li>
-            <li><a href="@Url.Action("KRA", "HR")">KRA</a></li>
-            <li><a href="@Url.Action("EmployeeFeedbackCriteria", "HR")">Employee Feedback Criteria</a></li>
-        </ul>
-    </div>
-    <div class="col-6 col-md-4">
-        <h6>Appraisal</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("Appraisal", "HR")">Appraisal</a></li>
-            <li><a href="@Url.Action("AppraisalCycle", "HR")">Appraisal Cycle</a></li>
-            <li><a href="@Url.Action("EmployeePerformanceFeedback", "HR")">Employee Performance Feedback</a></li>
-            <li><a href="@Url.Action("Goal", "HR")">Goal</a></li>
-        </ul>
-    </div>
-    <div class="col-6 col-md-4">
-        <h6>Energy Points</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("EnergyPointRule", "HR")">Energy Point Rule</a></li>
-            <li><a href="@Url.Action("EnergyPointSettings", "HR")">Energy Point Settings</a></li>
-            <li><a href="@Url.Action("EnergyPointLog", "HR")">Energy Point Log</a></li>
-        </ul>
-    </div>
-    <div class="col-6 col-md-4">
-        <h6>Promotion</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("EmployeePromotion", "HR")">Employee Promotion</a></li>
-        </ul>
-    </div>
-    <div class="col-6 col-md-4">
-        <h6>Reports</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("AppraisalOverview", "HR")">Appraisal Overview</a></li>
-        </ul>
-    </div>
-</div>
+    <section class="performance-hub__catalog">
+        <div class="performance-hub__section-heading"><div><span>Modules</span><h5>Masters, transactions, and reports</h5></div></div>
+        <div class="performance-hub__module-grid">
+            <section class="performance-module-card"><div class="performance-module-card__title"><i class="fa-solid fa-sliders"></i><h6>Masters</h6></div><a href="@Url.Action("AppraisalTemplate", "HR")">Appraisal Template <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("KRA", "HR")">KRA <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EmployeeFeedbackCriteria", "HR")">Employee Feedback Criteria <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="performance-module-card"><div class="performance-module-card__title"><i class="fa-solid fa-clipboard-list"></i><h6>Appraisal</h6></div><a href="@Url.Action("Appraisal", "HR")">Appraisal <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("AppraisalCycle", "HR")">Appraisal Cycle <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EmployeePerformanceFeedback", "HR")">Employee Performance Feedback <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("Goal", "HR")">Goal <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="performance-module-card"><div class="performance-module-card__title"><i class="fa-solid fa-bolt"></i><h6>Energy Points</h6></div><a href="@Url.Action("EnergyPointRule", "HR")">Energy Point Rule <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EnergyPointSettings", "HR")">Energy Point Settings <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EnergyPointLog", "HR")">Energy Point Log <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="performance-module-card"><div class="performance-module-card__title"><i class="fa-solid fa-arrow-trend-up"></i><h6>Promotion</h6></div><a href="@Url.Action("EmployeePromotion", "HR")">Employee Promotion <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="performance-module-card"><div class="performance-module-card__title"><i class="fa-solid fa-chart-column"></i><h6>Reports</h6></div><a href="@Url.Action("AppraisalOverview", "HR")">Appraisal Overview <i class="fa-solid fa-arrow-right"></i></a></section>
+        </div>
+    </section>
+</main>
+
+<style>
+    .performance-hub { --navy:#15324b; --teal:#0f877d; --sky:#eaf5fb; --line:#cfe0eb; --ink:#183247; background:linear-gradient(135deg,#eef7fb 0%,#f7fbfa 65%,#edf3fb 100%); border:1px solid #d5e5ee; border-radius:8px; padding:24px; color:var(--ink); }.performance-hub__header { display:flex; justify-content:space-between; align-items:center; gap:24px; padding:22px 24px; background:var(--navy); border-radius:8px; color:#fff; box-shadow:0 12px 26px rgba(21,50,75,.16); }.performance-hub__eyebrow,.performance-hub__section-heading span { color:#91cddd; font-size:12px; font-weight:700; text-transform:uppercase; }.performance-hub__header h4 { margin:5px 0 4px; font-weight:700; }.performance-hub__header p { margin:0; color:#d0e8ef; font-size:14px; }.performance-hub__primary-action { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:6px; background:var(--teal); color:#fff; text-decoration:none; font-weight:700; white-space:nowrap; }.performance-hub__shortcuts,.performance-hub__catalog { margin-top:24px; }.performance-hub__section-heading { margin-bottom:12px; }.performance-hub__section-heading h5 { margin:3px 0 0; color:var(--navy); font-weight:700; }.performance-hub__shortcut-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }.performance-shortcut { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:12px; min-height:104px; padding:18px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); text-decoration:none; transition:transform .16s ease,box-shadow .16s ease; }.performance-shortcut:hover { color:var(--ink); transform:translateY(-2px); box-shadow:0 10px 22px rgba(21,50,75,.10); }.performance-shortcut__icon { width:40px; height:40px; display:grid; place-items:center; border-radius:6px; font-size:17px; }.performance-shortcut--blue .performance-shortcut__icon { background:#e2f1fa; color:#1d6fa5; }.performance-shortcut--teal .performance-shortcut__icon { background:#dff4ef; color:#0f877d; }.performance-shortcut--gold .performance-shortcut__icon { background:#fff3d8; color:#a96d00; }.performance-shortcut__content { display:grid; gap:3px; }.performance-shortcut__content strong { font-size:15px; }.performance-shortcut__content small { color:#557084; font-size:12px; }.performance-shortcut__count { padding:4px 8px; border-radius:5px; background:#e8f2f6; color:#315369; font-size:12px; font-weight:700; white-space:nowrap; }.performance-hub__module-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }.performance-module-card { border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.94); padding:18px; }.performance-module-card__title { display:flex; align-items:center; gap:9px; padding-bottom:12px; border-bottom:1px solid #dceaf0; color:var(--navy); }.performance-module-card__title i { color:var(--teal); }.performance-module-card__title h6 { margin:0; font-weight:700; }.performance-module-card a { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eef4f6; color:#315d78; font-size:14px; text-decoration:none; }.performance-module-card a:last-child { border-bottom:0; padding-bottom:0; }.performance-module-card a:hover { color:var(--teal); }.performance-module-card a i { font-size:11px; }@@media (max-width:900px) { .performance-hub__shortcut-grid,.performance-hub__module-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .performance-hub__header { flex-wrap:wrap; } }@@media (max-width:620px) { .performance-hub { padding:14px; }.performance-hub__header { padding:18px; }.performance-hub__shortcut-grid,.performance-hub__module-grid { grid-template-columns:1fr; }.performance-hub__primary-action { width:100%; justify-content:center; } }
+</style>

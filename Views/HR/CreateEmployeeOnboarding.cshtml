@@ -19,6 +19,7 @@
     </div>
 }
 
+<div class="lifecycle-ui onboarding-create-page">
 <form asp-action="CreateEmployeeOnboarding"
       asp-controller="HR"
       method="post"
@@ -26,11 +27,14 @@
 
     @Html.AntiForgeryToken()
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Employee Onboarding</h4>
+    <div class="lifecycle-ui__header onboarding-create-page__header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div class="onboarding-create-page__eyebrow">Employee Lifecycle</div>
+            <h4 class="mb-0">New Employee Onboarding</h4>
+        </div>
 
-        <button type="submit" class="btn btn-dark btn-sm px-4">
-            Save
+        <button type="submit" class="btn onboarding-create-page__save-btn btn-sm px-4">
+            <i class="fa-solid fa-floppy-disk"></i> Save Draft
         </button>
     </div>
 
@@ -318,6 +322,18 @@
     </div>
 
 </form>
+</div>
+@await Html.PartialAsync("_LifecycleUi")
+<style>
+    .onboarding-create-page { padding: 24px !important; }
+    .onboarding-create-page__header { margin-bottom: 18px !important; }
+    .onboarding-create-page__eyebrow { color: #a8d6e5; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .onboarding-create-page__save-btn { border: 0; background: #0f877d; color: #fff; font-weight: 700; }
+    .onboarding-create-page__save-btn i { margin-right: 5px; }
+    .onboarding-create-page .card { border-color: #cfe0eb !important; }
+    .onboarding-create-page .card:first-of-type { border-top: 3px solid #1d6fa5 !important; }
+    .onboarding-create-page .form-control:focus, .onboarding-create-page .form-select:focus { border-color: #0f877d; box-shadow: 0 0 0 .2rem rgba(15, 135, 125, .12); }
+</style>
 
 @section Scripts {
     <script>

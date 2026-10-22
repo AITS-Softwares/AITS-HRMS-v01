@@ -1,70 +1,45 @@
-﻿@{
+@{
     ViewBag.Title = "Shift & Attendance";
 }
 
-<h4 class="mb-4">Shift &amp; Attendance</h4>
+<main class="shift-attendance-hub">
+    <header class="shift-attendance-hub__header">
+        <div>
+            <div class="shift-attendance-hub__eyebrow">HRMS / Workforce Operations</div>
+            <h4>Shift &amp; Attendance</h4>
+            <p>Manage employee time, attendance workflows, and workforce reports.</p>
+        </div>
+        <a href="@Url.Action("Attendance", "HR")" class="shift-attendance-hub__primary-action"><i class="fa-solid fa-calendar-check"></i> Open Attendance</a>
+    </header>
 
-<h5 class="mb-3">Your Shortcuts</h5>
-<div class="d-flex flex-wrap gap-4 mb-4">
-    <a href="@Url.Action("EmployeeCheckin", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
-        <span>Employee Checkin</span>
-        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.EmployeeCheckinCount</span>
-    </a>
-    <a href="@Url.Action("Attendance", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
-        <span>Attendance</span>
-        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.AttendanceCount</span>
-    </a>
-    <a href="@Url.Action("ShiftRequest", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
-        <span>Shift Request</span>
-        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.ShiftRequestPendingCount Pending</span>
-    </a>
-    <a href="@Url.Action("Dashboard", "HR")" class="text-decoration-none text-dark">
-        Dashboard
-    </a>
-    <a href="@Url.Action("Roster", "HR")" class="text-decoration-none text-dark">
-        Roster
-    </a>
-</div>
+    <section class="shift-attendance-hub__shortcuts">
+        <div class="shift-attendance-hub__section-heading"><div><span>Quick Access</span><h5>Daily workforce tasks</h5></div></div>
+        <div class="shift-attendance-hub__shortcut-grid">
+            <a href="@Url.Action("EmployeeCheckin", "HR")" class="shift-attendance-shortcut shift-attendance-shortcut--blue"><span class="shift-attendance-shortcut__icon"><i class="fa-solid fa-right-to-bracket"></i></span><span class="shift-attendance-shortcut__content"><strong>Employee Checkin</strong><small>Review employee time entries</small></span><span class="shift-attendance-shortcut__count">@ViewBag.EmployeeCheckinCount</span></a>
+            <a href="@Url.Action("Attendance", "HR")" class="shift-attendance-shortcut shift-attendance-shortcut--teal"><span class="shift-attendance-shortcut__icon"><i class="fa-solid fa-user-check"></i></span><span class="shift-attendance-shortcut__content"><strong>Attendance</strong><small>Track daily attendance records</small></span><span class="shift-attendance-shortcut__count">@ViewBag.AttendanceCount</span></a>
+            <a href="@Url.Action("ShiftRequest", "HR")" class="shift-attendance-shortcut shift-attendance-shortcut--gold"><span class="shift-attendance-shortcut__icon"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="shift-attendance-shortcut__content"><strong>Shift Requests</strong><small>Review employee shift changes</small></span><span class="shift-attendance-shortcut__count">@ViewBag.ShiftRequestPendingCount Pending</span></a>
+            <a href="@Url.Action("Dashboard", "HR")" class="shift-attendance-shortcut shift-attendance-shortcut--navy"><span class="shift-attendance-shortcut__icon"><i class="fa-solid fa-chart-pie"></i></span><span class="shift-attendance-shortcut__content"><strong>Dashboard</strong><small>View workforce activity</small></span><span class="shift-attendance-shortcut__arrow"><i class="fa-solid fa-arrow-right"></i></span></a>
+            <a href="@Url.Action("Roster", "HR")" class="shift-attendance-shortcut shift-attendance-shortcut--purple"><span class="shift-attendance-shortcut__icon"><i class="fa-solid fa-table-list"></i></span><span class="shift-attendance-shortcut__content"><strong>Roster</strong><small>Plan and review shifts</small></span><span class="shift-attendance-shortcut__arrow"><i class="fa-solid fa-arrow-right"></i></span></a>
+        </div>
+    </section>
 
-<h5 class="mb-3">Masters &amp; Reports</h5>
-<div class="row g-4">
-    <div class="col-md-3">
-        <h6>Shifts</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("ShiftType", "HR")">Shift Type</a></li>
-            <li><a href="@Url.Action("ShiftAssignment", "HR")">Shift Assignment</a></li>
-            <li><a href="@Url.Action("ShiftSchedule", "HR")">Shift Schedule</a></li>
-            @* <li><a href="@Url.Action("ShiftScheduleAssignment", "HR")">Shift Schedule Assignment</a></li> *@
-            <a href="/HR/ShiftScheduleAssignment">Shift Schedule Assignment</a>
-            <li><a href="@Url.Action("ShiftRequest", "HR")">Shift Request</a></li>
-            <li><a href="@Url.Action("ShiftAssignmentTool", "HR")">Shift Assignment Tool</a></li>
-        </ul>
-    </div>
-    <div class="col-md-3">
-        <h6>Attendance</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("Attendance", "HR")">Attendance</a></li>
-            <li><a href="@Url.Action("AttendanceRequest", "HR")">Attendance Request</a></li>
-            <li><a href="@Url.Action("EmployeeCheckin", "HR")">Employee Checkin</a></li>
-            <li><a href="@Url.Action("EmployeeAttendanceTool", "HR")">Employee Attendance Tool</a></li>
-            <li><a href="@Url.Action("UploadAttendance", "HR")">Upload Attendance</a></li>
-        </ul>
-    </div>
-    <div class="col-md-3">
-        <h6>Time</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("Timesheet", "HR")">Timesheet</a></li>
-            <li><a href="@Url.Action("ActivityType", "HR")">Activity Type</a></li>
-        </ul>
-    </div>
-    <div class="col-md-3">
-        <h6>Reports</h6>
-        <ul class="list-unstyled">
-            <li><a href="@Url.Action("MonthlyAttendanceSheet", "HR")">Monthly Attendance Sheet</a></li>
-            <li><a href="@Url.Action("ShiftAttendance", "HR")">Shift Attendance</a></li>
-            <li><a href="@Url.Action("EmployeeHoursUtilization", "HR")">Employee Hours Utilization Based On Time...</a></li>
-            <li><a href="@Url.Action("ProjectProfitability", "HR")">Project Profitability</a></li>
-            <li><a href="@Url.Action("EmployeesWorkingOnHoliday", "HR")">Employees working on a holiday</a></li>
-        </ul>
-    </div>
-</div>
+    <section class="shift-attendance-hub__catalog">
+        <div class="shift-attendance-hub__section-heading"><div><span>Workspace</span><h5>Masters, tools, and reports</h5></div></div>
+        <div class="shift-attendance-hub__module-grid">
+            <section class="shift-attendance-module-card"><div class="shift-attendance-module-card__title"><i class="fa-solid fa-business-time"></i><h6>Shifts</h6></div><a href="@Url.Action("ShiftType", "HR")">Shift Type <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ShiftAssignment", "HR")">Shift Assignment <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ShiftSchedule", "HR")">Shift Schedule <i class="fa-solid fa-arrow-right"></i></a><a href="/HR/ShiftScheduleAssignment">Shift Schedule Assignment <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ShiftRequest", "HR")">Shift Request <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ShiftAssignmentTool", "HR")">Shift Assignment Tool <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="shift-attendance-module-card"><div class="shift-attendance-module-card__title"><i class="fa-solid fa-clipboard-user"></i><h6>Attendance</h6></div><a href="@Url.Action("Attendance", "HR")">Attendance <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("AttendanceRequest", "HR")">Attendance Request <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EmployeeCheckin", "HR")">Employee Checkin <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EmployeeAttendanceTool", "HR")">Employee Attendance Tool <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("UploadAttendance", "HR")">Upload Attendance <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="shift-attendance-module-card"><div class="shift-attendance-module-card__title"><i class="fa-solid fa-hourglass-half"></i><h6>Time</h6></div><a href="@Url.Action("Timesheet", "HR")">Timesheet <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ActivityType", "HR")">Activity Type <i class="fa-solid fa-arrow-right"></i></a></section>
+            <section class="shift-attendance-module-card"><div class="shift-attendance-module-card__title"><i class="fa-solid fa-chart-column"></i><h6>Reports</h6></div><a href="@Url.Action("MonthlyAttendanceSheet", "HR")">Monthly Attendance Sheet <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ShiftAttendance", "HR")">Shift Attendance <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EmployeeHoursUtilization", "HR")">Employee Hours Utilization Based On Time... <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("ProjectProfitability", "HR")">Project Profitability <i class="fa-solid fa-arrow-right"></i></a><a href="@Url.Action("EmployeesWorkingOnHoliday", "HR")">Employees working on a holiday <i class="fa-solid fa-arrow-right"></i></a></section>
+        </div>
+    </section>
+</main>
+
+<style>
+    .shift-attendance-hub { --shift-navy:#153b5b; --shift-teal:#087f7b; --shift-line:#c9dce8; --shift-ink:#19354c; --shift-muted:#5f7489; background:linear-gradient(135deg,#edf7fb 0%,#f6fbfc 64%,#ecf3f9 100%); border:1px solid #d3e3ed; border-radius:8px; color:var(--shift-ink); padding:24px; }
+    .shift-attendance-hub__header { align-items:center; background:linear-gradient(115deg,#153b5b 0%,#245e82 58%,#087f7b 100%); border-radius:8px; box-shadow:0 12px 26px rgba(21,59,91,.16); color:#fff; display:flex; gap:24px; justify-content:space-between; padding:22px 24px; }
+    .shift-attendance-hub__eyebrow,.shift-attendance-hub__section-heading span { color:#9bd5df; font-size:12px; font-weight:700; text-transform:uppercase; }.shift-attendance-hub__header h4 { color:#fff; font-weight:700; margin:5px 0 4px; }.shift-attendance-hub__header p { color:#d4edf1; font-size:14px; margin:0; }.shift-attendance-hub__primary-action { align-items:center; background:#fff; border-radius:6px; color:#153b5b; display:inline-flex; font-weight:750; gap:8px; padding:10px 14px; text-decoration:none; white-space:nowrap; }
+    .shift-attendance-hub__shortcuts,.shift-attendance-hub__catalog { margin-top:24px; }.shift-attendance-hub__section-heading { margin-bottom:12px; }.shift-attendance-hub__section-heading h5 { color:var(--shift-navy); font-weight:750; margin:3px 0 0; }.shift-attendance-hub__shortcut-grid { display:grid; gap:14px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .shift-attendance-shortcut { align-items:center; background:#fff; border:1px solid var(--shift-line); border-radius:8px; color:var(--shift-ink); display:grid; gap:12px; grid-template-columns:auto 1fr auto; min-height:104px; padding:18px; text-decoration:none; transition:box-shadow .16s ease,transform .16s ease; }.shift-attendance-shortcut:hover { box-shadow:0 10px 22px rgba(21,59,91,.1); color:var(--shift-ink); transform:translateY(-2px); }.shift-attendance-shortcut__icon { border-radius:6px; display:grid; font-size:17px; height:40px; place-items:center; width:40px; }.shift-attendance-shortcut--blue .shift-attendance-shortcut__icon { background:#e0f1fa; color:#1c6fa6; }.shift-attendance-shortcut--teal .shift-attendance-shortcut__icon { background:#dff4ef; color:#087f7b; }.shift-attendance-shortcut--gold .shift-attendance-shortcut__icon { background:#fff2d5; color:#a96d00; }.shift-attendance-shortcut--navy .shift-attendance-shortcut__icon { background:#e3edf6; color:#245e82; }.shift-attendance-shortcut--purple .shift-attendance-shortcut__icon { background:#eee8fb; color:#6850ae; }.shift-attendance-shortcut__content { display:grid; gap:3px; }.shift-attendance-shortcut__content strong { font-size:15px; }.shift-attendance-shortcut__content small { color:var(--shift-muted); font-size:12px; }.shift-attendance-shortcut__count { background:#e8f2f6; border-radius:5px; color:#315369; font-size:12px; font-weight:750; padding:4px 8px; white-space:nowrap; }.shift-attendance-shortcut__arrow { color:#638298; font-size:12px; }
+    .shift-attendance-hub__module-grid { display:grid; gap:14px; grid-template-columns:repeat(3,minmax(0,1fr)); }.shift-attendance-module-card { background:rgba(255,255,255,.95); border:1px solid var(--shift-line); border-radius:8px; padding:18px; }.shift-attendance-module-card__title { align-items:center; border-bottom:1px solid #dceaf0; color:var(--shift-navy); display:flex; gap:9px; padding-bottom:12px; }.shift-attendance-module-card__title i { color:var(--shift-teal); }.shift-attendance-module-card__title h6 { font-weight:750; margin:0; }.shift-attendance-module-card a { align-items:center; border-bottom:1px solid #eef4f6; color:#315d78; display:flex; font-size:14px; justify-content:space-between; padding:10px 0; text-decoration:none; }.shift-attendance-module-card a:last-child { border-bottom:0; padding-bottom:0; }.shift-attendance-module-card a:hover { color:var(--shift-teal); }.shift-attendance-module-card a i { font-size:11px; }
+    @@media (max-width:980px) { .shift-attendance-hub__shortcut-grid,.shift-attendance-hub__module-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.shift-attendance-hub__header { flex-wrap:wrap; } } @@media (max-width:620px) { .shift-attendance-hub { padding:14px; }.shift-attendance-hub__header { align-items:flex-start; flex-direction:column; padding:18px; }.shift-attendance-hub__primary-action { justify-content:center; width:100%; }.shift-attendance-hub__shortcut-grid,.shift-attendance-hub__module-grid { grid-template-columns:1fr; } }
+</style>

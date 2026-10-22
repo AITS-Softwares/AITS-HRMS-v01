@@ -3,7 +3,7 @@
     ViewBag.Title = "New Employee Checkin";
 }
 
-<form asp-action="CreateEmployeeCheckin" method="post">
+<form asp-action="CreateEmployeeCheckin" method="post" class="workforce-ui checkin-create">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">New Employee Checkin</h4>
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
@@ -131,6 +131,9 @@
 </form>
 
 <style>
+    .workforce-ui.checkin-create { max-width: 1080px; margin: 8px auto 40px; padding: 26px; border: 1px solid #c7daea; border-radius: 8px; background: #edf5fb; box-shadow: 0 16px 34px rgba(19,55,91,.10); }
+    .workforce-ui.checkin-create .ea-form-header { margin: -26px -26px 24px; padding: 20px 26px; background: #14365d; border-radius: 8px 8px 0 0; }.workforce-ui.checkin-create h4 { color: #fff; font-weight: 760; }.workforce-ui.checkin-create .ea-breadcrumb { color: #a9c7df; }.workforce-ui.checkin-create .ea-back-btn { border-color: #6d94bb; background: #1d4b7d; color: #fff; }.workforce-ui.checkin-create .ea-back-btn:hover { background: #fff; color: #14365d; }
+    .workforce-ui.checkin-create .ea-section { border: 1px solid #c8ddec; border-radius: 8px; box-shadow: 0 8px 20px rgba(16,49,82,.07); }.workforce-ui.checkin-create .ea-section-title { color: #173f6b; border-color: #dce8f2; }.workforce-ui.checkin-create .ea-form-label { color: #315879; }.workforce-ui.checkin-create .ea-input { border-color: #b9cee2; border-radius: 6px; }.workforce-ui.checkin-create .ea-input:focus { border-color: #159b84; box-shadow: 0 0 0 3px rgba(21,155,132,.14); }.workforce-ui.checkin-create .btn-dark { border-color: #16a085; background: #108c77; }.workforce-ui.checkin-create .ea-toggle input:checked + .ea-toggle-slider { background: #159b84; }.workforce-ui.checkin-create .ea-segmented-input:checked + .ea-segmented-label { border-color: #159b84; box-shadow: 0 0 0 1px #159b84 inset; }
     .ea-form-header {
         display: flex;
         flex-wrap: wrap;

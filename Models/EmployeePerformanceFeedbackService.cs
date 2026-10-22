@@ -284,14 +284,16 @@ namespace Erp_Aits.Services
         {
             int newId;
 
+            EnsureReviewerNameColumn();
+
             using (var conn = new SqlConnection(_connectionString))
             {
                 string query = @"
                     INSERT INTO EmployeePerformanceFeedbacks
-                        (ErpNextId, ForEmployee, EmployeeName, Reviewer, Company, AddedOn, Appraisal, Feedback, TotalScore, IsDeleted)
+                        (ErpNextId, ForEmployee, EmployeeName, Reviewer, ReviewerName, Company, AddedOn, Appraisal, Feedback, TotalScore, IsDeleted)
                     OUTPUT INSERTED.Id
                     VALUES
-                        (@ErpNextId, @ForEmployee, @EmployeeName, @Reviewer, @Company, @AddedOn, @Appraisal, @Feedback, @TotalScore, 0)";
+                        (@ErpNextId, @ForEmployee, @EmployeeName, @Reviewer, @ReviewerName, @Company, @AddedOn, @Appraisal, @Feedback, @TotalScore, 0)";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
@@ -299,6 +301,7 @@ namespace Erp_Aits.Services
                     cmd.Parameters.AddWithValue("@ForEmployee", f.ForEmployee ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@EmployeeName", f.EmployeeName ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Reviewer", f.Reviewer ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ReviewerName", f.ReviewerName ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Company", f.Company ?? "AITS");
                     cmd.Parameters.AddWithValue("@AddedOn", f.AddedOn);
                     cmd.Parameters.AddWithValue("@Appraisal", f.Appraisal ?? (object)DBNull.Value);
@@ -370,6 +373,7 @@ namespace Erp_Aits.Services
                 );
             }
 
+            EnsureReviewerNameColumn();
 
             using (var conn =
                 new SqlConnection(
@@ -436,6 +440,7 @@ namespace Erp_Aits.Services
                                 ForEmployee = @ForEmployee,
                                 EmployeeName = @EmployeeName,
                                 Reviewer = @Reviewer,
+                                ReviewerName = @ReviewerName,
                                 Company = @Company,
                                 AddedOn = @AddedOn,
                                 Appraisal = @Appraisal,
@@ -498,6 +503,7 @@ namespace Erp_Aits.Services
                                 ForEmployee,
                                 EmployeeName,
                                 Reviewer,
+                                ReviewerName,
                                 Company,
                                 AddedOn,
                                 Appraisal,
@@ -515,6 +521,7 @@ namespace Erp_Aits.Services
                                 @ForEmployee,
                                 @EmployeeName,
                                 @Reviewer,
+                                @ReviewerName,
                                 @Company,
                                 @AddedOn,
                                 @Appraisal,
@@ -647,6 +654,11 @@ namespace Erp_Aits.Services
             );
 
             cmd.Parameters.AddWithValue(
+                "@ReviewerName",
+                DbValue(model.ReviewerName)
+            );
+
+            cmd.Parameters.AddWithValue(
                 "@Company",
                 DbValue(model.Company)
             );
@@ -687,6 +699,20 @@ namespace Erp_Aits.Services
             );
         }
 
+        private void EnsureReviewerNameColumn()
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand(@"
+                IF COL_LENGTH(N'dbo.EmployeePerformanceFeedbacks', N'ReviewerName') IS NULL
+                BEGIN
+                    ALTER TABLE dbo.EmployeePerformanceFeedbacks
+                    ADD ReviewerName NVARCHAR(255) NULL;
+                END", conn))
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
 
         private static object DbValue(
             string value)

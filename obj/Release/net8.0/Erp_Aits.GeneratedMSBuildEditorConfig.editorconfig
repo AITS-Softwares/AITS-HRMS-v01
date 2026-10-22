@@ -1,14 +1,11 @@
 is_global = true
 build_property.TargetFramework = net8.0
-build_property.TargetFrameworkIdentifier = .NETCoreApp
-build_property.TargetFrameworkVersion = v8.0
 build_property.TargetPlatformMinVersion = 
 build_property.UsingMicrosoftNETSdkWeb = true
 build_property.ProjectTypeGuids = 
 build_property.InvariantGlobalization = 
 build_property.PlatformNeutralAssembly = 
 build_property.EnforceExtendedAnalyzerRules = 
-build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Erp_Aits
 build_property.RootNamespace = Erp_Aits
@@ -20,8 +17,6 @@ build_property.SupportLocalizedComponentNames =
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
 build_property.MSBuildProjectDirectory = C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits
 build_property._RazorSourceGeneratorDebug = 
-build_property.EffectiveAnalysisLevelStyle = 8.0
-build_property.EnableCodeStyleSeverity = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/HR/Employee.cshtml]
 build_metadata.AdditionalFiles.TargetPath = SFJcRW1wbG95ZWUuY3NodG1s
@@ -85,6 +80,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Account.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQWNjb3VudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/AccountDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQWNjb3VudERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/AccountingDimension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQWNjb3VudGluZ0RpbWVuc2lvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/AccountingDimensionDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQWNjb3VudGluZ0RpbWVuc2lvbkRldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/ActivityCost.cshtml]
@@ -207,12 +218,32 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQnVsa1NhbGFyeVN0cnVjdHVyZUFzc2lnbm1lbnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Company.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ29tcGFueS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CompensatoryLeaveRequest.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ29tcGVuc2F0b3J5TGVhdmVSZXF1ZXN0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CompensatoryLeaveRequestDetails.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ29tcGVuc2F0b3J5TGVhdmVSZXF1ZXN0RGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CostCenter.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ29zdENlbnRlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CostCenterDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ29zdENlbnRlckRldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateAccount.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQWNjb3VudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateAccountingDimension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQWNjb3VudGluZ0RpbWVuc2lvbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateActivityCost.cshtml]
@@ -263,8 +294,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQXR0ZW5kYW5jZVJlcXVlc3QuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateCompany.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQ29tcGFueS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateCompensatoryLeaveRequest.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQ29tcGVuc2F0b3J5TGVhdmVSZXF1ZXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateCostCenter.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQ29zdENlbnRlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateCurrency.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlQ3VycmVuY3kuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateDailyWorkSummaryGroup.cshtml]
@@ -291,6 +334,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVBZHZhbmNlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeBenefitApplication.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVCZW5lZml0QXBwbGljYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeBenefitClaim.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVCZW5lZml0Q2xhaW0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeCheckin.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVDaGVja2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -309,6 +360,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeGroup.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVHcm91cC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeIncentive.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVJbmNlbnRpdmUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeOnboarding.cshtml]
@@ -337,6 +392,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeSkillMap.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVTa2lsbE1hcC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeTaxExemptionCategory.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVUYXhFeGVtcHRpb25DYXRlZ29yeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeTaxExemptionDeclaration.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVUYXhFeGVtcHRpb25EZWNsYXJhdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeTaxExemptionProofSubmission.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVUYXhFeGVtcHRpb25Qcm9vZlN1Ym1pc3Npb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEmployeeTaxExemptionSubCategory.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlRW1wbG95ZWVUYXhFeGVtcHRpb25TdWJDYXRlZ29yeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateEnergyPointRule.cshtml]
@@ -467,8 +538,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlUHVycG9zZU9mVHJhdmVsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateRetentionBonus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlUmV0ZW50aW9uQm9udXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateSalaryComponent.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlU2FsYXJ5Q29tcG9uZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateSalaryRegister.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlU2FsYXJ5UmVnaXN0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateSalarySlip.cshtml]
@@ -477,6 +556,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateSalaryStructure.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlU2FsYXJ5U3RydWN0dXJlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateSalaryStructureAssignment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlU2FsYXJ5U3RydWN0dXJlQXNzaWdubWVudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateSalaryWithholding.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlU2FsYXJ5V2l0aGhvbGRpbmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CreateShiftAssignment.cshtml]
@@ -527,6 +614,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3JlYXRlVmVoaWNsZVNlcnZpY2VJdGVtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Currency.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3VycmVuY3kuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/CurrencyDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcQ3VycmVuY3lEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/DailyWorkSummaryGroup.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRGFpbHlXb3JrU3VtbWFyeUdyb3VwLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -545,6 +640,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Designation.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRGVzaWduYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/DesignationDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRGVzaWduYXRpb25EZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Driver.cshtml]
@@ -581,6 +680,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeAttendanceTool.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVBdHRlbmRhbmNlVG9vbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeBenefitApplication.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVCZW5lZml0QXBwbGljYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeBenefitApplicationDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVCZW5lZml0QXBwbGljYXRpb25EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeBenefitClaim.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVCZW5lZml0Q2xhaW0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeBenefitClaimDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVCZW5lZml0Q2xhaW1EZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeBirthday.cshtml]
@@ -637,6 +752,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeHoursUtilization.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVIb3Vyc1V0aWxpemF0aW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeIncentive.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVJbmNlbnRpdmUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeIncentiveDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVJbmNlbnRpdmVEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeInformation.cshtml]
@@ -713,6 +836,38 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeesWorkingOnHoliday.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVzV29ya2luZ09uSG9saWRheS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionCategory.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25DYXRlZ29yeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionCategoryDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25DYXRlZ29yeURldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionDeclaration.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25EZWNsYXJhdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionDeclarationDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25EZWNsYXJhdGlvbkRldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionProofSubmission.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25Qcm9vZlN1Ym1pc3Npb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionProofSubmissionDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25Qcm9vZlN1Ym1pc3Npb25EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionSubCategory.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25TdWJDYXRlZ29yeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EmployeeTaxExemptionSubCategoryDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcRW1wbG95ZWVUYXhFeGVtcHRpb25TdWJDYXRlZ29yeURldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/EnergyPointLog.cshtml]
@@ -809,6 +964,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/IncomeTaxSlab.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcSW5jb21lVGF4U2xhYi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/IncomeTaxSlabDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcSW5jb21lVGF4U2xhYkRldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Index.cshtml]
@@ -979,8 +1138,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollEntryDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbEVudHJ5RGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollPeriod.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbFBlcmlvZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollPeriodDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbFBlcmlvZERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUGF5cm9sbFJlcG9ydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/PayrollSettings.cshtml]
@@ -1011,6 +1182,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUmVjcnVpdG1lbnRBbmFseXRpY3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/RetentionBonus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUmV0ZW50aW9uQm9udXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/RetentionBonusDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUmV0ZW50aW9uQm9udXNEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/Roster.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcUm9zdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -1019,8 +1198,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5Q29tcG9uZW50LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryComponentDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5Q29tcG9uZW50RGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryPayout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5UGF5b3V0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryRegister.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5UmVnaXN0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalarySlip.cshtml]
@@ -1029,6 +1216,26 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryStructure.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5U3RydWN0dXJlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryStructureAssignment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5U3RydWN0dXJlQXNzaWdubWVudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryStructureAssignmentDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5U3RydWN0dXJlQXNzaWdubWVudERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryStructureDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5U3RydWN0dXJlRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryWithholding.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5V2l0aGhvbGRpbmcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/SalaryWithholdingDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcU2FsYXJ5V2l0aGhvbGRpbmdEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/ShiftAndAttendance.cshtml]
@@ -1167,6 +1374,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX0VtcGxveWVlRm9ybUZpZWxkcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/_EnergyPointUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX0VuZXJneVBvaW50VWkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/_LifecycleUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX0xpZmVjeWNsZVVpLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/HR/_PerformanceModuleUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSFJcX1BlcmZvcm1hbmNlTW9kdWxlVWkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/LeadEvents/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGVhZEV2ZW50c1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -1239,8 +1458,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9DcmVhdGVUYXNrTW9kYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_ExpenseClaimsWorkspaceUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9FeHBlbnNlQ2xhaW1zV29ya3NwYWNlVWkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_RichTextEditor.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9SaWNoVGV4dEVkaXRvci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_ShiftModuleUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9TaGlmdE1vZHVsZVVpLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_TimeAttendanceUi.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9UaW1lQXR0ZW5kYW5jZVVpLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/komal himmat patil/Desktop/hrms/Erp_Aits/Erp_Aits/Views/Shared/_ValidationScriptsPartial.cshtml]

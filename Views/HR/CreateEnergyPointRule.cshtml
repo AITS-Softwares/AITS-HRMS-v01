@@ -3,8 +3,8 @@
     ViewBag.Title = "New Energy Point Rule";
 }
 
-<form asp-action="CreateEnergyPointRule" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<form asp-action="CreateEnergyPointRule" method="post" class="energy-point-ui energy-point-shell">
+    <div class="energy-point-page-header d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0 d-inline">New Energy Point Rule</h4>
             <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
@@ -12,12 +12,14 @@
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
-    <div class="form-check mb-4">
+    <div class="energy-point-section p-3 mb-4">
+    <div class="form-check">
         <input asp-for="Enabled" class="form-check-input" type="checkbox" />
         <label class="form-check-label" asp-for="Enabled">Enabled</label>
     </div>
+    </div>
 
-    <div class="row g-4">
+    <div class="energy-point-section p-4"><div class="row g-4">
         <div class="col-md-6">
             <div class="mb-3">
                 <label class="form-label">Rule Name <span class="text-danger">*</span></label>
@@ -26,7 +28,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Reference Document Type <span class="text-danger">*</span></label>
-                <select asp-for="ReferenceDocumentType" class="form-select" required>
+                <select asp-for="ReferenceDocumentType" id="ReferenceDocumentType" class="form-select" required>
                     <option value="">Select Reference Document Type</option>
                     @if (ViewBag.DocTypes != null)
                     {
@@ -51,7 +53,9 @@
 
             <div class="mb-3">
                 <label class="form-label">Field To Check</label>
-                <input asp-for="FieldToCheck" class="form-control" />
+                <select asp-for="FieldToCheck" id="FieldToCheck" class="form-select" data-selected="@Model.FieldToCheck">
+                    <option value="">Select field after choosing a document type</option>
+                </select>
             </div>
 
             <div class="mb-3">
@@ -68,19 +72,16 @@
 
             <div class="mb-3">
                 <label class="form-label">User Field</label>
-                <input asp-for="UserField" class="form-control" />
+                <select asp-for="UserField" id="UserField" class="form-select" data-selected="@Model.UserField">
+                    <option value="">Select field after choosing a document type</option>
+                </select>
                 <div class="form-text">The user from this field will be rewarded points</div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Multiplier Field</label>
-                <select asp-for="MultiplierField" class="form-select" id="MultiplierField">
-                    <option value="">Select Multiplier Field</option>
-                    <option value="conversion_rate">Exchange Rate</option>
-                    <option value="plc_conversion_rate">Price List Exchange Rate</option>
-                    <option value="total_qty">Total Quantity</option>
-                    <option value="total_net_weight">Total Net Weight</option>
-                    <option value="additional_discount_percentage">Additional Discount Percentage</option>
+                <select asp-for="MultiplierField" class="form-select" id="MultiplierField" data-selected="@Model.MultiplierField">
+                    <option value="">Select numeric field after choosing a document type</option>
                 </select>
             </div>
 
@@ -104,5 +105,70 @@
                 If the condition is satisfied user will be rewarded with the points. eg. doc.status == 'Closed'
             </div>
         </div>
-    </div>
+    </div></div>
 </form>
+
+<partial name="_EnergyPointUi" />
+
+<script>
+    const referenceDocumentType = document.getElementById('ReferenceDocumentType');
+    const ruleFieldToCheck = document.getElementById('FieldToCheck');
+    const ruleUserField = document.getElementById('UserField');
+    const ruleMultiplierField = document.getElementById('MultiplierField');
+
+    function populateRuleFieldOptions(select, fields, placeholder, numericOnly) {
+        const selected = select.dataset.selected || select.value || '';
+        select.innerHTML = '<option value="">' + placeholder + '</option>';
+
+        fields.filter(function (field) {
+            return !numericOnly || field.isNumeric;
+        }).forEach(function (field) {
+            const option = document.createElement('option');
+            option.value = field.value;
+            option.textContent = field.text;
+            option.selected = field.value === selected;
+            select.appendChild(option);
+        });
+
+        if (selected && select.value !== selected) {
+            const existingOption = document.createElement('option');
+            existingOption.value = selected;
+            existingOption.textContent = selected;
+            existingOption.selected = true;
+            select.appendChild(existingOption);
+        }
+
+        select.dataset.selected = '';
+    }
+
+    async function loadEnergyPointRuleFields() {
+        const doctype = referenceDocumentType.value;
+        const selects = [ruleFieldToCheck, ruleUserField, ruleMultiplierField];
+
+        if (!doctype) {
+            selects.forEach(function (select) { select.selectedIndex = 0; });
+            return;
+        }
+
+        try {
+            const response = await fetch('@Url.Action("GetEnergyPointRuleDocFields", "HR")?doctype=' + encodeURIComponent(doctype));
+            if (!response.ok) throw new Error('Unable to load fields.');
+
+            const fields = await response.json();
+            populateRuleFieldOptions(ruleFieldToCheck, fields, 'Select field', false);
+            populateRuleFieldOptions(ruleUserField, fields, 'Select user field', false);
+            populateRuleFieldOptions(ruleMultiplierField, fields, 'Select numeric multiplier field', true);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    referenceDocumentType.addEventListener('change', function () {
+        ruleFieldToCheck.dataset.selected = '';
+        ruleUserField.dataset.selected = '';
+        ruleMultiplierField.dataset.selected = '';
+        loadEnergyPointRuleFields();
+    });
+
+    if (referenceDocumentType.value) loadEnergyPointRuleFields();
+</script>

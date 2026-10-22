@@ -5,8 +5,8 @@
     var users = ViewBag.Users;
 }
 
-<form asp-action="CreateEnergyPointSettings" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<form asp-action="CreateEnergyPointSettings" method="post" class="energy-point-ui energy-point-shell">
+    <div class="energy-point-page-header d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0 d-inline">Energy Point Settings</h4>
             <span class="badge bg-success-subtle text-success ms-2">Enabled</span>
@@ -33,14 +33,14 @@
 
     <input type="hidden" asp-for="Id" />
 
-    <div class="card p-3 mb-3">
+    <div class="energy-point-section p-3 mb-3">
         <div class="form-check">
             <input asp-for="Enabled" class="form-check-input" type="checkbox" id="enabledCheck" onchange="toggleSettings()" />
             <label class="form-check-label" asp-for="Enabled">Enabled</label>
         </div>
     </div>
 
-    <div id="settingsBody" class="card p-3" style="display:@(Model.Enabled ? "block" : "none");">
+    <div id="settingsBody" class="energy-point-section p-3" style="display:@(Model.Enabled ? "block" : "none");">
         <h6 class="mb-3">Review Levels</h6>
 
         <table class="table table-bordered align-middle mb-1" id="levelsTable">
@@ -125,6 +125,8 @@
         </div>
     </div>
 </form>
+
+<partial name="_EnergyPointUi" />
 
 <div class="modal fade" id="giveReviewPointsModal" tabindex="-1" aria-labelledby="giveReviewPointsLabel" aria-hidden="true">
     <div class="modal-dialog">

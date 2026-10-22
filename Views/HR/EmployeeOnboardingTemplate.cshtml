@@ -28,16 +28,15 @@
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="template-list-page">
+<div class="template-list-page__header d-flex justify-content-between align-items-center mb-3">
 
-    <h4 class="mb-0 fw-bold">
-        Employee Onboarding Template
-    </h4>
+    <div><div class="template-list-page__eyebrow">Employee Lifecycle</div><h4 class="mb-0 fw-bold">Employee Onboarding Template</h4></div>
 
     <div class="d-flex gap-2">
         <a href="@Url.Action("CreateEmployeeOnboardingTemplate", "HR")"
-           class="btn btn-dark btn-sm px-4 fw-bold">
-            + Add Employee Onboarding Template
+           class="btn template-list-page__add btn-sm px-4 fw-bold">
+            <i class="fa-solid fa-plus"></i> Add Template
         </a>
     </div>
 
@@ -45,7 +44,7 @@
 
 <form method="get"
       action="@Url.Action("EmployeeOnboardingTemplate", "HR")"
-      class="row g-2 mb-3">
+      class="template-list-page__filters row g-2 mb-3">
 
     <div class="col-auto">
         <input type="text"
@@ -65,8 +64,8 @@
 
     <div class="col-auto">
         <button type="submit"
-                class="btn btn-sm btn-outline-secondary">
-            Search
+                class="btn template-list-page__search btn-sm">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
         </button>
     </div>
 
@@ -79,7 +78,7 @@
 
 </form>
 
-<div class="card border rounded-3 p-4 shadow-sm bg-white">
+<div class="template-list-page__table card border rounded-3 p-4 shadow-sm bg-white">
 
     <div class="table-responsive">
 
@@ -201,3 +200,7 @@
     </div>
 
 </div>
+</div>
+<style>
+ .template-list-page{background:linear-gradient(135deg,#eef7fb,#f7fbfa 65%,#edf3fb);border:1px solid #d5e5ee;border-radius:8px;padding:24px;color:#183247}.template-list-page__header{background:#15324b;color:#fff;border-radius:8px;padding:19px 21px;box-shadow:0 12px 26px rgba(21,50,75,.16)}.template-list-page__eyebrow{color:#a8d6e5;font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:4px}.template-list-page__add{background:#0f877d;border:0;color:#fff}.template-list-page__add i,.template-list-page__search i{margin-right:5px}.template-list-page__filters{margin:16px 0!important;padding:14px;background:#dfeff6;border:1px solid #c4dce8;border-radius:8px}.template-list-page__filters .form-control{border-color:#a9cadb}.template-list-page__search{background:#fff;color:#15324b;border:1px solid #1d6fa5;font-weight:700}.template-list-page__table{border-color:#cfe0eb!important;box-shadow:none!important}.template-list-page__table thead th{background:#e7f4f9!important;color:#15324b}.template-list-page__table tbody tr:hover{background:#edf9f7}
+</style>

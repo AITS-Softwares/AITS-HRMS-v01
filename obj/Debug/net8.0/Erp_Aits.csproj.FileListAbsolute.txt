@@ -1870,6 +1870,7 @@ C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\codex-tax-declara
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\codex-tax-declaration-check\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\codex-tax-declaration-check\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\codex-tax-declaration-check\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\web.config
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\appsettings.json
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Debug\net8.0\global.json

@@ -8,7 +8,8 @@
 <form asp-action="UpdateEmployeeGroup"
       asp-controller="HR"
       asp-route-id="@Model.Id"
-      method="post">
+      method="post"
+      class="employee-group-form">
 
     @Html.AntiForgeryToken()
 
@@ -160,6 +161,12 @@
         </div>
     </div>
 </form>
+
+<style>
+    .employee-group-form{max-width:1280px;margin:8px auto 40px;padding:26px;border:1px solid #c7daea;border-radius:8px;background:#edf5fb;box-shadow:0 16px 34px rgba(19,55,91,.10);color:#173555}
+    .employee-group-form> .d-flex:first-of-type{margin:-26px -26px 24px!important;padding:20px 26px;background:#14365d;border-radius:8px 8px 0 0;color:#fff}.employee-group-form> .d-flex:first-of-type .text-muted{color:#a9c7df!important}.employee-group-form h4{color:#fff;font-weight:760}.employee-group-form .btn{border-radius:6px;font-weight:700}.employee-group-form .btn-dark{border-color:#16a085;background:#108c77;box-shadow:0 5px 12px rgba(16,140,119,.2)}.employee-group-form .btn-dark:hover{background:#087361}.employee-group-form .btn-outline-secondary{border-color:#92afca;color:#e7f1fb}.employee-group-form .btn-outline-secondary:hover{background:#fff;color:#153a60}.employee-group-form .card{border:1px solid #c8ddec!important;border-radius:8px!important;background:#fff!important;box-shadow:0 8px 20px rgba(16,49,82,.07)!important}.employee-group-form .form-label{color:#315879!important;font-weight:720!important}.employee-group-form .form-control,.employee-group-form .form-select{min-height:40px;border-color:#b9cee2;border-radius:6px;color:#183b60;box-shadow:none}.employee-group-form .form-control:focus,.employee-group-form .form-select:focus{border-color:#159b84;box-shadow:0 0 0 3px rgba(21,155,132,.14)}.employee-group-form .table{border-color:#d8e5f0}.employee-group-form .table thead th{border-color:#2a5a89;background:#1d4b7d;color:#fff!important;font-size:12px;text-transform:uppercase;letter-spacing:.04em}.employee-group-form .table tbody td{border-color:#e1ebf4}.employee-group-form .table tbody tr:nth-child(even){background:#f4f9fd}.employee-group-form .form-check-input:checked{background-color:#159b84;border-color:#159b84}
+    @@media(max-width:640px){.employee-group-form{padding:16px}.employee-group-form> .d-flex:first-of-type{align-items:flex-start!important;flex-direction:column;margin:-16px -16px 18px!important;padding:18px}.employee-group-form .table{min-width:760px}}
+</style>
 
 
 

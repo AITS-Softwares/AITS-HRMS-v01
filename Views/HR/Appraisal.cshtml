@@ -3,12 +3,12 @@
     ViewBag.Title = "Appraisal";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
     <h4 class="mb-0">Appraisal</h4>
     <a href="@Url.Action("CreateAppraisal", "HR")" class="btn btn-dark btn-sm">+ Add Appraisal</a>
 </div>
 
-<form method="get" class="row g-2 mb-3">
+<form method="get" class="row g-2 mb-3 performance-ui performance-filter-panel">
     <div class="col-auto">
         <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
     </div>
@@ -29,7 +29,7 @@
     </div>
 </form>
 
-<table class="table table-hover align-middle">
+<table class="table table-hover align-middle performance-ui performance-data-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -71,14 +71,14 @@
     ViewBag.Title = "Appraisal";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
     <h4 class="mb-0">Appraisal</h4>
     <div>
         <a href="@Url.Action("CreateAppraisal", "HR")" class="btn btn-dark btn-sm">+ Add Appraisal</a>
     </div>
 </div>
 
-<form method="get" class="row g-2 mb-3">
+<form method="get" class="row g-2 mb-3 performance-ui performance-filter-panel">
     <div class="col-auto">
         <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
     </div>
@@ -99,7 +99,7 @@
     </div>
 </form>
 
-<table class="table table-hover align-middle">
+<table class="table table-hover align-middle performance-ui performance-data-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -125,3 +125,5 @@
 {
     <p class="text-muted text-center py-5">No appraisals found.</p>
 }
+
+@await Html.PartialAsync("_PerformanceModuleUi")

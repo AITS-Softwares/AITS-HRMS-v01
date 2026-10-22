@@ -2,8 +2,12 @@
 @{
     ViewBag.Title = "Employee Onboarding";
 }
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Employee Onboarding</h4>
+<div class="lifecycle-ui onboarding-list-page">
+<div class="onboarding-list-page__header d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <div class="onboarding-list-page__eyebrow">Employee Lifecycle</div>
+        <h4 class="mb-0">Employee Onboarding</h4>
+    </div>
     <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn btn-dark btn-sm">+ Add Employee Onboarding</a>
 </div>
 
@@ -66,8 +70,12 @@
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Employee Onboarding</h4>
+<div class="lifecycle-ui onboarding-list-page">
+<div class="onboarding-list-page__header d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <div class="onboarding-list-page__eyebrow">Employee Lifecycle</div>
+        <h4 class="mb-0">Employee Onboarding</h4>
+    </div>
     @* <div class="d-flex gap-2">
         <form asp-action="SyncEmployeeOnboardingFromErpNext" asp-controller="HR" method="post" class="d-inline">
             <button type="submit" class="btn btn-outline-primary btn-sm">⚡ Sync from ERPNext</button>
@@ -75,13 +83,13 @@
         <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn btn-dark btn-sm">+ Add Employee Onboarding</a>
     </div> *@
     <div class="d-flex gap-2">
-        <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn btn-dark btn-sm">
-            + Add Employee Onboarding
+        <a href="@Url.Action("CreateEmployeeOnboarding", "HR")" class="btn onboarding-list-page__add-btn btn-sm">
+            <i class="fa-solid fa-plus"></i> Add Employee Onboarding
         </a>
     </div>
 </div>
 
-<form method="get" class="row g-2 mb-3">
+<form method="get" class="onboarding-list-page__filters row g-2 mb-3">
     <div class="col-md-3">
         <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
     </div>
@@ -89,11 +97,11 @@
         <input type="text" name="employeeName" value="@ViewBag.EmployeeNameFilter" class="form-control form-control-sm" placeholder="Employee Name" />
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+        <button type="submit" class="btn onboarding-list-page__filter-btn btn-sm"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
     </div>
 </form>
 
-<table class="table table-hover align-middle">
+<div class="onboarding-list-page__table table-responsive"><table class="table table-hover align-middle mb-0">
     <thead>
         <tr>
             <th>ID</th>
@@ -124,9 +132,30 @@
             </tr>
         }
     </tbody>
-</table>
+</table></div>
 
 @if (!Model.Any())
 {
     <p class="text-muted">No employee onboarding records found.</p>
 }
+</div>
+@await Html.PartialAsync("_LifecycleUi")
+<style>
+    .onboarding-list-page { padding: 24px !important; }
+    .onboarding-list-page__header {
+        background: #15324b !important;
+        border-radius: 8px;
+        color: #fff;
+        padding: 19px 21px;
+        box-shadow: 0 12px 26px rgba(21, 50, 75, .16);
+    }
+    .onboarding-list-page__eyebrow { color: #a8d6e5; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .onboarding-list-page__add-btn { border: 0; background: #0f877d; color: #fff; font-weight: 700; }
+    .onboarding-list-page__add-btn i, .onboarding-list-page__filter-btn i { margin-right: 5px; }
+    .onboarding-list-page__filters { margin: 0 0 16px !important; padding: 14px; background: #dfeff6; border: 1px solid #c4dce8; border-radius: 8px; }
+    .onboarding-list-page__filters .form-control { border-color: #a9cadb; background: #fff; }
+    .onboarding-list-page__filter-btn { border: 1px solid #1d6fa5; background: #fff; color: #15324b; font-weight: 700; }
+    .onboarding-list-page__table { border: 1px solid #cfe0eb; border-radius: 8px; background: #fff; }
+    .onboarding-list-page__table thead th { background: #e7f4f9; color: #15324b; font-weight: 700; }
+    .onboarding-list-page__table tbody tr:hover { background: #edf9f7; }
+</style>

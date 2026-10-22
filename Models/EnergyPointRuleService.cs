@@ -152,6 +152,88 @@ namespace Erp_Aits.Services
             }
         }
 
+        public void Update(EnergyPointRule model)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                const string query = @"
+                    UPDATE EnergyPointRules
+                    SET Enabled = @Enabled,
+                        RuleName = @RuleName,
+                        ReferenceDocumentType = @RefDocType,
+                        ForDocumentEvent = @ForDocEvent,
+                        FieldToCheck = @FieldToCheck,
+                        Points = @Points,
+                        ApplyOnlyOnce = @ApplyOnlyOnce,
+                        AllotPointsToAssignedUsers = @AllotPoints,
+                        UserField = @UserField,
+                        MultiplierField = @MultiplierField,
+                        MaxPoints = @MaxPoints,
+                        Condition_ = @Condition,
+                        Status = @Status
+                    WHERE Id = @Id AND IsDeleted = 0";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    AddParams(cmd, model);
+                    cmd.Parameters.AddWithValue("@Id", model.Id);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void MarkDeletedById(int id)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand("UPDATE EnergyPointRules SET IsDeleted = 1 WHERE Id = @Id", conn))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void MarkDeletedIfMissingFromErpNext(ISet<string> erpNextIds)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+
+                const string getQuery = @"
+                    SELECT Id, ErpNextId
+                    FROM EnergyPointRules
+                    WHERE IsDeleted = 0
+                      AND ErpNextId IS NOT NULL
+                      AND LTRIM(RTRIM(ErpNextId)) <> ''";
+
+                var missingIds = new List<int>();
+
+                using (var cmd = new SqlCommand(getQuery, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string erpNextId = reader["ErpNextId"]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(erpNextId) &&
+                            !erpNextIds.Contains(erpNextId))
+                        {
+                            missingIds.Add(Convert.ToInt32(reader["Id"]));
+                        }
+                    }
+                }
+
+                foreach (int id in missingIds)
+                {
+                    using (var cmd = new SqlCommand("UPDATE EnergyPointRules SET IsDeleted = 1 WHERE Id = @Id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
         public void UpsertFromErpNext(EnergyPointRule model)
         {
             using (var conn = new SqlConnection(_connectionString))

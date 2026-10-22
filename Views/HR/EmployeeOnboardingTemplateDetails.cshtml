@@ -24,14 +24,15 @@
       asp-controller="HR"
       asp-route-id="@Model.Id"
       method="post"
-      id="templateForm">
+      id="templateForm"
+      class="template-detail-page">
 
     @Html.AntiForgeryToken()
 
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ErpNextId" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="template-detail-page__header d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">@Model.Title</h4>
 
         <div class="d-flex gap-2">
@@ -48,8 +49,8 @@
 
             <button type="submit"
                     id="updateBtn"
-                    class="btn btn-dark btn-sm px-4 fw-bold d-none">
-                Update Changes
+                    class="btn template-detail-page__save btn-sm px-4 fw-bold d-none">
+                <i class="fa-solid fa-floppy-disk"></i> Update Changes
             </button>
         </div>
     </div>
@@ -253,6 +254,9 @@
         </div>
     </div>
 </form>
+<style>
+ .template-detail-page{background:linear-gradient(135deg,#eef7fb,#f7fbfa 65%,#edf3fb);border:1px solid #d5e5ee;border-radius:8px;padding:24px;color:#183247}.template-detail-page__header{background:#15324b;color:#fff;border-radius:8px;padding:19px 21px;box-shadow:0 12px 26px rgba(21,50,75,.16)}.template-detail-page__header .btn-outline-secondary{background:#fff;border-color:#acc7d7;color:#15324b}.template-detail-page__save{background:#0f877d;border:0;color:#fff}.template-detail-page .card{border-color:#cfe0eb!important;box-shadow:none!important}.template-detail-page .form-label{color:#315369;font-size:13px;font-weight:700}.template-detail-page .form-control,.template-detail-page .form-select{border-color:#bcd4e2;border-radius:6px;min-height:38px}.template-detail-page .table thead th{background:#e7f4f9;color:#15324b}
+</style>
 
 <form asp-action="DeleteEmployeeOnboardingTemplate"
       asp-controller="HR"

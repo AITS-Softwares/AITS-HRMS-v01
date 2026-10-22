@@ -4,6 +4,8 @@
     ViewBag.Title = "Attendance Request";
 }
 
+<div class="workforce-ui attendance-request-list">
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -27,6 +29,10 @@
         + Add
     </a>
 </div>
+
+<style>
+    .workforce-ui.attendance-request-list { max-width: 1480px; margin: 8px auto 40px; padding: 26px; border: 1px solid #c7daea; border-radius: 8px; background: #edf5fb; box-shadow: 0 16px 34px rgba(19,55,91,.10); }.workforce-ui.attendance-request-list > .d-flex { margin: -26px -26px 22px; padding: 20px 26px; background: #14365d; border-radius: 8px 8px 0 0; }.workforce-ui.attendance-request-list h4 { color: #fff; font-size: 27px; font-weight: 760; }.workforce-ui.attendance-request-list .btn-outline-primary { border-color: #16a085; background: #108c77; color: #fff; border-radius: 6px; font-weight: 700; }.workforce-ui.attendance-request-list .card { overflow: hidden; border: 1px solid #c8ddec!important; border-radius: 8px; box-shadow: 0 8px 20px rgba(16,49,82,.07); }.workforce-ui.attendance-request-list .table thead th { padding: 14px 18px; border-color: #2a5a89; background: #1d4b7d; color: #fff!important; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }.workforce-ui.attendance-request-list .table tbody td { padding: 15px 18px; border-color: #e1ebf4; color: #31516f; }.workforce-ui.attendance-request-list .table tbody tr:nth-child(even) { background: #f4f9fd; }.workforce-ui.attendance-request-list .table tbody tr:hover { background: #e1f3ef; }.workforce-ui.attendance-request-list .badge { border-radius: 6px; }.workforce-ui.attendance-request-list .btn-outline-danger { border-radius: 6px; }
+</style>
 
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
@@ -128,3 +134,5 @@
         vertical-align: middle;
     }
 </style>
+
+</div>

@@ -16,7 +16,8 @@
     <div class="alert alert-success" role="alert">@TempData["Success"]</div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="lifecycle-ui">
+<div class="lifecycle-ui__header d-flex justify-content-between align-items-center mb-3">
     <div>
         <h4 class="mb-1">Employee Onboarding - @Model.EmployeeName</h4>
         <span class="badge @(isCancelled ? "bg-danger" : isCompleted ? "bg-success" : isDraft ? "bg-secondary" : "bg-warning text-dark")">@displayStatus</span>
@@ -104,6 +105,8 @@
         </div>
     </fieldset>
 </form>
+</div>
+@await Html.PartialAsync("_LifecycleUi")
 
 @if (isDraft)
 {

@@ -22,11 +22,11 @@
     </div>
 }
 
-<form asp-controller="HR" asp-action="UpdateAppraisal" method="post" id="appraisalForm">
+<form asp-controller="HR" asp-action="UpdateAppraisal" method="post" id="appraisalForm" class="performance-ui performance-form-shell">
     <input asp-for="Id" type="hidden" />
     <input asp-for="ErpNextId" type="hidden" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <div>
             <h4 class="mb-1">Appraisal - @Model.Employee</h4>
             <small class="text-muted">ERPNext ID: @(string.IsNullOrWhiteSpace(Model.ErpNextId) ? "-" : Model.ErpNextId)</small>
@@ -45,7 +45,7 @@
     </div>
 
     <fieldset @(isDraft ? "" : "disabled")>
-        <ul class="nav nav-tabs mb-3">
+        <ul class="nav nav-tabs mb-3 performance-tabs">
             <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overviewTab">Overview</a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#kraTab">KRAs</a></li>
             <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li>
@@ -62,15 +62,15 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Company</label>
-                            <input asp-for="Company" class="form-control" required />
+                            @Html.DropDownListFor(m => m.Company, (IEnumerable<SelectListItem>)ViewBag.CompanyList ?? new List<SelectListItem>(), "-- Select Company --", new { @class = "form-control", @required = "required" })
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Employee</label>
-                            <input asp-for="Employee" class="form-control" required />
+                            @Html.DropDownListFor(m => m.Employee, (IEnumerable<SelectListItem>)ViewBag.EmployeeList ?? new List<SelectListItem>(), "-- Select Employee --", new { @class = "form-control", @required = "required" })
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Appraisal Cycle</label>
-                            <input asp-for="AppraisalCycle" class="form-control" required />
+                            @Html.DropDownListFor(m => m.AppraisalCycle, (IEnumerable<SelectListItem>)ViewBag.AppraisalCycleList ?? new List<SelectListItem>(), "-- Select Appraisal Cycle --", new { @class = "form-control", @required = "required" })
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Employee Name</label>
@@ -78,7 +78,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Appraisal Template</label>
-                            <input asp-for="AppraisalTemplate" class="form-control" required />
+                            @Html.DropDownListFor(m => m.AppraisalTemplate, (IEnumerable<SelectListItem>)ViewBag.AppraisalTemplateList ?? new List<SelectListItem>(), "-- Select Appraisal Template --", new { @class = "form-control", @required = "required" })
                         </div>
                     </div>
                 </div>
@@ -200,6 +200,8 @@
         </form>
     }
 </div>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     function renumberRows(tbodyId) {

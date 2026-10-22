@@ -1,510 +1,87 @@
-﻿@model Erp_Aits.Models.AttendanceRequest
-
+@model Erp_Aits.Models.Attendance
 @{
-    ViewBag.Title = "Attendance Request Details";
-
-    bool isDraft = Model.DocStatus == 0;
-    bool isSubmitted = Model.DocStatus == 1;
-    bool isCancelled = Model.DocStatus == 2;
-
-    string docStatusText = isSubmitted ? "Submitted" : isCancelled ? "Cancelled" : "Draft";
-    string badgeClass = isSubmitted ? "bg-success" : isCancelled ? "bg-danger" : "bg-secondary";
-
-    var employees = ViewBag.Employees;
-    var companies = ViewBag.Companies;
-    var shifts = ViewBag.Shifts;
+    ViewBag.Title = "Attendance Details";
+    var isDraft = Model.DocStatus == 0;
+    var isSubmitted = Model.DocStatus == 1;
+    var editMode = ViewBag.EditMode == true && isDraft;
 }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<div class="attendance-detail-page">
+    @if (TempData["Success"] != null) { <div class="alert alert-success alert-dismissible fade show" role="alert">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+    @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger alert-dismissible fade show" role="alert">@TempData["ErpNextError"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
 
-@if (TempData["ErpNextError"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErpNextError"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h4 class="mb-1">Attendance Request</h4>
-        <div>
-            <span class="fw-semibold">
-                @(string.IsNullOrWhiteSpace(Model.AttendanceRequestCode) ? Model.ErpNextId : Model.AttendanceRequestCode)
-            </span>
-            <span class="badge @badgeClass ms-2">@docStatusText</span>
+    <header class="attendance-detail-header">
+        <div><div class="attendance-eyebrow">Workforce management</div><h4>Attendance Details</h4><div class="attendance-code">@Model.AttendanceCode</div></div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="@Url.Action("Attendance", "HR")" class="btn btn-outline-light btn-sm">Back to List</a>
+            @if (isDraft && !editMode) { <a href="@Url.Action("AttendanceDetails", "HR", new { id = Model.Id, edit = true })" class="btn attendance-edit-button btn-sm">Edit</a> }
+            <form action="@Url.Action("DeleteAttendance", "HR", new { id = Model.Id })" method="post" class="d-inline" onsubmit="return confirm('Delete this attendance from local HRMS only?');">@Html.AntiForgeryToken()<button type="submit" class="btn btn-danger btn-sm">Delete</button></form>
         </div>
-    </div>
+    </header>
 
-    <div class="d-flex gap-2">
-        <a href="@Url.Action("AttendanceRequest", "HR")" class="btn btn-outline-secondary btn-sm">
-            Back to List
-        </a>
+    <form action="@Url.Action("ProcessAttendanceAction", "HR")" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" /><input type="hidden" asp-for="AttendanceCode" /><input type="hidden" asp-for="ErpNextId" /><input type="hidden" asp-for="DocStatus" />
 
-        <form action="@Url.Action("DeleteAttendanceRequest", "HR", new { id = Model.Id })"
-              method="post"
-              onsubmit="return confirm('Are you sure you want to delete this Attendance Request?');">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-        </form>
-    </div>
+        <section class="attendance-detail-card">
+            <div class="attendance-card-title">Attendance Information</div>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Employee *</label>
+                    @if (editMode) { <select asp-for="Employee" id="employeeSelect" class="form-select" required><option value="">-- Select Employee --</option>@if (ViewBag.Employees != null) { foreach (var emp in ViewBag.Employees) { string code = emp.name?.ToString(); string name = emp.employee_name?.ToString(); <option value="@code" data-empname="@name" selected="@(code == Model.Employee)">@code - @name</option> } }</select> }
+                    else { <input class="form-control" value="@Model.Employee" readonly /><input type="hidden" asp-for="Employee" /> }
+                </div>
+                <div class="col-md-6"><label class="form-label">Employee Name</label><input asp-for="EmployeeName" id="employeeNameInput" class="form-control" readonly /></div>
+                <div class="col-md-6"><label class="form-label">Company *</label>
+                    @if (editMode) { <select asp-for="Company" class="form-select" required>@if (ViewBag.Companies != null) { foreach (var company in ViewBag.Companies) { string name = company.name?.ToString(); <option value="@name" selected="@(name == Model.Company)">@name</option> } }</select> }
+                    else { <input class="form-control" value="@Model.Company" readonly /><input type="hidden" asp-for="Company" /> }
+                </div>
+                <div class="col-md-6"><label class="form-label">Attendance Date *</label>
+                    @if (editMode) { <input asp-for="AttendanceDate" type="date" class="form-control" value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" required /> }
+                    else { <input class="form-control" value="@Model.AttendanceDate.ToString("dd-MM-yyyy")" readonly /><input type="hidden" name="AttendanceDate" value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" /> }
+                </div>
+                <div class="col-md-6"><label class="form-label">Status *</label>
+                    @if (editMode) { <select asp-for="Status" id="statusSelect" class="form-select" required><option value="Present">Present</option><option value="Absent">Absent</option><option value="On Leave">On Leave</option><option value="Half Day">Half Day</option><option value="Work From Home">Work From Home</option></select> }
+                    else { <input class="form-control" value="@Model.Status" readonly /><input type="hidden" asp-for="Status" /> }
+                </div>
+                <div class="col-md-6" id="leaveTypeWrapper" style="display:@(Model.Status == "On Leave" || Model.Status == "Half Day" ? "block" : "none")"><label class="form-label">Leave Type</label>
+                    @if (editMode) { <select asp-for="LeaveType" class="form-select"><option value="">-- Select Leave Type --</option>@if (ViewBag.LeaveTypes != null) { foreach (var leaveType in ViewBag.LeaveTypes) { string name = leaveType.name?.ToString(); <option value="@name" selected="@(name == Model.LeaveType)">@name</option> } }</select> }
+                    else { <input class="form-control" value="@Model.LeaveType" readonly /><input type="hidden" asp-for="LeaveType" /> }
+                </div>
+                <div class="col-md-6" id="otherHalfWrapper" style="display:@(Model.Status == "Half Day" ? "block" : "none")"><label class="form-label">Status for Other Half</label>
+                    @if (editMode) { <select asp-for="StatusForOtherHalf" class="form-select"><option value="">-- Select Status --</option><option value="Present">Present</option><option value="Absent">Absent</option></select> }
+                    else { <input class="form-control" value="@Model.StatusForOtherHalf" readonly /><input type="hidden" asp-for="StatusForOtherHalf" /> }
+                </div>
+            </div>
+        </section>
+
+        <section class="attendance-detail-card">
+            <div class="attendance-card-title">Shift and Timing</div>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Shift</label>
+                    @if (editMode) { <select asp-for="Shift" class="form-select"><option value="">-- Select Shift --</option>@if (ViewBag.Shifts != null) { foreach (var shift in ViewBag.Shifts) { string name = shift.name?.ToString(); <option value="@name" selected="@(name == Model.Shift)">@name</option> } }</select> }
+                    else { <input class="form-control" value="@Model.Shift" readonly /><input type="hidden" asp-for="Shift" /> }
+                </div>
+                <div class="col-md-6"><div class="attendance-toggle-panel">
+                    <div class="form-check mb-3"><input type="hidden" name="LateEntry" value="false" /><input asp-for="LateEntry" class="form-check-input" type="checkbox" disabled="@(!editMode)" /><label class="form-check-label" for="LateEntry">Late Entry</label></div>
+                    <div class="form-check"><input type="hidden" name="EarlyExit" value="false" /><input asp-for="EarlyExit" class="form-check-input" type="checkbox" disabled="@(!editMode)" /><label class="form-check-label" for="EarlyExit">Early Exit</label></div>
+                </div></div>
+            </div>
+        </section>
+
+        <div class="attendance-detail-actions">
+            @if (editMode) { <button type="submit" name="actionCommand" value="Save" class="btn attendance-save-button">Save Changes</button><button type="submit" name="actionCommand" value="Submit" class="btn attendance-submit-button">Submit</button><a href="@Url.Action("AttendanceDetails", "HR", new { id = Model.Id })" class="btn btn-outline-secondary">Cancel Edit</a> }
+            else if (isDraft) { <a href="@Url.Action("AttendanceDetails", "HR", new { id = Model.Id, edit = true })" class="btn attendance-edit-button">Edit Draft</a> }
+            else if (isSubmitted) { <button type="submit" name="actionCommand" value="Cancel" class="btn btn-danger" onclick="return confirm('Cancel this submitted Attendance in ERPNext and HRMS?');">Cancel</button> }
+            else { <span class="attendance-locked-note">Cancelled attendance is locked.</span> }
+        </div>
+    </form>
 </div>
 
-<form action="@Url.Action("ProcessAttendanceRequestAction", "HR")" method="post" id="attendanceRequestForm">
-    @Html.AntiForgeryToken()
-
-    <input type="hidden" name="Id" value="@Model.Id" />
-    <input type="hidden" name="AttendanceRequestCode" value="@Model.AttendanceRequestCode" />
-    <input type="hidden" name="ErpNextId" value="@Model.ErpNextId" />
-    <input type="hidden" name="DocStatus" value="@Model.DocStatus" />
-
-    <div class="card shadow-sm border-0 mb-3">
-        <div class="card-body">
-            <h5 class="mb-3">Request Details</h5>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Employee <span class="text-danger">*</span></label>
-
-                    @if (isDraft)
-                    {
-                        <select class="form-select editable-field" name="Employee" id="Employee" required="required">
-                            <option value="">-- Select Employee --</option>
-
-                            @if (employees != null)
-                            {
-                                foreach (var emp in employees)
-                                {
-                                    string empCode = emp.name != null ? emp.name.ToString() : "";
-                                    string empName = emp.employee_name != null ? emp.employee_name.ToString() : "";
-
-                                    if (empCode == Model.Employee)
-                                    {
-                                        <option value="@empCode" data-name="@empName" selected="selected">
-                                            @empCode - @empName
-                                        </option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@empCode" data-name="@empName">
-                                            @empCode - @empName
-                                        </option>
-                                    }
-                                }
-                            }
-                        </select>
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control" value="@Model.Employee" disabled="disabled" />
-                        <input type="hidden" name="Employee" value="@Model.Employee" />
-                    }
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Employee Name</label>
-                    <input type="text"
-                           class="form-control"
-                           name="EmployeeName"
-                           id="EmployeeName"
-                           value="@Model.EmployeeName"
-                           readonly="readonly" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Company <span class="text-danger">*</span></label>
-
-                    @if (isDraft)
-                    {
-                        <select class="form-select editable-field" name="Company" required="required">
-                            <option value="">-- Select Company --</option>
-
-                            @if (companies != null)
-                            {
-                                foreach (var company in companies)
-                                {
-                                    string companyName = company.name != null ? company.name.ToString() : "";
-
-                                    if (companyName == Model.Company)
-                                    {
-                                        <option value="@companyName" selected="selected">@companyName</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@companyName">@companyName</option>
-                                    }
-                                }
-                            }
-                        </select>
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control" value="@Model.Company" disabled="disabled" />
-                        <input type="hidden" name="Company" value="@Model.Company" />
-                    }
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">From Date <span class="text-danger">*</span></label>
-
-                    @if (isDraft)
-                    {
-                        <input type="date"
-                               class="form-control editable-field"
-                               name="FromDate"
-                               id="FromDate"
-                               value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")"
-                               required="required" />
-                    }
-                    else
-                    {
-                        <input type="date"
-                               class="form-control"
-                               value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")"
-                               disabled="disabled" />
-                        <input type="hidden"
-                               name="FromDate"
-                               value="@(Model.FromDate.HasValue? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")" />
-                    }
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">To Date <span class="text-danger">*</span></label>
-
-                    @if (isDraft)
-                    {
-                        <input type="date"
-                               class="form-control editable-field"
-                               name="ToDate"
-                               id="ToDate"
-                               value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")"
-                               required="required" />
-                    }
-                    else
-                    {
-                        <input type="date"
-                               class="form-control"
-                               value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")"
-                               disabled="disabled" />
-                        <input type="hidden"
-                               name="ToDate"
-                               value="@(Model.ToDate.HasValue? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")" />
-                    }
-                </div>
-
-                <div class="col-md-6">
-                    <div class="checkbox-panel">
-                        <div class="form-check">
-                            @if (Model.HalfDay)
-                            {
-                                <input type="checkbox"
-                                       class="form-check-input editable-field"
-                                       name="HalfDay"
-                                       id="HalfDay"
-                                       value="true"
-                                       checked="checked"
-                                       @(isDraft ? "" : "disabled") />
-                            }
-                            else
-                            {
-                                <input type="checkbox"
-                                       class="form-check-input editable-field"
-                                       name="HalfDay"
-                                       id="HalfDay"
-                                       value="true"
-                                       @(isDraft ? "" : "disabled") />
-                            }
-
-                            <input type="hidden" name="HalfDay" value="false" />
-                            <label class="form-check-label fw-semibold" for="HalfDay">Half Day</label>
-                        </div>
-
-                        <div class="mt-3" id="halfDayDateBox" style="display:none;">
-                            <label class="form-label">Half Day Date <span class="text-danger">*</span></label>
-
-                            @if (isDraft)
-                            {
-                                <input type="date"
-                                       class="form-control editable-field"
-                                       name="HalfDayDate"
-                                       id="HalfDayDate"
-                                       value="@(Model.HalfDayDate.HasValue? Model.HalfDayDate.Value.ToString("yyyy-MM-dd") : "")" />
-                            }
-                            else
-                            {
-                                <input type="date"
-                                       class="form-control"
-                                       id="HalfDayDate"
-                                       value="@(Model.HalfDayDate.HasValue? Model.HalfDayDate.Value.ToString("yyyy-MM-dd") : "")"
-                                       disabled="disabled" />
-                                <input type="hidden"
-                                       name="HalfDayDate"
-                                       value="@(Model.HalfDayDate.HasValue? Model.HalfDayDate.Value.ToString("yyyy-MM-dd") : "")" />
-                            }
-                        </div>
-
-                        <div class="form-check mt-3">
-                            @if (Model.IncludeHolidays)
-                            {
-                                <input type="checkbox"
-                                       class="form-check-input editable-field"
-                                       name="IncludeHolidays"
-                                       id="IncludeHolidays"
-                                       value="true"
-                                       checked="checked"
-                                       @(isDraft ? "" : "disabled") />
-                            }
-                            else
-                            {
-                                <input type="checkbox"
-                                       class="form-check-input editable-field"
-                                       name="IncludeHolidays"
-                                       id="IncludeHolidays"
-                                       value="true"
-                                       @(isDraft ? "" : "disabled") />
-                            }
-
-                            <input type="hidden" name="IncludeHolidays" value="false" />
-                            <label class="form-check-label fw-semibold" for="IncludeHolidays">Include Holidays</label>
-                        </div>
-
-                        <div class="form-text mt-2">Select if any selected request days are holidays.</div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Shift</label>
-
-                    @if (isDraft)
-                    {
-                        <select class="form-select editable-field" name="Shift">
-                            <option value="">-- Select Shift --</option>
-
-                            @if (shifts != null)
-                            {
-                                foreach (var shift in shifts)
-                                {
-                                    string shiftName = shift != null ? shift.ToString() : "";
-
-                                    if (shiftName == Model.Shift)
-                                    {
-                                        <option value="@shiftName" selected="selected">@shiftName</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@shiftName">@shiftName</option>
-                                    }
-                                }
-                            }
-                        </select>
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control" value="@Model.Shift" disabled="disabled" />
-                        <input type="hidden" name="Shift" value="@Model.Shift" />
-                    }
-
-                    <div class="form-text">Note: Shift will not be overwritten in existing attendance records.</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0 mb-3">
-        <div class="card-body">
-            <h5 class="mb-3">Reason</h5>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Reason <span class="text-danger">*</span></label>
-
-                    @if (isDraft)
-                    {
-                        <select class="form-select editable-field" name="Reason" required="required">
-                            @if (Model.Reason == "Work From Home" || string.IsNullOrWhiteSpace(Model.Reason))
-                            {
-                                <option value="Work From Home" selected="selected">Work From Home</option>
-                            }
-                            else
-                            {
-                                <option value="Work From Home">Work From Home</option>
-                            }
-
-                            @if (Model.Reason == "On Duty")
-                            {
-                                <option value="On Duty" selected="selected">On Duty</option>
-                            }
-                            else
-                            {
-                                <option value="On Duty">On Duty</option>
-                            }
-                        </select>
-                    }
-                    else
-                    {
-                        <input type="text" class="form-control" value="@Model.Reason" disabled="disabled" />
-                        <input type="hidden" name="Reason" value="@Model.Reason" />
-                    }
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Explanation</label>
-
-                    @if (isDraft)
-                    {
-                        <textarea class="form-control editable-field"
-                              name="Explanation"
-                              rows="4">@Model.Explanation</textarea>
-                    }
-                    else
-                    {
-                        <textarea class="form-control"
-                              rows="4"
-                              disabled="disabled">@Model.Explanation</textarea>
-                        <input type="hidden" name="Explanation" value="@Model.Explanation" />
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-end gap-2 mb-4">
-        @if (isDraft)
-        {
-            <button type="submit"
-                    class="btn btn-dark"
-                    name="actionCommand"
-                    value="Submit"
-                    id="mainActionButton">
-                Submit
-            </button>
-        }
-        else if (isSubmitted)
-        {
-            <button type="submit"
-                    class="btn btn-danger"
-                    name="actionCommand"
-                    value="Cancel"
-                    onclick="return confirm('Attendance Request is linked with submitted Attendance documents. Do you want to cancel all linked documents?');">
-                Cancel
-            </button>
-        }
-    </div>
-</form>
-
 <style>
-    .card {
-        border-radius: 8px;
-    }
-
-    .form-label {
-        font-weight: 600;
-        margin-bottom: 6px;
-    }
-
-    .form-control,
-    .form-select {
-        min-height: 42px;
-    }
-
-    .badge {
-        font-size: 12px;
-        padding: 6px 10px;
-        border-radius: 6px;
-    }
-
-    .checkbox-panel {
-        border: 1px solid #d9e0ea;
-        border-radius: 8px;
-        padding: 18px;
-        background: #f8fafc;
-    }
-
-    .form-text {
-        font-size: 13px;
-        color: #6c757d;
-    }
+    .attendance-detail-page{max-width:1180px;margin:8px auto 40px;padding:26px;border:1px solid #c7daea;border-radius:8px;background:#edf5fb;box-shadow:0 16px 34px rgba(19,55,91,.10)}.attendance-detail-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin:-26px -26px 24px;padding:20px 26px;background:#14365d;border-radius:8px 8px 0 0}.attendance-detail-header h4{margin:3px 0;color:#fff;font-size:27px;font-weight:760}.attendance-eyebrow{color:#84dfcc;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.attendance-code{color:#b7d0e7;font-size:13px}.attendance-detail-page .btn{border-radius:6px;font-weight:700}.attendance-edit-button,.attendance-save-button{border-color:#16a085;background:#108c77;color:#fff}.attendance-edit-button:hover,.attendance-save-button:hover{background:#087361;color:#fff}.attendance-submit-button{border-color:#2769a2;background:#286ca7;color:#fff}.attendance-detail-card{margin-bottom:18px;padding:22px;border:1px solid #c8ddec;border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(16,49,82,.07)}.attendance-card-title{margin-bottom:18px;color:#173f6b;font-size:16px;font-weight:760}.attendance-detail-page .form-label{color:#315879;font-size:13px;font-weight:720}.attendance-detail-page .form-control,.attendance-detail-page .form-select{min-height:42px;border-color:#b9cee2;border-radius:6px}.attendance-detail-page .form-control:focus,.attendance-detail-page .form-select:focus{border-color:#159b84;box-shadow:0 0 0 3px rgba(21,155,132,.14)}.attendance-detail-page .form-control[readonly]{background:#f2f7fb}.attendance-toggle-panel{height:100%;padding:16px;border:1px solid #c8ddec;border-radius:7px;background:#f3f8fc}.attendance-toggle-panel .form-check-input:checked{background-color:#159b84;border-color:#159b84}.attendance-detail-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}.attendance-locked-note{color:#9b3d3d;font-weight:700}@@media(max-width:640px){.attendance-detail-page{padding:16px}.attendance-detail-header{flex-direction:column;margin:-16px -16px 18px;padding:18px}}
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const employeeSelect = document.getElementById("Employee");
-        const employeeNameInput = document.getElementById("EmployeeName");
-
-        if (employeeSelect && employeeNameInput) {
-            employeeSelect.addEventListener("change", function () {
-                const selected = employeeSelect.options[employeeSelect.selectedIndex];
-                employeeNameInput.value = selected ? (selected.getAttribute("data-name") || "") : "";
-            });
-        }
-
-        const halfDay = document.getElementById("HalfDay");
-        const halfDayDateBox = document.getElementById("halfDayDateBox");
-        const halfDayDate = document.getElementById("HalfDayDate");
-        const fromDate = document.getElementById("FromDate");
-
-        function toggleHalfDayDate() {
-            if (!halfDay || !halfDayDateBox) return;
-
-            if (halfDay.checked) {
-                halfDayDateBox.style.display = "block";
-
-                if (halfDayDate) {
-                    halfDayDate.setAttribute("required", "required");
-
-                    if (!halfDayDate.value && fromDate && fromDate.value) {
-                        halfDayDate.value = fromDate.value;
-                    }
-                }
-            } else {
-                halfDayDateBox.style.display = "none";
-
-                if (halfDayDate) {
-                    halfDayDate.removeAttribute("required");
-
-                    if (!halfDayDate.disabled) {
-                        halfDayDate.value = "";
-                    }
-                }
-            }
-        }
-
-        if (halfDay) {
-            halfDay.addEventListener("change", toggleHalfDayDate);
-            toggleHalfDayDate();
-        }
-
-        if (fromDate && halfDayDate) {
-            fromDate.addEventListener("change", function () {
-                if (halfDay && halfDay.checked && !halfDayDate.value) {
-                    halfDayDate.value = fromDate.value;
-                }
-            });
-        }
-
-        const form = document.getElementById("attendanceRequestForm");
-        const actionButton = document.getElementById("mainActionButton");
-
-        if (form && actionButton) {
-            const fields = form.querySelectorAll(".editable-field");
-
-            fields.forEach(function (field) {
-                field.addEventListener("change", function () {
-                    actionButton.textContent = "Save";
-                    actionButton.value = "Save";
-                });
-
-                field.addEventListener("input", function () {
-                    actionButton.textContent = "Save";
-                    actionButton.value = "Save";
-                });
-            });
-        }
-    });
+    document.getElementById('employeeSelect')?.addEventListener('change', function () { document.getElementById('employeeNameInput').value = this.options[this.selectedIndex]?.dataset.empname || ''; });
+    document.getElementById('statusSelect')?.addEventListener('change', function () { const value = this.value; document.getElementById('leaveTypeWrapper').style.display = value === 'On Leave' || value === 'Half Day' ? 'block' : 'none'; document.getElementById('otherHalfWrapper').style.display = value === 'Half Day' ? 'block' : 'none'; });
 </script>

@@ -17,9 +17,10 @@
 
 <form asp-action="CreateGoal"
       asp-controller="HR"
-      method="post">
+      method="post"
+      class="performance-ui performance-form-shell">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
 
         <div>
 
@@ -391,6 +392,8 @@
 
 </form>
 
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 @section Scripts
 {

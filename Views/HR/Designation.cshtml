@@ -1,155 +1,66 @@
-﻿@* @model List<Erp_Aits.Models.Designation>
-@{
-    ViewBag.Title = "Designation";
-}
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Designation</h4>
-    <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newDesignationModal">
-        + Add Designation
-    </button>
-</div>
-
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Appraisal Template</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var d in Model)
-        {
-            <tr>
-                <td>@d.DesignationName</td>
-                <td>@d.AppraisalTemplate</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (!Model.Any())
-{
-    <p class="text-muted">No designations found.</p>
-}
-
-<!-- New Designation Modal -->
-<div class="modal fade" id="newDesignationModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="CreateDesignation" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title">New Designation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Designation *</label>
-                        <input type="text" name="DesignationName" class="form-control" required autofocus />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Appraisal Template</label>
-                        <input type="text" name="AppraisalTemplate" class="form-control" />
-                    </div>
-                </div>
-                @* <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
-                </div> *@
-@*                 <div class="modal-footer justify-content-between">
-                    <a href="@Url.Action("CreateDesignation", "HR")" class="btn btn-light btn-sm">Edit Full Form</a>
-                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div> *@ 
-
-
-
-
-
-
 @model List<Erp_Aits.Models.Designation>
 @{
-    ViewBag.Title = "Designation";
+    ViewBag.Title = "Designations";
 }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["ErpNextError"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-        @TempData["ErpNextError"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<style>
+    .designation-workspace { --des-ink:#10334a; --des-teal:#008c88; --des-sky:#eaf6fb; --des-mint:#eaf8f4; color:var(--des-ink); }
+    .designation-workspace .des-hero { background:linear-gradient(110deg,#10334a,#0b726f); color:#fff; padding:26px 30px; border-radius:8px; box-shadow:0 12px 25px rgba(16,51,74,.14); }
+    .designation-workspace .des-eyebrow { color:#a7e8db; font-size:.76rem; font-weight:700; letter-spacing:0; text-transform:uppercase; margin-bottom:4px; }
+    .designation-workspace .des-panel { background:#fff; border:1px solid #bcdce5; border-radius:8px; overflow:hidden; }
+    .designation-workspace .des-table { margin:0; }
+    .designation-workspace .des-table thead th { background:var(--des-sky); color:#174b64; border-bottom:1px solid #bcdce5; font-size:.78rem; letter-spacing:0; text-transform:uppercase; white-space:nowrap; }
+    .designation-workspace .des-table tbody tr { cursor:pointer; }
+    .designation-workspace .des-table tbody tr:hover { background:var(--des-mint); }
+    .designation-workspace .des-title-link { color:#0b6f83; font-weight:700; text-decoration:none; }
+    .designation-workspace .des-title-link:hover { color:#008c88; text-decoration:underline; }
+    .designation-workspace .des-template { display:inline-block; padding:4px 9px; background:#e8f3ff; border:1px solid #c1ddf5; color:#175879; border-radius:4px; font-size:.84rem; }
+    .designation-workspace .des-empty { padding:52px 24px; text-align:center; color:#5d7483; background:#fff; border:1px dashed #9fcbd5; border-radius:8px; }
+</style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Designation</h4>
-    <div class="d-flex gap-2">
-        <form action="@Url.Action("SyncDesignationsFromErpNext", "HR")" method="post" style="display:inline;">
-            <button type="submit" class="btn btn-outline-primary btn-sm">⚡ Sync from ERPNext</button>
-        </form>
-        <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newDesignationModal">
-            + Add Designation
-        </button>
-    </div>
-</div>
+<section class="designation-workspace">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+    @if (TempData["ErpNextError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">@TempData["ErpNextError"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
 
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>Designation Name</th>
-            <th>Appraisal Template</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var d in Model)
-        {
-            <tr>
-                <td>@d.DesignationName</td>
-                <td>@d.AppraisalTemplate</td>
-                <td>@d.Description</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (!Model.Any())
-{
-    <p class="text-muted">No designations found.</p>
-}
-
-<!-- New Designation Modal -->
-<div class="modal fade" id="newDesignationModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="@Url.Action("CreateDesignation", "HR")" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title">New Designation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Designation *</label>
-                        <input type="text" name="DesignationName" class="form-control" required autofocus placeholder="e.g. Software Engineer" />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Appraisal Template</label>
-                        <input type="text" name="AppraisalTemplate" class="form-control" placeholder="Select or type template..." />
-                    </div>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <a href="@Url.Action("CreateDesignation", "HR")" class="btn btn-light btn-sm">Edit Full Form</a>
-                    <button type="submit" class="btn btn-dark btn-sm">Save</button>
-                </div>
-            </form>
+    <header class="des-hero d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <div class="des-eyebrow">HRMS / Organization</div>
+            <h3 class="mb-1">Designations</h3>
+            <p class="mb-0 opacity-75">Manage role definitions, appraisal templates, and skill requirements.</p>
         </div>
-    </div>
-</div>
+        <a asp-action="CreateDesignation" class="btn btn-light fw-semibold">Add Designation</a>
+    </header>
+
+    @if (Model.Any())
+    {
+        <div class="des-panel">
+            <div class="table-responsive">
+                <table class="table des-table align-middle">
+                    <thead>
+                        <tr><th class="ps-4">Designation</th><th>Appraisal Template</th><th class="pe-4">Description</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var designation in Model)
+                        {
+                            <tr onclick="window.location='@Url.Action("DesignationDetails", "HR", new { id = designation.Id })'">
+                                <td class="ps-4"><a class="des-title-link" asp-action="DesignationDetails" asp-route-id="@designation.Id">@designation.DesignationName</a></td>
+                                <td>@if (!string.IsNullOrWhiteSpace(designation.AppraisalTemplate)) { <span class="des-template">@designation.AppraisalTemplate</span> } else { <span class="text-muted">Not assigned</span> }</td>
+                                <td class="pe-4 text-muted">@(string.IsNullOrWhiteSpace(designation.Description) ? "No description" : designation.Description)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="des-empty"><h5 class="mb-1">No designations yet</h5><p class="mb-3">Create the first role definition for your organization.</p><a asp-action="CreateDesignation" class="btn btn-primary">Add Designation</a></div>
+    }
+</section>

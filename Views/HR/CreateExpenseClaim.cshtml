@@ -126,6 +126,43 @@
     }
 </datalist>
 
+<datalist id="dunningList">
+    @if (ViewBag.Dunnings != null)
+    {
+        foreach (var item in ViewBag.Dunnings)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+<datalist id="aiAuditLogList">
+    @if (ViewBag.AiAuditLogs != null)
+    {
+        foreach (var item in ViewBag.AiAuditLogs)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+<datalist id="allowedToTransactWithList">
+    @if (ViewBag.AllowedToTransactWithOptions != null)
+    {
+        foreach (var item in ViewBag.AllowedToTransactWithOptions)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+<datalist id="appraisalTemplateList">
+    @if (ViewBag.AppraisalTemplates != null)
+    {
+        foreach (var item in ViewBag.AppraisalTemplates)
+        {
+            <option value="@item.name"></option>
+        }
+    }
+</datalist>
+
 <datalist id="taskList">
     @if (ViewBag.Tasks != null)
     {
@@ -136,6 +173,7 @@
     }
 </datalist>
 
+<div class="expense-claim-create">
 <form action="/HR/CreateExpenseClaim" method="post">
     <div class="ec-header">
         <div>
@@ -144,8 +182,8 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a href="@Url.Action("ExpenseClaims", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
-            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+            <a href="@Url.Action("ExpenseClaimList", "HR")" class="btn ec-btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <button type="submit" class="btn ec-btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Draft</button>
         </div>
     </div>
 
@@ -402,6 +440,22 @@
                                list="costCenterList"
                                placeholder="Select cost center" />
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Dunning</label>
+                        <input asp-for="Dunning" class="form-control" list="dunningList" placeholder="Select dunning" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">AI Audit Log</label>
+                        <input asp-for="AiAuditLog" class="form-control" list="aiAuditLogList" placeholder="Select AI audit log" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Allowed To Transact With</label>
+                        <input asp-for="AllowedToTransactWith" class="form-control" list="allowedToTransactWithList" placeholder="Select party" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Appraisal Template</label>
+                        <input asp-for="AppraisalTemplate" class="form-control" list="appraisalTemplateList" placeholder="Select appraisal template" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -434,26 +488,46 @@
         </div>
     </div>
 </form>
+</div>
 
 <style>
+    .expense-claim-create {
+        --ec-navy: #15324b;
+        --ec-blue: #1d6fa5;
+        --ec-teal: #0f877d;
+        --ec-sky: #eaf5fb;
+        --ec-line: #cfe0eb;
+        --ec-ink: #183247;
+        background: linear-gradient(135deg, #eef7fb 0%, #f6fbfa 62%, #edf3fb 100%);
+        border: 1px solid #d5e5ee;
+        border-radius: 8px;
+        padding: 22px;
+        color: var(--ec-ink);
+    }
+
     .ec-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
+        padding: 18px 20px;
+        background: var(--ec-navy);
+        border-radius: 8px;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(21, 50, 75, 0.14);
     }
 
     .ec-breadcrumb {
         font-size: 12px;
-        color: #6b7280;
+        color: #a8d6e5;
         text-transform: uppercase;
         letter-spacing: 0.04em;
     }
 
     .ec-tabs {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        background: #dfeef5;
+        border: 1px solid var(--ec-line);
         border-radius: 8px;
         padding: 4px;
         gap: 4px;
@@ -461,13 +535,13 @@
 
         .ec-tabs .nav-link {
             border: 0;
-            color: #374151;
+            color: #35556b;
             border-radius: 6px;
             padding: 8px 14px;
         }
 
             .ec-tabs .nav-link.active {
-                background: #111827;
+                background: var(--ec-teal);
                 color: #fff;
             }
 
@@ -516,14 +590,15 @@
 
 
     .ec-section {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--ec-line);
         border-radius: 8px;
         padding: 18px;
         margin-bottom: 16px;
     }
 
     .ec-section-title {
+        color: var(--ec-navy);
         font-weight: 700;
         margin-bottom: 14px;
         padding-bottom: 10px;
@@ -533,17 +608,19 @@
     .form-label {
         font-size: 13px;
         font-weight: 600;
-        color: #374151;
+        color: #315369;
     }
 
     .form-control,
     .form-select {
+        border: 1px solid #bcd4e2;
         border-radius: 6px;
         min-height: 38px;
     }
 
     .table th {
-        background: #f8fafc;
+        background: #e9f4f8;
+        color: var(--ec-navy);
         font-size: 13px;
         white-space: nowrap;
     }
@@ -554,6 +631,27 @@
 
     .table input {
         min-width: 140px;
+    }
+
+    .expense-claim-create .ec-btn-primary {
+        border: 0;
+        background: var(--ec-teal);
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .expense-claim-create .ec-btn-secondary {
+        border: 1px solid #acc7d7;
+        background: #fff;
+        color: var(--ec-navy);
+        font-weight: 700;
+    }
+
+    .expense-claim-create .btn i { margin-right: 5px; }
+
+    @@media (max-width: 768px) {
+        .expense-claim-create { padding: 14px; }
+        .ec-header { align-items: flex-start; flex-direction: column; }
     }
 </style>
 
@@ -726,6 +824,7 @@
         if (!sanctionedInput) return;
 
         sanctionedInput.value = amountInput.value || '0.00';
+        document.querySelectorAll('#taxesBody .tax-rate').forEach(calculateTaxTotal);
     }
 
 
@@ -756,7 +855,7 @@
                            step="0.01"
                            name="Taxes[${i}].Rate"
                            value="${esc(rate)}"
-                           class="form-control form-control-sm"
+                           class="form-control form-control-sm tax-rate"
                            oninput="calculateTaxTotal(this)" />
                 </td>
                 <td>
@@ -765,14 +864,15 @@
                            name="Taxes[${i}].Amount"
                            value="${esc(amount)}"
                            class="form-control form-control-sm tax-amount"
-                           oninput="calculateTaxTotal(this)" />
+                           readonly />
                 </td>
                 <td>
                     <input type="number"
                            step="0.01"
                            name="Taxes[${i}].Total"
                            value="${esc(total)}"
-                           class="form-control form-control-sm tax-total" />
+                           class="form-control form-control-sm tax-total"
+                           readonly />
                 </td>
                 <td class="text-center">
                     <button type="button"
@@ -786,12 +886,12 @@
 
     function calculateTaxTotal(input) {
         const row = input.closest('tr');
-        const amount = parseFloat(row.querySelector('.tax-amount')?.value || 0);
-        const total = row.querySelector('.tax-total');
-
-        if (total) {
-            total.value = amount.toFixed(2);
-        }
+        const rate = parseFloat(row.querySelector('.tax-rate')?.value || 0);
+        const claimedAmount = Array.from(document.querySelectorAll('#expensesBody .expense-amount'))
+            .reduce((sum, field) => sum + (parseFloat(field.value) || 0), 0);
+        const amount = claimedAmount * rate / 100;
+        row.querySelector('.tax-amount').value = amount.toFixed(2);
+        row.querySelector('.tax-total').value = (claimedAmount + amount).toFixed(2);
     }
 
     function addAdvanceRow(advance = '', advancePaid = '', unclaimed = '', allocated = '') {
@@ -808,8 +908,7 @@
                                placeholder="Select employee advance"
                                autocomplete="off"
                                oninput="loadErpLinkDropdown(this, 'Employee Advance')"
-                               onfocus="loadErpLinkDropdown(this, 'Employee Advance')"
-                               required />
+                               onfocus="loadErpLinkDropdown(this, 'Employee Advance')" />
                         <div class="erp-link-dropdown d-none"></div>
                     </div>
                 </td>

@@ -3,14 +3,10 @@
     ViewBag.Title = "Energy Point Settings";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="energy-point-ui energy-point-page-header d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Energy Point Settings</h4>
 
     <div class="d-flex gap-2">
-        <form method="post" asp-action="SyncEnergyPointSettingsFromErpNext" asp-controller="HR">
-            <button type="submit" class="btn btn-outline-primary btn-sm">Sync From ERPNext</button>
-        </form>
-
         <a href="@Url.Action("CreateEnergyPointSettings", "HR")" class="btn btn-dark btn-sm">
             Open Settings
         </a>
@@ -27,7 +23,8 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
-<table class="table table-hover align-middle">
+<div class="energy-point-ui energy-point-shell">
+<table class="table table-hover align-middle energy-point-data-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -43,7 +40,7 @@
         {
             <tr style="cursor:pointer" onclick="window.location='@Url.Action("CreateEnergyPointSettings", "HR")'">
                 <td>@Model.Id</td>
-                <td>@(Model.Enabled ? "Yes" : "No")</td>
+                <td><span class="energy-point-status">@(Model.Enabled ? "Enabled" : "Disabled")</span></td>
                 <td>@Model.PointAllocationPeriodicity</td>
                 <td>@(Model.LastPointAllocationDate?.ToString("dd-MM-yyyy") ?? "-")</td>
                 <td>@(Model.ReviewLevels?.Count ?? 0)</td>
@@ -57,3 +54,6 @@
         }
     </tbody>
 </table>
+</div>
+
+<partial name="_EnergyPointUi" />

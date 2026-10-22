@@ -18,11 +18,11 @@
     </div>
 }
 
-<form asp-action="UpdateGoal" asp-controller="HR" asp-route-id="@Model.Id" method="post">
+<form asp-action="UpdateGoal" asp-controller="HR" asp-route-id="@Model.Id" method="post" class="performance-ui performance-form-shell">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="ErpNextId" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
         <h4 class="mb-0">@Model.GoalName</h4>
         <div class="d-flex gap-2">
             <a href="@Url.Action("Goal", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
@@ -104,6 +104,8 @@
 <form asp-action="DeleteGoal" asp-controller="HR" asp-route-id="@Model.Id" method="post" id="deleteGoalForm" class="d-none">
     @Html.AntiForgeryToken()
 </form>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 @section Scripts {
     <script>

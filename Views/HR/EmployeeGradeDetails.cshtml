@@ -37,7 +37,8 @@
       asp-controller="HR"
       asp-route-id="@Model.Id"
       method="post"
-      id="updateGradeForm">
+      id="updateGradeForm"
+      class="employee-grade-form">
 
     @Html.AntiForgeryToken()
 
@@ -142,6 +143,11 @@
     </div>
 
 </form>
+
+<style>
+    .employee-grade-form{max-width:1080px;margin:8px auto 40px;padding:26px;border:1px solid #c7daea;border-radius:8px;background:#edf5fb;box-shadow:0 16px 34px rgba(19,55,91,.10);color:#173555}.employee-grade-form> .d-flex:first-of-type{margin:-26px -26px 24px!important;padding:20px 26px;background:#14365d;border-radius:8px 8px 0 0}.employee-grade-form h4{color:#fff;font-weight:760}.employee-grade-form .btn{border-radius:6px;font-weight:700}.employee-grade-form .btn-dark{border-color:#16a085;background:#108c77}.employee-grade-form .btn-primary{border-color:#2769a2;background:#286ca7}.employee-grade-form .btn-outline-secondary{border-color:#91acc7;color:#e7f1fb}.employee-grade-form .btn-outline-secondary:hover{background:#fff;color:#163d64}.employee-grade-form .card{border:1px solid #c8ddec!important;border-radius:8px!important;background:#fff!important;box-shadow:0 8px 20px rgba(16,49,82,.07)!important}.employee-grade-form .form-label{color:#315879!important;font-weight:720!important}.employee-grade-form .form-control{min-height:42px;border-color:#b9cee2;border-radius:6px;color:#183b60}.employee-grade-form .form-control:focus{border-color:#159b84;box-shadow:0 0 0 3px rgba(21,155,132,.14)}.employee-grade-form .form-control[readonly]{background:#f2f7fb;color:#516d88}
+    @@media(max-width:640px){.employee-grade-form{padding:16px}.employee-grade-form> .d-flex:first-of-type{align-items:flex-start!important;flex-direction:column;margin:-16px -16px 18px!important;padding:18px}}
+</style>
 
 <form asp-controller="HR"
       asp-action="DeleteEmployeeGrade"

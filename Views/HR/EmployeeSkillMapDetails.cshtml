@@ -62,7 +62,8 @@
         }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="skill-detail-page">
+<div class="skill-detail-page__header d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Employee Skill Map</h4>
 
     <div class="d-flex gap-2">
@@ -101,7 +102,8 @@
 }
 
 <form method="post"
-      action="@Url.Action("UpdateEmployeeSkillMap", "HR", new { id = Model.Id })">
+      action="@Url.Action("UpdateEmployeeSkillMap", "HR", new { id = Model.Id })"
+      class="skill-detail-page__form">
 
     @Html.AntiForgeryToken()
 
@@ -385,6 +387,10 @@
         </div>
     }
 </form>
+</div>
+<style>
+ .skill-detail-page{background:linear-gradient(135deg,#eef7fb,#f7fbfa 65%,#edf3fb);border:1px solid #d5e5ee;border-radius:8px;padding:24px;color:#183247}.skill-detail-page__header{background:#15324b;color:#fff;border-radius:8px;padding:19px 21px;box-shadow:0 12px 26px rgba(21,50,75,.16)}.skill-detail-page__header .btn-outline-secondary{background:#fff;border-color:#acc7d7;color:#15324b}.skill-detail-page__header .btn-dark,.skill-detail-page__form .btn-dark{background:#0f877d;border-color:#0f877d}.skill-detail-page__form .card{border-color:#cfe0eb!important;box-shadow:none!important}.skill-detail-page__form .form-label{color:#315369;font-size:13px;font-weight:700}.skill-detail-page__form .form-control,.skill-detail-page__form .form-select{border-color:#bcd4e2;border-radius:6px;min-height:38px}.skill-detail-page__form .table thead th{background:#e7f4f9;color:#15324b}
+</style>
 
 @if (editMode)
 {

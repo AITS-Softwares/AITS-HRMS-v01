@@ -41,12 +41,13 @@
 <form asp-controller="HR"
       asp-action="CreateKRA"
       method="post"
-      id="createKraForm">
+      id="createKraForm"
+      class="performance-ui performance-form-shell">
 
     @Html.AntiForgeryToken()
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 performance-page-header">
 
         <div>
             <h4 class="mb-0">New KRA</h4>
@@ -133,6 +134,8 @@
     </div>
 
 </form>
+
+@await Html.PartialAsync("_PerformanceModuleUi")
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
