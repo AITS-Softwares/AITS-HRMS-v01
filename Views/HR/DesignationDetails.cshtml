@@ -8,12 +8,14 @@
     .designation-detail .des-label { color:#587483; font-size:.78rem; font-weight:700; letter-spacing:0; text-transform:uppercase; margin-bottom:5px; }
     .designation-detail .des-value { background:#f3fafb; border:1px solid #d2e7eb; border-radius:5px; min-height:42px; padding:10px 12px; }
     .designation-detail .des-description { min-height:120px; white-space:pre-wrap; }
+    .designation-detail .des-skills { background:#f5fbf8; border:1px solid #c8e4dc; border-radius:6px; overflow:hidden; }
+    .designation-detail .des-skills th { background:#e2f3ed; color:#12554f; font-size:.78rem; text-transform:uppercase; }
 </style>
 
 <section class="designation-detail">
     <header class="des-hero d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div><div class="small text-uppercase opacity-75">HRMS / Organization</div><h3 class="mb-1">@Model.DesignationName</h3><p class="mb-0 opacity-75">Designation details</p></div>
-        <a asp-action="Designation" class="btn btn-outline-light">Back to Designations</a>
+        <div class="d-flex gap-2"><a asp-action="Designation" class="btn btn-outline-light">Back to Designations</a><a asp-action="CreateDesignation" asp-route-id="@Model.Id" class="btn btn-light fw-semibold">Edit</a></div>
     </header>
 
     <div class="des-section">
@@ -22,5 +24,17 @@
             <div class="col-md-6"><div class="des-label">Appraisal Template</div><div class="des-value">@(string.IsNullOrWhiteSpace(Model.AppraisalTemplate) ? "Not assigned" : Model.AppraisalTemplate)</div></div>
             <div class="col-12"><div class="des-label">Description</div><div class="des-value des-description">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description" : Model.Description)</div></div>
         </div>
+    </div>
+
+    <div class="des-section mt-3">
+        <div class="des-label mb-2">Required Skills</div>
+        @if (Model.Skills != null && Model.Skills.Any())
+        {
+            <div class="table-responsive des-skills"><table class="table align-middle mb-0"><thead><tr><th class="ps-3" style="width:80px">No.</th><th>Skill</th></tr></thead><tbody>@for (var i = 0; i < Model.Skills.Count; i++) { <tr><td class="ps-3">@(i + 1)</td><td>@Model.Skills[i].Skill</td></tr> }</tbody></table></div>
+        }
+        else
+        {
+            <div class="des-value">No required skills added.</div>
+        }
     </div>
 </section>

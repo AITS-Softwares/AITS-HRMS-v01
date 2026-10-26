@@ -564,7 +564,10 @@ namespace Erp_Aits.Services
                     }
                     catch
                     {
-                        tx.Rollback();
+                        // A command can fail after SQL Server has already completed the transaction.
+                        // Do not mask that useful failure with a second "transaction completed" exception.
+                        if (tx.Connection != null)
+                            tx.Rollback();
                         throw;
                     }
                 }

@@ -30,8 +30,12 @@
 
 <style>
     .payment-detail-page {
-        padding: 20px;
+        padding: 24px;
+        max-width: 1280px;
+        margin: 0 auto;
     }
+
+    .payment-detail-page > .d-flex:first-of-type { background: linear-gradient(110deg, #0c4a6e, #0f766e); color: #fff; border-radius: 8px; padding: 1.25rem 1.5rem; }
 
     .payment-section {
         border-top: 1px solid #d7dce2;
@@ -134,6 +138,10 @@
         <a href="@Url.Action("PaymentEntry", "HR")" class="btn btn-outline-secondary">
             Back
         </a>
+        @if (ViewBag.PaymentEntryRefreshError == null && Model.DocStatus == 0)
+        {
+            <a href="@Url.Action("CreatePaymentEntry", "HR", new { id = Model.Id })" class="btn btn-light">Edit</a>
+        }
         @if (ViewBag.PaymentEntryRefreshError == null && !string.IsNullOrWhiteSpace(Model.ErpNextId) && Model.DocStatus != 2)
         {
             <form action="@Url.Action("ChangePaymentEntryStatus", "HR")" method="post" onsubmit="return confirm('Confirm this payment entry status change?');">
@@ -474,6 +482,10 @@
                 <label class="form-label">Cost Center</label>
                 <input class="form-control" value="@Model.CostCenter" readonly />
             </div>
+            <div class="col-md-6"><label class="form-label">Dunning</label><input class="form-control" value="@Model.Dunning" readonly /></div>
+            <div class="col-md-6"><label class="form-label">AI Audit Log</label><input class="form-control" value="@Model.AiAuditLog" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Allowed To Transact With</label><input class="form-control" value="@Model.AllowedToTransactWith" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Appraisal Template</label><input class="form-control" value="@Model.AppraisalTemplate" readonly /></div>
         </div>
     </div>
 
@@ -490,6 +502,20 @@
                 <label class="form-label">DocStatus</label>
                 <input class="form-control" value="@Model.DocStatus" readonly />
             </div>
+        </div>
+    </div>
+
+    <div class="payment-section">
+        <h6 class="payment-section-title">Payment Controls and Bank Details</h6>
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Payment Order Status</label><input class="form-control" value="@Model.PaymentOrderStatus" readonly /></div>
+            <div class="col-md-4"><label class="form-label">Clearance Date</label><input class="form-control" value="@NullableDate(Model.ClearanceDate)" readonly /></div>
+            <div class="col-md-4"><label class="form-label">Is Opening</label><input class="form-control" value="@Model.IsOpening" readonly /></div>
+            <div class="col-md-4"><label class="form-label">Bank</label><input class="form-control" value="@Model.Bank" readonly /></div>
+            <div class="col-md-4"><label class="form-label">Bank Account No</label><input class="form-control" value="@Model.BankAccountNo" readonly /></div>
+            <div class="col-md-4"><label class="form-label">Payment Order</label><input class="form-control" value="@Model.PaymentOrder" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Tax Withholding Category</label><input class="form-control" value="@Model.TaxWithholdingCategory" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Title</label><input class="form-control" value="@Model.Title" readonly /></div>
         </div>
     </div>
 </div>

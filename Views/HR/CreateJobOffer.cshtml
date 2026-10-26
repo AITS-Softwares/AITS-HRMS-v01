@@ -1,6 +1,9 @@
 ﻿@* @model Erp_Aits.Models.JobOffer
 @{
     ViewBag.Title = "New Job Offer";
+    var isEdit = ViewBag.IsEdit == true;
+    var isDraft = Model.DocStatus == 0;
+    var isLocked = isEdit && !isDraft;
 }
 
 <form asp-action="CreateJobOffer" method="post">
@@ -76,7 +79,16 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Letter Head</label>
-                <input asp-for="LetterHead" class="form-control" />
+                <select asp-for="LetterHead" class="form-select">
+                    <option value="">-- Select Letter Head --</option>
+                    @if (ViewBag.JobOfferLetterHeads != null)
+                    {
+                        foreach (var letterHead in ViewBag.JobOfferLetterHeads)
+                        {
+                            <option value="@letterHead.name">@letterHead.name</option>
+                        }
+                    }
+                </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Print Heading</label>
@@ -132,22 +144,50 @@
 
 
 @model Erp_Aits.Models.JobOffer
+@using Newtonsoft.Json.Linq
 
 @{
     ViewBag.Title = "New Job Offer";
+    var isEdit = ViewBag.IsEdit == true;
+    var isDraft = Model.DocStatus == 0;
+    var isLocked = isEdit && !isDraft;
+    var savedOfferTerms = new JArray();
+    if (!string.IsNullOrWhiteSpace(Model.OfferTermsJson))
+    {
+        try { savedOfferTerms = JArray.Parse(Model.OfferTermsJson); } catch { }
+    }
 }
 
-<form asp-action="CreateJobOffer" asp-controller="HR" method="post">
+<form id="jobOfferForm" asp-action="@(isEdit ? "UpdateJobOffer" : "CreateJobOffer")" asp-controller="HR" method="post">
     @Html.AntiForgeryToken()
 
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ErpNextId" />
     <input type="hidden" name="returnToOnboarding" value="@ViewBag.ReturnToOnboarding" />
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Job Offer</h4>
+        <h4 class="mb-0">@(isEdit ? "Job Offer Details" : "New Job Offer")</h4>
 
-        <button type="submit" class="btn btn-dark btn-sm px-4">
-            Save
-        </button>
+        <div class="d-flex gap-2">
+            @if (isEdit)
+            {
+                <a href="@Url.Action("JobOffer", "HR")" class="btn btn-outline-secondary btn-sm px-4">Back to List</a>
+                @if (isDraft)
+                {
+                    <button type="submit" formaction="@Url.Action("ChangeJobOfferStatus", "HR", new { status = 1 })" class="btn btn-success btn-sm px-4">Submit</button>
+                }
+                else if (Model.DocStatus == 1)
+                {
+                    <button type="submit" formaction="@Url.Action("ChangeJobOfferStatus", "HR", new { status = 2 })" class="btn btn-danger btn-sm px-4">Cancel</button>
+                }
+            }
+            else
+            {
+                <button type="submit" class="btn btn-dark btn-sm px-4">Save</button>
+            }
+        </div>
     </div>
 
     <div class="card p-4 mb-3">
@@ -253,9 +293,16 @@
 
     <div class="card p-4 mb-3">
         <label class="form-label">Job Offer Term Template</label>
-        <input asp-for="JobOfferTermTemplate"
-               class="form-control mb-3"
-               placeholder="Enter Job Offer Term Template" />
+        <select asp-for="JobOfferTermTemplate" class="form-select mb-3">
+            <option value="">-- Select Job Offer Term Template --</option>
+            @if (ViewBag.JobOfferTermTemplates != null)
+            {
+                foreach (var template in ViewBag.JobOfferTermTemplates)
+                {
+                    <option value="@template.name">@template.name</option>
+                }
+            }
+        </select>
 
         <label class="form-label">Job Offer Terms</label>
 
@@ -269,7 +316,17 @@
                 </tr>
             </thead>
 
-            <tbody></tbody>
+            <tbody>
+                @foreach (var term in savedOfferTerms)
+                {
+                    <tr>
+                        <td></td>
+                        <td><input class="form-control form-control-sm" name="OfferTerms" value="@(term["offer_term"]?.ToString())" required /></td>
+                        <td><input class="form-control form-control-sm" name="OfferTermValues" value="@(term["value"]?.ToString())" required /></td>
+                        <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTermRow(this)">×</button></td>
+                    </tr>
+                }
+            </tbody>
         </table>
 
         <button type="button"
@@ -310,7 +367,16 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Letter Head</label>
-                <input asp-for="LetterHead" class="form-control" />
+                <select asp-for="LetterHead" class="form-select">
+                    <option value="">-- Select Letter Head --</option>
+                    @if (ViewBag.JobOfferLetterHeads != null)
+                    {
+                        foreach (var letterHead in ViewBag.JobOfferLetterHeads)
+                        {
+                            <option value="@letterHead.name">@letterHead.name</option>
+                        }
+                    }
+                </select>
             </div>
 
             <div class="col-md-6">
@@ -391,6 +457,14 @@
 
         rows.forEach(function (row, index) {
             row.cells[0].innerText = index + 1;
+        });
+    }
+
+    renumberTermRows();
+
+    if (@(isLocked ? "true" : "false")) {
+        document.querySelectorAll('#jobOfferForm input:not([type="hidden"]), #jobOfferForm select, #jobOfferForm textarea, #jobOfferForm .btn-outline-secondary, #jobOfferForm .btn-outline-danger').forEach(function (element) {
+            element.disabled = true;
         });
     }
 </script>

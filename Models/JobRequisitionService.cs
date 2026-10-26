@@ -20,6 +20,7 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureErpNextIdColumn(conn);
                 string query = "SELECT * FROM JobRequisitions WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(idFilter))
@@ -50,6 +51,7 @@ namespace Erp_Aits.Services
         {
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureErpNextIdColumn(conn);
                 string query = "SELECT * FROM JobRequisitions WHERE Id = @Id AND IsDeleted = 0";
                 using (var cmd = new SqlCommand(query, conn))
                 {
@@ -127,17 +129,19 @@ namespace Erp_Aits.Services
         {
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureErpNextIdColumn(conn);
                 string query = @"
                     INSERT INTO JobRequisitions
-                        (Code, NoOfPositions, Company, Designation, ExpectedCompensation, Status,
+                        (ErpNextId, Code, NoOfPositions, Company, Designation, ExpectedCompensation, Status,
                          Department, RequestedBy, PostingDate, ExpectedBy, JobDescription, ReasonForRequesting)
                     OUTPUT INSERTED.Id
                     VALUES
-                        (@Code, @NoOfPositions, @Company, @Designation, @ExpectedCompensation, @Status,
+                        (@ErpNextId, @Code, @NoOfPositions, @Company, @Designation, @ExpectedCompensation, @Status,
                          @Department, @RequestedBy, @PostingDate, @ExpectedBy, @JobDescription, @ReasonForRequesting)";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
+                    cmd.Parameters.AddWithValue("@ErpNextId", r.ErpNextId ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Code", r.Code ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@NoOfPositions", (object)r.NoOfPositions ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@Company", r.Company ?? (object)DBNull.Value);
@@ -158,11 +162,22 @@ namespace Erp_Aits.Services
             }
         }
 
+        public void Update(JobRequisition r)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            EnsureErpNextIdColumn(conn);
+            using var cmd = new SqlCommand(@"UPDATE JobRequisitions SET NoOfPositions=@Positions, Company=@Company, Designation=@Designation, ExpectedCompensation=@Compensation, Status=@Status, Department=@Department, RequestedBy=@RequestedBy, PostingDate=@PostingDate, ExpectedBy=@ExpectedBy, JobDescription=@Description, ReasonForRequesting=@Reason, DocStatus=@DocStatus WHERE Id=@Id", conn);
+            cmd.Parameters.AddWithValue("@Id", r.Id); cmd.Parameters.AddWithValue("@Positions", (object)r.NoOfPositions ?? DBNull.Value); cmd.Parameters.AddWithValue("@Company", r.Company ?? ""); cmd.Parameters.AddWithValue("@Designation", r.Designation ?? ""); cmd.Parameters.AddWithValue("@Compensation", (object)r.ExpectedCompensation ?? DBNull.Value); cmd.Parameters.AddWithValue("@Status", r.Status ?? "Pending"); cmd.Parameters.AddWithValue("@Department", r.Department ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@RequestedBy", r.RequestedBy ?? ""); cmd.Parameters.AddWithValue("@PostingDate", r.PostingDate); cmd.Parameters.AddWithValue("@ExpectedBy", (object)r.ExpectedBy ?? DBNull.Value); cmd.Parameters.AddWithValue("@Description", r.JobDescription ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@Reason", r.ReasonForRequesting ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@DocStatus", r.DocStatus);
+            conn.Open(); cmd.ExecuteNonQuery();
+        }
+
         private JobRequisition MapRow(System.Data.Common.DbDataReader reader)
         {
             return new JobRequisition
             {
                 Id = Convert.ToInt32(reader["Id"]),
+                ErpNextId = reader["ErpNextId"] == DBNull.Value ? null : reader["ErpNextId"]?.ToString(),
+                DocStatus = reader["DocStatus"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocStatus"]),
                 Code = reader["Code"]?.ToString() ?? string.Empty,
                 NoOfPositions = reader["NoOfPositions"] != DBNull.Value ? Convert.ToInt32(reader["NoOfPositions"]) : (int?)null,
                 Company = reader["Company"]?.ToString() ?? string.Empty,
@@ -176,6 +191,15 @@ namespace Erp_Aits.Services
                 JobDescription = reader["JobDescription"]?.ToString() ?? string.Empty,
                 ReasonForRequesting = reader["ReasonForRequesting"]?.ToString() ?? string.Empty
             };
+        }
+
+        private static void EnsureErpNextIdColumn(SqlConnection conn)
+        {
+            var closeWhenDone = conn.State != System.Data.ConnectionState.Open;
+            if (closeWhenDone) conn.Open();
+            using var cmd = new SqlCommand("IF COL_LENGTH('dbo.JobRequisitions','ErpNextId') IS NULL ALTER TABLE dbo.JobRequisitions ADD ErpNextId NVARCHAR(255) NULL; IF COL_LENGTH('dbo.JobRequisitions','DocStatus') IS NULL ALTER TABLE dbo.JobRequisitions ADD DocStatus INT NOT NULL CONSTRAINT DF_JobRequisitions_DocStatus DEFAULT(0);", conn);
+            cmd.ExecuteNonQuery();
+            if (closeWhenDone) conn.Close();
         }
     }
 }

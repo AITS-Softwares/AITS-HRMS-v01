@@ -1,13 +1,27 @@
 ﻿@model Erp_Aits.Models.StaffingPlan
 @{
-    ViewBag.Title = "New Staffing Plan";
+    var isEdit = ViewBag.IsEdit == true;
+    var isDraft = Model.DocStatus == 0;
+    var isLocked = isEdit && !isDraft;
+    ViewBag.Title = isEdit ? "Staffing Plan Details" : "New Staffing Plan";
 }
 
-<form asp-action="CreateStaffingPlan" method="post" id="staffingForm">
+<select id="staffingDesignationOptions" class="d-none"><option value="">Select designation...</option>@foreach (var item in ViewBag.Designations) { <option value="@item.name">@item.name</option> }</select>
+
+<form asp-action="@(isEdit ? "UpdateStaffingPlan" : "CreateStaffingPlan")" method="post" id="staffingForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Id" /><input type="hidden" asp-for="ErpNextId" /><input type="hidden" asp-for="DocStatus" />
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Staffing Plan</h4>
-        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        <h4 class="mb-0">@(isEdit ? "Staffing Plan Details" : "New Staffing Plan")</h4>
+        <div class="d-flex gap-2">
+            @if (!isEdit) { <button type="submit" class="btn btn-dark btn-sm">Save</button> }
+            else { <a href="@Url.Action("StaffingPlan", "HR")" class="btn btn-outline-secondary btn-sm">Back to List</a>
+                @if (isDraft) { <button type="submit" formaction="@Url.Action("ChangeStaffingPlanStatus", "HR", new { id = Model.Id, status = 1 })" class="btn btn-success btn-sm">Submit</button> }
+                else if (Model.DocStatus == 1) { <button type="submit" formaction="@Url.Action("ChangeStaffingPlanStatus", "HR", new { id = Model.Id, status = 2 })" class="btn btn-danger btn-sm">Cancel</button> }
+            }
+        </div>
     </div>
+    <fieldset @(isLocked ? "disabled" : null)>
 
     <div class="card p-4 mb-3">
         <div class="row g-3">
@@ -22,7 +36,7 @@
 
             <div class="col-md-6">
                 <label class="form-label">Company *</label>
-                <input asp-for="Company" class="form-control" required value="@Model.Company" />
+                <select asp-for="Company" id="staffingCompany" class="form-select" required><option value="">Select company...</option>@foreach (var item in ViewBag.Companies) { <option value="@item.name">@item.name</option> }</select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">To Date *</label>
@@ -31,7 +45,7 @@
 
             <div class="col-md-6">
                 <label class="form-label">Department</label>
-                <input asp-for="Department" class="form-control" />
+                <select asp-for="Department" id="staffingDepartment" class="form-select"><option value="">Select department...</option>@foreach (var item in ViewBag.Departments) { <option value="@item.name">@item.name</option> }</select>
             </div>
         </div>
     </div>
@@ -65,7 +79,7 @@
         <label class="form-label">Total Estimated Budget</label>
         <input type="text" id="totalBudgetDisplay" class="form-control" value="₹ 0.00" disabled />
     </div>
-</form>
+</fieldset></form>
 
 <!-- Select Job Requisition Modal -->
 <div class="modal fade" id="jobReqModal" tabindex="-1">
@@ -116,23 +130,28 @@
 
 <script>
     var rowIndex = 0;
+    var existingDetails = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Details));
 
     function addStaffingRow(designation) {
         var tbody = document.getElementById('staffingTable').querySelector('tbody');
         var i = rowIndex++;
 
         var row = document.createElement('tr');
+        var designationOptions = document.getElementById('staffingDesignationOptions').innerHTML;
         row.innerHTML = `
             <td><input type="checkbox" /></td>
             <td>${tbody.rows.length + 1}</td>
-            <td><input name="Details[${i}].Designation" class="form-control form-control-sm border-0" value="${designation || ''}" /></td>
+            <td><select name="Details[${i}].Designation" class="form-select form-select-sm border-0" onchange="refreshStaffingRow(this)">${designationOptions}</select></td>
             <td><input name="Details[${i}].Vacancies" type="number" class="form-control form-control-sm border-0 vacancies" value="0" oninput="recalcRow(this)" /></td>
             <td><input name="Details[${i}].EstimatedCostPerPosition" type="number" step="0.01" class="form-control form-control-sm border-0 costper" value="0" oninput="recalcRow(this)" /></td>
             <td><input name="Details[${i}].TotalEstimatedCost" type="number" step="0.01" class="form-control form-control-sm border-0 total" value="0" readonly /></td>
-            <td><input name="Details[${i}].NumberOfPositions" type="number" class="form-control form-control-sm border-0" value="0" /></td>
+            <td><input name="Details[${i}].NumberOfPositions" type="number" class="form-control form-control-sm border-0 positions" value="0" readonly /></td>
             <td><i class="fas fa-pen text-muted" style="cursor:pointer"></i></td>
         `;
         tbody.appendChild(row);
+        var designationSelect = row.querySelector('select');
+        designationSelect.value = designation || '';
+        refreshStaffingRow(designationSelect);
     }
 
     function recalcRow(el) {
@@ -150,6 +169,37 @@
         totals.forEach(t => sum += parseFloat(t.value) || 0);
         document.getElementById('totalBudgetDisplay').value = '₹ ' + sum.toFixed(2);
     }
+
+    async function refreshStaffingRow(select) {
+        var row = select.closest('tr');
+        var designation = select.value;
+        if (!designation) {
+            row.querySelector('.positions').value = '0';
+            return;
+        }
+
+        var company = document.getElementById('staffingCompany').value;
+        var department = document.getElementById('staffingDepartment').value;
+        var url = '@Url.Action("GetStaffingPlanPositionCount", "HR")'
+            + '?designation=' + encodeURIComponent(designation)
+            + '&company=' + encodeURIComponent(company)
+            + '&department=' + encodeURIComponent(department);
+
+        try {
+            var response = await fetch(url);
+            var data = await response.json();
+            row.querySelector('.positions').value = data.count || 0;
+        } catch {
+            row.querySelector('.positions').value = '0';
+        }
+    }
+
+    function refreshAllStaffingRows() {
+        document.querySelectorAll('#staffingTable select[name$=".Designation"]').forEach(refreshStaffingRow);
+    }
+
+    document.getElementById('staffingCompany').addEventListener('change', refreshAllStaffingRows);
+    document.getElementById('staffingDepartment').addEventListener('change', refreshAllStaffingRows);
 
     function searchJobRequisitions() {
         var name = document.getElementById('filterName').value;
@@ -193,4 +243,13 @@
         var modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide();
     }
+
+    existingDetails.forEach(detail => {
+        addStaffingRow(detail.Designation);
+        var row = document.querySelector('#staffingTable tbody').lastElementChild;
+        row.querySelector('.vacancies').value = detail.Vacancies;
+        row.querySelector('.costper').value = detail.EstimatedCostPerPosition;
+        row.querySelector('.positions').value = detail.NumberOfPositions;
+        recalcRow(row.querySelector('.vacancies'));
+    });
 </script>

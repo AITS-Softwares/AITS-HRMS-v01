@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "uN0oYOR4lDrRScGA0fQihhGDpaO6DxHwFp88pn6bOGw=",
+  "Hash": "bqme+x3VkCbRljNg1gMK1Jmeby6J+5RlD/4yk4F0czg=",
   "Source": "Erp_Aits",
   "BasePath": "_content/Erp_Aits",
   "Mode": "Default",
@@ -1307,6 +1307,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploads\\employee-referral\\3c10e0ae-8fd6-436f-9337-34c67bc63b79.sql"
+    },
+    {
+      "Identity": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\employee-referral\\e4655f43-b905-4bf4-b623-26fe75963564.pdf",
+      "SourceId": "Erp_Aits",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\",
+      "BasePath": "_content/Erp_Aits",
+      "RelativePath": "uploads/employee-referral/e4655f43-b905-4bf4-b623-26fe75963564.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\employee-referral\\e4655f43-b905-4bf4-b623-26fe75963564.pdf"
     },
     {
       "Identity": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\events\\cbd5f906-797b-455c-bb63-c65227bc35f9_aits_save.png",

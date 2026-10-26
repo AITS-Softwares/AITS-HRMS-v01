@@ -58,7 +58,7 @@
                 <td>@r.Id</td>
                 <td>@r.FirstName @r.LastName</td>
                 <td>@r.ReferralDate.ToString("dd-MM-yyyy")</td>
-                <td>@r.Status</td>
+                <td><span class="badge @(r.Status == "Rejected" ? "bg-danger" : "bg-secondary")">@r.Status</span></td>
                 <td>@r.ForDesignation</td>
                 <td>@r.Referrer</td>
             </tr>

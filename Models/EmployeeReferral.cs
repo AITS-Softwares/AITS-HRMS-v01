@@ -5,6 +5,8 @@ namespace Erp_Aits.Models
     public class EmployeeReferral
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
+        public int DocStatus { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime ReferralDate { get; set; } = DateTime.Now;

@@ -2,8 +2,19 @@
 @model Erp_Aits.Models.PaymentEntry
 
 @{
-    ViewBag.Title = "New Payment Entry";
+    bool isEdit = Model.Id > 0;
+    ViewBag.Title = isEdit ? "Edit Payment Entry" : "New Payment Entry";
 }
+
+<style>
+    #paymentEntryForm { max-width: 1280px; margin: 0 auto; }
+    #paymentEntryForm .card { border: 1px solid #c9dbe5 !important; border-radius: 8px !important; box-shadow: 0 10px 24px rgba(16, 79, 112, .07); }
+    #paymentEntryForm .card h6 { color: #075985; font-weight: 700; border-bottom: 1px solid #dbeafe; padding-bottom: .75rem; }
+    #paymentEntryForm .form-label { color: #334155; font-size: .84rem; font-weight: 650; }
+    #paymentEntryForm .form-control, #paymentEntryForm .form-select { border-color: #b9d2df; min-height: 40px; }
+    #paymentEntryForm .form-control:focus, #paymentEntryForm .form-select:focus { border-color: #0f766e; box-shadow: 0 0 0 .18rem rgba(13, 148, 136, .13); }
+    .payment-form-header { background: linear-gradient(110deg, #0c4a6e, #0f766e); color: #fff; border-radius: 8px; padding: 1.25rem 1.5rem; }
+</style>
 
 
 @if (TempData["ErpNextError"] != null)
@@ -40,10 +51,17 @@
 </datalist>
 
 
-<datalist id="dynamicPartyList"></datalist>
 <datalist id="paymentContactList"></datalist>
 <datalist id="paymentLetterHeads">@foreach (var item in ViewBag.LetterHeads ?? new object[0]) { <option value="@item.name"></option> }</datalist>
 <datalist id="paymentPrintHeadings">@foreach (var item in ViewBag.PrintHeadings ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="bankList">@foreach (var item in ViewBag.Banks ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="taxWithholdingCategoryList">@foreach (var item in ViewBag.TaxWithholdingCategories ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="paymentOrderList">@foreach (var item in ViewBag.PaymentOrders ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="autoRepeatList">@foreach (var item in ViewBag.AutoRepeats ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="dunningList">@foreach (var item in ViewBag.Dunnings ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="aiAuditLogList">@foreach (var item in ViewBag.AiAuditLogs ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="allowedToTransactWithList">@foreach (var item in ViewBag.AllowedToTransactWithOptions ?? new object[0]) { <option value="@item.name"></option> }</datalist>
+<datalist id="appraisalTemplateList">@foreach (var item in ViewBag.AppraisalTemplates ?? new object[0]) { <option value="@item.name"></option> }</datalist>
 
 <datalist id="dynamicAccountList"></datalist>
 
@@ -108,20 +126,23 @@
       method="post"
       id="paymentEntryForm">
 
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
+
 
     <!-- ========================================================= -->
     <!-- HEADER -->
     <!-- ========================================================= -->
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 payment-form-header">
 
         <div>
             <h4 class="mb-0 d-inline">
-                New Payment Entry
+                @(isEdit ? "Edit Payment Entry" : "New Payment Entry")
             </h4>
 
             <span class="badge bg-warning-subtle text-warning ms-2">
-                Not Saved
+                @(isEdit ? "Draft - editable" : "Not Saved")
             </span>
         </div>
 
@@ -129,7 +150,7 @@
         <button type="submit"
                 class="btn btn-dark btn-sm px-4">
 
-            Save
+            @(isEdit ? "Save Changes" : "Save")
 
         </button>
 
@@ -336,11 +357,12 @@
                     <span class="text-danger">*</span>
                 </label>
 
-                <input asp-for="Party"
-                       id="Party"
-                       list="dynamicPartyList"
-                       class="form-control"
-                       placeholder="Select Party..." />
+                <select asp-for="Party"
+                        id="Party"
+                        class="form-select"
+                        required>
+                    <option value="">-- Select Party --</option>
+                </select>
 
             </div>
 
@@ -644,6 +666,13 @@
 
             </div>
 
+            <div class="col-md-6"><label class="form-label">Paid Amount After Tax</label><input asp-for="PaidAmountAfterTax" id="PaidAmountAfterTax" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Received Amount After Tax</label><input asp-for="ReceivedAmountAfterTax" id="ReceivedAmountAfterTax" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Paid Amount (Company Currency)</label><input asp-for="BasePaidAmount" id="BasePaidAmount" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Received Amount (Company Currency)</label><input asp-for="BaseReceivedAmount" id="BaseReceivedAmount" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Paid Amount After Tax (Company Currency)</label><input asp-for="BasePaidAmountAfterTax" id="BasePaidAmountAfterTax" class="form-control" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Received Amount After Tax (Company Currency)</label><input asp-for="BaseReceivedAmountAfterTax" id="BaseReceivedAmountAfterTax" class="form-control" readonly /></div>
+
         </div>
 
     </div>
@@ -905,12 +934,13 @@
             <div class="col-md-6">
 
                 <label class="form-label">
-                    Cheque/Reference No
+                    Cheque/Reference No <span class="text-danger">*</span>
                 </label>
 
                 <input asp-for="ReferenceNo"
                        id="ReferenceNo"
-                       class="form-control" />
+                       class="form-control"
+                       required />
 
             </div>
 
@@ -918,13 +948,14 @@
             <div class="col-md-6">
 
                 <label class="form-label">
-                    Cheque/Reference Date
+                    Cheque/Reference Date <span class="text-danger">*</span>
                 </label>
 
                 <input asp-for="ReferenceDate"
                        id="ReferenceDate"
                        type="date"
-                       class="form-control" />
+                       class="form-control"
+                       required />
 
             </div>
 
@@ -971,6 +1002,11 @@
 
             </div>
 
+            <div class="col-md-6"><label class="form-label">Dunning</label><input asp-for="Dunning" list="dunningList" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">AI Audit Log</label><input asp-for="AiAuditLog" list="aiAuditLogList" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">Allowed To Transact With</label><input asp-for="AllowedToTransactWith" list="allowedToTransactWithList" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">Appraisal Template</label><input asp-for="AppraisalTemplate" list="appraisalTemplateList" class="form-control" /></div>
+
         </div>
 
     </div>
@@ -978,10 +1014,35 @@
     <div class="card border rounded-3 p-4 mb-3">
         <h6>More Information</h6>
         <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Status</label><input class="form-control" value="Draft" readonly /></div>
+            <div class="col-md-6"><label class="form-label">Status</label><input class="form-control" value="@(isEdit ? Model.Status : "Draft")" readonly /></div>
             <div class="col-md-6"><label class="form-label">Letter Head</label><input asp-for="LetterHead" list="paymentLetterHeads" class="form-control" /></div>
             <div class="col-md-6"><label><input asp-for="CustomRemarks" /> Custom Remarks</label><textarea asp-for="Remarks" class="form-control"></textarea></div>
             <div class="col-md-6"><label class="form-label">Print Heading</label><input asp-for="PrintHeading" list="paymentPrintHeadings" class="form-control" /></div>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3">
+        <h6>Payment Controls and Bank Details</h6>
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Payment Order Status</label><select asp-for="PaymentOrderStatus" class="form-select"><option value="">Select status</option><option>Initiated</option><option>Payment Ordered</option><option>Paid</option><option>Cancelled</option></select></div>
+            <div class="col-md-4"><label class="form-label">Clearance Date</label><input asp-for="ClearanceDate" type="date" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">Is Opening</label><select asp-for="IsOpening" class="form-select"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+            <div class="col-md-4"><label class="form-label">Bank</label><input asp-for="Bank" list="bankList" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">Bank Account No</label><input asp-for="BankAccountNo" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">Payment Order</label><input asp-for="PaymentOrder" list="paymentOrderList" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">Auto Repeat</label><input asp-for="AutoRepeat" list="autoRepeatList" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">Title</label><input asp-for="Title" class="form-control" /></div>
+        </div>
+    </div>
+
+    <div class="card border rounded-3 p-4 mb-3">
+        <h6>Tax Withholding and Advance Settings</h6>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4"><div class="form-check"><input asp-for="BookAdvancePaymentsInSeparatePartyAccount" class="form-check-input" /><label asp-for="BookAdvancePaymentsInSeparatePartyAccount" class="form-check-label">Book Advance Payments in Separate Party Account</label></div></div>
+            <div class="col-md-4"><div class="form-check"><input asp-for="ReconcileOnAdvancePaymentDate" class="form-check-input" /><label asp-for="ReconcileOnAdvancePaymentDate" class="form-check-label">Reconcile on Advance Payment Date</label></div></div>
+            <div class="col-md-4"><div class="form-check"><input asp-for="ApplyTaxWithholdingAmount" class="form-check-input" /><label asp-for="ApplyTaxWithholdingAmount" class="form-check-label">Apply Tax Withholding Amount</label></div></div>
+            <div class="col-md-6"><label class="form-label">Tax Withholding Category</label><input asp-for="TaxWithholdingCategory" list="taxWithholdingCategoryList" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">Amended From</label><input asp-for="AmendedFrom" class="form-control" readonly /></div>
         </div>
     </div>
 </form>
@@ -1193,15 +1254,8 @@
 
         async function loadParties()
         {
-            const list =
-                document.getElementById(
-                    "dynamicPartyList"
-                );
-
-
-            list.innerHTML = "";
-
-            party.value = "";
+            const selectedParty = party.value;
+            party.innerHTML = '<option value="">-- Select Party --</option>';
 
             document.getElementById(
                 "PartyName"
@@ -1234,29 +1288,18 @@
                 data.forEach(
                     function(item)
                     {
-                        const option =
-                            document.createElement(
-                                "option"
-                            );
-
-
-                        option.value =
-                            item.name;
-
-
-                        option.label =
-                            item.title
-                                ? item.name
-                                    + " - "
-                                    + item.title
-                                : item.name;
-
-
-                        list.appendChild(
-                            option
-                        );
+                        const option = document.createElement("option");
+                        option.value = item.name;
+                        option.textContent = item.title
+                            ? item.name + " - " + item.title
+                            : item.name;
+                        option.dataset.partyType = partyType.value;
+                        party.appendChild(option);
                     }
                 );
+
+                if (selectedParty && [...party.options].some(option => option.value === selectedParty))
+                    party.value = selectedParty;
             }
             catch(error)
             {
@@ -1319,6 +1362,16 @@
 
                 document.getElementById("PartyBankAccount").value =
                     data.partyBankAccount || "";
+
+                const contactSelect = document.getElementById("ContactPerson");
+                const emailField = document.getElementById("ContactEmail");
+                if (data.contactPerson)
+                {
+                    if (![...contactSelect.options].some(option => option.value === data.contactPerson))
+                        contactSelect.add(new Option(data.contactPerson, data.contactPerson));
+                    contactSelect.value = data.contactPerson;
+                }
+                emailField.value = data.contactEmail || "";
 
                 if (data.paidFrom)
                     paidFrom.value = data.paidFrom;
@@ -1547,6 +1600,12 @@
                 document.getElementById("ContactPerson").value = "";
                 document.getElementById("ContactEmail").value = "";
             }
+            else
+            {
+                const requiredPartyType = paymentType.value === "Receive" ? "Customer" : "Supplier";
+                partyType.value = requiredPartyType;
+                await loadParties();
+            }
 
             await loadModeOfPaymentAccount();
 
@@ -1621,9 +1680,9 @@
                         </option>
 
                     </select>
-                    <select name="Taxes[${index}].AddDeductTax" class="form-select form-select-sm"><option value="Add">Add</option><option value="Deduct">Deduct</option></select>
-                    <input name="Taxes[${index}].RowId" type="number" min="1" class="form-control form-control-sm" placeholder="Previous row" />
-                    <label><input name="Taxes[${index}].IncludedInPaidAmount" type="checkbox" value="true" /> Included in paid amount</label>
+                    <input name="Taxes[${index}].AddDeductTax" type="hidden" value="Add" />
+                    <input name="Taxes[${index}].RowId" type="hidden" />
+                    <input name="Taxes[${index}].IncludedInPaidAmount" type="hidden" value="false" />
                 </td>
 
                 <td>
@@ -1672,33 +1731,10 @@
         }
 
         async function loadPaymentContacts() {
-            const list = document.getElementById("ContactPerson");
-            list.replaceChildren(new Option("Select contact", ""));
-            document.getElementById("ContactPerson").value = "";
-            document.getElementById("ContactEmail").value = "";
-            if (!party.value || !partyType.value) return;
-            try {
-                const selectedParty = party.value, selectedType = partyType.value;
-                const url = "/HR/PaymentEntryContacts?partyType=" + encodeURIComponent(selectedType) + "&party=" + encodeURIComponent(selectedParty);
-                const data = await (await fetch(url)).json();
-                if (party.value !== selectedParty || partyType.value !== selectedType) return;
-                if (!data.success) throw new Error(data.message || "Contacts could not be loaded.");
-                data.contacts.forEach(name => list.add(new Option(name, name)));
-                if (!data.contacts.length) list.options[0].text = "No linked contacts";
-            } catch (error) { alert(error.message); }
+            // Contact and email are returned by ERPNext's party-details API.
+            // Do not call contact_query: it is unavailable on this ERPNext site.
+            return;
         }
-        document.getElementById("ContactPerson").addEventListener("change", async function () {
-            const email = document.getElementById("ContactEmail");
-            email.value = "";
-            if (!this.value) return;
-            try {
-                const data = await (await fetch("/HR/PaymentEntryContacts?contact=" + encodeURIComponent(this.value))).json();
-                if (!data.success) throw new Error(data.message || "Contact email could not be loaded.");
-                email.value = data.email || "";
-            } catch (error) { alert(error.message); }
-        });
-        party.addEventListener("change", loadPaymentContacts);
-        partyType.addEventListener("change", loadPaymentContacts);
 
         async function loadPaymentGstDetails() {
             const fields = ["CompanyAddress", "CompanyGstin", "CustomerAddress", "BillingAddressGstin", "PlaceOfSupply", "GstCategory"];
@@ -1910,7 +1946,16 @@
 
         party.addEventListener(
             "change",
-            loadPartyDetails
+            async function()
+            {
+                const selected = party.options[party.selectedIndex];
+                if (selected?.dataset.partyType)
+                    partyType.value = selected.dataset.partyType;
+
+                await loadPartyDetails();
+                await loadPaymentContacts();
+                await loadPaymentGstDetails();
+            }
         );
 
 
@@ -1977,6 +2022,7 @@
             async function()
             {
                 await loadAccounts();
+                await paymentTypeChanged();
                 const savedReferences = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.References ?? new List<Erp_Aits.Models.PaymentEntryReference>()));
                 savedReferences.forEach(r => addPaymentReference({ voucher_type: r.ReferenceDoctype, voucher_no: r.ReferenceName, invoice_amount: r.GrandTotal, outstanding_amount: r.OutstandingAmount, allocated_amount: r.AllocatedAmount, payment_term: r.PaymentTerm, due_date: r.DueDate ? r.DueDate.substring(0, 10) : "", exchange_rate: r.ExchangeRate }));
                 const savedTaxes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Taxes ?? new List<Erp_Aits.Models.PaymentEntryTax>()));
@@ -1996,6 +2042,25 @@
                 refreshVisibility();
             }
         );
+
+        function syncComputedAmounts() {
+            const read = id => Number(document.getElementById(id)?.value || 0);
+            const set = (id, value) => { const field = document.getElementById(id); if (field) field.value = Number.isFinite(value) ? value.toFixed(2) : "0.00"; };
+            const paid = read("PaidAmount");
+            const received = read("ReceivedAmount");
+            const sourceRate = read("SourceExchangeRate") || 1;
+            const targetRate = read("TargetExchangeRate") || 1;
+            set("PaidAmountAfterTax", paid);
+            set("ReceivedAmountAfterTax", received);
+            set("BasePaidAmount", paid * sourceRate);
+            set("BaseReceivedAmount", received * targetRate);
+            set("BasePaidAmountAfterTax", paid * sourceRate);
+            set("BaseReceivedAmountAfterTax", received * targetRate);
+        }
+
+        ["PaidAmount", "ReceivedAmount", "SourceExchangeRate", "TargetExchangeRate"].forEach(id =>
+            document.getElementById(id)?.addEventListener("input", syncComputedAmounts));
+        document.addEventListener("DOMContentLoaded", syncComputedAmounts);
 
     </script>
 }

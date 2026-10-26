@@ -1,13 +1,25 @@
 ﻿@model Erp_Aits.Models.EmployeeReferral
 @{
-    ViewBag.Title = "New Employee Referral";
+    var isEdit = ViewBag.IsEdit == true;
+    var isDraft = Model.DocStatus == 0;
+    var isLocked = isEdit && !isDraft;
+    ViewBag.Title = isEdit ? "Employee Referral Details" : "New Employee Referral";
 }
 
-<form asp-action="CreateEmployeeReferral" method="post" id="referralForm">
+<form asp-action="@(isEdit ? "UpdateEmployeeReferral" : "CreateEmployeeReferral")" method="post" id="referralForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Id" /><input type="hidden" asp-for="ErpNextId" /><input type="hidden" asp-for="DocStatus" />
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Employee Referral</h4>
-        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        <div><h4 class="mb-0">@(isEdit ? "Employee Referral Details" : "New Employee Referral")</h4>@if (isEdit) { <span class="badge @(Model.Status == "Rejected" ? "bg-danger" : "bg-secondary") mt-1">@Model.Status</span> }</div>
+        <div class="d-flex gap-2">
+            @if (!isEdit) { <button type="submit" class="btn btn-dark btn-sm">Save</button> }
+            else { <a href="@Url.Action("EmployeeReferral", "HR")" class="btn btn-outline-secondary btn-sm">Back to List</a>
+                @if (isDraft) { <button type="submit" formaction="@Url.Action("SubmitEmployeeReferral", "HR", new { id = Model.Id })" class="btn btn-success btn-sm">Submit</button> }
+                else if (Model.DocStatus == 1) { <button type="submit" formaction="@Url.Action("RejectEmployeeReferral", "HR", new { id = Model.Id })" class="btn btn-danger btn-sm">Reject Employee Referral</button><button type="submit" formaction="@Url.Action("CreateJobApplicantFromReferral", "HR", new { id = Model.Id })" class="btn btn-dark btn-sm">Create Job Applicant</button> }
+            }
+        </div>
     </div>
+    <fieldset @(isLocked ? "disabled" : null)>
 
     <div class="card p-4 mb-3">
         <div class="row g-3">
@@ -35,7 +47,7 @@
 
             <div class="col-md-6 offset-md-6">
                 <label class="form-label">For Designation *</label>
-                <input asp-for="ForDesignation" class="form-control" required />
+                <select asp-for="ForDesignation" class="form-select" required><option value="">Select designation...</option>@foreach (var item in ViewBag.ReferralDesignations) { <option value="@item.name">@item.name</option> }</select>
             </div>
         </div>
     </div>
@@ -81,7 +93,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Referrer *</label>
-                <input asp-for="Referrer" class="form-control" required />
+                <select asp-for="Referrer" class="form-select" required><option value="">Select employee...</option>@foreach (var item in ViewBag.ReferralEmployees) { <option value="@item.name">@item.name - @item.employee_name</option> }</select>
             </div>
             <div class="col-md-6 d-flex align-items-end">
                 <div class="form-check">
@@ -102,7 +114,7 @@
         <label class="form-label">Work References</label>
         @await Html.PartialAsync("_RichTextEditor", new ViewDataDictionary(ViewData) { { "FieldName", "WorkReferences" }, { "Content", Model.WorkReferences } })
     </div>
-</form>
+</fieldset></form>
 
 <script>
     document.getElementById('referralResumeFile').addEventListener('change', function () {

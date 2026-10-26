@@ -5,6 +5,8 @@ namespace Erp_Aits.Models
     public class JobOffer
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
+        public int DocStatus { get; set; }
         public string JobApplicant { get; set; }
         public string ApplicantName { get; set; }
         public string Status { get; set; } = "Awaiting Response";
@@ -16,5 +18,6 @@ namespace Erp_Aits.Models
         public string TermsAndConditions { get; set; }
         public string LetterHead { get; set; }
         public string PrintHeading { get; set; }
+        public string OfferTermsJson { get; set; }
     }
 }

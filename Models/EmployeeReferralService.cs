@@ -20,6 +20,7 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureSyncColumns(conn);
                 string query = "SELECT * FROM EmployeeReferrals WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(idFilter))
@@ -67,6 +68,7 @@ namespace Erp_Aits.Services
         {
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureSyncColumns(conn);
                 string query = "SELECT * FROM EmployeeReferrals WHERE Id = @Id AND IsDeleted = 0";
                 using (var cmd = new SqlCommand(query, conn))
                 {
@@ -87,6 +89,8 @@ namespace Erp_Aits.Services
             return new EmployeeReferral
             {
                 Id = Convert.ToInt32(reader["Id"]),
+                ErpNextId = reader["ErpNextId"] == DBNull.Value ? null : reader["ErpNextId"]?.ToString(),
+                DocStatus = reader["DocStatus"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocStatus"]),
                 FirstName = reader["FirstName"]?.ToString() ?? string.Empty,
                 LastName = reader["LastName"]?.ToString() ?? string.Empty,
                 ReferralDate = Convert.ToDateTime(reader["ReferralDate"]),
@@ -110,19 +114,22 @@ namespace Erp_Aits.Services
         {
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureSyncColumns(conn);
                 string query = @"
                     INSERT INTO EmployeeReferrals
-                        (FirstName, LastName, ReferralDate, Status, ForDesignation, Email,
+                        (ErpNextId, DocStatus, FirstName, LastName, ReferralDate, Status, ForDesignation, Email,
                          CurrentEmployer, ContactNo, CurrentJobTitle, ResumeLink, ResumeAttachment, ResumeAttachmentName,
                          Referrer, IsApplicableForReferralBonus, QualifiedReason, WorkReferences)
                     OUTPUT INSERTED.Id
                     VALUES
-                        (@FirstName, @LastName, @ReferralDate, @Status, @ForDesignation, @Email,
+                        (@ErpNextId, @DocStatus, @FirstName, @LastName, @ReferralDate, @Status, @ForDesignation, @Email,
                          @CurrentEmployer, @ContactNo, @CurrentJobTitle, @ResumeLink, @ResumeAttachment, @ResumeAttachmentName,
                          @Referrer, @IsApplicableForReferralBonus, @QualifiedReason, @WorkReferences)";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
+                    cmd.Parameters.AddWithValue("@ErpNextId", r.ErpNextId ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@DocStatus", r.DocStatus);
                     cmd.Parameters.AddWithValue("@FirstName", r.FirstName ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@LastName", r.LastName ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@ReferralDate", r.ReferralDate);
@@ -145,6 +152,22 @@ namespace Erp_Aits.Services
                     return newId;
                 }
             }
+        }
+
+        public void Update(EmployeeReferral r)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            EnsureSyncColumns(conn);
+            using var cmd = new SqlCommand(@"UPDATE EmployeeReferrals SET ErpNextId=@ErpNextId, DocStatus=@DocStatus, FirstName=@FirstName, LastName=@LastName, ReferralDate=@ReferralDate, Status=@Status, ForDesignation=@ForDesignation, Email=@Email, CurrentEmployer=@CurrentEmployer, ContactNo=@ContactNo, CurrentJobTitle=@CurrentJobTitle, ResumeLink=@ResumeLink, ResumeAttachment=@ResumeAttachment, ResumeAttachmentName=@ResumeAttachmentName, Referrer=@Referrer, IsApplicableForReferralBonus=@Bonus, QualifiedReason=@Reason, WorkReferences=@References WHERE Id=@Id", conn);
+            cmd.Parameters.AddWithValue("@Id", r.Id); cmd.Parameters.AddWithValue("@ErpNextId", r.ErpNextId ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@DocStatus", r.DocStatus); cmd.Parameters.AddWithValue("@FirstName", r.FirstName ?? ""); cmd.Parameters.AddWithValue("@LastName", r.LastName ?? ""); cmd.Parameters.AddWithValue("@ReferralDate", r.ReferralDate); cmd.Parameters.AddWithValue("@Status", r.Status ?? "Pending"); cmd.Parameters.AddWithValue("@ForDesignation", r.ForDesignation ?? ""); cmd.Parameters.AddWithValue("@Email", r.Email ?? ""); cmd.Parameters.AddWithValue("@CurrentEmployer", r.CurrentEmployer ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@ContactNo", r.ContactNo ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@CurrentJobTitle", r.CurrentJobTitle ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@ResumeLink", r.ResumeLink ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@ResumeAttachment", r.ResumeAttachment ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@ResumeAttachmentName", r.ResumeAttachmentName ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@Referrer", r.Referrer ?? ""); cmd.Parameters.AddWithValue("@Bonus", r.IsApplicableForReferralBonus); cmd.Parameters.AddWithValue("@Reason", r.QualifiedReason ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@References", r.WorkReferences ?? (object)DBNull.Value);
+            conn.Open(); cmd.ExecuteNonQuery();
+        }
+
+        private static void EnsureSyncColumns(SqlConnection conn)
+        {
+            var close = conn.State != System.Data.ConnectionState.Open; if (close) conn.Open();
+            using var cmd = new SqlCommand("IF COL_LENGTH('dbo.EmployeeReferrals','ErpNextId') IS NULL ALTER TABLE dbo.EmployeeReferrals ADD ErpNextId NVARCHAR(255) NULL; IF COL_LENGTH('dbo.EmployeeReferrals','DocStatus') IS NULL ALTER TABLE dbo.EmployeeReferrals ADD DocStatus INT NOT NULL CONSTRAINT DF_EmployeeReferrals_DocStatus DEFAULT(0);", conn);
+            cmd.ExecuteNonQuery(); if (close) conn.Close();
         }
     }
 }

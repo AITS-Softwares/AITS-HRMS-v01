@@ -5,6 +5,7 @@ namespace Erp_Aits.Models
     public class JobOpening
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
         public string JobOpeningTemplate { get; set; }
         public string JobTitle { get; set; }
         public string Designation { get; set; }

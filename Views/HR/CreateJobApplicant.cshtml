@@ -3,9 +3,15 @@
     ViewBag.Title = "New Job Applicant";
 }
 
-<form asp-action="CreateJobApplicant" method="post" id="applicantForm">
+<datalist id="countries">@foreach (var item in ViewBag.Countries) { <option value="@item.name"></option> }</datalist>
+<datalist id="applicantCurrencies">@foreach (var item in ViewBag.Currencies) { <option value="@item.name"></option> }</datalist>
+
+<form asp-action="@(ViewBag.IsEdit == true ? "UpdateJobApplicant" : "CreateJobApplicant")" method="post" id="applicantForm">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ErpNextId" />
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Job Applicant</h4>
+        <h4 class="mb-0">@(ViewBag.IsEdit == true ? "Job Applicant Details" : "New Job Applicant")</h4>
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
@@ -22,8 +28,11 @@
                 <input asp-for="ApplicantName" class="form-control" required autofocus />
             </div>
             <div class="col-md-6">
-                <label class="form-label">Job Opening</label>
-                <input asp-for="JobOpening" class="form-control" />
+                <label class="form-label">Job Title</label>
+                <select asp-for="JobOpening" class="form-select">
+                    <option value="">Select job title...</option>
+                    @foreach (var item in ViewBag.JobOpenings) { <option value="@item.name" data-designation="@item.designation">@item.name - @item.job_title</option> }
+                </select>
             </div>
 
             <div class="col-md-6">
@@ -32,7 +41,10 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Designation</label>
-                <input asp-for="Designation" class="form-control" />
+                <select asp-for="Designation" class="form-select">
+                    <option value="">Select designation...</option>
+                    @foreach (var item in ViewBag.Designations) { <option value="@item.name">@item.name</option> }
+                </select>
             </div>
 
             <div class="col-md-6">
@@ -52,7 +64,7 @@
 
             <div class="col-md-6">
                 <label class="form-label">Country</label>
-                <input asp-for="Country" class="form-control" />
+                <input asp-for="Country" class="form-control" list="countries" />
             </div>
         </div>
     </div>
@@ -62,7 +74,17 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Source</label>
-                <input asp-for="Source" class="form-control" />
+                <select asp-for="Source" class="form-select">
+                    <option value="">Select source...</option>
+                    @foreach (var item in ViewBag.JobApplicantSources) { <option value="@item.name">@item.name</option> }
+                </select>
+            </div>
+            <div class="col-md-6" id="sourceNameField">
+                <label class="form-label">Source Name</label>
+                <select asp-for="SourceName" class="form-select">
+                    <option value="">Select source name...</option>
+                    @foreach (var item in ViewBag.SourceNameEmployees) { <option value="@item.name">@item.name - @item.employee_name</option> }
+                </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Applicant Rating</label>
@@ -99,7 +121,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Currency</label>
-                <input asp-for="Currency" class="form-control" />
+                <input asp-for="Currency" class="form-control" list="applicantCurrencies" />
             </div>
             <div class="col-md-6">
                 <label class="form-label">Lower Range</label>
@@ -132,6 +154,27 @@
             });
         });
     });
+
+    (function () {
+        var jobOpening = document.getElementById('JobOpening');
+        var designation = document.getElementById('Designation');
+        var source = document.getElementById('Source');
+        var sourceNameField = document.getElementById('sourceNameField');
+
+        function setDesignationFromOpening() {
+            var option = jobOpening && jobOpening.options[jobOpening.selectedIndex];
+            if (option && option.dataset.designation && designation)
+                designation.value = option.dataset.designation;
+        }
+
+        function toggleSourceName() {
+            sourceNameField.style.display = source && source.value ? '' : 'none';
+        }
+
+        jobOpening && jobOpening.addEventListener('change', setDesignationFromOpening);
+        source && source.addEventListener('change', toggleSourceName);
+        toggleSourceName();
+    })();
 
     // File attach: uploads immediately on selection, stores returned path
     document.getElementById('resumeFile').addEventListener('change', function () {

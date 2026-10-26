@@ -20,11 +20,17 @@ namespace Erp_Aits.Models
 
         public string ModeOfPayment { get; set; }
 
+        public string PaymentOrderStatus { get; set; }
+
         public string PartyType { get; set; }
 
         public string Party { get; set; }
 
         public string PartyName { get; set; }
+
+        public bool BookAdvancePaymentsInSeparatePartyAccount { get; set; }
+
+        public bool ReconcileOnAdvancePaymentDate { get; set; }
 
         public decimal PartyBalance { get; set; }
 
@@ -60,13 +66,27 @@ namespace Erp_Aits.Models
 
         public decimal PaidAmount { get; set; }
 
+        public decimal PaidAmountAfterTax { get; set; }
+
+        public decimal BasePaidAmount { get; set; }
+
+        public decimal BasePaidAmountAfterTax { get; set; }
+
         public decimal ReceivedAmount { get; set; }
+
+        public decimal ReceivedAmountAfterTax { get; set; }
+
+        public decimal BaseReceivedAmount { get; set; }
+
+        public decimal BaseReceivedAmountAfterTax { get; set; }
 
         public decimal SourceExchangeRate { get; set; } = 1;
 
         public decimal TargetExchangeRate { get; set; } = 1;
 
         public decimal TotalAllocatedAmount { get; set; }
+
+        public decimal BaseTotalAllocatedAmount { get; set; }
 
         public decimal UnallocatedAmount { get; set; }
 
@@ -79,6 +99,12 @@ namespace Erp_Aits.Models
         //public decimal DifferenceAmount { get; set; }
 
         public decimal TotalTaxesAndCharges { get; set; }
+
+        public decimal BaseTotalTaxesAndCharges { get; set; }
+
+        public bool ApplyTaxWithholdingAmount { get; set; }
+
+        public string TaxWithholdingCategory { get; set; }
 
         public string SalesTaxesChargesTemplate { get; set; }
 
@@ -100,9 +126,19 @@ namespace Erp_Aits.Models
 
         public DateTime? ReferenceDate { get; set; }
 
+        public DateTime? ClearanceDate { get; set; }
+
         public string Project { get; set; }
 
         public string CostCenter { get; set; }
+
+        public string Dunning { get; set; }
+
+        public string AiAuditLog { get; set; }
+
+        public string AllowedToTransactWith { get; set; }
+
+        public string AppraisalTemplate { get; set; }
 
         public string LetterHead { get; set; }
 
@@ -111,6 +147,24 @@ namespace Erp_Aits.Models
         public bool CustomRemarks { get; set; }
 
         public string Remarks { get; set; }
+
+        public string IsOpening { get; set; }
+
+        public string Bank { get; set; }
+
+        public string BankAccountNo { get; set; }
+
+        public string PaymentOrder { get; set; }
+
+        public string InWords { get; set; }
+
+        public string BaseInWords { get; set; }
+
+        public string AutoRepeat { get; set; }
+
+        public string AmendedFrom { get; set; }
+
+        public string Title { get; set; }
 
         public int DocStatus { get; set; }
 

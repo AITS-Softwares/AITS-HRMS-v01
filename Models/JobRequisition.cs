@@ -5,6 +5,8 @@ namespace Erp_Aits.Models
     public class JobRequisition
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
+        public int DocStatus { get; set; }
         public string Code { get; set; }
         public int? NoOfPositions { get; set; }
         public string Company { get; set; }

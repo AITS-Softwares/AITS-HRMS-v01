@@ -33,7 +33,7 @@
                 <tbody>
                     @foreach (var jo in Model)
                     {
-                        <tr>
+                        <tr style="cursor:pointer" onclick="location.href='@Url.Action("JobOpeningDetails", "HR", new { id = jo.Id })'">
                             <td>@jo.Id</td>
                             <td>@jo.JobTitle</td>
                             <td>@jo.Designation</td>

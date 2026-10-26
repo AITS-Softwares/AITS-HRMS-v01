@@ -170,6 +170,17 @@
                 </select>
             </div>
 
+            <div class="col-md-6">
+                <label class="form-label">Leave Policy *</label>
+                <select name="LeavePolicy" class="form-control" required>
+                    <option value="">-- Select Leave Policy --</option>
+                    @foreach (var policy in leavePolicies)
+                    {
+                        <!option value="@policy" @(Model.LeavePolicy == policy ? "selected" : "")>@policy</!option>
+                    }
+                </select>
+            </div>
+
         </div>
     </div>
 

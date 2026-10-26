@@ -131,7 +131,7 @@ namespace Erp_Aits.Services
                     if (!reader.Read())
                         return null;
 
-                    return new Designation
+                    var designation = new Designation
                     {
                         Id = Convert.ToInt32(reader["Id"]),
                         DesignationCode = reader["DesignationCode"]?.ToString() ?? string.Empty,
@@ -139,8 +139,72 @@ namespace Erp_Aits.Services
                         Description = reader["Description"]?.ToString() ?? string.Empty,
                         AppraisalTemplate = reader["AppraisalTemplate"]?.ToString() ?? string.Empty
                     };
+                    designation.Skills = GetSkills(conn, designation.Id);
+                    return designation;
                 }
             }
+        }
+
+        public void SaveSkills(int designationId, IEnumerable<DesignationSkill> skills)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+            EnsureSkillsTable(conn);
+
+            using var transaction = conn.BeginTransaction();
+            using (var delete = new SqlCommand("DELETE FROM DesignationSkills WHERE DesignationId = @DesignationId", conn, transaction))
+            {
+                delete.Parameters.AddWithValue("@DesignationId", designationId);
+                delete.ExecuteNonQuery();
+            }
+
+            foreach (var skill in skills ?? Array.Empty<DesignationSkill>())
+            {
+                if (string.IsNullOrWhiteSpace(skill.Skill))
+                    continue;
+
+                using var insert = new SqlCommand("INSERT INTO DesignationSkills (DesignationId, Skill) VALUES (@DesignationId, @Skill)", conn, transaction);
+                insert.Parameters.AddWithValue("@DesignationId", designationId);
+                insert.Parameters.AddWithValue("@Skill", skill.Skill.Trim());
+                insert.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+        }
+
+        private static List<DesignationSkill> GetSkills(SqlConnection conn, int designationId)
+        {
+            EnsureSkillsTable(conn);
+            var skills = new List<DesignationSkill>();
+            using var cmd = new SqlCommand("SELECT Id, DesignationId, Skill FROM DesignationSkills WHERE DesignationId = @DesignationId ORDER BY Id", conn);
+            cmd.Parameters.AddWithValue("@DesignationId", designationId);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                skills.Add(new DesignationSkill
+                {
+                    Id = Convert.ToInt32(reader["Id"]),
+                    DesignationId = Convert.ToInt32(reader["DesignationId"]),
+                    Skill = reader["Skill"]?.ToString() ?? string.Empty
+                });
+            }
+            return skills;
+        }
+
+        private static void EnsureSkillsTable(SqlConnection conn)
+        {
+            const string sql = @"
+                IF OBJECT_ID(N'dbo.DesignationSkills', N'U') IS NULL
+                BEGIN
+                    CREATE TABLE dbo.DesignationSkills (
+                        Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        DesignationId INT NOT NULL,
+                        Skill NVARCHAR(255) NOT NULL
+                    );
+                    CREATE INDEX IX_DesignationSkills_DesignationId ON dbo.DesignationSkills(DesignationId);
+                END";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.ExecuteNonQuery();
         }
 
         public int UpsertFromErpNext(Designation designation)

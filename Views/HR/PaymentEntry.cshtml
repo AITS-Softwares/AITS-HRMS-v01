@@ -1,181 +1,62 @@
-﻿@* @model List<Erp_Aits.Models.PaymentEntryListRow>
-@{
-    ViewBag.Title = "Payment Entry";
-}
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Payment Entry</h4>
-    <a href="@Url.Action("CreatePaymentEntry", "HR")" class="btn btn-dark btn-sm">+ Add Payment Entry</a>
-</div>
-
-<form method="get" class="row g-2 mb-3">
-    <div class="col-auto">
-        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID" value="@ViewBag.IdFilter" />
-    </div>
-    <div class="col-auto">
-        <select name="paymentType" class="form-select form-select-sm">
-            <option value="">Payment Type</option>
-            <option value="Pay" selected="@(ViewBag.PaymentTypeFilter == "Pay")">Pay</option>
-            <option value="Receive" selected="@(ViewBag.PaymentTypeFilter == "Receive")">Receive</option>
-            <option value="Internal Transfer" selected="@(ViewBag.PaymentTypeFilter == "Internal Transfer")">Internal Transfer</option>
-        </select>
-    </div>
-    <div class="col-auto">
-        <input type="text" name="partyType" class="form-control form-control-sm" placeholder="Party Type" value="@ViewBag.PartyTypeFilter" />
-    </div>
-    <div class="col-auto">
-        <input type="text" name="party" class="form-control form-control-sm" placeholder="Party" value="@ViewBag.PartyFilter" />
-    </div>
-    <div class="col-auto">
-        <input type="text" name="title" class="form-control form-control-sm" placeholder="Title" value="@ViewBag.TitleFilter" />
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
-    </div>
-</form>
-
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Payment Type</th>
-            <th>Party Type</th>
-            <th>Party</th>
-            <th>Party Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
-        {
-            <tr>
-                <td>@(p.Id > 0 ? p.Id.ToString() : "-")</td>
-                <td>@p.PaymentType</td>
-                <td>@p.PartyType</td>
-                <td>@p.Party</td>
-                <td>@p.PartyName</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (!Model.Any())
-{
-    <p class="text-muted text-center py-5">No Payment Entry found with matching filters.</p>
-} *@
-
-
-
-
-
-
-
-
-
-
 @model List<Erp_Aits.Models.PaymentEntryListRow>
 @{
     ViewBag.Title = "Payment Entry";
 }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["ErpNextError"] != null)
-{
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        @TempData["ErpNextError"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<style>
+    .payment-list-page { max-width: 1320px; margin: 0 auto; padding: 26px; }
+    .payment-list-hero { background: linear-gradient(110deg, #0c4a6e, #0f766e); color: #fff; border-radius: 8px; padding: 1.4rem 1.55rem; box-shadow: 0 14px 28px rgba(15, 118, 110, .18); }
+    .payment-list-panel { background: #fff; border: 1px solid #c9dbe5; border-radius: 8px; padding: 1rem; box-shadow: 0 10px 24px rgba(16, 79, 112, .07); }
+    .payment-list-page .form-control, .payment-list-page .form-select { border-color: #b9d2df; min-height: 40px; }
+    .payment-list-page .table thead th { background: #e0f2fe; color: #0c4a6e; border-bottom: 0; padding: .85rem .75rem; white-space: nowrap; }
+    .payment-list-page .table td { padding: .85rem .75rem; }
+    .payment-list-page .table tbody tr:hover { background: #f0fdfa; }
+    .payment-list-page .erp-ref { background: #d1fae5; color: #047857; font-weight: 700; text-decoration: none; padding: .32rem .55rem; border-radius: 6px; }
+</style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Payment Entry</h4>
-    <div class="d-flex gap-2">
-        <a href="@Url.Action("CreatePaymentEntry", "HR")" class="btn btn-dark btn-sm">+ Add Payment Entry</a>
+<div class="payment-list-page">
+    @if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+    @if (TempData["ErpNextError"] != null) { <div class="alert alert-warning alert-dismissible fade show">@TempData["ErpNextError"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+
+    <div class="payment-list-hero d-flex justify-content-between align-items-center mb-4">
+        <div><div class="small text-white-50 mb-1">ACCOUNTS / PAYMENTS</div><h3 class="mb-0">Payment Entry</h3></div>
+        <a href="@Url.Action("CreatePaymentEntry", "HR")" class="btn btn-light fw-semibold">+ Add Payment Entry</a>
     </div>
+
+    <div class="payment-list-panel mb-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3"><label class="form-label">ID or ERPNext Ref</label><input name="id" class="form-control" value="@ViewBag.IdFilter" /></div>
+            <div class="col-md-2"><label class="form-label">Payment Type</label><select name="paymentType" class="form-select"><option value="">All Types</option><option value="Pay" selected="@(ViewBag.PaymentTypeFilter == "Pay")">Pay</option><option value="Receive" selected="@(ViewBag.PaymentTypeFilter == "Receive")">Receive</option><option value="Internal Transfer" selected="@(ViewBag.PaymentTypeFilter == "Internal Transfer")">Internal Transfer</option></select></div>
+            <div class="col-md-2"><label class="form-label">Party Type</label><input name="partyType" class="form-control" value="@ViewBag.PartyTypeFilter" /></div>
+            <div class="col-md-2"><label class="form-label">Party</label><input name="party" class="form-control" value="@ViewBag.PartyFilter" /></div>
+            <div class="col-md-2"><label class="form-label">Party Name</label><input name="title" class="form-control" value="@ViewBag.TitleFilter" /></div>
+            <div class="col-md-1 d-grid"><button class="btn btn-outline-primary">Search</button></div>
+        </form>
+    </div>
+
+    <div class="payment-list-panel">
+        <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+            <thead><tr><th>ERPNext Ref</th><th>Payment Type</th><th>Party Type</th><th>Party</th><th>Party Name</th><th>Status</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@if (!string.IsNullOrWhiteSpace(p.ErpNextId)) { <a class="erp-ref" href="@Url.Action("OpenErpPaymentEntry", "HR", new { name = p.ErpNextId })">@p.ErpNextId</a> } else { <a href="@Url.Action("PaymentEntryDetails", "HR", new { id = p.Id })">Local entry</a> }</td>
+                        <td>@p.PaymentType</td><td>@p.PartyType</td><td>@p.Party</td><td>@p.PartyName</td>
+                        <td><span class="badge @(p.DocStatus == 1 ? "bg-success" : p.DocStatus == 2 ? "bg-danger" : "bg-warning text-dark")">@(string.IsNullOrWhiteSpace(p.Status) ? (p.DocStatus == 1 ? "Submitted" : p.DocStatus == 2 ? "Cancelled" : "Draft") : p.Status)</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table></div>
+        @if (!Model.Any()) { <p class="text-muted text-center py-5 mb-0">No Payment Entry found with matching filters.</p> }
+    </div>
+
+    @if (ViewBag.PaymentEntryPage != null)
+    {
+        <div class="d-flex align-items-center gap-2 mt-3">
+            @if ((int)ViewBag.PaymentEntryPage > 1) { <a class="btn btn-outline-secondary" href="@Url.Action("PaymentEntry", new { id = ViewBag.IdFilter, paymentType = ViewBag.PaymentTypeFilter, partyType = ViewBag.PartyTypeFilter, party = ViewBag.PartyFilter, title = ViewBag.TitleFilter, page = (int)ViewBag.PaymentEntryPage - 1 })">Previous</a> }
+            <span>Page @ViewBag.PaymentEntryPage</span>
+            @if (ViewBag.PaymentEntryHasNext == true) { <a class="btn btn-outline-secondary" href="@Url.Action("PaymentEntry", new { id = ViewBag.IdFilter, paymentType = ViewBag.PaymentTypeFilter, partyType = ViewBag.PartyTypeFilter, party = ViewBag.PartyFilter, title = ViewBag.TitleFilter, page = (int)ViewBag.PaymentEntryPage + 1 })">Next</a> }
+        </div>
+    }
 </div>
-
-<form method="get" class="row g-2 mb-3">
-    <div class="col-auto">
-        <input type="text" name="id" class="form-control form-control-sm" placeholder="ID or ERPNext Ref" value="@ViewBag.IdFilter" />
-    </div>
-    <div class="col-auto">
-        <select name="paymentType" class="form-select form-select-sm">
-            <option value="">Payment Type</option>
-            <option value="Pay" selected="@(ViewBag.PaymentTypeFilter == "Pay")">Pay</option>
-            <option value="Receive" selected="@(ViewBag.PaymentTypeFilter == "Receive")">Receive</option>
-            <option value="Internal Transfer" selected="@(ViewBag.PaymentTypeFilter == "Internal Transfer")">Internal Transfer</option>
-        </select>
-    </div>
-    <div class="col-auto">
-        <input type="text" name="partyType" class="form-control form-control-sm" placeholder="Party Type" value="@ViewBag.PartyTypeFilter" />
-    </div>
-    <div class="col-auto">
-        <input type="text" name="party" class="form-control form-control-sm" placeholder="Party" value="@ViewBag.PartyFilter" />
-    </div>
-    <div class="col-auto">
-        <input type="text" name="title" class="form-control form-control-sm" placeholder="Title" value="@ViewBag.TitleFilter" />
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
-    </div>
-</form>
-
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>ERPNext Ref</th>
-            <th>Payment Type</th>
-            <th>Party Type</th>
-            <th>Party</th>
-            <th>Party Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
-        {
-            <tr>
-                <td>@(p.Id > 0 ? p.Id.ToString() : "-")</td>
-                <td>
-                    @if (!string.IsNullOrEmpty(p.ErpNextId))
-                    {
-                        <a href="@Url.Action("OpenErpPaymentEntry", "HR", new { name = p.ErpNextId })" class="badge bg-success-subtle text-success">@p.ErpNextId</a>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("PaymentEntryDetails", "HR", new { id = p.Id })" class="badge bg-secondary-subtle text-muted">Local</a>
-                    }
-                </td>
-                <td>@p.PaymentType</td>
-                <td>@p.PartyType</td>
-                <td>@p.Party</td>
-                <td>@p.PartyName</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (ViewBag.PaymentEntryPage != null)
-{
-    <div class="d-flex align-items-center gap-2">
-        @if ((int)ViewBag.PaymentEntryPage > 1)
-        {
-            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("PaymentEntry", new { id = ViewBag.IdFilter, paymentType = ViewBag.PaymentTypeFilter, partyType = ViewBag.PartyTypeFilter, party = ViewBag.PartyFilter, title = ViewBag.TitleFilter, page = (int)ViewBag.PaymentEntryPage - 1 })">Previous</a>
-        }
-        <span>Page @ViewBag.PaymentEntryPage</span>
-        @if (ViewBag.PaymentEntryHasNext == true)
-        {
-            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("PaymentEntry", new { id = ViewBag.IdFilter, paymentType = ViewBag.PaymentTypeFilter, partyType = ViewBag.PartyTypeFilter, party = ViewBag.PartyFilter, title = ViewBag.TitleFilter, page = (int)ViewBag.PaymentEntryPage + 1 })">Next</a>
-        }
-    </div>
-}
-
-@if (!Model.Any())
-{
-    <p class="text-muted text-center py-5">No Payment Entry found with matching filters.</p>
-}

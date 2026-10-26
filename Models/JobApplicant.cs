@@ -3,6 +3,7 @@
     public class JobApplicant
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
         public string ApplicantName { get; set; }
         public string EmailAddress { get; set; }
         public string JobOpening { get; set; }
@@ -11,6 +12,7 @@
         public string Status { get; set; } = "Open";
         public string Country { get; set; } = "India";
         public string Source { get; set; }
+        public string SourceName { get; set; }
         public int ApplicantRating { get; set; }
         public string CoverLetter { get; set; }
         public string ResumeAttachment { get; set; }

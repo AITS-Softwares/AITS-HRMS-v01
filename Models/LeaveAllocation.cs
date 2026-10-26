@@ -18,7 +18,8 @@ namespace Erp_Aits.Models
         public bool AddUnusedLeaves { get; set; }
         public string Description { get; set; }
         public bool Expired { get; set; }
-        public string ErpNextId { get; set; }
+        // ERPNext assigns this only after a successful create.
+        public string? ErpNextId { get; set; }
         public int DocStatus { get; set; }
         public string Status { get; set; } = "Draft";
     }

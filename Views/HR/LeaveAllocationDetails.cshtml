@@ -3,6 +3,7 @@
     ViewBag.Title = "Leave Allocation " + Model.Id;
     var leaveTypes = ViewBag.LeaveTypes as List<string> ?? new List<string>();
     var leavePeriods = ViewBag.LeavePeriods as List<string> ?? new List<string>();
+    var leavePolicies = ViewBag.LeavePolicies as List<string> ?? new List<string>();
     bool isDraft = Model.DocStatus == 0;
     bool isSubmitted = Model.DocStatus == 1;
     bool isCancelled = Model.DocStatus == 2;
@@ -129,6 +130,20 @@
                     @foreach (var period in leavePeriods)
                     {
                         <!option value="@period" @(Model.LeavePeriod == period ? "selected" : "")>@period</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Leave Policy *</label>
+                <select name="LeavePolicy" class="form-control" disabled="@(!isDraft)" required>
+                    @if (!leavePolicies.Contains(Model.LeavePolicy) && !string.IsNullOrWhiteSpace(Model.LeavePolicy))
+                    {
+                        <option value="@Model.LeavePolicy" selected>@Model.LeavePolicy</option>
+                    }
+                    @foreach (var policy in leavePolicies)
+                    {
+                        <!option value="@policy" @(Model.LeavePolicy == policy ? "selected" : "")>@policy</!option>
                     }
                 </select>
             </div>

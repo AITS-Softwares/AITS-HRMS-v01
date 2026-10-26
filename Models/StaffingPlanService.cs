@@ -21,6 +21,7 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
+                EnsureErpNextIdColumn(conn);
                 string query = "SELECT * FROM StaffingPlans WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(idFilter))
@@ -41,6 +42,8 @@ namespace Erp_Aits.Services
                             list.Add(new StaffingPlan
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                ErpNextId = reader["ErpNextId"] == DBNull.Value ? null : reader["ErpNextId"]?.ToString(),
+                                DocStatus = reader["DocStatus"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocStatus"]),
                                 Name = reader["Name"]?.ToString() ?? string.Empty,
                                 Company = reader["Company"]?.ToString() ?? string.Empty,
                                 FromDate = Convert.ToDateTime(reader["FromDate"]),
@@ -63,6 +66,7 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
+                EnsureErpNextIdColumn(conn);
 
                 using (var cmd = new SqlCommand("SELECT * FROM StaffingPlans WHERE Id = @Id AND IsDeleted = 0", conn))
                 {
@@ -74,6 +78,8 @@ namespace Erp_Aits.Services
                             plan = new StaffingPlan
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                ErpNextId = reader["ErpNextId"] == DBNull.Value ? null : reader["ErpNextId"]?.ToString(),
+                                DocStatus = reader["DocStatus"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocStatus"]),
                                 Name = reader["Name"]?.ToString() ?? string.Empty,
                                 Company = reader["Company"]?.ToString() ?? string.Empty,
                                 FromDate = Convert.ToDateTime(reader["FromDate"]),
@@ -122,12 +128,14 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
+                EnsureErpNextIdColumn(conn);
 
                 using (var cmd = new SqlCommand(@"
-                    INSERT INTO StaffingPlans (Name, Company, FromDate, ToDate, Department, TotalEstimatedBudget)
+                    INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Department, TotalEstimatedBudget)
                     OUTPUT INSERTED.Id
-                    VALUES (@Name, @Company, @FromDate, @ToDate, @Department, @TotalEstimatedBudget)", conn))
+                    VALUES (@ErpNextId, @Name, @Company, @FromDate, @ToDate, @Department, @TotalEstimatedBudget)", conn))
                 {
+                    cmd.Parameters.AddWithValue("@ErpNextId", plan.ErpNextId ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Name", plan.Name ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Company", plan.Company ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@FromDate", plan.FromDate);
@@ -163,6 +171,31 @@ namespace Erp_Aits.Services
             }
 
             return newId;
+        }
+
+        public void Update(StaffingPlan plan)
+        {
+            plan.TotalEstimatedBudget = plan.Details.Sum(d => d.Vacancies * d.EstimatedCostPerPosition);
+            using var conn = new SqlConnection(_connectionString); conn.Open(); EnsureErpNextIdColumn(conn);
+            using (var cmd = new SqlCommand("UPDATE StaffingPlans SET Name=@Name, Company=@Company, FromDate=@FromDate, ToDate=@ToDate, Department=@Department, TotalEstimatedBudget=@Budget, DocStatus=@DocStatus WHERE Id=@Id", conn))
+            {
+                cmd.Parameters.AddWithValue("@Id", plan.Id); cmd.Parameters.AddWithValue("@Name", plan.Name ?? ""); cmd.Parameters.AddWithValue("@Company", plan.Company ?? ""); cmd.Parameters.AddWithValue("@FromDate", plan.FromDate); cmd.Parameters.AddWithValue("@ToDate", plan.ToDate); cmd.Parameters.AddWithValue("@Department", plan.Department ?? (object)DBNull.Value); cmd.Parameters.AddWithValue("@Budget", plan.TotalEstimatedBudget); cmd.Parameters.AddWithValue("@DocStatus", plan.DocStatus); cmd.ExecuteNonQuery();
+            }
+            using (var delete = new SqlCommand("DELETE FROM StaffingPlanDetails WHERE StaffingPlanId=@Id", conn)) { delete.Parameters.AddWithValue("@Id", plan.Id); delete.ExecuteNonQuery(); }
+            foreach (var detail in plan.Details.Where(d => !string.IsNullOrWhiteSpace(d.Designation)))
+            {
+                using var insert = new SqlCommand("INSERT INTO StaffingPlanDetails (StaffingPlanId, Designation, Vacancies, EstimatedCostPerPosition, TotalEstimatedCost, NumberOfPositions) VALUES (@PlanId,@Designation,@Vacancies,@Cost,@Total,@Positions)", conn);
+                insert.Parameters.AddWithValue("@PlanId", plan.Id); insert.Parameters.AddWithValue("@Designation", detail.Designation); insert.Parameters.AddWithValue("@Vacancies", detail.Vacancies); insert.Parameters.AddWithValue("@Cost", detail.EstimatedCostPerPosition); insert.Parameters.AddWithValue("@Total", detail.Vacancies * detail.EstimatedCostPerPosition); insert.Parameters.AddWithValue("@Positions", detail.NumberOfPositions); insert.ExecuteNonQuery();
+            }
+        }
+
+        private static void EnsureErpNextIdColumn(SqlConnection conn)
+        {
+            var closeWhenDone = conn.State != System.Data.ConnectionState.Open;
+            if (closeWhenDone) conn.Open();
+            using var cmd = new SqlCommand("IF COL_LENGTH('dbo.StaffingPlans','ErpNextId') IS NULL ALTER TABLE dbo.StaffingPlans ADD ErpNextId NVARCHAR(255) NULL; IF COL_LENGTH('dbo.StaffingPlans','DocStatus') IS NULL ALTER TABLE dbo.StaffingPlans ADD DocStatus INT NOT NULL CONSTRAINT DF_StaffingPlans_DocStatus DEFAULT(0);", conn);
+            cmd.ExecuteNonQuery();
+            if (closeWhenDone) conn.Close();
         }
     }
 }

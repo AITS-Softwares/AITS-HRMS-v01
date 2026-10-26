@@ -1,59 +1,86 @@
 ﻿@{
     ViewBag.Title = "Leaves";
 }
-<h4 class="mb-4">Leaves</h4>
+<style>
+    .leave-workspace { --ink: #12324a; --teal: #087c78; --sky: #eaf4fb; color: var(--ink); max-width: 1440px; margin: 0 auto; padding: 8px 0 32px; }
+    .leave-banner { align-items: center; background: #12324a; border: 1px solid #204d6d; border-radius: 8px; box-shadow: 0 14px 28px rgba(18, 50, 74, .14); color: #fff; display: flex; gap: 24px; justify-content: space-between; padding: 24px 28px; }
+    .leave-banner__eyebrow { color: #8edbd0; font-size: .75rem; font-weight: 700; letter-spacing: .08em; margin: 0 0 6px; text-transform: uppercase; }
+    .leave-banner h4 { color: #fff; font-size: 1.7rem; margin: 0; }
+    .leave-banner__summary { background: #d9f1eb; border: 1px solid #90d3c7; border-radius: 6px; color: #075b58; font-size: .9rem; font-weight: 700; padding: 10px 14px; white-space: nowrap; }
+    .leave-section { margin-top: 30px; }
+    .leave-section__title { color: var(--ink); font-size: 1.1rem; font-weight: 700; margin: 0 0 12px; }
+    .leave-shortcuts { background: var(--sky); border: 1px solid #b8d8e9; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 12px; padding: 14px; }
+    .leave-shortcut { align-items: center; background: #fff; border: 1px solid #bfd7e6; border-radius: 6px; color: var(--ink); display: inline-flex; font-weight: 700; gap: 10px; min-height: 48px; padding: 10px 14px; text-decoration: none; transition: background-color .16s ease, border-color .16s ease, transform .16s ease; }
+    .leave-shortcut:hover { background: #f5fcfb; border-color: var(--teal); color: #075b58; transform: translateY(-1px); }
+    .leave-shortcut__badge { background: #fff0d6; border-radius: 999px; color: #9a5700; font-size: .76rem; font-weight: 700; padding: 4px 8px; }
+    .leave-grid { display: grid; gap: 18px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .leave-panel { background: #fff; border: 1px solid #c7dce7; border-radius: 8px; min-height: 225px; overflow: hidden; }
+    .leave-panel--setup { border-top: 4px solid #2383ba; } .leave-panel--allocation { border-top: 4px solid #087c78; } .leave-panel--application { border-top: 4px solid #d28720; } .leave-panel--reports { border-top: 4px solid #7a5fb8; }
+    .leave-panel__title { align-items: center; background: #f7fbfd; border-bottom: 1px solid #d9e6ed; display: flex; font-size: 1rem; font-weight: 700; margin: 0; min-height: 58px; padding: 0 18px; }
+    .leave-panel--allocation .leave-panel__title { background: #f1faf7; } .leave-panel--application .leave-panel__title { background: #fff8ed; } .leave-panel--reports .leave-panel__title { background: #f7f4fd; }
+    .leave-panel__links { list-style: none; margin: 0; padding: 8px 18px; } .leave-panel__links li + li { border-top: 1px solid #e6eef2; }
+    .leave-panel__links a { align-items: center; color: #245d82; display: flex; font-size: .94rem; gap: 10px; min-height: 44px; padding: 7px 0; text-decoration: none; }
+    .leave-panel__links a::after { content: ">"; font-weight: 700; margin-left: auto; } .leave-panel__links a:hover { color: var(--teal); }
+    @@media (max-width: 900px) { .leave-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @@media (max-width: 640px) { .leave-workspace { padding-bottom: 20px; } .leave-banner { align-items: flex-start; flex-direction: column; padding: 20px; } .leave-banner h4 { font-size: 1.4rem; } .leave-banner__summary { white-space: normal; } .leave-grid { grid-template-columns: 1fr; } .leave-panel { min-height: 0; } }
+</style>
 
-<h5 class="mb-3">Your Shortcuts</h5>
-<div class="d-flex flex-wrap gap-4 mb-4">
-    <a href="@Url.Action("CreateLeave", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+<main class="leave-workspace">
+<section class="leave-banner"><div><p class="leave-banner__eyebrow">HRMS / Leave management</p><h4>Leaves</h4></div><div class="leave-banner__summary">Manage leave setup, allocations, and requests</div></section>
+
+<section class="leave-section">
+<h5 class="leave-section__title">Your Shortcuts</h5>
+<div class="leave-shortcuts">
+    <a href="@Url.Action("CreateLeave", "HR")" class="leave-shortcut">
         <span>Leave Application</span>
-        <span class="badge bg-secondary-subtle text-secondary">@ViewBag.OpenLeaveApplicationCount Open</span>
+        <span class="leave-shortcut__badge">@ViewBag.OpenLeaveApplicationCount Open</span>
     </a>
-    <a href="@Url.Action("LeaveAllocation", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2">
+    <a href="@Url.Action("LeaveAllocation", "HR")" class="leave-shortcut">
         <span>Leave Allocation</span>
-        <span class="badge bg-secondary-subtle text-secondary">0</span>
+        <span class="leave-shortcut__badge">0</span>
     </a>
 </div>
+</section>
 
-<h5 class="mb-3">Masters &amp; Reports</h5>
-<div class="row g-4">
-    <div class="col-md-3">
-        <h6>Setup</h6>
-        <ul class="list-unstyled">
+<section class="leave-section">
+<h5 class="leave-section__title">Masters &amp; Reports</h5>
+<div class="leave-grid">
+    <article class="leave-panel leave-panel--setup">
+        <h6 class="leave-panel__title">Setup</h6>
+        <ul class="leave-panel__links">
             <li><a href="@Url.Action("HolidayList", "HR")">Holiday List</a></li>
             <li><a href="@Url.Action("LeaveType", "HR")">Leave Type</a></li>
             <li><a href="@Url.Action("LeavePeriod", "HR")">Leave Period</a></li>
             <li><a href="@Url.Action("LeavePolicy", "HR")">Leave Policy</a></li>
             <li><a href="@Url.Action("LeaveBlockList", "HR")">Leave Block List</a></li>
         </ul>
-    </div>
-    <div class="col-md-3">
-        <h6>Allocation</h6>
-        <ul class="list-unstyled">
+    </article>
+    <article class="leave-panel leave-panel--allocation">
+        <h6 class="leave-panel__title">Allocation</h6>
+        <ul class="leave-panel__links">
             <li><a href="@Url.Action("LeaveAllocation", "HR")">Leave Allocation</a></li>
             <li><a href="@Url.Action("LeavePolicyAssignment", "HR")">Leave Policy Assignment</a></li>
             <li><a href="@Url.Action("LeaveControlPanel", "HR")">Leave Control Panel</a></li>
             <li><a href="@Url.Action("LeaveEncashment", "HR")">Leave Encashment</a></li>
         </ul>
-    </div>
-    <div class="col-md-3">
-        <h6>Application</h6>
-        <ul class="list-unstyled">
+    </article>
+    <article class="leave-panel leave-panel--application">
+        <h6 class="leave-panel__title">Application</h6>
+        <ul class="leave-panel__links">
             <li><a href="@Url.Action("CreateLeave", "HR")">Leave Application</a></li>
             @* <a href="@Url.Action("CreateLeave", "HR")" class="text-decoration-none text-dark d-flex align-items-center gap-2"> *@
             @* <li><a href="@Url.Action("CreateCompensatoryLeaveRequest", "HR")">Compensatory Leave Request</a></li> *@
             <li><a href="/HR/CompensatoryLeaveRequest">Compensatory Leave Request</a></li>
         </ul>
-    </div>
-</div>
-
-<div class="row g-4 mt-1">
-    <div class="col-md-3">
-        <h6>Reports</h6>
-        <ul class="list-unstyled">
+    </article>
+    <article class="leave-panel leave-panel--reports">
+        <h6 class="leave-panel__title">Reports</h6>
+        <ul class="leave-panel__links">
             <li><a href="@Url.Action("EmployeeLeaveBalance", "HR")">Employee Leave Balance</a></li>
             <li><a href="@Url.Action("EmployeeLeaveBalanceSummary", "HR")">Employee Leave Balance Summary</a></li>
             <li><a href="@Url.Action("EmployeesWorkingOnHoliday", "HR")">Employees working on a holiday</a></li>
         </ul>
-    </div>
+    </article>
 </div>
+</section>
+</main>
