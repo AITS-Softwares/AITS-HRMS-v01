@@ -24,25 +24,10 @@ namespace Erp_Aits.Services
 
         public async Task<bool> HasPermission(int userId, string controller, string action, string permissionType = "View")
         {
-    if (string.Equals(controller, "HR", StringComparison.OrdinalIgnoreCase))
-    {
-        const string roleQuery = @"
-            SELECT TOP (1) [Role]
-            FROM Users
-            WHERE Id = @UserId
-              AND IsActive = 1
-              AND IsDeleted = 0";
-
-        using var hrConnection = new SqlConnection(_connectionString);
-        using var hrCommand = new SqlCommand(roleQuery, hrConnection);
-        hrCommand.Parameters.AddWithValue("@UserId", userId);
-        await hrConnection.OpenAsync();
-
-        var role = (await hrCommand.ExecuteScalarAsync())?.ToString();
-        return string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(role, "Company Admin", StringComparison.OrdinalIgnoreCase);
-    }
+            if (string.Equals(controller, "HR", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
 
             try
             {

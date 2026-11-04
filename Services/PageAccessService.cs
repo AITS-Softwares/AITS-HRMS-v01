@@ -471,35 +471,28 @@ namespace Erp_Aits.Services
                             FROM Permissions p
                             WHERE p.IsActive = 1
                               AND p.MenuOrder IS NOT NULL
-                              AND (
-                (@HasHrmsAccess = 1 AND p.ControllerName = 'HR')
-                OR (
-                    p.ControllerName <> 'HR'
-                    AND (
-                        EXISTS (
-                            SELECT 1 FROM UserPermissions up
-                            WHERE up.UserId = @UserId
-                              AND up.PermissionId = p.Id
-                              AND up.CanView = 1
-                        )
-                        OR EXISTS (
-                            SELECT 1
-                            FROM RolePermissions rp
-                            INNER JOIN Users u ON u.[Role] = rp.RoleName
-                            WHERE u.Id = @UserId
-                              AND rp.PermissionId = p.Id
-                              AND rp.CanView = 1
-                        )
+                AND (
+                    p.ControllerName = 'HR'
+                    OR EXISTS (
+                        SELECT 1 FROM UserPermissions up
+                        WHERE up.UserId = @UserId
+                          AND up.PermissionId = p.Id
+                          AND up.CanView = 1
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM RolePermissions rp
+                        INNER JOIN Users u ON u.[Role] = rp.RoleName
+                        WHERE u.Id = @UserId
+                          AND rp.PermissionId = p.Id
+                          AND rp.CanView = 1
                     )
                 )
-                              )
                             ORDER BY p.MenuOrder";
 
                         using (var cmd = new SqlCommand(query, conn))
                         {
                     cmd.Parameters.AddWithValue("@UserId", userId);
-                    cmd.Parameters.AddWithValue("@HasHrmsAccess",
-                        loginType == "Company" || userRole == "Employee" || userRole == "Admin" || userRole == "Company Admin" ? 1 : 0);
                             await conn.OpenAsync();
 
                             using (var reader = await cmd.ExecuteReaderAsync())
@@ -599,35 +592,28 @@ namespace Erp_Aits.Services
                                 p.ParentMenu
                             FROM Permissions p
                             WHERE p.IsActive = 1
-                              AND (
-                (@HasHrmsAccess = 1 AND p.ControllerName = 'HR')
-                OR (
-                    p.ControllerName <> 'HR'
-                    AND (
-                        EXISTS (
-                            SELECT 1 FROM UserPermissions up
-                            WHERE up.UserId = @UserId
-                              AND up.PermissionId = p.Id
-                              AND up.CanView = 1
-                        )
-                        OR EXISTS (
-                            SELECT 1
-                            FROM RolePermissions rp
-                            INNER JOIN Users u ON u.[Role] = rp.RoleName
-                            WHERE u.Id = @UserId
-                              AND rp.PermissionId = p.Id
-                              AND rp.CanView = 1
-                        )
+                AND (
+                    p.ControllerName = 'HR'
+                    OR EXISTS (
+                        SELECT 1 FROM UserPermissions up
+                        WHERE up.UserId = @UserId
+                          AND up.PermissionId = p.Id
+                          AND up.CanView = 1
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM RolePermissions rp
+                        INNER JOIN Users u ON u.[Role] = rp.RoleName
+                        WHERE u.Id = @UserId
+                          AND rp.PermissionId = p.Id
+                          AND rp.CanView = 1
                     )
                 )
-                              )
                             ORDER BY p.MenuOrder";
 
                         using (var cmd = new SqlCommand(query, conn))
                         {
                     cmd.Parameters.AddWithValue("@UserId", userId);
-                    cmd.Parameters.AddWithValue("@HasHrmsAccess",
-                        loginType == "Company" || userRole == "Employee" || userRole == "Admin" || userRole == "Company Admin" ? 1 : 0);
                             await conn.OpenAsync();
 
                             using (var reader = await cmd.ExecuteReaderAsync())
