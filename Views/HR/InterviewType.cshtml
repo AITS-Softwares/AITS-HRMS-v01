@@ -3,6 +3,7 @@
     ViewBag.Title = "Interview Type";
 }
 
+<div class="recruitment-theme workflow-page interview-ui">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Interview Type</h4>
     <a href="@Url.Action("CreateInterviewType", "HR")" class="btn btn-dark btn-sm">+ Add Interview Type</a>
@@ -39,3 +40,5 @@
 {
     <p class="text-muted text-center py-5">No interview types found.</p>
 }
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

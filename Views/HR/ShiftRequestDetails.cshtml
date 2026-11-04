@@ -109,7 +109,7 @@
                 <label class="form-label">Approver</label>
                 @if (canEdit)
                 {
-                    <select name="Approver" class="form-select" required>
+                    <select name="Approver" id="Approver" class="form-select" required>
                         <option value="">-- Select Approver --</option>
                         @if (ViewBag.Users != null)
                         {
@@ -156,7 +156,7 @@
 </form>
 
 <script>
-    function setEmployeeDetails(selectElement) {
+    async function setEmployeeDetails(selectElement) {
         var selected = selectElement.options[selectElement.selectedIndex];
         document.getElementById("EmployeeName").value = selected.getAttribute("data-name") || "";
         document.getElementById("Department").value = selected.getAttribute("data-department") || "";
@@ -165,6 +165,17 @@
         if (companySelect && company) {
             companySelect.value = company;
         }
+        var approver = document.getElementById("Approver");
+        if (!selectElement.value || !approver) return;
+        try {
+            var response = await fetch('@Url.Action("GetShiftRequestEmployeeDetails", "HR")?employee=' + encodeURIComponent(selectElement.value));
+            var data = await response.json();
+            if (!data.success) return;
+            document.getElementById("EmployeeName").value = data.employeeName || "";
+            document.getElementById("Department").value = data.department || "";
+            if (companySelect && data.company) companySelect.value = data.company;
+            if (data.shiftRequestApprover) approver.value = data.shiftRequestApprover;
+        } catch (e) { console.warn('Employee details could not be refreshed.', e); }
     }
 
     (function () {

@@ -3,6 +3,9 @@
     ViewBag.Title = "Expense Claim Type " + Model.Name;
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">

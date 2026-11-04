@@ -1,5 +1,7 @@
 ﻿@model Erp_Aits.Models.Vehicle
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui operations-ui" aria-hidden="true"></span>
 @{
     ViewBag.Title = "New Vehicle";
     var employees = ViewBag.Employees as List<string> ?? new List<string>();

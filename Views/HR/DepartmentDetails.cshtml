@@ -2,7 +2,8 @@
 
 @{
     ViewBag.Title = "Department Details";
-    bool isEdit = ViewBag.IsEdit == true;
+    // Department details remain editable after every save; no separate edit mode is needed.
+    bool isEdit = true;
 }
 
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -269,24 +270,17 @@
             <div class="dept-actions">
                 <a href="@Url.Action("Department", "HR")" class="btn-back">Back</a>
 
-                @if (isEdit)
-                {
-                    <button type="submit" form="departmentUpdateForm" class="btn-save">Save Department</button>
-                }
-                else
-                {
-                    <a href="@Url.Action("DepartmentDetails", "HR", new { id = Model.Id, edit = true })" class="btn-edit">Edit</a>
+                <button type="submit" form="departmentUpdateForm" class="btn-save">Save Department</button>
 
-                    <form asp-action="DeleteDepartment"
-                          asp-controller="HR"
-                          asp-route-id="@Model.Id"
-                          method="post"
-                          class="d-inline"
-                          onsubmit="return confirm('Are you sure you want to delete this Department from ERPNext and HRMS?');">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn-delete">Delete</button>
-                    </form>
-                }
+                <form asp-action="DeleteDepartment"
+                      asp-controller="HR"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline"
+                      onsubmit="return confirm('Are you sure you want to delete this Department from ERPNext and HRMS?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
             </div>
         </div>
 

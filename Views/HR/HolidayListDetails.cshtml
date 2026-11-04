@@ -1,31 +1,29 @@
 ﻿@model Erp_Aits.Models.HolidayList
 @{
     ViewBag.Title = "Holiday List Details";
-    bool editMode = ViewBag.EditMode == true;
+    bool editMode = true;
 }
 
-<div class="container my-4">
+<div class="container my-4 holiday-shell">
+    <style>
+        .holiday-shell { background:#f1fbfd; border:1px solid #cbe5ed; border-radius:18px; padding:26px; }
+        .holiday-shell .card { border:1px solid #c9e1e9; border-radius:14px; box-shadow:none !important; }
+        .holiday-shell h4, .holiday-shell h6, .holiday-shell .form-label { color:#17486c; font-weight:700; }
+        .holiday-shell .table thead th { background:#e7f5f8; color:#17486c; }
+    </style>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4>Holiday List - @Model.HolidayListName</h4>
 
         <div class="d-flex gap-2">
             <a href="@Url.Action("HolidayList", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
 
-            @if (!editMode)
-            {
-                <a href="@Url.Action("HolidayListDetails", "HR", new { id = Model.Id, edit = true })"
-                   class="btn btn-dark btn-sm">
-                    Edit
-                </a>
-
-                <form method="post"
+            <form method="post"
                       action="@Url.Action("DeleteHolidayList", "HR", new { id = Model.Id })"
                       onsubmit="return confirm('Delete this Holiday List from HRMS and ERPNext?');"
                       class="d-inline">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                 </form>
-            }
         </div>
     </div>
 
@@ -82,18 +80,28 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Country</label>
-                    <input name="Country"
-                           class="form-control"
-                           value="@Model.Country"
-                           @(editMode ? "" : "readonly") />
+                    <input name="Country" id="country" class="form-control" list="countryOptions"
+                           value="@Model.Country" placeholder="Select or type country" autocomplete="off" />
+                    <datalist id="countryOptions"></datalist>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Subdivision (State)</label>
-                    <input name="Subdivision"
-                           class="form-control"
-                           value="@Model.Subdivision"
-                           @(editMode ? "" : "readonly") />
+                    <input name="Subdivision" id="subdivision" class="form-control" list="subdivisionOptions" data-current="@Model.Subdivision"
+                           value="@Model.Subdivision" placeholder="Select or type subdivision" autocomplete="off" />
+                    <datalist id="subdivisionOptions"></datalist>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Weekly Off</label>
+                    <select name="WeeklyOff" class="form-select">
+                        <option value="">Select weekly off</option>
+                        @foreach (var day in new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })
+                        {
+                            if (Model.WeeklyOff == day) { <option value="@day" selected>@day</option> }
+                            else { <option value="@day">@day</option> }
+                        }
+                    </select>
                 </div>
 
                 <div class="col-md-6">
@@ -212,6 +220,59 @@
 @if (editMode)
 {
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const countrySelect = document.getElementById("country");
+            const subdivisionSelect = document.getElementById("subdivision");
+            if (!countrySelect || !subdivisionSelect) return;
+            let holidayCountryOptions;
+
+            async function loadHolidayCountryOptions() {
+                if (holidayCountryOptions) return holidayCountryOptions;
+                const response = await fetch('@Url.Action("GetHolidayCountryOptions", "HR")');
+                if (!response.ok) return null;
+                holidayCountryOptions = await response.json();
+                const options = document.getElementById("countryOptions");
+                options.innerHTML = "";
+                (holidayCountryOptions.countries || []).forEach(country => {
+                    options.appendChild(new Option(country.label + " (" + country.value + ")", country.value));
+                });
+                return holidayCountryOptions;
+            }
+
+            async function loadSubdivisions() {
+                const current = subdivisionSelect.dataset.current || subdivisionSelect.value;
+                const options = document.getElementById("subdivisionOptions");
+                options.innerHTML = "";
+                if (!countrySelect.value) return;
+                try {
+                    const data = await loadHolidayCountryOptions();
+                    if (!data) return;
+                    const selected = (data.countries || []).find(country =>
+                        country.value.toLowerCase() === countrySelect.value.toLowerCase() ||
+                        country.label.toLowerCase() === countrySelect.value.toLowerCase());
+                    const countryCode = selected ? selected.value : countrySelect.value.trim();
+                    if (selected) countrySelect.value = countryCode;
+                    ((data.subdivisionsByCountry || {})[countryCode] || [])
+                        .forEach(name => options.appendChild(new Option(name, name)));
+                    if (current) subdivisionSelect.value = current;
+                } catch { }
+            }
+
+            countrySelect.addEventListener("change", function () {
+                subdivisionSelect.dataset.current = "";
+                loadSubdivisions();
+            });
+            countrySelect.addEventListener("input", function () {
+                subdivisionSelect.dataset.current = "";
+                loadSubdivisions();
+            });
+            // Load Country first, then populate the State/Subdivision list
+            // for the currently selected country.
+            loadHolidayCountryOptions().then(function () {
+                if (countrySelect.value) loadSubdivisions();
+            });
+        });
+
         function updateHolidayIndexes() {
             const rows = document.querySelectorAll("#holidaysBody tr:not(#emptyHolidayRow)");
 

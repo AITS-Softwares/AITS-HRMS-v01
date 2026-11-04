@@ -3,6 +3,7 @@
     ViewBag.Title = "Job Applicant";
 }
 
+<div class="recruitment-theme recruitment-list">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Job Applicant</h4>
     <a href="@Url.Action("CreateJobApplicant", "HR")" class="btn btn-dark btn-sm">+ Add Job Applicant</a>
@@ -53,3 +54,6 @@
         <a href="@Url.Action("CreateJobApplicant", "HR")" class="btn btn-light btn-sm">Create a new Job Applicant</a>
     </div>
 }
+</div>
+
+@await Html.PartialAsync("_RecruitmentTheme")

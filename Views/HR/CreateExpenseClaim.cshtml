@@ -126,6 +126,17 @@
     }
 </datalist>
 
+<template id="expenseCostCenterOptions">
+    <option value="">Select Cost Center</option>
+    @if (ViewBag.CostCenters != null)
+    {
+        foreach (var cc in ViewBag.CostCenters)
+        {
+            <option value="@cc.name">@cc.name</option>
+        }
+    }
+</template>
+
 <datalist id="dunningList">
     @if (ViewBag.Dunnings != null)
     {
@@ -252,7 +263,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Approval Status</label>
+                        <label class="form-label">Status <span class="text-danger">*</span></label>
                         <select name="ApprovalStatus" class="form-select">
                             <option value="Draft" selected="@(Model.ApprovalStatus == "Draft")">Draft</option>
                             <option value="Approved" selected="@(Model.ApprovalStatus == "Approved")">Approved</option>
@@ -291,12 +302,10 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Company GSTIN</label>
-                        <input id="CompanyGstin"
-                               name="CompanyGstin"
-                               value="@Model.CompanyGstin"
-                               class="form-control"
-                               list="companyGstinList"
-                               placeholder="Auto-filled from company" />
+                        <select id="CompanyGstin" name="CompanyGstin" class="form-select" onchange="syncCompanyFromGstin(this)">
+                            <option value="">Select Company GSTIN</option>
+                            @if (ViewBag.Companies != null) { foreach (var c in ViewBag.Companies) { <option value="@c.gstin" data-company="@c.name" selected="@(c.gstin?.ToString() == Model.CompanyGstin ? "selected" : null)">@c.gstin — @c.name</option> } }
+                        </select>
                     </div>
                 </div>
             </div>
@@ -312,6 +321,7 @@
                                 <th>Expense Date</th>
                                 <th>Expense Type</th>
                                 <th>Description</th>
+                                <th>Cost Center</th>
                                 <th>Amount</th>
                                 <th>Sanctioned Amount</th>
                                 <th style="width:60px;"></th>
@@ -716,6 +726,11 @@
         if (costCenterInput && costCenter) costCenterInput.value = costCenter;
     }
 
+    function syncCompanyFromGstin(select) {
+        const company = select.options[select.selectedIndex]?.getAttribute('data-company') || '';
+        if (company) { document.getElementById('Company').value = company; autoFillCompanyData(company); }
+    }
+
     function loadErpLinkDropdown(input, doctype) {
         clearTimeout(erpLinkTimer);
 
@@ -789,6 +804,9 @@
                     <input name="Expenses[${i}].Description"
                            value="${esc(desc)}"
                            class="form-control form-control-sm" />
+                </td>
+                <td>
+                    <select name="Expenses[${i}].CostCenter" class="form-select form-select-sm">${document.getElementById('expenseCostCenterOptions').innerHTML}</select>
                 </td>
                 <td>
                     <input type="number"

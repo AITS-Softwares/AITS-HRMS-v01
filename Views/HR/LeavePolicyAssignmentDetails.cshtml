@@ -9,6 +9,9 @@
     string effectiveTo = Model.EffectiveTo == default(DateTime) ? "" : Model.EffectiveTo.ToString("yyyy-MM-dd");
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">

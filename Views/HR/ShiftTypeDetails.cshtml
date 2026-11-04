@@ -1,196 +1,45 @@
-﻿@model Erp_Aits.Models.ShiftType
-
+@model Erp_Aits.Models.ShiftType
 @{
     ViewBag.Title = "Shift Type Details";
-
-    bool editMode =
-        ViewBag.EditMode == true ||
-        string.Equals(Context.Request.Query["edit"], "true", StringComparison.OrdinalIgnoreCase);
-
     var holidayLists = ViewBag.HolidayLists as List<string> ?? new List<string>();
+    var colors = new[] { "Blue", "Cyan", "Fuchsia", "Green", "Lime", "Orange", "Pink", "Red", "Violet", "Yellow" };
 }
-
-@functions {
-    string FormatTime(string value)
-    {
-        if (TimeSpan.TryParse(value, out var time))
-            return time.ToString(@"hh\:mm\:ss");
-
-        return value ?? "";
-    }
-}
+@functions { string FormatTime(string value) => TimeSpan.TryParse(value, out var time) ? time.ToString(@"hh\:mm\:ss") : value ?? ""; }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h4 class="mb-0">Shift Type - @Model.Name</h4>
-        <small class="text-muted">@Model.ShiftTypeCode</small>
-    </div>
-
+    <div><h4 class="mb-0">Shift Type - @Model.Name</h4><small class="text-muted">@Model.ShiftTypeCode</small></div>
     <div class="d-flex gap-2">
-        <a href="@Url.Action("ShiftType", "HR")" class="btn btn-outline-secondary btn-sm">Back to List</a>
-
-        @if (!editMode)
-        {
-            <a href="/HR/ShiftTypeDetails/@Model.Id?edit=true" class="btn btn-dark btn-sm">Edit</a>
-
-            <form method="post"
-                  action="@Url.Action("DeleteShiftType", "HR", new { id = Model.Id })"
-                  onsubmit="return confirm('Are you sure you want to delete this Shift Type?');">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
-        }
+        <a href="@Url.Action("ShiftType", "HR")" class="btn btn-outline-light btn-sm">Back to List</a>
+        <div class="dropdown"><button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">Shift Tool</button><ul class="dropdown-menu"><li><a class="dropdown-item" href="@Url.Action("ShiftAssignmentTool", "HR")">Shift Assignment Tool</a></li><li><a class="dropdown-item" href="@Url.Action("Roster", "HR")">Roster</a></li></ul></div>
+        <button type="submit" form="shiftTypeForm" formaction="@Url.Action("MarkShiftTypeAttendance", "HR", new { id = Model.Id })" formmethod="post" class="btn btn-warning btn-sm">Mark Attendance</button>
+        <form method="post" action="@Url.Action("DeleteShiftType", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Shift Type?');">@Html.AntiForgeryToken()<button type="submit" class="btn btn-danger btn-sm">Delete</button></form>
     </div>
 </div>
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div> }
+@if (TempData["Success"] != null) { <div class="alert alert-success mb-3">@TempData["Success"]</div> }
 
-@if (TempData["ErpNextError"] != null)
-{
-    <div class="alert alert-danger mb-3">@TempData["ErpNextError"]</div>
-}
+<form id="shiftTypeForm" method="post" action="@Url.Action("UpdateShiftType", "HR", new { id = Model.Id })">
+@Html.AntiForgeryToken()
+<div class="card p-4"><div class="row g-3">
+    <div class="col-md-6"><label class="form-label">Shift Type Name</label><input class="form-control" value="@Model.Name" readonly /><input type="hidden" name="Name" value="@Model.Name" /></div>
+    <div class="col-md-6"><label class="form-label">Holiday List</label><select name="HolidayList" class="form-select" required><option value="">Select Holiday List</option>@foreach (var hl in holidayLists) { <option value="@hl" selected="@(Model.HolidayList == hl)">@hl</option> }</select></div>
+    <div class="col-md-6"><label class="form-label">Start Time</label><input name="StartTime" type="time" class="form-control" value="@FormatTime(Model.StartTime)" step="1" required /></div>
+    <div class="col-md-6"><label class="form-label">End Time</label><input name="EndTime" type="time" class="form-control" value="@FormatTime(Model.EndTime)" step="1" required /></div>
+    <div class="col-md-6"><label class="form-label">Roster Color</label><select name="RosterColor" class="form-select">@foreach (var color in colors) { <option value="@color" selected="@(Model.RosterColor == color)">@color</option> }</select></div>
+    <div class="col-md-6 d-flex align-items-end"><div class="form-check"><input type="hidden" name="EnableAutoAttendance" value="false" /><input type="checkbox" name="EnableAutoAttendance" value="true" class="form-check-input" id="EnableAutoAttendance" @(Model.EnableAutoAttendance ? "checked" : "") /><label class="form-check-label" for="EnableAutoAttendance">Enable Auto Attendance</label></div></div>
+</div></div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success mb-3">@TempData["Success"]</div>
-}
-
-<form method="post" action="@Url.Action("UpdateShiftType", "HR", new { id = Model.Id })">
-    @Html.AntiForgeryToken()
-
-    <div class="card p-4">
-        <div class="row g-3">
-
-            <div class="col-md-6">
-                <label class="form-label">Shift Type Name</label>
-                <input type="text"
-                       class="form-control"
-                       value="@Model.Name"
-                       readonly />
-                <input type="hidden" name="Name" value="@Model.Name" />
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Holiday List</label>
-
-                @if (editMode)
-                {
-                    <select name="HolidayList" class="form-select" required>
-                        <option value="">Select Holiday List</option>
-                        @foreach (var hl in holidayLists)
-                        {
-                            <option value="@hl" selected="@(Model.HolidayList == hl)">
-                                @hl
-                            </option>
-                        }
-                    </select>
-                }
-                else
-                {
-                    <input type="text" class="form-control" value="@Model.HolidayList" readonly />
-                    <input type="hidden" name="HolidayList" value="@Model.HolidayList" />
-                }
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Start Time</label>
-
-                @if (editMode)
-                {
-                    <input type="time"
-                           name="StartTime"
-                           class="form-control"
-                           value="@FormatTime(Model.StartTime)"
-                           step="1"
-                           required />
-                }
-                else
-                {
-                    <input type="time"
-                           class="form-control"
-                           value="@FormatTime(Model.StartTime)"
-                           step="1"
-                           readonly />
-                    <input type="hidden" name="StartTime" value="@FormatTime(Model.StartTime)" />
-                }
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Roster Color</label>
-
-                @if (editMode)
-                {
-                    <select name="RosterColor" class="form-select">
-                        <option value="Blue" selected="@(Model.RosterColor == "Blue" || string.IsNullOrWhiteSpace(Model.RosterColor))">Blue</option>
-                        <option value="Green" selected="@(Model.RosterColor == "Green")">Green</option>
-                        <option value="Red" selected="@(Model.RosterColor == "Red")">Red</option>
-                        <option value="Orange" selected="@(Model.RosterColor == "Orange")">Orange</option>
-                        <option value="Purple" selected="@(Model.RosterColor == "Purple")">Purple</option>
-                        <option value="Yellow" selected="@(Model.RosterColor == "Yellow")">Yellow</option>
-                    </select>
-                }
-                else
-                {
-                    <input type="text" class="form-control" value="@Model.RosterColor" readonly />
-                    <input type="hidden" name="RosterColor" value="@Model.RosterColor" />
-                }
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">End Time</label>
-
-                @if (editMode)
-                {
-                    <input type="time"
-                           name="EndTime"
-                           class="form-control"
-                           value="@FormatTime(Model.EndTime)"
-                           step="1"
-                           required />
-                }
-                else
-                {
-                    <input type="time"
-                           class="form-control"
-                           value="@FormatTime(Model.EndTime)"
-                           step="1"
-                           readonly />
-                    <input type="hidden" name="EndTime" value="@FormatTime(Model.EndTime)" />
-                }
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-check mt-4">
-                    <input type="hidden" name="EnableAutoAttendance" value="false" />
-
-                    @if (editMode)
-                    {
-                        <input type="checkbox"
-                               name="EnableAutoAttendance"
-                               value="true"
-                               class="form-check-input"
-                               id="EnableAutoAttendance"
-                               @(Model.EnableAutoAttendance ? "checked" : "") />
-                    }
-                    else
-                    {
-                        <input type="checkbox"
-                               class="form-check-input"
-                               id="EnableAutoAttendance"
-                               @(Model.EnableAutoAttendance ? "checked" : "")
-                               disabled />
-                    }
-
-                    <label class="form-check-label" for="EnableAutoAttendance">Enable Auto Attendance</label>
-                </div>
-            </div>
-        </div>
-
-        @if (editMode)
-        {
-            <div class="mt-4 d-flex gap-2">
-                <button type="submit" class="btn btn-dark">Save</button>
-                <a href="/HR/ShiftTypeDetails/@Model.Id" class="btn btn-outline-secondary">Cancel</a>
-            </div>
-        }
-    </div>
+<div id="autoAttendanceSettings" class="card p-4 mt-3" @(Model.EnableAutoAttendance ? "" : "hidden")>
+    <h5 class="mb-3">Auto Attendance Settings</h5><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Determine Check-in and Check-out</label><select name="DetermineCheckInAndCheckOut" class="form-select"><option value="">Select</option><option value="Alternating entries as IN and OUT during the same shift" selected="@(Model.DetermineCheckInAndCheckOut == "Alternating entries as IN and OUT during the same shift")">Alternating entries as IN and OUT during the same shift</option><option value="Strictly based on Log Type in Employee Checkin" selected="@(Model.DetermineCheckInAndCheckOut == "Strictly based on Log Type in Employee Checkin")">Strictly based on Log Type in Employee Checkin</option></select></div>
+        <div class="col-md-6"><label class="form-label">Working Hours Calculation Based On</label><select name="WorkingHoursCalculationBasedOn" class="form-select"><option value="">Select</option><option value="First Check-in and Last Check-out" selected="@(Model.WorkingHoursCalculationBasedOn == "First Check-in and Last Check-out")">First Check-in and Last Check-out</option><option value="Every Valid Check-in and Check-out" selected="@(Model.WorkingHoursCalculationBasedOn == "Every Valid Check-in and Check-out")">Every Valid Check-in and Check-out</option></select></div>
+        <div class="col-md-6"><label class="form-label">Begin check-in before shift start time (minutes)</label><input name="BeginCheckInBeforeShiftStartTime" type="number" class="form-control" value="@Model.BeginCheckInBeforeShiftStartTime" /></div><div class="col-md-6"><label class="form-label">Allow check-out after shift end time (minutes)</label><input name="AllowCheckOutAfterShiftEndTime" type="number" class="form-control" value="@Model.AllowCheckOutAfterShiftEndTime" /></div>
+        <div class="col-md-6"><label class="form-label">Working hours threshold for half day</label><input name="WorkingHoursThresholdForHalfDay" type="number" step="0.01" class="form-control" value="@Model.WorkingHoursThresholdForHalfDay" /></div><div class="col-md-6"><label class="form-label">Working hours threshold for absent</label><input name="WorkingHoursThresholdForAbsent" type="number" step="0.01" class="form-control" value="@Model.WorkingHoursThresholdForAbsent" /></div>
+        <div class="col-md-6"><label class="form-label">Process Attendance After</label><input name="ProcessAttendanceAfter" type="date" class="form-control" value="@(Model.ProcessAttendanceAfter?.ToString("yyyy-MM-dd"))" /></div><div class="col-md-6"><label class="form-label">Last Sync of Checkin</label><input class="form-control" value="@(Model.LastSyncOfCheckin?.ToString("yyyy-MM-dd HH:mm:ss") ?? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))" readonly /></div><div class="col-md-6 d-flex align-items-end"><div class="form-check"><input type="hidden" name="MarkAutoAttendanceOnHolidays" value="false" /><input name="MarkAutoAttendanceOnHolidays" value="true" type="checkbox" class="form-check-input" id="MarkHolidays" @(Model.MarkAutoAttendanceOnHolidays ? "checked" : "") /><label for="MarkHolidays" class="form-check-label">Mark Auto Attendance on Holidays</label></div></div>
+        <div class="col-md-6"><div class="form-check"><input type="hidden" name="AutoUpdateLastSync" value="false" /><input name="AutoUpdateLastSync" value="true" type="checkbox" class="form-check-input" id="AutoLastSync" @(Model.AutoUpdateLastSync ? "checked" : "") /><label for="AutoLastSync" class="form-check-label">Automatically update Last Sync of Checkin</label></div></div>
+    </div><hr class="my-4" /><h5 class="mb-3">Late Entry &amp; Early Exit Settings</h5><div class="row g-3"><div class="col-md-6"><div class="form-check"><input type="hidden" name="EnableLateEntryMarking" value="false" /><input name="EnableLateEntryMarking" value="true" type="checkbox" class="form-check-input" id="EnableLate" @(Model.EnableLateEntryMarking ? "checked" : "") /><label for="EnableLate" class="form-check-label">Enable Late Entry</label></div><input name="LateEntryGracePeriod" type="number" class="form-control mt-2" placeholder="Late Entry Grace Period (minutes)" value="@Model.LateEntryGracePeriod" /></div><div class="col-md-6"><div class="form-check"><input type="hidden" name="EnableEarlyExitMarking" value="false" /><input name="EnableEarlyExitMarking" value="true" type="checkbox" class="form-check-input" id="EnableEarly" @(Model.EnableEarlyExitMarking ? "checked" : "") /><label for="EnableEarly" class="form-check-label">Enable Early Exit</label></div><input name="EarlyExitGracePeriod" type="number" class="form-control mt-2" placeholder="Early Exit Grace Period (minutes)" value="@Model.EarlyExitGracePeriod" /></div></div>
+</div>
+<div class="mt-4"><button type="submit" class="btn btn-success">Save</button></div>
 </form>
+<script>document.getElementById('EnableAutoAttendance')?.addEventListener('change', function(){ document.getElementById('autoAttendanceSettings').hidden = !this.checked; });</script>
 <partial name="_ShiftModuleUi" />

@@ -2,14 +2,13 @@
 @{
     ViewBag.Title = "Employee Promotion";
 }
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 
 <div class="d-flex justify-content-between align-items-center mb-3 performance-ui performance-page-header">
     <h4 class="mb-0">Employee Promotion</h4>
 
     <div class="d-flex gap-2">
-        <form asp-action="SyncEmployeePromotionsFromErpNext" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-secondary btn-sm">Sync from ERPNext</button>
-        </form>
         <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#quickAddModal">
             + Add Employee Promotion
         </button>

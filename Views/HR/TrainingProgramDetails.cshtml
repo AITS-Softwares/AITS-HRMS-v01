@@ -3,7 +3,10 @@
     ViewBag.Title = Model.TrainingProgramName;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
+
+<div class="d-flex justify-content-between align-items-center training-detail-header">
     <div>
         <h4 class="mb-0">@Model.TrainingProgramName</h4>
         <small class="text-muted">@Model.TrainingProgramCode</small>
@@ -11,7 +14,7 @@
     <a href="@Url.Action("TrainingProgram", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
 </div>
 
-<div class="card p-4 mb-3">
+<div class="card p-4 mb-3 training-detail-card">
     <div class="row g-3">
         <div class="col-md-6">
             <label class="form-label">Training Program</label>
@@ -28,7 +31,7 @@
     </div>
 </div>
 
-<div class="card p-4 mb-3">
+<div class="card p-4 mb-3 training-detail-card">
     <div class="row g-3">
         <div class="col-md-6">
             <label class="form-label">Trainer Name</label>
@@ -49,7 +52,7 @@
     </div>
 </div>
 
-<div class="card p-4">
+<div class="card p-4 training-detail-card">
     <label class="form-label">Description</label>
     <div class="form-control bg-light" style="min-height:200px; white-space:pre-wrap;">@Model.Description</div>
 </div>

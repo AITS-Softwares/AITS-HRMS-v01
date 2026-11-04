@@ -1,11 +1,11 @@
 ﻿@model Erp_Aits.Models.EmployeeCheckin
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui operations-ui" aria-hidden="true"></span>
 @{
     ViewBag.Title = Model.EmployeeName + " - " + Model.EmployeeCheckinCode;
 
-    bool editMode =
-        ViewBag.EditMode == true ||
-        string.Equals(Context.Request.Query["edit"], "true", StringComparison.OrdinalIgnoreCase);
+    bool editMode = true;
 
     string timeValue = Model.Time.HasValue
         ? Model.Time.Value.ToString("yyyy-MM-ddTHH:mm:ss")
@@ -25,22 +25,6 @@
             Back to List
         </a>
 
-        @if (!editMode)
-        {
-            <a href="/HR/EmployeeCheckinDetails/@Model.Id?edit=true"
-               class="btn btn-dark btn-sm">
-                Edit
-            </a>
-
-            <form method="post"
-                  action="@Url.Action("DeleteEmployeeCheckin", "HR", new { id = Model.Id })"
-                  onsubmit="return confirm('Are you sure you want to delete this Employee Checkin?');">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger btn-sm">
-                    Delete
-                </button>
-            </form>
-        }
     </div>
 </div>
 

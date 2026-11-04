@@ -3,7 +3,6 @@ C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\ap
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\appsettings.json
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\global.json
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\Erp_Aits.staticwebassets.runtime.json
-C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\Erp_Aits.exe
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\Erp_Aits.deps.json
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\Erp_Aits.runtimeconfig.json
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\Erp_Aits.dll
@@ -154,3 +153,10 @@ C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Release\net8.0\st
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Release\net8.0\staticwebassets\msbuild.buildMultiTargeting.Erp_Aits.props
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Release\net8.0\staticwebassets\msbuild.buildTransitive.Erp_Aits.props
 C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\obj\Release\net8.0\staticwebassets.pack.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\web.config
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\appsettings.Development.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\appsettings.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\Erp_Aits.deps.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\Erp_Aits.runtimeconfig.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\Erp_Aits.staticwebassets.runtime.json
+C:\Users\komal himmat patil\Desktop\hrms\Erp_Aits\Erp_Aits\bin\Release\net8.0\artifacts\permission-check\global.json

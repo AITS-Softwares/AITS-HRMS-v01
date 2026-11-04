@@ -3,7 +3,8 @@
     ViewBag.Title = "Interview Round " + Model.Id;
 }
 
-<h4 class="mb-3">@Model.RoundName</h4>
+<div class="recruitment-theme workflow-page interview-ui">
+<h4 class="workflow-title">@Model.RoundName</h4>
 
 <div class="card p-4 mb-3">
     <div class="row g-3">
@@ -47,6 +48,8 @@
         </div>
     </div>
 </div>
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")
 
 <div class="card p-4">
     <h6 class="mb-3">Expected Skillset</h6>

@@ -1,11 +1,14 @@
 ﻿@model Erp_Aits.Models.AppointmentLetterTemplate
 @{
     ViewBag.Title = "New Appointment Letter Template";
+    var formAction = Model.Id > 0 ? "UpdateAppointmentLetterTemplate" : "CreateAppointmentLetterTemplate";
 }
 
-<form asp-action="CreateAppointmentLetterTemplate" method="post">
+<form asp-action="@formAction" method="post">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Appointment Letter Template</h4>
+        <h4 class="mb-0">@(Model.Id > 0 ? "Edit Appointment Letter Template" : "New Appointment Letter Template")</h4>
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
@@ -32,7 +35,9 @@
                             <th style="width:50px;"></th>
                         </tr>
                     </thead>
-                    <tbody id="termsBody"></tbody>
+                    <tbody id="termsBody">
+                        @for (var i = 0; i < Model.Terms.Count; i++) { <tr><td>@(i + 1)</td><td><input name="Terms[@i].Title" class="form-control form-control-sm" value="@Model.Terms[i].Title" required /></td><td><input name="Terms[@i].Description" class="form-control form-control-sm" value="@Model.Terms[i].Description" required /></td><td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">&times;</button></td></tr> }
+                    </tbody>
                 </table>
                 <button type="button" class="btn btn-sm btn-outline-dark mb-3" onclick="addTermRow()">Add Row</button>
             </div>
@@ -47,7 +52,7 @@
 
 @section Scripts {
     <script>
-        let termIdx = 0;
+        let termIdx = @Model.Terms.Count;
 
         function addTermRow() {
             const i = termIdx++;
@@ -60,7 +65,6 @@
             document.getElementById('termsBody').insertAdjacentHTML('beforeend', row);
         }
 
-        // start with one row, like the reference screenshot
-        addTermRow();
+        if (!document.querySelector('#termsBody tr')) addTermRow();
     </script>
 }

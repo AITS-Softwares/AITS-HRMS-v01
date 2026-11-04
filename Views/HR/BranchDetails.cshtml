@@ -34,20 +34,18 @@
     </div>
 }
 
-@if (ViewBag.SyncWarning != null)
-{
-    <div class="alert alert-warning alert-dismissible fade show"
-         role="alert">
-
-        @ViewBag.SyncWarning
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close">
-        </button>
-    </div>
-}
+<style>
+    .branch-detail-page { background:#f1fbfd; border:1px solid #cbe5ed; border-radius:18px; padding:26px; }
+    .branch-detail-hero { background:linear-gradient(110deg,#17486c,#008d88); color:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 12px 24px rgba(23,72,108,.17); }
+    .branch-detail-hero h4 { margin:0; font-weight:750; }
+    .branch-detail-card { background:#fff; border:1px solid #c9e1e9 !important; border-radius:13px !important; box-shadow:none !important; }
+    .branch-detail-card .form-label { color:#17486c; font-weight:700; }
+    .branch-detail-card .form-control { min-height:45px; border-color:#b9dbe4; }
+    .branch-detail-card .form-control[readonly] { background:#f5fbfc; }
+    .branch-back { background:#fff; border:0; color:#0b5065; font-weight:700; }
+    .branch-edit { background:#0b7880; border:0; font-weight:700; }
+    .branch-update { background:#075d66 !important; border:0; }
+</style>
 
 
 <!-- ========================================================= -->
@@ -75,13 +73,13 @@
     <!-- HEADER -->
     <!-- ===================================================== -->
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="branch-detail-page">
+    <div class="branch-detail-hero d-flex justify-content-between align-items-center gap-3 mb-4">
 
         <div>
 
-            <h4 class="mb-0">
-                Branch Details
-            </h4>
+            <div class="small text-uppercase fw-bold" style="color:#9de2e7">Organization setup</div>
+            <h4>Branch Details</h4>
 
         </div>
 
@@ -90,7 +88,7 @@
 
             <!-- Back -->
             <a href="@Url.Action("Branches", "HR")"
-               class="btn btn-outline-secondary btn-sm">
+               class="btn btn-sm branch-back">
 
                 Back
 
@@ -100,7 +98,7 @@
             <!-- Edit -->
             <button type="button"
                     id="btnEditBranch"
-                    class="btn btn-primary btn-sm px-3">
+                    class="btn btn-primary btn-sm px-3 branch-edit">
 
                 Edit
 
@@ -122,7 +120,7 @@
             <!-- Update -->
             <button type="submit"
                     id="btnUpdateBranch"
-                    class="btn btn-dark btn-sm px-4 fw-bold"
+                    class="btn btn-dark btn-sm px-4 fw-bold branch-update"
                     style="display:none;">
 
                 Update Changes
@@ -149,7 +147,7 @@
     <!-- BRANCH FORM -->
     <!-- ===================================================== -->
 
-    <div class="card border rounded-3 p-4 shadow-sm bg-white">
+    <div class="card border rounded-3 p-4 bg-white branch-detail-card">
 
         <div class="row">
 
@@ -176,6 +174,7 @@
 
     </div>
 
+    </div>
 </form>
 
 

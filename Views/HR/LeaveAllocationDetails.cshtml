@@ -23,12 +23,15 @@
 <form method="post"
       action="@Url.Action("UpdateLeaveAllocation", "HR", new { id = Model.Id })"
       id="leaveAllocationForm">
+<style>
+ body{background:#f1fbfd}.allocation-detail{max-width:1180px;margin:24px auto}.allocation-detail .detail-top{background:linear-gradient(110deg,#17486c,#008d88);border-radius:14px;padding:22px 26px;color:#fff}.allocation-detail .card{border:1px solid #cbe5ed;border-radius:14px;box-shadow:0 8px 18px rgba(11,80,101,.06)}.allocation-detail .card h6,.allocation-detail label{color:#17486c;font-weight:700}.allocation-detail .form-control{border-color:#b9dce5}.allocation-detail .btn-dark{background:#fff;color:#0b5065;border:0;font-weight:700}
+</style><div class="allocation-detail">
     <input type="hidden" name="Id" value="@Model.Id" />
     <input type="hidden" name="ErpNextId" value="@Model.ErpNextId" />
     <input type="hidden" name="DocStatus" value="@Model.DocStatus" />
     <input type="hidden" name="Status" value="@Model.Status" />
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="detail-top d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0 d-inline-block me-2">Leave Allocation @(!string.IsNullOrWhiteSpace(Model.ErpNextId) ? Model.ErpNextId : "#" + Model.Id)</h4>
             @if (isSubmitted)
@@ -111,12 +114,12 @@
 
             <div class="col-md-6">
                 <label class="form-label">From Date *</label>
-                <input name="FromDate" type="date" value="@Model.FromDate.ToString("yyyy-MM-dd")" class="form-control" readonly="@(!isDraft)" required />
+                <input id="leaveAllocationFromDate" name="FromDate" type="date" value="@Model.FromDate.ToString("yyyy-MM-dd")" class="form-control" readonly="@(!isDraft)" required />
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">To Date *</label>
-                <input name="ToDate" type="date" value="@Model.ToDate.ToString("yyyy-MM-dd")" class="form-control" readonly="@(!isDraft)" required />
+                <input id="leaveAllocationToDate" name="ToDate" type="date" value="@Model.ToDate.ToString("yyyy-MM-dd")" class="form-control" readonly="@(!isDraft)" required />
             </div>
 
             <div class="col-md-6">
@@ -178,4 +181,26 @@
         <label class="form-label">Description</label>
         <textarea name="Description" class="form-control" rows="5" readonly="@(!isDraft)">@Model.Description</textarea>
     </div>
-</form>
+</div></form>
+
+@if (isDraft)
+{
+    <script>
+        (function () {
+            const from = document.getElementById('leaveAllocationFromDate');
+            const to = document.getElementById('leaveAllocationToDate');
+            if (!from || !to) return;
+            const nextDay = value => {
+                const date = new Date(value + 'T00:00:00');
+                date.setDate(date.getDate() + 1);
+                return date.toISOString().slice(0, 10);
+            };
+            const alignDates = () => {
+                if (from.value && (!to.value || to.value <= from.value)) to.value = nextDay(from.value);
+                if (from.value) to.min = nextDay(from.value);
+            };
+            from.addEventListener('change', alignDates);
+            alignDates();
+        })();
+    </script>
+}

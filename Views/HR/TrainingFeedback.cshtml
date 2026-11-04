@@ -2,12 +2,14 @@
 @{
     ViewBag.Title = "Training Feedback";
 }
-<div class="d-flex justify-content-between align-items-center mb-3">
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
+<div class="d-flex justify-content-between align-items-center mb-3 training-list-header">
     <h4 class="mb-0">Training Feedback</h4>
     <a href="@Url.Action("CreateTrainingFeedback", "HR")" class="btn btn-dark btn-sm">+ Add Training Feedback</a>
 </div>
 
-<form method="get" class="row g-2 mb-3">
+<form method="get" class="row g-2 mb-3 training-list-filters">
     <div class="col-md-2">
         <input type="text" name="id" value="@ViewBag.IdFilter" class="form-control form-control-sm" placeholder="ID" />
     </div>
@@ -27,7 +29,7 @@
 
 @if (Model.Any())
 {
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle training-list-table">
         <thead>
             <tr>
                 <th>ID</th>

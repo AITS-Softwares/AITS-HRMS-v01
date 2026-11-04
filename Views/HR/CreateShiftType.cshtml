@@ -20,7 +20,7 @@
         <h4 class="mb-0">New Shift Type</h4>
         <div>
             <a href="@Url.Action("ShiftType", "HR")" class="btn btn-outline-secondary btn-sm me-2">Back to List</a>
-            <button type="submit" class="btn btn-dark btn-sm">Save & Push to ERPNext</button>
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
         </div>
     </div>
 
@@ -72,10 +72,14 @@
                 <label class="form-label">Roster Color</label>
                 <select name="RosterColor" class="form-select">
                     <option value="Blue" selected="@(Model.RosterColor == "Blue" || string.IsNullOrWhiteSpace(Model.RosterColor))">Blue</option>
+                    <option value="Cyan" selected="@(Model.RosterColor == "Cyan")">Cyan</option>
+                    <option value="Fuchsia" selected="@(Model.RosterColor == "Fuchsia")">Fuchsia</option>
                     <option value="Green" selected="@(Model.RosterColor == "Green")">Green</option>
+                    <option value="Lime" selected="@(Model.RosterColor == "Lime")">Lime</option>
                     <option value="Red" selected="@(Model.RosterColor == "Red")">Red</option>
                     <option value="Orange" selected="@(Model.RosterColor == "Orange")">Orange</option>
-                    <option value="Purple" selected="@(Model.RosterColor == "Purple")">Purple</option>
+                    <option value="Pink" selected="@(Model.RosterColor == "Pink")">Pink</option>
+                    <option value="Violet" selected="@(Model.RosterColor == "Violet")">Violet</option>
                     <option value="Yellow" selected="@(Model.RosterColor == "Yellow")">Yellow</option>
                 </select>
             </div>
@@ -104,5 +108,32 @@
             </div>
         </div>
     </div>
+
+    <div id="autoAttendanceSettings" class="card p-4 mt-3" @(Model.EnableAutoAttendance ? "" : "hidden")>
+        <h5 class="mb-3">Auto Attendance Settings</h5>
+        <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Determine Check-in and Check-out</label><select name="DetermineCheckInAndCheckOut" class="form-select"><option value="">Select</option><option value="Alternating entries as IN and OUT during the same shift" selected="@(Model.DetermineCheckInAndCheckOut == "Alternating entries as IN and OUT during the same shift")">Alternating entries as IN and OUT during the same shift</option><option value="Strictly based on Log Type in Employee Checkin" selected="@(Model.DetermineCheckInAndCheckOut == "Strictly based on Log Type in Employee Checkin")">Strictly based on Log Type in Employee Checkin</option></select></div>
+            <div class="col-md-6"><label class="form-label">Working Hours Calculation Based On</label><select name="WorkingHoursCalculationBasedOn" class="form-select"><option value="">Select</option><option value="First Check-in and Last Check-out" selected="@(Model.WorkingHoursCalculationBasedOn == "First Check-in and Last Check-out")">First Check-in and Last Check-out</option><option value="Every Valid Check-in and Check-out" selected="@(Model.WorkingHoursCalculationBasedOn == "Every Valid Check-in and Check-out")">Every Valid Check-in and Check-out</option></select></div>
+            <div class="col-md-6"><label class="form-label">Begin check-in before shift start time (minutes)</label><input name="BeginCheckInBeforeShiftStartTime" type="number" class="form-control" value="@Model.BeginCheckInBeforeShiftStartTime" /></div>
+            <div class="col-md-6"><label class="form-label">Allow check-out after shift end time (minutes)</label><input name="AllowCheckOutAfterShiftEndTime" type="number" class="form-control" value="@Model.AllowCheckOutAfterShiftEndTime" /></div>
+            <div class="col-md-6"><label class="form-label">Working hours threshold for half day</label><input name="WorkingHoursThresholdForHalfDay" type="number" step="0.01" class="form-control" value="@Model.WorkingHoursThresholdForHalfDay" /></div>
+            <div class="col-md-6"><label class="form-label">Working hours threshold for absent</label><input name="WorkingHoursThresholdForAbsent" type="number" step="0.01" class="form-control" value="@Model.WorkingHoursThresholdForAbsent" /></div>
+            <div class="col-md-6"><label class="form-label">Process Attendance After</label><input name="ProcessAttendanceAfter" type="date" class="form-control" value="@(Model.ProcessAttendanceAfter?.ToString("yyyy-MM-dd"))" /></div>
+            <div class="col-md-6"><label class="form-label">Last Sync of Checkin</label><input class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")" readonly /></div>
+            <div class="col-md-6 d-flex align-items-end"><div class="form-check"><input type="hidden" name="MarkAutoAttendanceOnHolidays" value="false" /><input name="MarkAutoAttendanceOnHolidays" value="true" type="checkbox" class="form-check-input" id="MarkHolidays" @(Model.MarkAutoAttendanceOnHolidays ? "checked" : "") /><label for="MarkHolidays" class="form-check-label">Mark Auto Attendance on Holidays</label></div></div>
+            <div class="col-md-6"><div class="form-check"><input type="hidden" name="AutoUpdateLastSync" value="false" /><input name="AutoUpdateLastSync" value="true" type="checkbox" class="form-check-input" id="AutoLastSync" @(Model.AutoUpdateLastSync ? "checked" : "") /><label for="AutoLastSync" class="form-check-label">Automatically update Last Sync of Checkin</label></div></div>
+        </div>
+        <hr class="my-4" />
+        <h5 class="mb-3">Late Entry &amp; Early Exit Settings</h5>
+        <div class="row g-3">
+            <div class="col-md-6"><div class="form-check"><input type="hidden" name="EnableLateEntryMarking" value="false" /><input name="EnableLateEntryMarking" value="true" type="checkbox" class="form-check-input" id="EnableLate" @(Model.EnableLateEntryMarking ? "checked" : "") /><label for="EnableLate" class="form-check-label">Enable Late Entry</label></div><input name="LateEntryGracePeriod" type="number" class="form-control mt-2" placeholder="Late Entry Grace Period (minutes)" value="@Model.LateEntryGracePeriod" /></div>
+            <div class="col-md-6"><div class="form-check"><input type="hidden" name="EnableEarlyExitMarking" value="false" /><input name="EnableEarlyExitMarking" value="true" type="checkbox" class="form-check-input" id="EnableEarly" @(Model.EnableEarlyExitMarking ? "checked" : "") /><label for="EnableEarly" class="form-check-label">Enable Early Exit</label></div><input name="EarlyExitGracePeriod" type="number" class="form-control mt-2" placeholder="Early Exit Grace Period (minutes)" value="@Model.EarlyExitGracePeriod" /></div>
+        </div>
+    </div>
 </form>
+<script>
+document.getElementById('EnableAutoAttendance')?.addEventListener('change', function () {
+    document.getElementById('autoAttendanceSettings').hidden = !this.checked;
+});
+</script>
 <partial name="_ShiftModuleUi" />

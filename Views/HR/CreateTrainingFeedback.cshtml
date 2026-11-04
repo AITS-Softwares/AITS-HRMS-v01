@@ -2,12 +2,14 @@
 @{
     ViewBag.Title = "New Training Feedback";
 }
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 training-form-header">
     <h4 class="mb-0">New Training Feedback</h4>
 </div>
 
-<form asp-action="CreateTrainingFeedback" method="post">
+<form asp-action="CreateTrainingFeedback" method="post" class="training-form-shell training-form-card">
     <div class="row g-3 mb-3">
         <div class="col-md-6">
             <label class="form-label">Employee <span class="text-danger">*</span></label>

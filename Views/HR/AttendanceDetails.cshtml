@@ -3,7 +3,6 @@
     ViewBag.Title = "Attendance Details";
     var isDraft = Model.DocStatus == 0;
     var isSubmitted = Model.DocStatus == 1;
-    var editMode = ViewBag.EditMode == true && isDraft;
 }
 
 <div class="attendance-detail-page">
@@ -13,9 +12,7 @@
     <header class="attendance-detail-header">
         <div><div class="attendance-eyebrow">Workforce management</div><h4>Attendance Details</h4><div class="attendance-code">@Model.AttendanceCode</div></div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a href="@Url.Action("Attendance", "HR")" class="btn btn-outline-light btn-sm">Back to List</a>
-            @if (isDraft && !editMode) { <a href="@Url.Action("AttendanceDetails", "HR", new { id = Model.Id, edit = true })" class="btn attendance-edit-button btn-sm">Edit</a> }
-            <form action="@Url.Action("DeleteAttendance", "HR", new { id = Model.Id })" method="post" class="d-inline" onsubmit="return confirm('Delete this attendance from local HRMS only?');">@Html.AntiForgeryToken()<button type="submit" class="btn btn-danger btn-sm">Delete</button></form>
+            <a href="@Url.Action("Attendance", "HR")" class="btn attendance-back-button btn-sm">Back to List</a>
         </div>
     </header>
 
@@ -27,28 +24,29 @@
             <div class="attendance-card-title">Attendance Information</div>
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Employee *</label>
-                    @if (editMode) { <select asp-for="Employee" id="employeeSelect" class="form-select" required><option value="">-- Select Employee --</option>@if (ViewBag.Employees != null) { foreach (var emp in ViewBag.Employees) { string code = emp.name?.ToString(); string name = emp.employee_name?.ToString(); <option value="@code" data-empname="@name" selected="@(code == Model.Employee)">@code - @name</option> } }</select> }
+                    @if (isDraft) { <select asp-for="Employee" id="employeeSelect" class="form-select" required><option value="">-- Select Employee --</option>@if (ViewBag.Employees != null) { foreach (var emp in ViewBag.Employees) { string code = emp.name?.ToString(); string name = emp.employee_name?.ToString(); <option value="@code" data-empname="@name" data-department="@emp.department" selected="@(code == Model.Employee)">@code - @name</option> } }</select> }
                     else { <input class="form-control" value="@Model.Employee" readonly /><input type="hidden" asp-for="Employee" /> }
                 </div>
                 <div class="col-md-6"><label class="form-label">Employee Name</label><input asp-for="EmployeeName" id="employeeNameInput" class="form-control" readonly /></div>
+                <div class="col-md-6"><label class="form-label">Department</label><input asp-for="Department" id="departmentInput" class="form-control" readonly /></div>
                 <div class="col-md-6"><label class="form-label">Company *</label>
-                    @if (editMode) { <select asp-for="Company" class="form-select" required>@if (ViewBag.Companies != null) { foreach (var company in ViewBag.Companies) { string name = company.name?.ToString(); <option value="@name" selected="@(name == Model.Company)">@name</option> } }</select> }
+                    @if (isDraft) { <select asp-for="Company" class="form-select" required>@if (ViewBag.Companies != null) { foreach (var company in ViewBag.Companies) { string name = company.name?.ToString(); <option value="@name" selected="@(name == Model.Company)">@name</option> } }</select> }
                     else { <input class="form-control" value="@Model.Company" readonly /><input type="hidden" asp-for="Company" /> }
                 </div>
                 <div class="col-md-6"><label class="form-label">Attendance Date *</label>
-                    @if (editMode) { <input asp-for="AttendanceDate" type="date" class="form-control" value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" required /> }
+                    @if (isDraft) { <input asp-for="AttendanceDate" type="date" class="form-control" value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" required /> }
                     else { <input class="form-control" value="@Model.AttendanceDate.ToString("dd-MM-yyyy")" readonly /><input type="hidden" name="AttendanceDate" value="@Model.AttendanceDate.ToString("yyyy-MM-dd")" /> }
                 </div>
                 <div class="col-md-6"><label class="form-label">Status *</label>
-                    @if (editMode) { <select asp-for="Status" id="statusSelect" class="form-select" required><option value="Present">Present</option><option value="Absent">Absent</option><option value="On Leave">On Leave</option><option value="Half Day">Half Day</option><option value="Work From Home">Work From Home</option></select> }
+                    @if (isDraft) { <select asp-for="Status" id="statusSelect" class="form-select" required><option value="Present">Present</option><option value="Absent">Absent</option><option value="On Leave">On Leave</option><option value="Half Day">Half Day</option><option value="Work From Home">Work From Home</option></select> }
                     else { <input class="form-control" value="@Model.Status" readonly /><input type="hidden" asp-for="Status" /> }
                 </div>
                 <div class="col-md-6" id="leaveTypeWrapper" style="display:@(Model.Status == "On Leave" || Model.Status == "Half Day" ? "block" : "none")"><label class="form-label">Leave Type</label>
-                    @if (editMode) { <select asp-for="LeaveType" class="form-select"><option value="">-- Select Leave Type --</option>@if (ViewBag.LeaveTypes != null) { foreach (var leaveType in ViewBag.LeaveTypes) { string name = leaveType.name?.ToString(); <option value="@name" selected="@(name == Model.LeaveType)">@name</option> } }</select> }
+                    @if (isDraft) { <select asp-for="LeaveType" class="form-select"><option value="">-- Select Leave Type --</option>@if (ViewBag.LeaveTypes != null) { foreach (var leaveType in ViewBag.LeaveTypes) { string name = leaveType.name?.ToString(); <option value="@name" selected="@(name == Model.LeaveType)">@name</option> } }</select> }
                     else { <input class="form-control" value="@Model.LeaveType" readonly /><input type="hidden" asp-for="LeaveType" /> }
                 </div>
                 <div class="col-md-6" id="otherHalfWrapper" style="display:@(Model.Status == "Half Day" ? "block" : "none")"><label class="form-label">Status for Other Half</label>
-                    @if (editMode) { <select asp-for="StatusForOtherHalf" class="form-select"><option value="">-- Select Status --</option><option value="Present">Present</option><option value="Absent">Absent</option></select> }
+                    @if (isDraft) { <select asp-for="StatusForOtherHalf" class="form-select"><option value="">-- Select Status --</option><option value="Present">Present</option><option value="Absent">Absent</option></select> }
                     else { <input class="form-control" value="@Model.StatusForOtherHalf" readonly /><input type="hidden" asp-for="StatusForOtherHalf" /> }
                 </div>
             </div>
@@ -58,19 +56,18 @@
             <div class="attendance-card-title">Shift and Timing</div>
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Shift</label>
-                    @if (editMode) { <select asp-for="Shift" class="form-select"><option value="">-- Select Shift --</option>@if (ViewBag.Shifts != null) { foreach (var shift in ViewBag.Shifts) { string name = shift.name?.ToString(); <option value="@name" selected="@(name == Model.Shift)">@name</option> } }</select> }
+                    @if (isDraft) { <select asp-for="Shift" class="form-select"><option value="">-- Select Shift --</option>@if (ViewBag.Shifts != null) { foreach (var shift in ViewBag.Shifts) { string name = shift.name?.ToString(); <option value="@name" selected="@(name == Model.Shift)">@name</option> } }</select> }
                     else { <input class="form-control" value="@Model.Shift" readonly /><input type="hidden" asp-for="Shift" /> }
                 </div>
                 <div class="col-md-6"><div class="attendance-toggle-panel">
-                    <div class="form-check mb-3"><input type="hidden" name="LateEntry" value="false" /><input asp-for="LateEntry" class="form-check-input" type="checkbox" disabled="@(!editMode)" /><label class="form-check-label" for="LateEntry">Late Entry</label></div>
-                    <div class="form-check"><input type="hidden" name="EarlyExit" value="false" /><input asp-for="EarlyExit" class="form-check-input" type="checkbox" disabled="@(!editMode)" /><label class="form-check-label" for="EarlyExit">Early Exit</label></div>
+                    <div class="form-check mb-3"><input type="hidden" name="LateEntry" value="false" /><input asp-for="LateEntry" class="form-check-input" type="checkbox" disabled="@(!isDraft)" /><label class="form-check-label" for="LateEntry">Late Entry</label></div>
+                    <div class="form-check"><input type="hidden" name="EarlyExit" value="false" /><input asp-for="EarlyExit" class="form-check-input" type="checkbox" disabled="@(!isDraft)" /><label class="form-check-label" for="EarlyExit">Early Exit</label></div>
                 </div></div>
             </div>
         </section>
 
         <div class="attendance-detail-actions">
-            @if (editMode) { <button type="submit" name="actionCommand" value="Save" class="btn attendance-save-button">Save Changes</button><button type="submit" name="actionCommand" value="Submit" class="btn attendance-submit-button">Submit</button><a href="@Url.Action("AttendanceDetails", "HR", new { id = Model.Id })" class="btn btn-outline-secondary">Cancel Edit</a> }
-            else if (isDraft) { <a href="@Url.Action("AttendanceDetails", "HR", new { id = Model.Id, edit = true })" class="btn attendance-edit-button">Edit Draft</a> }
+            @if (isDraft) { <button type="submit" name="actionCommand" value="Save" class="btn attendance-save-button">Save</button><button type="submit" name="actionCommand" value="Submit" class="btn attendance-submit-button" onclick="return confirm('Submit this Attendance in ERPNext and HRMS?');">Submit</button> }
             else if (isSubmitted) { <button type="submit" name="actionCommand" value="Cancel" class="btn btn-danger" onclick="return confirm('Cancel this submitted Attendance in ERPNext and HRMS?');">Cancel</button> }
             else { <span class="attendance-locked-note">Cancelled attendance is locked.</span> }
         </div>
@@ -78,10 +75,22 @@
 </div>
 
 <style>
-    .attendance-detail-page{max-width:1180px;margin:8px auto 40px;padding:26px;border:1px solid #c7daea;border-radius:8px;background:#edf5fb;box-shadow:0 16px 34px rgba(19,55,91,.10)}.attendance-detail-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin:-26px -26px 24px;padding:20px 26px;background:#14365d;border-radius:8px 8px 0 0}.attendance-detail-header h4{margin:3px 0;color:#fff;font-size:27px;font-weight:760}.attendance-eyebrow{color:#84dfcc;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.attendance-code{color:#b7d0e7;font-size:13px}.attendance-detail-page .btn{border-radius:6px;font-weight:700}.attendance-edit-button,.attendance-save-button{border-color:#16a085;background:#108c77;color:#fff}.attendance-edit-button:hover,.attendance-save-button:hover{background:#087361;color:#fff}.attendance-submit-button{border-color:#2769a2;background:#286ca7;color:#fff}.attendance-detail-card{margin-bottom:18px;padding:22px;border:1px solid #c8ddec;border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(16,49,82,.07)}.attendance-card-title{margin-bottom:18px;color:#173f6b;font-size:16px;font-weight:760}.attendance-detail-page .form-label{color:#315879;font-size:13px;font-weight:720}.attendance-detail-page .form-control,.attendance-detail-page .form-select{min-height:42px;border-color:#b9cee2;border-radius:6px}.attendance-detail-page .form-control:focus,.attendance-detail-page .form-select:focus{border-color:#159b84;box-shadow:0 0 0 3px rgba(21,155,132,.14)}.attendance-detail-page .form-control[readonly]{background:#f2f7fb}.attendance-toggle-panel{height:100%;padding:16px;border:1px solid #c8ddec;border-radius:7px;background:#f3f8fc}.attendance-toggle-panel .form-check-input:checked{background-color:#159b84;border-color:#159b84}.attendance-detail-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}.attendance-locked-note{color:#9b3d3d;font-weight:700}@@media(max-width:640px){.attendance-detail-page{padding:16px}.attendance-detail-header{flex-direction:column;margin:-16px -16px 18px;padding:18px}}
+    .attendance-detail-page{max-width:1180px;margin:8px auto 40px;padding:26px;border:1px solid #c7daea;border-radius:8px;background:#edf5fb;box-shadow:0 16px 34px rgba(19,55,91,.10)}.attendance-detail-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin:-26px -26px 24px;padding:20px 26px;background:#14365d;border-radius:8px 8px 0 0}.attendance-detail-header h4{margin:3px 0;color:#fff;font-size:27px;font-weight:760}.attendance-eyebrow{color:#84dfcc;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.attendance-code{color:#b7d0e7;font-size:13px}.attendance-detail-page .btn{border-radius:6px;font-weight:700}.attendance-back-button{border-color:#bdd8ec;background:#fff;color:#17466f}.attendance-back-button:hover{background:#dceefa;color:#123856}.attendance-save-button{border-color:#16a085;background:#108c77;color:#fff}.attendance-save-button:hover{background:#087361;color:#fff}.attendance-submit-button{border-color:#2769a2;background:#286ca7;color:#fff}.attendance-detail-card{margin-bottom:18px;padding:22px;border:1px solid #c8ddec;border-radius:8px;background:#fff;box-shadow:0 8px 20px rgba(16,49,82,.07)}.attendance-card-title{margin-bottom:18px;color:#173f6b;font-size:16px;font-weight:760}.attendance-detail-page .form-label{color:#315879;font-size:13px;font-weight:720}.attendance-detail-page .form-control,.attendance-detail-page .form-select{min-height:42px;border-color:#b9cee2;border-radius:6px}.attendance-detail-page .form-control:focus,.attendance-detail-page .form-select:focus{border-color:#159b84;box-shadow:0 0 0 3px rgba(21,155,132,.14)}.attendance-detail-page .form-control[readonly]{background:#f2f7fb}.attendance-toggle-panel{height:100%;padding:16px;border:1px solid #c8ddec;border-radius:7px;background:#f3f8fc}.attendance-toggle-panel .form-check-input:checked{background-color:#159b84;border-color:#159b84}.attendance-detail-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}.attendance-locked-note{color:#9b3d3d;font-weight:700}@@media(max-width:640px){.attendance-detail-page{padding:16px}.attendance-detail-header{flex-direction:column;margin:-16px -16px 18px;padding:18px}}
 </style>
 
 <script>
-    document.getElementById('employeeSelect')?.addEventListener('change', function () { document.getElementById('employeeNameInput').value = this.options[this.selectedIndex]?.dataset.empname || ''; });
+    document.getElementById('employeeSelect')?.addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+        document.getElementById('employeeNameInput').value = selected?.dataset.empname || '';
+        document.getElementById('departmentInput').value = selected?.dataset.department || '';
+        fetch('@Url.Action("GetEmployeeName", "HR")?employeeId=' + encodeURIComponent(this.value))
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) return;
+                document.getElementById('employeeNameInput').value = data.employeeName || '';
+                document.getElementById('departmentInput').value = data.department || '';
+            })
+            .catch(() => { });
+    });
     document.getElementById('statusSelect')?.addEventListener('change', function () { const value = this.value; document.getElementById('leaveTypeWrapper').style.display = value === 'On Leave' || value === 'Half Day' ? 'block' : 'none'; document.getElementById('otherHalfWrapper').style.display = value === 'Half Day' ? 'block' : 'none'; });
 </script>

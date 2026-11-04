@@ -32,6 +32,7 @@ namespace Erp_Aits.Models
         public string AttendanceCode { get; set; }
         public string Employee { get; set; }
         public string EmployeeName { get; set; }
+        public string Department { get; set; }
 
         public string LeaveType { get; set; }
         public string StatusForOtherHalf { get; set; }

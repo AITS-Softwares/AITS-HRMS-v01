@@ -52,7 +52,15 @@
     ViewBag.Title = "Holiday List";
 }
 
-<div class="container my-4">
+<div class="container my-4 holiday-list-shell">
+    <style>
+        .holiday-list-shell { background:#f1fbfd; border:1px solid #cbe5ed; border-radius:18px; padding:26px; }
+        .holiday-list-shell h4 { color:#17486c; font-weight:700; }
+        .holiday-list-shell .card { border:1px solid #c9e1e9; border-radius:14px; box-shadow:none !important; }
+        .holiday-list-shell .table thead th { background:#e7f5f8; color:#17486c; border-color:#cbe5ed; }
+        .holiday-list-shell tbody tr:hover { background:#f4fcfd; }
+        .holiday-list-shell .btn-dark { background:linear-gradient(110deg,#17486c,#008d88); border:0; }
+    </style>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Holiday List Management</h4>
         <div>
@@ -82,7 +90,7 @@
     </form>
 
     <!-- Holiday Lists Table -->
-    <div class="card p-3 shadow-sm">
+    <div class="card p-3">
         <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>

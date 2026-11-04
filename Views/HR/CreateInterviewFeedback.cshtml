@@ -1,9 +1,12 @@
 ﻿@model Erp_Aits.Models.InterviewFeedbackModel
 @{
     ViewBag.Title = "New Interview Feedback";
+    var interviews = ViewBag.FeedbackInterviews as List<Erp_Aits.Models.Interview> ?? new List<Erp_Aits.Models.Interview>();
+    var interviewers = ViewBag.FeedbackInterviewers as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
 }
 
-<form asp-action="CreateInterviewFeedback" method="post">
+<form asp-action="CreateInterviewFeedback" method="post" novalidate class="recruitment-theme workflow-page interview-ui">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0 d-inline">New Interview Feedback</h4>
@@ -16,11 +19,27 @@
     <div class="row g-3 mb-4">
         <div class="col-md-6">
             <label class="form-label">Interview <span class="text-danger">*</span></label>
-            <input asp-for="InterviewId" type="number" class="form-control" required />
+            <select asp-for="InterviewId" class="form-select" id="feedbackInterview">
+                <option value="">Select Interview</option>
+                @foreach (var interview in interviews)
+                {
+                    <option value="@interview.Id">@interview.InterviewRound — @interview.JobApplicant (@interview.ScheduledOn.ToString("dd-MM-yyyy"))</option>
+                }
+            </select>
+            <span asp-validation-for="InterviewId" class="text-danger"></span>
         </div>
         <div class="col-md-6">
             <label class="form-label">Interviewer <span class="text-danger">*</span></label>
-            <input asp-for="Interviewer" class="form-control" required />
+            <select asp-for="Interviewer" class="form-select">
+                <option value="">Select Interviewer</option>
+                @foreach (var row in interviewers)
+                {
+                    var id = row["name"]?.ToString() ?? string.Empty;
+                    var label = row["full_name"]?.ToString() ?? id;
+                    <option value="@id">@label</option>
+                }
+            </select>
+            <span asp-validation-for="Interviewer" class="text-danger"></span>
         </div>
 
         <div class="col-md-6">
@@ -30,6 +49,11 @@
                 <option value="Rejected">Rejected</option>
             </select>
         </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6"><label class="form-label">Interview Round</label><input id="feedbackRound" class="form-control" readonly /></div>
+        <div class="col-md-6"><label class="form-label">Job Applicant</label><input id="feedbackApplicant" class="form-control" readonly /></div>
     </div>
 
     <hr />
@@ -48,7 +72,7 @@
             <tr>
                 <td><input type="checkbox" /></td>
                 <td class="row-number">1</td>
-                <td><input type="text" name="SkillNames" class="form-control form-control-sm border-0" /></td>
+                <td><select name="SkillNames" class="form-select form-select-sm border-0 skill-select"><option value="">Select Interview first</option></select></td>
                 <td>
                     <div class="star-rating" data-index="0">
                         <i class="fa-star" data-value="1">★</i>
@@ -114,7 +138,7 @@
         row.innerHTML =
             '<td><input type="checkbox" /></td>' +
             '<td class="row-number">' + rowNum + '</td>' +
-            '<td><input type="text" name="SkillNames" class="form-control form-control-sm border-0" /></td>' +
+            '<td><select name="SkillNames" class="form-select form-select-sm border-0 skill-select"><option value="">Select Skill</option></select></td>' +
             '<td>' +
                 '<div class="star-rating">' +
                     '<i class="fa-star" data-value="1">★</i>' +
@@ -128,5 +152,29 @@
 
         tbody.appendChild(row);
         initStars(row.querySelector('.star-rating'));
+        populateSkillSelect(row.querySelector('.skill-select'));
     }
+
+    var feedbackSkills = [];
+    function populateSkillSelect(select) {
+        select.innerHTML = '<option value="">Select Skill</option>';
+        feedbackSkills.forEach(function (skill) { var option = new Option(skill, skill); select.add(option); });
+    }
+    document.getElementById('feedbackInterview').addEventListener('change', async function () {
+        var id = this.value;
+        document.getElementById('feedbackRound').value = '';
+        document.getElementById('feedbackApplicant').value = '';
+        feedbackSkills = [];
+        if (id) {
+            var response = await fetch('@Url.Action("GetInterviewFeedbackData", "HR")?interviewId=' + encodeURIComponent(id));
+            if (response.ok) {
+                var data = await response.json();
+                document.getElementById('feedbackRound').value = data.interviewRound || '';
+                document.getElementById('feedbackApplicant').value = data.jobApplicant || '';
+                feedbackSkills = data.skills || [];
+            }
+        }
+        document.querySelectorAll('.skill-select').forEach(populateSkillSelect);
+    });
 </script>
+@await Html.PartialAsync("_RecruitmentTheme")

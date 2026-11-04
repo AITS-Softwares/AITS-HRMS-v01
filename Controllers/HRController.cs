@@ -14,6 +14,26 @@ namespace Erp_Aits.Controllers
 {
     public class HRController : Controller
     {
+        // ERPNext Holiday List gets countries and their subdivisions from the
+        // Python `holidays` package, not from a Subdivision DocType.  Keep the
+        // standard response in-process so every country change is immediate.
+        private sealed class HolidayCountryOption
+        {
+            public string Value { get; set; }
+            public string Label { get; set; }
+        }
+
+        private sealed class HolidayCountryMap
+        {
+            public List<HolidayCountryOption> Countries { get; set; } = new List<HolidayCountryOption>();
+            public Dictionary<string, List<string>> SubdivisionsByCountry { get; set; } =
+                new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static readonly System.Threading.SemaphoreSlim HolidayCountryMapLock = new(1, 1);
+        private static HolidayCountryMap _holidayCountryMap;
+        private static DateTime _holidayCountryMapExpiresUtc = DateTime.MinValue;
+
         private readonly IConfiguration _configuration;
         private readonly EmployeeService _employeeService;
         private readonly LeaveApplicationService _leaveService;
@@ -1136,19 +1156,14 @@ namespace Erp_Aits.Controllers
             }
             try
             {
-                var payload = new JObject
-                {
-                    ["name"] = form["Name"].ToString(), ["company"] = form["Company"].ToString(), ["letter_head"] = form["LetterHead"].ToString(), ["is_active"] = form["IsActive"].ToString(), ["is_default"] = form["IsDefault"].ToString(), ["currency"] = form["Currency"].ToString(),
-                    ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["max_benefits"] = form["MaxBenefitsAmount"].ToString(), ["salary_slip_based_on_timesheet"] = form.ContainsKey("SalarySlipBasedOnTimesheet") ? 1 : 0, ["payroll_frequency"] = form["PayrollFrequency"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["hour_rate"] = form["HourRate"].ToString(),
-                    ["mode_of_payment"] = form["ModeOfPayment"].ToString(), ["payment_account"] = form["PaymentAccount"].ToString(), ["earnings"] = BuildSalaryComponentRows(form["EarningsComponents"], form["EarningsAmounts"]), ["deductions"] = BuildSalaryComponentRows(form["DeductionsComponents"], form["DeductionsAmounts"])
-                };
+                var payload = BuildSalaryStructurePayload(form, true);
                 var response = JObject.Parse(await _erpNextService.PostAsync("/api/resource/Salary%20Structure", payload));
                 TempData["Success"] = "Salary Structure created in ERPNext.";
                 var returnUrl = TempData["SalaryStructureReturnUrl"]?.ToString();
                 var createdName = response["data"]?["name"]?.ToString() ?? form["Name"].ToString();
                 if (Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl + (returnUrl.Contains('?') ? "&" : "?") + "selectedSalaryStructure=" + Uri.EscapeDataString(createdName));
-                return RedirectToAction(nameof(SalaryStructure));
+                return RedirectToAction(nameof(SalaryStructureDetails), new { id = createdName });
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure creation failed: " + ShortErpNextError(ex.Message); return RedirectToAction(nameof(CreateSalaryStructure)); }
         }
@@ -1168,9 +1183,55 @@ namespace Erp_Aits.Controllers
         [Route("HR/SalaryStructureDetails/{id}")]
         public async Task<ActionResult> SalaryStructureDetails(string id)
         {
-            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(id)))["data"] as JObject; }
+            try { ViewBag.Document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(id)))["data"] as JObject; await LoadSalaryStructureOptionsAsync(); }
             catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure details could not be loaded: " + ShortErpNextError(ex.Message); }
             return View("~/Views/HR/SalaryStructureDetails.cshtml");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/SalaryStructureDetails/{id}")]
+        public async Task<ActionResult> UpdateSalaryStructure(string id, IFormCollection form)
+        {
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(id)))["data"] as JObject;
+                if (doc == null || doc["docstatus"]?.Value<int>() != 0) throw new InvalidOperationException("Only a draft Salary Structure can be edited.");
+                await _erpNextService.PutAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(id), BuildSalaryStructurePayload(form, false));
+                TempData["Success"] = "Salary Structure saved as Draft.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure save failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(SalaryStructureDetails), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/SalaryStructureStatus/{id}/{status:int}")]
+        public async Task<ActionResult> SetSalaryStructureStatus(string id, int status)
+        {
+            try
+            {
+                var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Salary%20Structure/" + Uri.EscapeDataString(id)))["data"] as JObject ?? throw new InvalidOperationException("Salary Structure not found.");
+                var current = doc["docstatus"]?.Value<int>() ?? -1;
+                if (status == 1 && current == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc });
+                else if (status == 2 && current == 1) await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Salary Structure", name = id });
+                else throw new InvalidOperationException("Refresh the document and try again.");
+                TempData["Success"] = status == 1 ? "Salary Structure submitted." : "Salary Structure cancelled.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Salary Structure action failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(SalaryStructureDetails), new { id });
+        }
+
+        private static JObject BuildSalaryStructurePayload(IFormCollection form, bool includeName)
+        {
+            var payload = new JObject
+            {
+                ["company"] = form["Company"].ToString(), ["letter_head"] = form["LetterHead"].ToString(), ["is_active"] = form["IsActive"].ToString(), ["is_default"] = form["IsDefault"].ToString(), ["currency"] = form["Currency"].ToString(),
+                ["leave_encashment_amount_per_day"] = form["LeaveEncashmentAmountPerDay"].ToString(), ["max_benefits"] = form["MaxBenefitsAmount"].ToString(), ["salary_slip_based_on_timesheet"] = form.ContainsKey("SalarySlipBasedOnTimesheet") ? 1 : 0, ["payroll_frequency"] = form["PayrollFrequency"].ToString(), ["salary_component"] = form["SalaryComponent"].ToString(), ["hour_rate"] = form["HourRate"].ToString(),
+                ["mode_of_payment"] = form["ModeOfPayment"].ToString(), ["payment_account"] = form["PaymentAccount"].ToString(), ["earnings"] = BuildSalaryComponentRows(form["EarningsComponents"], form["EarningsAmounts"]), ["deductions"] = BuildSalaryComponentRows(form["DeductionsComponents"], form["DeductionsAmounts"])
+            };
+            if (includeName) payload["name"] = form["Name"].ToString();
+            return payload;
         }
 
         [HttpGet]
@@ -2773,6 +2834,43 @@ namespace Erp_Aits.Controllers
             ViewBag.AssignmentEmployeeTypes = await GetSalaryRegisterLinkOptionsAsync("Employment Type");
         }
 
+        [HttpGet]
+        [Route("HR/GetSalaryStructureAssignmentDefaults")]
+        public async Task<JsonResult> GetSalaryStructureAssignmentDefaults(string salaryStructure)
+        {
+            if (string.IsNullOrWhiteSpace(salaryStructure))
+                return Json(new { success = false, message = "Select a Salary Structure first." });
+
+            try
+            {
+                var document = JObject.Parse(await _erpNextService.GetAsync(
+                    "/api/resource/Salary%20Structure/" + Uri.EscapeDataString(salaryStructure)))["data"] as JObject;
+                if (document == null) return Json(new { success = false, message = "Salary Structure was not found in ERPNext." });
+
+                var company = document["company"]?.ToString() ?? "";
+                var payableAccount = document["payroll_payable_account"]?.ToString() ?? "";
+
+                // Older ERPNext records keep the payable account on the Company rather than the Salary Structure.
+                if (string.IsNullOrWhiteSpace(payableAccount) && !string.IsNullOrWhiteSpace(company))
+                {
+                    var companyDocument = JObject.Parse(await _erpNextService.GetAsync(
+                        "/api/resource/Company/" + Uri.EscapeDataString(company)))["data"] as JObject;
+                    payableAccount = companyDocument?["default_payroll_payable_account"]?.ToString()
+                        ?? companyDocument?["payroll_payable_account"]?.ToString()
+                        ?? "";
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    company,
+                    currency = document["currency"]?.ToString() ?? "",
+                    payrollPayableAccount = payableAccount
+                });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = ShortErpNextError(ex.Message) }); }
+        }
+
         private static JArray BuildAssignmentCostCenters(IEnumerable<string> costCenters, IEnumerable<string> percentages)
         {
             var rows = new JArray(); var centerList = costCenters.ToList(); var percentageList = percentages.ToList();
@@ -2782,9 +2880,10 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/BulkSalaryStructureAssignment")]
-        public async Task<ActionResult> BulkSalaryStructureAssignment()
+        public async Task<ActionResult> BulkSalaryStructureAssignment(string selectedSalaryStructure)
         {
             ViewBag.Title = "Bulk Salary Structure Assignment";
+            ViewBag.SelectedSalaryStructure = selectedSalaryStructure;
             await LoadBulkSalaryStructureAssignmentOptionsAsync();
             return View("~/Views/HR/BulkSalaryStructureAssignment.cshtml");
         }
@@ -10451,17 +10550,8 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/EmployeeCheckin")]
-        public async Task<ActionResult> EmployeeCheckin()
+        public ActionResult EmployeeCheckin()
         {
-            try
-            {
-                await PullEmployeeCheckinsFromErpNext();
-            }
-            catch (Exception ex)
-            {
-                TempData["ErpNextError"] = "ERPNext refresh failed: " + ex.Message;
-            }
-
             var list = _employeeCheckinService.GetAllCheckins();
 
             return View("~/Views/HR/EmployeeCheckin.cshtml", list);
@@ -11077,6 +11167,7 @@ namespace Erp_Aits.Controllers
                     ExpenseDate = GetDate(exp["expense_date"]),
                     ExpenseClaimType = expenseType,
                     Description = exp["description"]?.ToString(),
+                    CostCenter = exp["cost_center"]?.ToString(),
                     Amount = GetDecimal(exp["amount"]),
                     SanctionedAmount = GetDecimal(exp["sanctioned_amount"])
                 });
@@ -11388,6 +11479,8 @@ namespace Erp_Aits.Controllers
                                         expense_type =
                                             e.ExpenseClaimType,
 
+                                        cost_center = e.CostCenter,
+
                                         description =
                                             string.IsNullOrWhiteSpace(e.Description)
                                                 ? e.ExpenseClaimType
@@ -11552,6 +11645,7 @@ namespace Erp_Aits.Controllers
                 {
                     expense_date = e.ExpenseDate?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"),
                     expense_type = e.ExpenseClaimType,
+                    cost_center = string.IsNullOrWhiteSpace(e.CostCenter) ? null : e.CostCenter,
                     description = string.IsNullOrWhiteSpace(e.Description) ? e.ExpenseClaimType : e.Description,
                     amount = e.Amount,
                     sanctioned_amount = e.SanctionedAmount > 0 ? e.SanctionedAmount : e.Amount
@@ -11651,6 +11745,8 @@ namespace Erp_Aits.Controllers
                 if (string.IsNullOrWhiteSpace(local.ErpNextId))
                     throw new Exception("ERPNext reference is missing.");
 
+                await NormalizeExpenseClaimDepartmentAsync(model);
+
                 await _erpNextService.PutAsync(
                     "/api/resource/Expense%20Claim/" +
                     Uri.EscapeDataString(local.ErpNextId),
@@ -11666,16 +11762,50 @@ namespace Erp_Aits.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErpNextError"] = "Expense Claim update failed: " + ex.Message;
+                TempData["ErpNextError"] = "Expense Claim update failed: " + ShortErpNextError(ex.Message);
                 await LoadExpenseClaimDropdownDataAsync();
                 model.Id = id;
                 return View("~/Views/HR/ExpenseClaimDetails.cshtml", model);
             }
         }
 
+        private async Task NormalizeExpenseClaimDepartmentAsync(ExpenseClaim model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Department) || string.IsNullOrWhiteSpace(model.Company)) return;
+            var selectedDepartment = model.Department;
+            try
+            {
+                var departmentDoc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Department/" + Uri.EscapeDataString(selectedDepartment)))["data"] as JObject;
+                if (string.Equals(ErpValue(departmentDoc, "company"), model.Company, StringComparison.OrdinalIgnoreCase)) return;
+
+                // Use the employee's department only when it belongs to the selected company.
+                if (!string.IsNullOrWhiteSpace(model.Employee))
+                {
+                    var employeeDoc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Employee/" + Uri.EscapeDataString(model.Employee)))["data"] as JObject;
+                    var employeeDepartment = ErpValue(employeeDoc, "department");
+                    if (!string.IsNullOrWhiteSpace(employeeDepartment))
+                    {
+                        var employeeDepartmentDoc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Department/" + Uri.EscapeDataString(employeeDepartment)))["data"] as JObject;
+                        if (string.Equals(ErpValue(employeeDepartmentDoc, "company"), model.Company, StringComparison.OrdinalIgnoreCase))
+                        {
+                            model.Department = employeeDepartment;
+                            return;
+                        }
+                    }
+                }
+                // Do not send a cross-company department to ERPNext.
+                model.Department = string.Empty;
+                TempData["ErpNextError"] = "The selected department does not belong to the selected company, so it was cleared before saving.";
+            }
+            catch
+            {
+                // ERPNext remains the final validator if a department master cannot be read.
+            }
+        }
+
         [HttpPost]
         [Route("HR/SubmitExpenseClaim")]
-        public async Task<ActionResult> SubmitExpenseClaim(int id)
+        public async Task<ActionResult> SubmitExpenseClaim(int id, ExpenseClaim model)
         {
             try
             {
@@ -11686,6 +11816,16 @@ namespace Erp_Aits.Controllers
 
                 if (string.IsNullOrWhiteSpace(local.ErpNextId))
                     throw new Exception("ERPNext reference is missing.");
+
+                if (!string.Equals(model.ApprovalStatus, "Approved", StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(model.ApprovalStatus, "Rejected", StringComparison.OrdinalIgnoreCase))
+                    throw new Exception("Select Approval Status as Approved or Rejected, then submit the claim.");
+
+                model.Id = id;
+                model.ErpNextId = local.ErpNextId;
+                model.Status = local.Status;
+                await NormalizeExpenseClaimDepartmentAsync(model);
+                await _erpNextService.PutAsync("/api/resource/Expense%20Claim/" + Uri.EscapeDataString(local.ErpNextId), BuildExpenseClaimPayload(model));
 
                 string json =
                     await _erpNextService.GetAsync(
@@ -11708,7 +11848,7 @@ namespace Erp_Aits.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErpNextError"] = "Expense Claim submit failed: " + ex.Message;
+                TempData["ErpNextError"] = "Expense Claim submit failed: " + ShortErpNextError(ex.Message);
                 return RedirectToAction("ExpenseClaimDetails", new { id });
             }
         }
@@ -11744,7 +11884,7 @@ namespace Erp_Aits.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErpNextError"] = "Expense Claim cancel failed: " + ex.Message;
+                TempData["ErpNextError"] = "Expense Claim cancel failed: " + ShortErpNextError(ex.Message);
                 return RedirectToAction("ExpenseClaimDetails", new { id });
             }
         }
@@ -12771,13 +12911,16 @@ namespace Erp_Aits.Controllers
         [Route("HR/Employee")]
         public async Task<ActionResult> Employee(string status = "Active")
         {
+            // ERPNext keeps inactive employees as normal Employee documents. Refresh those
+            // records on opening the directory so they are available in the Inactive/All tabs.
+            // Do not let a temporary ERP error stop the local employee list from opening.
             try
             {
-                await SyncEmployeesFromErpNextSilent();
+                await SyncInactiveEmployeesFromErpNextSilent();
             }
-            catch (Exception ex)
+            catch
             {
-                TempData["ErpNextError"] = "Auto refresh from ERPNext failed: " + ShortErpNextError(ex.Message);
+                // The locally synced directory remains available if ERPNext is temporarily busy.
             }
 
             var employees = _employeeService.GetAllEmployees();
@@ -12791,6 +12934,51 @@ namespace Erp_Aits.Controllers
 
             ViewBag.StatusFilter = status;
             return View(employees);
+        }
+
+        private async Task SyncInactiveEmployeesFromErpNextSilent()
+        {
+            const int pageLength = 500;
+            var start = 0;
+            var fields = Uri.EscapeDataString("[\"name\",\"branch\"]");
+            var filters = Uri.EscapeDataString("[[\"status\",\"=\",\"Inactive\"]]");
+
+            while (true)
+            {
+                var listUrl = $"/api/resource/Employee?fields={fields}&filters={filters}&limit_start={start}&limit_page_length={pageLength}";
+                var response = await _erpNextService.GetAsync(listUrl);
+                var rows = JObject.Parse(response)["data"] as JArray;
+
+                if (rows == null || rows.Count == 0)
+                    break;
+
+                foreach (var item in rows)
+                {
+                    var erpName = item["name"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(erpName))
+                        continue;
+
+                    var detailResponse = await _erpNextService.GetAsync($"/api/resource/Employee/{Uri.EscapeDataString(erpName)}");
+                    var doc = JObject.Parse(detailResponse)["data"] as JObject;
+                    if (doc == null)
+                        continue;
+
+                    var branchFromList = item["branch"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(ReadText(doc, "branch")) && !string.IsNullOrWhiteSpace(branchFromList))
+                        doc["branch"] = branchFromList;
+
+                    var employee = MapEmployeeFromErpNext(doc);
+                    employee.ErpNextId = erpName;
+                    employee.EmployeeCode = erpName;
+                    employee.Status = "Inactive";
+                    _employeeService.UpsertFromErpNext(employee);
+                }
+
+                if (rows.Count < pageLength)
+                    break;
+
+                start += pageLength;
+            }
         }
 
         private async Task SyncEmployeesFromErpNextSilent()
@@ -14856,7 +15044,7 @@ namespace Erp_Aits.Controllers
 
         [HttpGet]
         [Route("HR/Attendance")]
-        public async Task<ActionResult> Attendance(string employee, string status)
+        public async Task<ActionResult> Attendance(string employee, string status, int page = 1, int pageSize = 20)
         {
             var service = new AttendanceService(_connectionString);
 
@@ -14872,7 +15060,28 @@ namespace Erp_Aits.Controllers
             ViewBag.EmployeeFilter = employee;
             ViewBag.StatusFilter = status;
 
-            var list = service.GetAllAttendance(employee, status);
+            List<Attendance> list;
+            try
+            {
+                list = service.GetAllAttendance(employee, status);
+            }
+            catch (SqlException)
+            {
+                TempData["ErpNextError"] = "Attendance records are temporarily busy. Please refresh in a moment.";
+                list = new List<Attendance>();
+            }
+            var allowedPageSizes = new[] { 20, 50, 100, 200, 500 };
+            if (!allowedPageSizes.Contains(pageSize)) pageSize = 20;
+
+            var totalRecords = list.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalRecords / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+            list = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalRecords = totalRecords;
+            ViewBag.TotalPages = totalPages;
             return View("Attendance", list);
         }
 
@@ -15023,7 +15232,7 @@ namespace Erp_Aits.Controllers
         {
             try
             {
-                var fields = Uri.EscapeDataString("[\"name\",\"employee\",\"employee_name\",\"company\",\"attendance_date\",\"status\",\"shift\",\"late_entry\",\"early_exit\",\"docstatus\"]");
+                var fields = Uri.EscapeDataString("[\"name\",\"employee\",\"employee_name\",\"department\",\"company\",\"attendance_date\",\"status\",\"shift\",\"late_entry\",\"early_exit\",\"docstatus\"]");
 
                 var response = await _erpNextService.GetAsync(
                     $"/api/resource/Attendance?fields={fields}&limit_page_length=0"
@@ -15038,6 +15247,12 @@ namespace Erp_Aits.Controllers
                     {
                         conn.Open();
 
+                        using (var ensureDepartment = new SqlCommand(@"IF COL_LENGTH('dbo.Attendances', 'Department') IS NULL
+ALTER TABLE dbo.Attendances ADD Department NVARCHAR(255) NULL;", conn))
+                        {
+                            ensureDepartment.ExecuteNonQuery();
+                        }
+
                         foreach (var item in dataList)
                         {
                             string erpId = item["name"]?.ToString();
@@ -15047,6 +15262,7 @@ namespace Erp_Aits.Controllers
                                 continue;
 
                             string empName = item["employee_name"]?.ToString();
+                            string department = item["department"]?.ToString();
                             string comp = item["company"]?.ToString();
                             string status = item["status"]?.ToString();
                             string shift = item["shift"]?.ToString();
@@ -15074,6 +15290,7 @@ SET ErpNextId=@ErpId,
     AttendanceCode=@ErpId,
     Employee=@Emp,
     EmployeeName=@EmpName,
+    Department=@Department,
     Company=@Comp,
     AttendanceDate=@Date,
     Status=@Status,
@@ -15087,6 +15304,7 @@ WHERE ErpNextId=@ErpId OR AttendanceCode=@ErpId", conn))
                                         updCmd.Parameters.AddWithValue("@ErpId", erpId);
                                         updCmd.Parameters.AddWithValue("@Emp", emp);
                                         updCmd.Parameters.AddWithValue("@EmpName", empName ?? (object)DBNull.Value);
+                                        updCmd.Parameters.AddWithValue("@Department", department ?? (object)DBNull.Value);
                                         updCmd.Parameters.AddWithValue("@Comp", comp ?? (object)DBNull.Value);
                                         updCmd.Parameters.AddWithValue("@Date", attDate);
                                         updCmd.Parameters.AddWithValue("@Status", status ?? "Present");
@@ -15102,13 +15320,14 @@ WHERE ErpNextId=@ErpId OR AttendanceCode=@ErpId", conn))
                                 {
                                     using (var insCmd = new SqlCommand(@"
 INSERT INTO Attendances
-(ErpNextId, AttendanceCode, Employee, EmployeeName, Company, AttendanceDate, Status, Shift, LateEntry, EarlyExit, DocStatus, IsDeleted)
+(ErpNextId, AttendanceCode, Employee, EmployeeName, Department, Company, AttendanceDate, Status, Shift, LateEntry, EarlyExit, DocStatus, IsDeleted)
 VALUES
-(@ErpId, @ErpId, @Emp, @EmpName, @Comp, @Date, @Status, @Shift, @LateEntry, @EarlyExit, @DocStatus, 0)", conn))
+(@ErpId, @ErpId, @Emp, @EmpName, @Department, @Comp, @Date, @Status, @Shift, @LateEntry, @EarlyExit, @DocStatus, 0)", conn))
                                     {
                                         insCmd.Parameters.AddWithValue("@ErpId", erpId);
                                         insCmd.Parameters.AddWithValue("@Emp", emp);
                                         insCmd.Parameters.AddWithValue("@EmpName", empName ?? (object)DBNull.Value);
+                                        insCmd.Parameters.AddWithValue("@Department", department ?? (object)DBNull.Value);
                                         insCmd.Parameters.AddWithValue("@Comp", comp ?? (object)DBNull.Value);
                                         insCmd.Parameters.AddWithValue("@Date", attDate);
                                         insCmd.Parameters.AddWithValue("@Status", status ?? "Present");
@@ -15143,7 +15362,7 @@ VALUES
         {
             try
             {
-                var empRes = await _erpNextService.GetAsync("/api/resource/Employee?fields=[\"name\",\"employee_name\"]&limit_page_length=99999");
+                var empRes = await _erpNextService.GetAsync("/api/resource/Employee?fields=[\"name\",\"employee_name\",\"department\"]&limit_page_length=99999");
                 ViewBag.Employees = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(empRes)?.data;
 
                 var shiftRes = await _erpNextService.GetAsync("/api/resource/Shift Type?fields=[\"name\"]&limit_page_length=500");
@@ -20458,6 +20677,7 @@ VALUES
         [Route("HR/CreateHolidayList")]
         public async Task<ActionResult> CreateHolidayList(HolidayList model)
         {
+            model.Country = ResolveHolidayCountryCode(model.Country, await GetHolidayCountryMapAsync());
             int localId = _holidayListService.Insert(model);
 
             try
@@ -20487,6 +20707,7 @@ VALUES
             { "color", model.Color ?? "#3788d8" },
             { "country", model.Country },
             { "subdivision", model.Subdivision },
+            { "weekly_off", model.WeeklyOff },
             { "holidays", holidaysPayload }
         };
 
@@ -20523,8 +20744,61 @@ VALUES
                 TempData["ErpNextError"] = "ERPNext refresh failed: " + ShortErpNextError(ex.Message);
             }
 
-            var model = _holidayListService.GetById(id);
+            HolidayList model;
+            try
+            {
+                model = _holidayListService.GetById(id);
+            }
+            catch (SqlException ex) when (ex.Number == -2 || ex.Number == 1222)
+            {
+                TempData["ErpNextError"] = "Holiday List is temporarily busy. Please refresh in a moment.";
+                return RedirectToAction("HolidayList");
+            }
             if (model == null) return NotFound();
+
+            // The list refresh imports the header fields in one fast request.  Load this
+            // document's child holiday rows only when it is opened, so the detail page
+            // always matches ERPNext without turning the list screen into an N+1 request.
+            try
+            {
+                string detailJson = await _erpNextService.GetAsync(
+                    "/api/resource/Holiday%20List/" + Uri.EscapeDataString(model.HolidayListName));
+                var detail = JObject.Parse(detailJson)["data"];
+                if (detail != null)
+                {
+                    model.HolidayListName = detail["holiday_list_name"]?.ToString() ?? model.HolidayListName;
+                    model.FromDate = detail["from_date"] == null ? model.FromDate : Convert.ToDateTime(detail["from_date"].ToString());
+                    model.ToDate = detail["to_date"] == null ? model.ToDate : Convert.ToDateTime(detail["to_date"].ToString());
+                    model.Color = detail["color"]?.ToString() ?? model.Color;
+                    model.Country = detail["country"]?.ToString() ?? model.Country;
+                    model.Subdivision = detail["subdivision"]?.ToString() ?? model.Subdivision;
+                    model.WeeklyOff = detail["weekly_off"]?.ToString() ?? model.WeeklyOff;
+                    model.Holidays = detail["holidays"]?.Select(h => new HolidayListDate
+                    {
+                        HolidayDate = h["holiday_date"] == null ? DateTime.Today : Convert.ToDateTime(h["holiday_date"].ToString()),
+                        Description = CleanHolidayDescription(h["description"])
+                    }).ToList() ?? new List<HolidayListDate>();
+                    model.TotalHolidays = model.Holidays.Count;
+                    _holidayListService.Update(model);
+                }
+            }
+            catch { /* Header data remains available when ERPNext is temporarily unavailable. */ }
+
+            try
+            {
+                var countryJson = await _erpNextService.GetAsync(
+                    "/api/resource/Country?fields=[\"name\"]&limit_page_length=1000&order_by=name%20asc");
+                ViewBag.Countries = JObject.Parse(countryJson)["data"]?
+                    .Select(x => x["name"]?.ToString())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList() ?? new List<string>();
+            }
+            catch
+            {
+                ViewBag.Countries = string.IsNullOrWhiteSpace(model.Country)
+                    ? new List<string>()
+                    : new List<string> { model.Country };
+            }
 
             ViewBag.EditMode = edit;
             return View("~/Views/HR/HolidayListDetails.cshtml", model);
@@ -20554,15 +20828,10 @@ VALUES
             string id = null, string employee = null, string employeeName = null,
             string leaveType = null, string leavePeriod = null, string leavePolicy = null, bool expired = false)
         {
-            try
-            {
-                await PullLeaveAllocationsFromErpNext();
-            }
-            catch (Exception ex)
-            {
-                TempData["ErpNextError"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
-            }
-
+            // One compact ERP request keeps the local list current without the previous
+            // one-request-per-document timeout behaviour.
+            try { await PullLeaveAllocationsFromErpNext(); }
+            catch { /* Keep the available HRMS records usable when ERPNext is unavailable. */ }
             var list = _leaveAllocationService.GetAll(id, employee, employeeName, leaveType, leavePeriod, leavePolicy, expired);
             ViewBag.IdFilter = id;
             ViewBag.EmployeeFilter = employee;
@@ -20618,18 +20887,32 @@ VALUES
             {
                 ValidateLeaveAllocation(model);
 
-                var response = await _erpNextService.PostAsync(
-                    $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}",
-                    BuildLeaveAllocationPayload(model));
+                // Always retain a valid draft in HRMS first.  ERPNext can be unavailable or
+                // reject a linked document, but that must not make the Save button appear to do nothing.
+                model.DocStatus = 0;
+                model.Status = "Draft";
+                int localId = _leaveAllocationService.Insert(model);
 
-                string erpId = ExtractErpDocName(response);
-                string detailJson = await _erpNextService.GetAsync(
-                    $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(erpId)}");
+                try
+                {
+                    var response = await _erpNextService.PostAsync(
+                        $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}",
+                        BuildLeaveAllocationPayload(model));
 
-                var saved = MapErpLeaveAllocation(JObject.Parse(detailJson)["data"]);
-                int localId = _leaveAllocationService.InsertOrUpdate(saved);
+                    string erpId = ExtractErpDocName(response);
+                    string detailJson = await _erpNextService.GetAsync(
+                        $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(erpId)}");
 
-                TempData["Success"] = "Leave Allocation saved in ERPNext and HRMS.";
+                    var saved = MapErpLeaveAllocation(JObject.Parse(detailJson)["data"]);
+                    saved.Id = localId;
+                    _leaveAllocationService.Update(saved);
+                    TempData["Success"] = "Leave Allocation saved in ERPNext and HRMS.";
+                }
+                catch (Exception syncEx)
+                {
+                    TempData["ErpNextError"] = "Saved in HRMS as Draft. ERPNext sync: " + ExtractErpNextErrorMessage(syncEx.Message);
+                }
+
                 return RedirectToAction("LeaveAllocationDetails", "HR", new { id = localId });
             }
             catch (Exception ex)
@@ -20670,60 +20953,7 @@ VALUES
         {
             try
             {
-                string listJson = await _erpNextService.GetAsync(
-                    "/api/resource/Holiday%20List?fields=[\"name\"]&limit_page_length=500");
-
-                dynamic listParsed = JsonConvert.DeserializeObject(listJson);
-
-                int syncedCount = 0;
-
-                if (listParsed?.data != null)
-                {
-                    foreach (var item in listParsed.data)
-                    {
-                        string docName = item.name?.ToString();
-                        if (string.IsNullOrWhiteSpace(docName)) continue;
-
-                        string detailJson = await _erpNextService.GetAsync(
-                            "/api/resource/Holiday%20List/" + Uri.EscapeDataString(docName));
-
-                        dynamic detailParsed = JsonConvert.DeserializeObject(detailJson);
-                        var d = detailParsed?.data;
-                        if (d == null) continue;
-
-                        var holidays = new List<HolidayListDate>();
-
-                        if (d.holidays != null)
-                        {
-                            foreach (var h in d.holidays)
-                            {
-                                if (h.holiday_date == null) continue;
-
-                                holidays.Add(new HolidayListDate
-                                {
-                                    HolidayDate = Convert.ToDateTime(h.holiday_date.ToString()),
-                                    Description = h.description?.ToString() ?? string.Empty
-                                });
-                            }
-                        }
-
-                        var model = new HolidayList
-                        {
-                            HolidayListName = d.holiday_list_name?.ToString() ?? d.name?.ToString() ?? docName,
-                            FromDate = d.from_date != null ? Convert.ToDateTime(d.from_date.ToString()) : DateTime.Today,
-                            ToDate = d.to_date != null ? Convert.ToDateTime(d.to_date.ToString()) : DateTime.Today,
-                            TotalHolidays = holidays.Count,
-                            Color = d.color?.ToString() ?? "#3788d8",
-                            Country = d.country?.ToString(),
-                            Subdivision = d.subdivision?.ToString(),
-                            Holidays = holidays
-                        };
-
-                        _holidayListService.Insert(model);
-                        syncedCount++;
-                    }
-                }
-
+                int syncedCount = await PullHolidayListsFromErpNext(includeHolidayRows: true);
                 TempData["Success"] = $"Synced {syncedCount} Holiday Lists from ERPNext.";
             }
             catch (Exception ex)
@@ -20744,61 +20974,127 @@ VALUES
                 Color = "#3788d8"
             };
 
-            // Fetch Countries / Subdivisions dynamically if available in ERPNext
-            try
-            {
-                var countryJson = await _erpNextService.GetAsync("/api/resource/Country?fields=[\"name\"]&limit_page_length=200");
-                dynamic countryParsed = JsonConvert.DeserializeObject(countryJson);
-                var countries = new List<string>();
-                if (countryParsed?.data != null)
-                {
-                    foreach (var c in countryParsed.data) countries.Add(c.name.ToString());
-                }
-                ViewBag.Countries = countries.Any() ? countries : new List<string> { "India" };
-            }
-            catch
-            {
-                ViewBag.Countries = new List<string> { "India" };
-            }
-
             return View("~/Views/HR/CreateHolidayList.cshtml", model);
         }
 
-        // AJAX API: Get Subdivisions based on Country
+        [HttpGet]
+        [Route("HR/GetHolidayCountryOptions")]
+        public async Task<JsonResult> GetHolidayCountryOptions()
+        {
+            var map = await GetHolidayCountryMapAsync();
+            return Json(new
+            {
+                countries = map.Countries.Select(x => new { value = x.Value, label = x.Label }),
+                subdivisionsByCountry = map.SubdivisionsByCountry
+            });
+        }
+
+        // Kept for the existing form routes.  Data comes from ERPNext's
+        // standard Holiday List provider, never from a Subdivision master.
         [HttpGet]
         [Route("HR/GetSubdivisions")]
         public async Task<JsonResult> GetSubdivisions(string country)
         {
-            var list = new List<string>();
+            var map = await GetHolidayCountryMapAsync();
+            var key = ResolveHolidayCountryCode(country, map);
+            return Json(map.SubdivisionsByCountry.TryGetValue(key, out var subdivisions)
+                ? subdivisions
+                : new List<string>());
+        }
 
-            if (string.IsNullOrWhiteSpace(country))
-                return Json(list);
+        private async Task<HolidayCountryMap> GetHolidayCountryMapAsync()
+        {
+            if (_holidayCountryMap != null && DateTime.UtcNow < _holidayCountryMapExpiresUtc)
+                return _holidayCountryMap;
 
+            await HolidayCountryMapLock.WaitAsync();
             try
             {
-                string filters = Uri.EscapeDataString($"[[\"country\",\"=\",\"{country}\"]]");
-                string fields = Uri.EscapeDataString("[\"name\"]");
+                if (_holidayCountryMap != null && DateTime.UtcNow < _holidayCountryMapExpiresUtc)
+                    return _holidayCountryMap;
 
-                string response = await _erpNextService.GetAsync(
-                    $"/api/resource/Subdivision?filters={filters}&fields={fields}&limit_page_length=1000&order_by=name%20asc");
-
-                dynamic parsed = JsonConvert.DeserializeObject(response);
-
-                if (parsed?.data != null)
+                var document = new
                 {
-                    foreach (var item in parsed.data)
+                    doctype = "Holiday List",
+                    name = "new-holiday-list-country-options",
+                    __islocal = 1
+                };
+                var response = await _erpNextService.PostMethodAsync(
+                    // `run_doc_method` is the public Frappe document-method
+                    // endpoint.  The old frappe.desk.form path does not exist
+                    // on current ERPNext versions, so it silently forced the
+                    // empty fallback map and left Subdivision blank.
+                    "/api/method/run_doc_method",
+                    new
                     {
-                        string name = item.name?.ToString();
-                        if (!string.IsNullOrWhiteSpace(name))
-                            list.Add(name);
+                        docs = JsonConvert.SerializeObject(document),
+                        method = "get_supported_countries"
+                    });
+
+                var message = JObject.Parse(response)["message"] as JObject;
+                var countries = message?["countries"]?.Children<JObject>()
+                    .Select(x => new HolidayCountryOption
+                    {
+                        Value = x["value"]?.ToString(),
+                        Label = x["label"]?.ToString()
+                    })
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                    .OrderBy(x => x.Label ?? x.Value, StringComparer.OrdinalIgnoreCase)
+                    .ToList() ?? new List<HolidayCountryOption>();
+
+                var subdivisions = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                if (message?["subdivisions_by_country"] is JObject source)
+                {
+                    foreach (var property in source.Properties())
+                    {
+                        subdivisions[property.Name] = property.Value.Values<string>()
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                            .ToList();
                     }
+                }
+
+                if (countries.Count > 0)
+                {
+                    _holidayCountryMap = new HolidayCountryMap
+                    {
+                        Countries = countries,
+                        SubdivisionsByCountry = subdivisions
+                    };
+                    _holidayCountryMapExpiresUtc = DateTime.UtcNow.AddHours(6);
                 }
             }
             catch
             {
+                // Continue to serve the last known standard response during a
+                // temporary ERPNext outage. The fallback keeps the form usable.
+            }
+            finally
+            {
+                HolidayCountryMapLock.Release();
             }
 
-            return Json(list);
+            return _holidayCountryMap ?? new HolidayCountryMap
+            {
+                Countries = new List<HolidayCountryOption>
+                {
+                    new HolidayCountryOption { Value = "IN", Label = "India" }
+                },
+                SubdivisionsByCountry = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["IN"] = new List<string>()
+                }
+            };
+        }
+
+        private static string ResolveHolidayCountryCode(string country, HolidayCountryMap map)
+        {
+            if (string.IsNullOrWhiteSpace(country)) return string.Empty;
+            var match = map.Countries.FirstOrDefault(x =>
+                string.Equals(x.Value, country, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(x.Label, country, StringComparison.OrdinalIgnoreCase));
+            return match?.Value ?? country.Trim();
         }
         // AJAX API: Fetch Local Holidays for a selected Subdivision from ERPNext
         [HttpGet]
@@ -20863,6 +21159,7 @@ VALUES
         [Route("HR/FetchHolidaysBySubdivision")]
         public async Task<ActionResult> FetchHolidaysBySubdivision(HolidayList model, List<HolidayListDate> Holidays)
         {
+            model.Country = ResolveHolidayCountryCode(model.Country, await GetHolidayCountryMapAsync());
             model.Holidays = Holidays ?? new List<HolidayListDate>();
 
             try
@@ -21033,16 +21330,17 @@ VALUES
         }
 
 
-        private async Task PullHolidayListsFromErpNext()
+        private async Task<int> PullHolidayListsFromErpNext(bool includeHolidayRows = false)
         {
             var service = new HolidayListService(_connectionString);
 
             var response = await _erpNextService.GetAsync(
-                "/api/resource/Holiday%20List?fields=[\"name\",\"from_date\",\"to_date\",\"total_holidays\",\"color\",\"country\",\"subdivision\"]&limit_page_length=1000"
+                "/api/resource/Holiday%20List?fields=[\"name\",\"holiday_list_name\",\"from_date\",\"to_date\",\"total_holidays\",\"color\",\"country\",\"subdivision\",\"weekly_off\"]&limit_page_length=1000&order_by=modified%20desc"
             );
 
             dynamic parsed = Newtonsoft.Json.JsonConvert.DeserializeObject(response);
 
+            int syncedCount = 0;
             foreach (var row in parsed.data)
             {
                 string erpName = row.name?.ToString() ?? "";
@@ -21051,7 +21349,7 @@ VALUES
 
                 var holidayList = new HolidayList
                 {
-                    HolidayListName = erpName,
+                    HolidayListName = row.holiday_list_name?.ToString() ?? erpName,
                     FromDate = row.from_date != null
                         ? Convert.ToDateTime(row.from_date.ToString())
                         : DateTime.Today,
@@ -21063,11 +21361,26 @@ VALUES
                         : 0,
                     Color = row.color?.ToString() ?? "",
                     Country = row.country?.ToString() ?? "",
-                    Subdivision = row.subdivision?.ToString() ?? ""
+                    Subdivision = row.subdivision?.ToString() ?? "",
+                    WeeklyOff = row.weekly_off?.ToString() ?? ""
                 };
 
+                if (includeHolidayRows)
+                {
+                    string detailJson = await _erpNextService.GetAsync("/api/resource/Holiday%20List/" + Uri.EscapeDataString(erpName));
+                    var details = JObject.Parse(detailJson)["data"];
+                    holidayList.Holidays = details?["holidays"]?.Select(h => new HolidayListDate
+                    {
+                        HolidayDate = h["holiday_date"] == null ? DateTime.Today : Convert.ToDateTime(h["holiday_date"].ToString()),
+                        Description = CleanHolidayDescription(h["description"])
+                    }).ToList() ?? new List<HolidayListDate>();
+                    holidayList.TotalHolidays = holidayList.Holidays.Count;
+                }
+
                 service.InsertOrUpdateFromErpNext(holidayList);
+                syncedCount++;
             }
+            return syncedCount;
         }
 
 
@@ -21099,17 +21412,31 @@ VALUES
 
         public async Task<ActionResult> LeaveAllocationDetails(int id)
         {
-            try
-            {
-                await PullLeaveAllocationsFromErpNext();
-            }
-            catch (Exception ex)
-            {
-                TempData["ErpNextError"] = "ERPNext refresh failed: " + ExtractErpNextErrorMessage(ex.Message);
-            }
-
             var model = _leaveAllocationService.GetById(id);
             if (model == null) return NotFound();
+
+            // Refresh only this document. This keeps an ERPNext cancel/submit reflected in HRMS
+            // without running the slow full Leave Allocation synchronisation.
+            if (!string.IsNullOrWhiteSpace(model.ErpNextId))
+            {
+                try
+                {
+                    string detailJson = await _erpNextService.GetAsync(
+                        $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(model.ErpNextId)}");
+                    var refreshed = MapErpLeaveAllocation(JObject.Parse(detailJson)["data"]);
+                    if (refreshed != null)
+                    {
+                        refreshed.Id = id;
+                        _leaveAllocationService.Update(refreshed);
+                        model = refreshed;
+                    }
+                }
+                catch
+                {
+                    // Keep the locally saved allocation available when ERPNext is temporarily unavailable.
+                }
+            }
+
             await PopulateAllocationDropdownsAsync();
             return View(model);
         }
@@ -21133,14 +21460,29 @@ VALUES
                     : model.LeavePolicy;
                 ValidateLeaveAllocation(model);
                 model.Id = id;
-                model.ErpNextId = string.IsNullOrWhiteSpace(existing.ErpNextId) ? existing.Series : existing.ErpNextId;
+                model.EmployeeName = string.IsNullOrWhiteSpace(model.EmployeeName) ? existing.EmployeeName : model.EmployeeName;
+                model.Company = string.IsNullOrWhiteSpace(model.Company) ? existing.Company : model.Company;
+                model.DocStatus = 0;
+                model.Status = "Draft";
+                _leaveAllocationService.Update(model);
 
-                await _erpNextService.PutAsync(
-                    $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(model.ErpNextId)}",
-                    BuildLeaveAllocationPayload(model));
+                string erpId = existing.ErpNextId;
+                if (string.IsNullOrWhiteSpace(erpId))
+                {
+                    var createResponse = await _erpNextService.PostAsync(
+                        $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}",
+                        BuildLeaveAllocationPayload(model));
+                    erpId = ExtractErpDocName(createResponse);
+                }
+                else
+                {
+                    await _erpNextService.PutAsync(
+                        $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(erpId)}",
+                        BuildLeaveAllocationPayload(model));
+                }
 
                 string detailJson = await _erpNextService.GetAsync(
-                    $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(model.ErpNextId)}");
+                    $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(erpId)}");
 
                 var updated = MapErpLeaveAllocation(JObject.Parse(detailJson)["data"]);
                 updated.Id = id;
@@ -21260,7 +21602,7 @@ VALUES
         private async Task<(int imported, int updated)> PullLeaveAllocationsFromErpNext()
         {
             string listJson = await _erpNextService.GetAsync(
-                $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}?fields=[\"name\"]&limit_page_length=0");
+                $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}?fields=[\"name\",\"naming_series\",\"employee\",\"employee_name\",\"company\",\"leave_type\",\"leave_period\",\"leave_policy\",\"from_date\",\"to_date\",\"new_leaves_allocated\",\"carry_forward\",\"description\",\"expired\",\"docstatus\"]&limit_page_length=1000&order_by=modified%20desc");
 
             dynamic listParsed = JsonConvert.DeserializeObject(listJson);
             int importedCount = 0;
@@ -21275,10 +21617,9 @@ VALUES
                     if (string.IsNullOrWhiteSpace(erpId)) continue;
 
                     erpIds.Add(erpId);
-                    string detailJson = await _erpNextService.GetAsync(
-                        $"/api/resource/{Uri.EscapeDataString("Leave Allocation")}/{Uri.EscapeDataString(erpId)}");
-
-                    var model = MapErpLeaveAllocation(JObject.Parse(detailJson)["data"]);
+                    // The list response already contains every field used by HRMS.
+                    // Avoiding a further request for every row prevents ERP/SQL timeouts.
+                    var model = MapErpLeaveAllocation(item);
                     if (model == null) continue;
 
                     if (_leaveAllocationService.ExistsByErpNextId(erpId))
@@ -21294,7 +21635,6 @@ VALUES
                 }
             }
 
-            SoftDeleteMissingErpDocuments("LeaveAllocations", "ErpNextId", erpIds);
             return (importedCount, updatedCount);
         }
 
@@ -21349,7 +21689,7 @@ VALUES
             if (string.IsNullOrWhiteSpace(model.LeavePolicy)) throw new Exception("Leave Policy is required.");
             if (model.FromDate == default) throw new Exception("From Date is required.");
             if (model.ToDate == default) throw new Exception("To Date is required.");
-            if (model.ToDate < model.FromDate) throw new Exception("To Date cannot be before From Date.");
+            if (model.ToDate <= model.FromDate) throw new Exception("To Date must be after From Date.");
         }
 
 
@@ -22460,9 +22800,89 @@ VALUES
         // GET: HR/CreatePaymentEntry
         [HttpGet]
         [Route("HR/CreatePaymentEntry")]
-        public async Task<ActionResult> CreatePaymentEntry(int? id)
+        public async Task<ActionResult> CreatePaymentEntry(int? id, int? expenseClaimId)
         {
             await LoadPaymentEntryMasterDataAsync();
+
+            if (expenseClaimId.HasValue)
+            {
+                var claim = _expenseClaimService.GetExpenseClaimById(expenseClaimId.Value);
+                if (claim == null)
+                {
+                    TempData["ErpNextError"] = "Expense Claim not found.";
+                    return RedirectToAction("ExpenseClaimList");
+                }
+
+                decimal claimedAmount = (claim.Expenses ?? new List<ExpenseClaimDetail>())
+                    .Sum(x => x.SanctionedAmount > 0 ? x.SanctionedAmount : x.Amount);
+                decimal taxAmount = (claim.Taxes ?? new List<ExpenseTaxAndCharge>()).Sum(x => x.Amount);
+                decimal total = claimedAmount + taxAmount;
+                string reference = string.IsNullOrWhiteSpace(claim.ErpNextId) ? claim.ExpenseClaimCode : claim.ErpNextId;
+
+                var payment = new PaymentEntry
+                {
+                    PostingDate = claim.PostingDate ?? DateTime.Today,
+                    PaymentType = "Pay",
+                    Company = claim.Company,
+                    PartyType = "Employee",
+                    Party = claim.Employee,
+                    PartyName = claim.EmployeeName,
+                    PaidTo = claim.PayableAccount,
+                    PaidAmount = total,
+                    ReceivedAmount = total,
+                    PaidAmountAfterTax = total,
+                    ReceivedAmountAfterTax = total,
+                    BasePaidAmount = total,
+                    BaseReceivedAmount = total,
+                    TotalAllocatedAmount = total,
+                    BaseTotalAllocatedAmount = total,
+                    UnallocatedAmount = 0,
+                    DifferenceAmount = 0,
+                    Project = claim.Project,
+                    CostCenter = claim.CostCenter,
+                    CompanyGstin = claim.CompanyGstin,
+                    ReferenceNo = reference,
+                    ReferenceDate = claim.PostingDate,
+                    Remarks = "Payment against Expense Claim " + reference,
+                    Status = "Draft",
+                    DocStatus = 0
+                };
+
+                // ERPNext does not permit Expense Claim in Payment Entry's References table.
+                // Keep the claim number in Reference No and Remarks instead.
+
+                // ERPNext's payment-entry helper adds its own account defaults when available.
+                if (!string.IsNullOrWhiteSpace(claim.ErpNextId))
+                {
+                    try
+                    {
+                        string helperJson = await _erpNextService.GetAsync(
+                            "/api/method/erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry?dt=Expense%20Claim&dn=" +
+                            Uri.EscapeDataString(claim.ErpNextId));
+                        var helperDoc = JObject.Parse(helperJson)["message"] as JObject;
+                        var erpPayment = MapErpPaymentEntry(helperDoc);
+                        if (erpPayment != null)
+                        {
+                            erpPayment.PostingDate = claim.PostingDate ?? erpPayment.PostingDate;
+                            erpPayment.Company = claim.Company ?? erpPayment.Company;
+                            erpPayment.Party = claim.Employee ?? erpPayment.Party;
+                            erpPayment.PartyName = claim.EmployeeName ?? erpPayment.PartyName;
+                            erpPayment.Project = claim.Project ?? erpPayment.Project;
+                            erpPayment.CostCenter = claim.CostCenter ?? erpPayment.CostCenter;
+                            erpPayment.ReferenceNo = reference;
+                            erpPayment.ReferenceDate = claim.PostingDate;
+                            erpPayment.Remarks = "Payment against Expense Claim " + reference;
+                            erpPayment.References = new List<PaymentEntryReference>();
+                            erpPayment.DocStatus = 0;
+                            erpPayment.Status = "Draft";
+                            payment = erpPayment;
+                        }
+                    }
+                    catch { /* The locally prefilled form remains available if ERP defaults cannot be read. */ }
+                }
+
+                return View("~/Views/HR/CreatePaymentEntry.cshtml", payment);
+            }
 
             if (id.HasValue)
             {
@@ -23996,11 +24416,15 @@ VALUES
                     model.StatusForOtherHalf = null;
                 }
 
+                if (string.IsNullOrWhiteSpace(model.Department) && !string.IsNullOrWhiteSpace(model.Employee))
+                    model.Department = await GetErpEmployeeFieldAsync(model.Employee, "department");
+
                 var payload = new
                 {
                     employee = model.Employee,
                     employee_name = model.EmployeeName,
                     company = model.Company,
+                    department = model.Department,
                     attendance_date = model.AttendanceDate.ToString("yyyy-MM-dd"),
                     status = model.Status,
                     leave_type = model.LeaveType,
@@ -24345,6 +24769,7 @@ VALUES
             if (string.IsNullOrWhiteSpace(model.Employee)) model.Employee = existing.Employee;
             if (string.IsNullOrWhiteSpace(model.EmployeeName)) model.EmployeeName = existing.EmployeeName;
             if (string.IsNullOrWhiteSpace(model.Company)) model.Company = existing.Company;
+            if (string.IsNullOrWhiteSpace(model.Department)) model.Department = existing.Department;
             if (string.IsNullOrWhiteSpace(model.Status)) model.Status = existing.Status;
             if (string.IsNullOrWhiteSpace(model.Shift)) model.Shift = existing.Shift;
             if (model.AttendanceDate < new DateTime(1753, 1, 1)) model.AttendanceDate = existing.AttendanceDate;
@@ -24374,6 +24799,7 @@ VALUES
                         employee = model.Employee,
                         employee_name = model.EmployeeName,
                         company = model.Company,
+                        department = model.Department,
                         attendance_date = model.AttendanceDate.ToString("yyyy-MM-dd"),
                         status = model.Status,
                         leave_type = model.LeaveType,
@@ -24412,6 +24838,7 @@ VALUES
                         employee = model.Employee,
                         employee_name = model.EmployeeName,
                         company = model.Company,
+                        department = model.Department,
                         attendance_date = model.AttendanceDate.ToString("yyyy-MM-dd"),
                         status = model.Status,
                         leave_type = model.LeaveType,
@@ -24800,15 +25227,6 @@ VALUES
         {
             var service = new AttendanceService(_connectionString);
 
-            try
-            {
-                await PullAttendanceFromErpNext();
-            }
-            catch (Exception ex)
-            {
-                TempData["ErpNextError"] = CleanErpNextError(ex);
-            }
-
             var record = service.GetById(id);
             if (record == null) return NotFound();
 
@@ -24868,6 +25286,10 @@ VALUES
 
                     company =
                         employee["company"]?.ToString()
+                        ?? "",
+
+                    department =
+                        employee["department"]?.ToString()
                         ?? ""
                 });
             }
@@ -29477,11 +29899,15 @@ VALUES
             if (string.IsNullOrWhiteSpace(model.Company))
                 model.Company = await GetErpEmployeeFieldAsync(model.Employee, "company");
 
+            if (string.IsNullOrWhiteSpace(model.Department))
+                model.Department = await GetErpEmployeeFieldAsync(model.Employee, "department");
+
             var payload = new
             {
                 employee = model.Employee,
                 employee_name = model.EmployeeName,
                 company = model.Company,
+                department = model.Department,
                 attendance_date = model.AttendanceDate.ToString("yyyy-MM-dd"),
                 status = model.Status,
                 shift = model.Shift,
@@ -29581,7 +30007,7 @@ VALUES
             };
             AddErpFilter(attendanceFilters, "company", company);
 
-            var fields = Uri.EscapeDataString("[\"name\",\"employee\",\"employee_name\",\"company\",\"attendance_date\",\"status\",\"shift\",\"leave_type\",\"late_entry\",\"early_exit\",\"docstatus\"]");
+            var fields = Uri.EscapeDataString("[\"name\",\"employee\",\"employee_name\",\"company\",\"department\",\"attendance_date\",\"status\",\"shift\",\"leave_type\",\"late_entry\",\"early_exit\",\"docstatus\"]");
             var url = "/api/resource/Attendance?fields=" + fields
                 + "&filters=" + Uri.EscapeDataString(attendanceFilters.ToString(Formatting.None))
                 + "&limit_page_length=1000";
@@ -29630,6 +30056,7 @@ VALUES
                 ErpNextId = erpId,
                 Employee = employee,
                 EmployeeName = item["employee_name"]?.ToString() ?? "",
+                Department = item["department"]?.ToString() ?? "",
                 Company = item["company"]?.ToString() ?? "",
                 AttendanceDate = attendanceDate,
                 Status = item["status"]?.ToString() ?? "Present",
@@ -29701,7 +30128,7 @@ VALUES
         }
 
         [Route("HR/ShiftScheduleAssignment")]
-        public async Task<ActionResult> HRShiftScheduleAssignmentList(string id, string employee, string employeeName)
+        public async Task<ActionResult> HRShiftScheduleAssignmentList(string id, string employee, string employeeName, int page = 1, int pageSize = 20)
         {
             ViewBag.IdFilter = id;
             ViewBag.EmployeeFilter = employee;
@@ -29713,6 +30140,17 @@ VALUES
                 TempData.Remove("Success");
 
                 var list = _hrShiftScheduleAssignmentService.GetAll(id, employee, employeeName);
+                var allowedPageSizes = new[] { 20, 50, 100, 200, 500 };
+                if (!allowedPageSizes.Contains(pageSize)) pageSize = 20;
+                var totalRecords = list.Count;
+                var totalPages = Math.Max(1, (int)Math.Ceiling(totalRecords / (double)pageSize));
+                page = Math.Clamp(page, 1, totalPages);
+                list = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+                ViewBag.Page = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalRecords = totalRecords;
+                ViewBag.TotalPages = totalPages;
                 return View("HRShiftScheduleAssignmentList", list);
             }
             catch (Exception ex)
@@ -30077,14 +30515,25 @@ VALUES
 
 
         [Route("HR/ShiftSchedule")]
-        public async Task<ActionResult> HRShiftScheduleList(string id, string shiftType)
+        public async Task<ActionResult> HRShiftScheduleList(string id, string shiftType, int page = 1, int pageSize = 20)
         {
             await SyncShiftSchedulesFromErpNext();
             TempData.Remove("Success");
 
             var list = _hrShiftScheduleService.GetAll(id, shiftType);
+            var allowedPageSizes = new[] { 20, 50, 100, 200, 500 };
+            if (!allowedPageSizes.Contains(pageSize)) pageSize = 20;
+            var totalRecords = list.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalRecords / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+            list = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             ViewBag.IdFilter = id;
             ViewBag.ShiftTypeFilter = shiftType;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalRecords = totalRecords;
+            ViewBag.TotalPages = totalPages;
             return View("HRShiftScheduleList", list);
         }
 
@@ -30244,16 +30693,27 @@ VALUES
         }
 
         [Route("HR/ShiftAssignment")]
-        public async Task<ActionResult> HRShiftAssignmentList(string id, string employee, string employeeName, string shiftType)
+        public async Task<ActionResult> HRShiftAssignmentList(string id, string employee, string employeeName, string shiftType, int page = 1, int pageSize = 20)
         {
             await SyncShiftAssignmentsFromErpNext();
             TempData.Remove("Success");
 
             var list = _hrShiftAssignmentService.GetAll(id, employee, employeeName, shiftType);
+            var allowedPageSizes = new[] { 20, 50, 100, 200, 500 };
+            if (!allowedPageSizes.Contains(pageSize)) pageSize = 20;
+            var totalRecords = list.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalRecords / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+            list = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             ViewBag.IdFilter = id;
             ViewBag.EmployeeFilter = employee;
             ViewBag.EmployeeNameFilter = employeeName;
             ViewBag.ShiftTypeFilter = shiftType;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalRecords = totalRecords;
+            ViewBag.TotalPages = totalPages;
             return View("HRShiftAssignmentList", list);
         }
 
@@ -30529,7 +30989,7 @@ VALUES
         //}
         [HttpGet]
         [Route("HR/ShiftType")]
-        public async Task<ActionResult> ShiftType(string id = null)
+        public async Task<ActionResult> ShiftType(string id = null, int page = 1, int pageSize = 20)
         {
             try
             {
@@ -30541,7 +31001,19 @@ VALUES
             }
 
             var list = _shiftTypeService.GetAll(id);
+            var allowedPageSizes = new[] { 20, 100, 500, 2500 };
+            if (!allowedPageSizes.Contains(pageSize)) pageSize = 20;
+
+            var totalRecords = list.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalRecords / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+            list = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             ViewBag.IdFilter = id;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalRecords = totalRecords;
+            ViewBag.TotalPages = totalPages;
             return View("~/Views/HR/ShiftType.cshtml", list);
         }
 
@@ -30550,7 +31022,7 @@ VALUES
             var service = new ShiftTypeService(_connectionString);
 
             var response = await _erpNextService.GetAsync(
-                "/api/resource/Shift%20Type?fields=[\"name\",\"start_time\",\"end_time\",\"holiday_list\",\"color\",\"enable_auto_attendance\"]&limit_page_length=1000"
+                "/api/resource/Shift%20Type?fields=[\"name\",\"start_time\",\"end_time\",\"holiday_list\",\"color\",\"enable_auto_attendance\",\"determine_check_in_and_check_out\",\"working_hours_calculation_based_on\",\"begin_check_in_before_shift_start_time\",\"allow_check_out_after_shift_end_time\",\"mark_auto_attendance_on_holidays\",\"working_hours_threshold_for_half_day\",\"working_hours_threshold_for_absent\",\"process_attendance_after\",\"last_sync_of_checkin\",\"auto_update_last_sync\",\"enable_late_entry_marking\",\"late_entry_grace_period\",\"enable_early_exit_marking\",\"early_exit_grace_period\"]&limit_page_length=1000"
             );
 
             dynamic parsed = JsonConvert.DeserializeObject(response);
@@ -30577,7 +31049,21 @@ VALUES
                     EnableAutoAttendance =
                         item.enable_auto_attendance != null &&
                         (item.enable_auto_attendance.ToString() == "1" ||
-                         item.enable_auto_attendance.ToString().Equals("true", StringComparison.OrdinalIgnoreCase))
+                         item.enable_auto_attendance.ToString().Equals("true", StringComparison.OrdinalIgnoreCase)),
+                    DetermineCheckInAndCheckOut = item.determine_check_in_and_check_out?.ToString() ?? "",
+                    WorkingHoursCalculationBasedOn = item.working_hours_calculation_based_on?.ToString() ?? "",
+                    BeginCheckInBeforeShiftStartTime = item.begin_check_in_before_shift_start_time == null ? 60 : Convert.ToInt32(item.begin_check_in_before_shift_start_time),
+                    AllowCheckOutAfterShiftEndTime = item.allow_check_out_after_shift_end_time == null ? 60 : Convert.ToInt32(item.allow_check_out_after_shift_end_time),
+                    MarkAutoAttendanceOnHolidays = item.mark_auto_attendance_on_holidays != null && Convert.ToBoolean(item.mark_auto_attendance_on_holidays),
+                    WorkingHoursThresholdForHalfDay = item.working_hours_threshold_for_half_day == null ? null : Convert.ToDecimal(item.working_hours_threshold_for_half_day),
+                    WorkingHoursThresholdForAbsent = item.working_hours_threshold_for_absent == null ? null : Convert.ToDecimal(item.working_hours_threshold_for_absent),
+                    ProcessAttendanceAfter = item.process_attendance_after == null ? null : Convert.ToDateTime(item.process_attendance_after),
+                    LastSyncOfCheckin = item.last_sync_of_checkin == null ? null : Convert.ToDateTime(item.last_sync_of_checkin),
+                    AutoUpdateLastSync = item.auto_update_last_sync != null && Convert.ToBoolean(item.auto_update_last_sync),
+                    EnableLateEntryMarking = item.enable_late_entry_marking != null && Convert.ToBoolean(item.enable_late_entry_marking),
+                    LateEntryGracePeriod = item.late_entry_grace_period == null ? null : Convert.ToInt32(item.late_entry_grace_period),
+                    EnableEarlyExitMarking = item.enable_early_exit_marking != null && Convert.ToBoolean(item.enable_early_exit_marking),
+                    EarlyExitGracePeriod = item.early_exit_grace_period == null ? null : Convert.ToInt32(item.early_exit_grace_period)
                 });
             }
 
@@ -30689,6 +31175,7 @@ VALUES
             }
 
             model.Id = id;
+            ApplyShiftTypeCheckboxes(model);
 
             // Shift Type Name should remain readonly, so always keep old name.
             model.Name = existing.Name;
@@ -30730,7 +31217,20 @@ VALUES
                     end_time = model.EndTime,
                     holiday_list = model.HolidayList,
                     color = model.RosterColor,
-                    enable_auto_attendance = model.EnableAutoAttendance ? 1 : 0
+                    enable_auto_attendance = model.EnableAutoAttendance ? 1 : 0,
+                    determine_check_in_and_check_out = model.DetermineCheckInAndCheckOut,
+                    working_hours_calculation_based_on = model.WorkingHoursCalculationBasedOn,
+                    begin_check_in_before_shift_start_time = model.BeginCheckInBeforeShiftStartTime,
+                    allow_check_out_after_shift_end_time = model.AllowCheckOutAfterShiftEndTime,
+                    mark_auto_attendance_on_holidays = model.MarkAutoAttendanceOnHolidays ? 1 : 0,
+                    working_hours_threshold_for_half_day = model.WorkingHoursThresholdForHalfDay,
+                    working_hours_threshold_for_absent = model.WorkingHoursThresholdForAbsent,
+                    process_attendance_after = model.ProcessAttendanceAfter?.ToString("yyyy-MM-dd"),
+                    auto_update_last_sync = model.AutoUpdateLastSync ? 1 : 0,
+                    enable_late_entry_marking = model.EnableLateEntryMarking ? 1 : 0,
+                    late_entry_grace_period = model.LateEntryGracePeriod,
+                    enable_early_exit_marking = model.EnableEarlyExitMarking ? 1 : 0,
+                    early_exit_grace_period = model.EarlyExitGracePeriod
                 };
 
                 await _erpNextService.PutAsync(
@@ -30789,6 +31289,76 @@ VALUES
             ViewBag.HolidayLists = await LoadErpHolidayListNamesAsync();
 
             return View("~/Views/HR/ShiftTypeDetails.cshtml", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("HR/ShiftType/{id:int}/MarkAttendance")]
+        public async Task<ActionResult> MarkShiftTypeAttendance(int id, ShiftType model)
+        {
+            var existing = _shiftTypeService.GetById(id);
+            if (existing == null) return NotFound();
+
+            model.Id = id;
+            model.Name = existing.Name;
+            model.ShiftTypeCode = existing.ShiftTypeCode;
+            ApplyShiftTypeCheckboxes(model);
+
+            if (!model.EnableAutoAttendance)
+            {
+                TempData["ErpNextError"] = "Please Enable Auto Attendance and complete the setup first.";
+                return RedirectToAction("ShiftTypeDetails", new { id });
+            }
+
+            try
+            {
+                model.RosterColor = string.IsNullOrWhiteSpace(model.RosterColor) ? "Blue" : model.RosterColor;
+                await _erpNextService.PutAsync(
+                    "/api/resource/Shift%20Type/" + Uri.EscapeDataString(existing.Name),
+                    new
+                    {
+                        start_time = model.StartTime,
+                        end_time = model.EndTime,
+                        holiday_list = model.HolidayList,
+                        color = model.RosterColor,
+                        enable_auto_attendance = 1,
+                        determine_check_in_and_check_out = model.DetermineCheckInAndCheckOut,
+                        working_hours_calculation_based_on = model.WorkingHoursCalculationBasedOn,
+                        begin_check_in_before_shift_start_time = model.BeginCheckInBeforeShiftStartTime,
+                        allow_check_out_after_shift_end_time = model.AllowCheckOutAfterShiftEndTime,
+                        mark_auto_attendance_on_holidays = model.MarkAutoAttendanceOnHolidays ? 1 : 0,
+                        working_hours_threshold_for_half_day = model.WorkingHoursThresholdForHalfDay,
+                        working_hours_threshold_for_absent = model.WorkingHoursThresholdForAbsent,
+                        process_attendance_after = model.ProcessAttendanceAfter?.ToString("yyyy-MM-dd"),
+                        auto_update_last_sync = model.AutoUpdateLastSync ? 1 : 0,
+                        enable_late_entry_marking = model.EnableLateEntryMarking ? 1 : 0,
+                        late_entry_grace_period = model.LateEntryGracePeriod,
+                        enable_early_exit_marking = model.EnableEarlyExitMarking ? 1 : 0,
+                        early_exit_grace_period = model.EarlyExitGracePeriod
+                    });
+                model.LastSyncOfCheckin = DateTime.Now;
+                _shiftTypeService.Update(model);
+
+                var response = await _erpNextService.GetAsync(
+                    "/api/resource/Shift%20Type/" + Uri.EscapeDataString(existing.Name));
+                var document = JObject.Parse(response)["data"];
+                if (document == null) throw new Exception("Shift Type could not be loaded from ERPNext.");
+
+                await _erpNextService.PostMethodAsync("/api/method/run_doc_method", new
+                {
+                    docs = document.ToString(Formatting.None),
+                    method = "process_auto_attendance",
+                    args = new { is_manually_triggered = 1 }
+                });
+
+                TempData["Success"] = "Attendance has been marked as per employee check-ins.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = ExtractErpNextErrorMessage(ex.Message);
+            }
+
+            return RedirectToAction("ShiftTypeDetails", new { id });
         }
         public ActionResult Roster(int? month, int? year, string employee)
         {
@@ -30852,6 +31422,7 @@ VALUES
 
         public async Task<ActionResult> ShiftRequestDetails(int id, bool edit = false)
         {
+            await SyncShiftRequestsFromErpNext();
             var model = _shiftRequestService.GetById(id);
             if (model == null)
             {
@@ -32800,6 +33371,9 @@ VALUES
 
                         defaultShift =
                             defaultShift,
+
+                        shiftRequestApprover =
+                            employeeApprover,
 
                         approvers =
                             approvers.ToList()
@@ -36213,71 +36787,246 @@ VALUES
         {
             return View();
         }
-        public ActionResult AppointmentLetter(string id = null, string applicantName = null)
+        public async Task<ActionResult> AppointmentLetter(string id = null, string applicantName = null)
         {
+            await SyncAppointmentLettersFromErpAsync();
             var letters = _appointmentLetterService.GetAll(id, applicantName);
             ViewBag.IdFilter = id;
             ViewBag.ApplicantNameFilter = applicantName;
             return View(letters);
         }
 
-        public ActionResult CreateAppointmentLetter()
+        public async Task<ActionResult> CreateAppointmentLetter()
         {
+            await LoadAppointmentLetterDropdownsAsync();
             return View(new AppointmentLetter { Company = "AITS", AppointmentDate = DateTime.Now });
         }
 
         [HttpPost]
-        public ActionResult CreateAppointmentLetter(AppointmentLetter model)
+        public async Task<ActionResult> CreateAppointmentLetter(AppointmentLetter model)
         {
-            model.AppointmentLetterCode = _appointmentLetterService.GetNextCode();
-            int newId = _appointmentLetterService.Insert(model);
-            return RedirectToAction("AppointmentLetterDetails", new { id = newId });
+            try
+            {
+                EnsureAppointmentLetterSchema();
+                var response = await _erpNextService.PostAsync("/api/resource/Appointment%20Letter", new { job_applicant = model.JobApplicant, applicant_name = model.ApplicantName, company = model.Company, appointment_date = model.AppointmentDate?.ToString("yyyy-MM-dd"), appointment_letter_template = model.AppointmentLetterTemplate, introduction = model.Introduction, closing_notes = model.ClosingNotes, terms = (model.Terms ?? new List<AppointmentLetterTerm>()).Where(x => !string.IsNullOrWhiteSpace(x.Title)).Select(x => new { title = x.Title, description = x.Description }) });
+                model.ErpNextId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                model.AppointmentLetterCode = model.ErpNextId ?? _appointmentLetterService.GetNextCode();
+                int newId = _appointmentLetterService.Insert(model);
+                return RedirectToAction("AppointmentLetterDetails", new { id = newId });
+            }
+            catch (Exception ex) { ModelState.AddModelError(string.Empty, "Appointment Letter save failed: " + ShortErpNextError(ex.Message)); await LoadAppointmentLetterDropdownsAsync(); return View(model); }
         }
 
-        public ActionResult AppointmentLetterDetails(int id)
+        public async Task<ActionResult> AppointmentLetterDetails(int id)
         {
+            await SyncAppointmentLettersFromErpAsync();
             var letter = _appointmentLetterService.GetById(id);
             if (letter == null)
             {
                 return NotFound();
             }
-            return View(letter);
+            await LoadAppointmentLetterDropdownsAsync();
+            return View("CreateAppointmentLetter", letter);
         }
 
-        public ActionResult AppointmentLetterTemplate(string id = null, string templateName = null)
+        public async Task<ActionResult> EditAppointmentLetter(int id)
         {
+            await SyncAppointmentLettersFromErpAsync();
+            var model = _appointmentLetterService.GetById(id);
+            if (model == null) return NotFound();
+            await LoadAppointmentLetterDropdownsAsync();
+            return View("CreateAppointmentLetter", model);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateAppointmentLetter(AppointmentLetter model)
+        {
+            try
+            {
+                var existing = _appointmentLetterService.GetById(model.Id);
+                var erpId = existing?.ErpNextId ?? model.ErpNextId;
+                if (string.IsNullOrWhiteSpace(erpId)) throw new InvalidOperationException("This Appointment Letter has not synced to ERPNext yet.");
+                var response = await _erpNextService.PutAsync("/api/resource/Appointment%20Letter/" + Uri.EscapeDataString(erpId), new { job_applicant = model.JobApplicant, applicant_name = model.ApplicantName, company = model.Company, appointment_date = model.AppointmentDate?.ToString("yyyy-MM-dd"), appointment_letter_template = model.AppointmentLetterTemplate, introduction = model.Introduction, closing_notes = model.ClosingNotes, terms = (model.Terms ?? new List<AppointmentLetterTerm>()).Where(x => !string.IsNullOrWhiteSpace(x.Title)).Select(x => new { title = x.Title, description = x.Description }) });
+                using var conn = new SqlConnection(_connectionString); conn.Open();
+                UpsertAppointmentLetter(conn, JObject.Parse(response)["data"] as JObject ?? new JObject { ["name"] = erpId });
+                return RedirectToAction(nameof(AppointmentLetterDetails), new { id = model.Id });
+            }
+            catch (Exception ex) { ModelState.AddModelError(string.Empty, "Appointment Letter update failed: " + ShortErpNextError(ex.Message)); await LoadAppointmentLetterDropdownsAsync(); return View("CreateAppointmentLetter", model); }
+        }
+
+        public async Task<ActionResult> AppointmentLetterTemplate(string id = null, string templateName = null)
+        {
+            await SyncAppointmentLetterTemplatesFromErpAsync();
             var templates = _appointmentLetterTemplateService.GetAllTemplates(id, templateName);
             ViewBag.IdFilter = id;
             ViewBag.TemplateNameFilter = templateName;
             return View(templates);
         }
 
-        public ActionResult CreateAppointmentLetterTemplate()
+        public async Task<ActionResult> CreateAppointmentLetterTemplate()
         {
+            await SyncAppointmentLetterTemplatesFromErpAsync();
             ViewBag.NextCode = _appointmentLetterTemplateService.GetNextTemplateCode();
             return View(new AppointmentLetterTemplate());
         }
 
         [HttpPost]
-        public ActionResult CreateAppointmentLetterTemplate(AppointmentLetterTemplate model)
+        public async Task<ActionResult> CreateAppointmentLetterTemplate(AppointmentLetterTemplate model)
         {
-            model.TemplateCode = _appointmentLetterTemplateService.GetNextTemplateCode();
-            _appointmentLetterTemplateService.InsertTemplate(model);
-            return RedirectToAction("AppointmentLetterTemplate");
+            try
+            {
+                EnsureAppointmentLetterSchema();
+                var response = await _erpNextService.PostAsync("/api/resource/Appointment%20Letter%20Template", new { template_name = model.TemplateName, introduction = model.Introduction, closing_notes = model.ClosingNotes, terms = (model.Terms ?? new List<AppointmentLetterTemplateTerm>()).Where(x => !string.IsNullOrWhiteSpace(x.Title)).Select(x => new { title = x.Title, description = x.Description }) });
+                model.ErpNextId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                model.TemplateCode = model.ErpNextId ?? _appointmentLetterTemplateService.GetNextTemplateCode();
+                _appointmentLetterTemplateService.InsertTemplate(model);
+                return RedirectToAction("AppointmentLetterTemplate");
+            }
+            catch (Exception ex) { ModelState.AddModelError(string.Empty, "Appointment Letter Template save failed: " + ShortErpNextError(ex.Message)); return View(model); }
         }
 
         // Detail view — opens when a row is clicked, shows data in the same form layout
-        public ActionResult AppointmentLetterTemplateDetails(int id)
+        public async Task<ActionResult> AppointmentLetterTemplateDetails(int id)
         {
+            await SyncAppointmentLetterTemplatesFromErpAsync();
             var template = _appointmentLetterTemplateService.GetById(id);
             if (template == null)
             {
                 return NotFound();
             }
-            return View(template);
+            return View("CreateAppointmentLetterTemplate", template);
         }
-        public ActionResult InterviewFeedback(string id, string interview, string interviewRound, string jobApplicant, string interviewer, string result)
+
+        public async Task<ActionResult> EditAppointmentLetterTemplate(int id)
         {
+            await SyncAppointmentLetterTemplatesFromErpAsync();
+            var model = _appointmentLetterTemplateService.GetById(id);
+            if (model == null) return NotFound();
+            return View("CreateAppointmentLetterTemplate", model);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateAppointmentLetterTemplate(AppointmentLetterTemplate model)
+        {
+            try
+            {
+                var existing = _appointmentLetterTemplateService.GetById(model.Id);
+                var erpId = existing?.ErpNextId ?? model.ErpNextId;
+                if (string.IsNullOrWhiteSpace(erpId)) throw new InvalidOperationException("This Appointment Letter Template has not synced to ERPNext yet.");
+                var response = await _erpNextService.PutAsync("/api/resource/Appointment%20Letter%20Template/" + Uri.EscapeDataString(erpId), new { template_name = model.TemplateName, introduction = model.Introduction, closing_notes = model.ClosingNotes, terms = (model.Terms ?? new List<AppointmentLetterTemplateTerm>()).Where(x => !string.IsNullOrWhiteSpace(x.Title)).Select(x => new { title = x.Title, description = x.Description }) });
+                using var conn = new SqlConnection(_connectionString); conn.Open();
+                UpsertAppointmentTemplate(conn, JObject.Parse(response)["data"] as JObject ?? new JObject { ["name"] = erpId });
+                return RedirectToAction(nameof(AppointmentLetterTemplateDetails), new { id = model.Id });
+            }
+            catch (Exception ex) { ModelState.AddModelError(string.Empty, "Appointment Letter Template update failed: " + ShortErpNextError(ex.Message)); return View("CreateAppointmentLetterTemplate", model); }
+        }
+
+        private async Task LoadAppointmentLetterDropdownsAsync()
+        {
+            ViewBag.AppointmentApplicants = await FetchErpNextDropdownOptionsAsync("Job Applicant", "[\"name\",\"applicant_name\"]", 1000);
+            ViewBag.AppointmentCompanies = await FetchErpNextDropdownOptionsAsync("Company", "[\"name\"]", 1000);
+            ViewBag.AppointmentTemplates = await FetchErpNextDropdownOptionsAsync("Appointment Letter Template", "[\"name\",\"template_name\"]", 1000);
+        }
+
+        private async Task SyncAppointmentLetterTemplatesFromErpAsync()
+        {
+            try
+            {
+                EnsureAppointmentLetterSchema();
+                var response = await _erpNextService.GetAsync("/api/resource/Appointment%20Letter%20Template?fields=" + Uri.EscapeDataString("[\"name\",\"template_name\",\"introduction\",\"closing_notes\",\"terms\"]") + "&limit_page_length=1000");
+                var rows = JObject.Parse(response)["data"] as JArray ?? new JArray();
+                using var conn = new SqlConnection(_connectionString); conn.Open();
+                foreach (var row in rows.OfType<JObject>())
+                {
+                    var erpId = ErpValue(row, "name");
+                    var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Appointment%20Letter%20Template/" + Uri.EscapeDataString(erpId)))["data"] as JObject ?? row;
+                    UpsertAppointmentTemplate(conn, doc);
+                }
+                await PushUnsyncedAppointmentTemplatesToErpAsync(conn);
+            }
+            catch { }
+        }
+
+        private void UpsertAppointmentTemplate(SqlConnection conn, JObject doc)
+        {
+            var erpId = ErpValue(doc, "name"); if (string.IsNullOrWhiteSpace(erpId)) return;
+            using var cmd = new SqlCommand(@"IF EXISTS (SELECT 1 FROM AppointmentLetterTemplates WHERE ErpNextId=@ErpNextId)
+UPDATE AppointmentLetterTemplates SET TemplateCode=@Code,TemplateName=@Name,Introduction=@Introduction,ClosingNotes=@ClosingNotes,IsDeleted=0 WHERE ErpNextId=@ErpNextId;
+ELSE INSERT INTO AppointmentLetterTemplates (ErpNextId,TemplateCode,TemplateName,Introduction,ClosingNotes,IsDeleted) VALUES (@ErpNextId,@Code,@Name,@Introduction,@ClosingNotes,0);
+SELECT TOP 1 Id FROM AppointmentLetterTemplates WHERE ErpNextId=@ErpNextId;", conn);
+            cmd.Parameters.AddWithValue("@ErpNextId", erpId); cmd.Parameters.AddWithValue("@Code", erpId); cmd.Parameters.AddWithValue("@Name", ErpValue(doc, "template_name")); cmd.Parameters.AddWithValue("@Introduction", ErpValue(doc, "introduction")); cmd.Parameters.AddWithValue("@ClosingNotes", ErpValue(doc, "closing_notes"));
+            var id = Convert.ToInt32(cmd.ExecuteScalar());
+            using (var clear = new SqlCommand("DELETE FROM AppointmentLetterTemplateTerms WHERE TemplateId=@Id", conn)) { clear.Parameters.AddWithValue("@Id", id); clear.ExecuteNonQuery(); }
+            foreach (var term in (doc["terms"] as JArray ?? new JArray()).OfType<JObject>())
+            { using var insert = new SqlCommand("INSERT INTO AppointmentLetterTemplateTerms (TemplateId,Title,Description) VALUES (@Id,@Title,@Description)", conn); insert.Parameters.AddWithValue("@Id", id); insert.Parameters.AddWithValue("@Title", ErpValue(term, "title")); insert.Parameters.AddWithValue("@Description", ErpValue(term, "description")); insert.ExecuteNonQuery(); }
+        }
+
+        private async Task SyncAppointmentLettersFromErpAsync()
+        {
+            try
+            {
+                EnsureAppointmentLetterSchema();
+                var response = await _erpNextService.GetAsync("/api/resource/Appointment%20Letter?fields=" + Uri.EscapeDataString("[\"name\",\"job_applicant\",\"applicant_name\",\"company\",\"appointment_date\",\"appointment_letter_template\",\"introduction\",\"closing_notes\",\"terms\"]") + "&limit_page_length=1000");
+                var rows = JObject.Parse(response)["data"] as JArray ?? new JArray();
+                using var conn = new SqlConnection(_connectionString); conn.Open();
+                foreach (var row in rows.OfType<JObject>())
+                {
+                    var erpId = ErpValue(row, "name");
+                    var doc = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Appointment%20Letter/" + Uri.EscapeDataString(erpId)))["data"] as JObject ?? row;
+                    UpsertAppointmentLetter(conn, doc);
+                }
+                await PushUnsyncedAppointmentLettersToErpAsync(conn);
+            }
+            catch { }
+        }
+
+        private async Task PushUnsyncedAppointmentTemplatesToErpAsync(SqlConnection conn)
+        {
+            foreach (var item in _appointmentLetterTemplateService.GetAllTemplates().Where(x => string.IsNullOrWhiteSpace(x.ErpNextId)))
+            {
+                var model = _appointmentLetterTemplateService.GetById(item.Id); if (model == null) continue;
+                var response = await _erpNextService.PostAsync("/api/resource/Appointment%20Letter%20Template", new { template_name = model.TemplateName, introduction = model.Introduction, closing_notes = model.ClosingNotes, terms = model.Terms.Select(x => new { title = x.Title, description = x.Description }) });
+                var erpId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(erpId)) { using var update = new SqlCommand("UPDATE AppointmentLetterTemplates SET ErpNextId=@ErpNextId,TemplateCode=@ErpNextId WHERE Id=@Id", conn); update.Parameters.AddWithValue("@ErpNextId", erpId); update.Parameters.AddWithValue("@Id", model.Id); update.ExecuteNonQuery(); }
+            }
+        }
+
+        private async Task PushUnsyncedAppointmentLettersToErpAsync(SqlConnection conn)
+        {
+            foreach (var item in _appointmentLetterService.GetAll().Where(x => string.IsNullOrWhiteSpace(x.ErpNextId)))
+            {
+                var model = _appointmentLetterService.GetById(item.Id); if (model == null) continue;
+                var response = await _erpNextService.PostAsync("/api/resource/Appointment%20Letter", new { job_applicant = model.JobApplicant, applicant_name = model.ApplicantName, company = model.Company, appointment_date = model.AppointmentDate?.ToString("yyyy-MM-dd"), appointment_letter_template = model.AppointmentLetterTemplate, introduction = model.Introduction, closing_notes = model.ClosingNotes, terms = model.Terms.Select(x => new { title = x.Title, description = x.Description }) });
+                var erpId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(erpId)) { using var update = new SqlCommand("UPDATE AppointmentLetters SET ErpNextId=@ErpNextId,AppointmentLetterCode=@ErpNextId WHERE Id=@Id", conn); update.Parameters.AddWithValue("@ErpNextId", erpId); update.Parameters.AddWithValue("@Id", model.Id); update.ExecuteNonQuery(); }
+            }
+        }
+
+        private void EnsureAppointmentLetterSchema()
+        {
+            using var conn = new SqlConnection(_connectionString); conn.Open();
+            using var ensure = new SqlCommand(@"IF COL_LENGTH('dbo.AppointmentLetterTemplates','ErpNextId') IS NULL ALTER TABLE dbo.AppointmentLetterTemplates ADD ErpNextId NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.AppointmentLetters','ErpNextId') IS NULL ALTER TABLE dbo.AppointmentLetters ADD ErpNextId NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.AppointmentLetters','ApplicantName') IS NULL ALTER TABLE dbo.AppointmentLetters ADD ApplicantName NVARCHAR(255) NULL;", conn);
+            ensure.ExecuteNonQuery();
+        }
+
+        private void UpsertAppointmentLetter(SqlConnection conn, JObject doc)
+        {
+            var erpId = ErpValue(doc, "name"); if (string.IsNullOrWhiteSpace(erpId)) return;
+            using var cmd = new SqlCommand(@"IF EXISTS (SELECT 1 FROM AppointmentLetters WHERE ErpNextId=@ErpNextId)
+UPDATE AppointmentLetters SET AppointmentLetterCode=@Code,JobApplicant=@Applicant,ApplicantName=@ApplicantName,Company=@Company,AppointmentDate=@Date,AppointmentLetterTemplate=@Template,Introduction=@Introduction,ClosingNotes=@ClosingNotes,IsDeleted=0 WHERE ErpNextId=@ErpNextId;
+ELSE INSERT INTO AppointmentLetters (ErpNextId,AppointmentLetterCode,JobApplicant,ApplicantName,Company,AppointmentDate,AppointmentLetterTemplate,Introduction,ClosingNotes,IsDeleted) VALUES (@ErpNextId,@Code,@Applicant,@ApplicantName,@Company,@Date,@Template,@Introduction,@ClosingNotes,0);
+SELECT TOP 1 Id FROM AppointmentLetters WHERE ErpNextId=@ErpNextId;", conn);
+            cmd.Parameters.AddWithValue("@ErpNextId", erpId); cmd.Parameters.AddWithValue("@Code", erpId); cmd.Parameters.AddWithValue("@Applicant", ErpValue(doc, "job_applicant")); cmd.Parameters.AddWithValue("@ApplicantName", ErpValue(doc, "applicant_name")); cmd.Parameters.AddWithValue("@Company", ErpValue(doc, "company")); cmd.Parameters.AddWithValue("@Date", ErpDate(doc, "appointment_date")); cmd.Parameters.AddWithValue("@Template", ErpValue(doc, "appointment_letter_template")); cmd.Parameters.AddWithValue("@Introduction", ErpValue(doc, "introduction")); cmd.Parameters.AddWithValue("@ClosingNotes", ErpValue(doc, "closing_notes"));
+            var id = Convert.ToInt32(cmd.ExecuteScalar());
+            using (var clear = new SqlCommand("DELETE FROM AppointmentLetterTerms WHERE AppointmentLetterId=@Id", conn)) { clear.Parameters.AddWithValue("@Id", id); clear.ExecuteNonQuery(); }
+            foreach (var term in (doc["terms"] as JArray ?? new JArray()).OfType<JObject>())
+            { using var insert = new SqlCommand("INSERT INTO AppointmentLetterTerms (AppointmentLetterId,Title,Description) VALUES (@Id,@Title,@Description)", conn); insert.Parameters.AddWithValue("@Id", id); insert.Parameters.AddWithValue("@Title", ErpValue(term, "title")); insert.Parameters.AddWithValue("@Description", ErpValue(term, "description")); insert.ExecuteNonQuery(); }
+        }
+        public async Task<ActionResult> InterviewFeedback(string id, string interview, string interviewRound, string jobApplicant, string interviewer, string result)
+        {
+            await SyncInterviewFeedbacksFromErpAsync();
             var list = _interviewFeedbackService.GetAll(id, interview, interviewRound, jobApplicant, interviewer, result);
             ViewBag.IdFilter = id;
             ViewBag.InterviewFilter = interview;
@@ -36288,26 +37037,188 @@ VALUES
             return View(list);
         }
 
-        public ActionResult CreateInterviewFeedback()
+        public async Task<ActionResult> CreateInterviewFeedback()
         {
+            await SyncInterviewFeedbacksFromErpAsync();
+            await LoadInterviewFeedbackDropdownsAsync();
             return View(new InterviewFeedbackModel { Result = "Cleared" });
         }
 
         [HttpPost]
-        public ActionResult CreateInterviewFeedback(InterviewFeedbackModel model, string[] SkillNames, int[] SkillRatings)
+        public async Task<ActionResult> CreateInterviewFeedback(InterviewFeedbackModel model, string[] SkillNames, int[] SkillRatings)
         {
             var names = SkillNames != null ? new List<string>(SkillNames) : new List<string>();
             var ratings = SkillRatings != null ? new List<int>(SkillRatings) : new List<int>();
-
-            int newId = _interviewFeedbackService.Insert(model, names, ratings);
-            return RedirectToAction("InterviewFeedbackDetails", new { id = newId });
+            if (model.InterviewId <= 0) ModelState.AddModelError(nameof(model.InterviewId), "Select an Interview.");
+            if (string.IsNullOrWhiteSpace(model.Interviewer)) ModelState.AddModelError(nameof(model.Interviewer), "Select an Interviewer.");
+            if (!ModelState.IsValid)
+            {
+                await LoadInterviewFeedbackDropdownsAsync();
+                return View(model);
+            }
+            try
+            {
+                var interview = _interviewService.GetById(model.InterviewId);
+                if (interview == null || string.IsNullOrWhiteSpace(interview.ErpNextId)) throw new InvalidOperationException("Select an Interview synced from ERPNext.");
+                var response = await _erpNextService.PostAsync("/api/resource/Interview%20Feedback", new
+                {
+                    interview = interview.ErpNextId,
+                    interviewer = model.Interviewer,
+                    result = model.Result,
+                    feedback = model.FeedbackText,
+                    skill_assessment = names.Select((skill, index) => new { skill, rating = index < ratings.Count ? ratings[index] : 0 }).Where(x => !string.IsNullOrWhiteSpace(x.skill))
+                });
+                model.ErpNextId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                int newId = _interviewFeedbackService.Insert(model, names, ratings);
+                return RedirectToAction("InterviewFeedbackDetails", new { id = newId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "Interview Feedback save failed: " + ShortErpNextError(ex.Message));
+                await LoadInterviewFeedbackDropdownsAsync();
+                return View(model);
+            }
         }
 
-        public ActionResult InterviewFeedbackDetails(int id)
+        public async Task<ActionResult> InterviewFeedbackDetails(int id)
         {
+            await SyncInterviewFeedbacksFromErpAsync();
             var model = _interviewFeedbackService.GetById(id);
             if (model == null) return NotFound();
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetInterviewFeedbackData(int interviewId)
+        {
+            var interview = _interviewService.GetById(interviewId);
+            if (interview == null) return NotFound();
+            var skills = new List<string>();
+            try
+            {
+                var response = await _erpNextService.GetAsync("/api/resource/Interview%20Round/" + Uri.EscapeDataString(interview.InterviewRound));
+                var doc = JObject.Parse(response)["data"] as JObject;
+                skills = (doc?["expected_skill_set"] as JArray ?? new JArray()).OfType<JObject>().Select(x => ErpValue(x, "skill")).Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            }
+            catch { }
+            return Json(new { interviewRound = interview.InterviewRound, jobApplicant = interview.JobApplicant, skills });
+        }
+
+        private async Task LoadInterviewFeedbackDropdownsAsync()
+        {
+            ViewBag.FeedbackInterviews = _interviewService.GetAllInterviews(null, null, null, null, null, null);
+            ViewBag.FeedbackInterviewers = await FetchErpNextDropdownOptionsAsync("User", "[\"name\",\"full_name\"]", 1000);
+        }
+
+        private async Task SyncInterviewFeedbacksFromErpAsync()
+        {
+            try
+            {
+                var feedbackRows = new JArray();
+                for (var start = 0; ; start += 1000)
+                {
+                    var response = await _erpNextService.GetAsync("/api/resource/Interview%20Feedback?fields=" + Uri.EscapeDataString("[\"name\"]") + "&limit_start=" + start + "&limit_page_length=1000");
+                    var page = JObject.Parse(response)["data"] as JArray ?? new JArray();
+                    foreach (var row in page) feedbackRows.Add(row);
+                    if (page.Count < 1000) break;
+                }
+                using var conn = new SqlConnection(_connectionString);
+                conn.Open();
+                using (var ensure = new SqlCommand(@"IF COL_LENGTH('dbo.InterviewFeedbacks','ErpNextId') IS NULL ALTER TABLE dbo.InterviewFeedbacks ADD ErpNextId NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.Interviews','ErpNextId') IS NULL ALTER TABLE dbo.Interviews ADD ErpNextId NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.Interviews','Interviewers') IS NULL ALTER TABLE dbo.Interviews ADD Interviewers NVARCHAR(MAX) NULL;
+IF COL_LENGTH('dbo.Interviews','JobOpening') IS NULL ALTER TABLE dbo.Interviews ADD JobOpening NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.Interviews','ExpectedAverageRating') IS NULL ALTER TABLE dbo.Interviews ADD ExpectedAverageRating DECIMAL(18,2) NULL;
+IF COL_LENGTH('dbo.Interviews','AverageRating') IS NULL ALTER TABLE dbo.Interviews ADD AverageRating DECIMAL(18,2) NULL;
+IF COL_LENGTH('dbo.Interviews','Reminded') IS NULL ALTER TABLE dbo.Interviews ADD Reminded BIT NOT NULL CONSTRAINT DF_Interviews_Reminded DEFAULT 0;
+IF COL_LENGTH('dbo.Interviews','DocStatus') IS NULL ALTER TABLE dbo.Interviews ADD DocStatus INT NOT NULL CONSTRAINT DF_Interviews_DocStatus DEFAULT 0;", conn)) ensure.ExecuteNonQuery();
+                foreach (var row in feedbackRows.OfType<JObject>())
+                {
+                    var erpId = ErpValue(row, "name");
+                    var full = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Interview%20Feedback/" + Uri.EscapeDataString(erpId)))["data"] as JObject;
+                    if (full == null) continue;
+                    var erpInterviewId = ErpValue(full, "interview");
+                    int? interviewId;
+                    using (var find = new SqlCommand("SELECT TOP 1 Id FROM Interviews WHERE ErpNextId=@Id", conn)) { find.Parameters.AddWithValue("@Id", erpInterviewId); var value = find.ExecuteScalar(); interviewId = value == null || value == DBNull.Value ? null : Convert.ToInt32(value); }
+                    if (!interviewId.HasValue && !string.IsNullOrWhiteSpace(erpInterviewId))
+                    {
+                        var interviewDocument = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Interview/" + Uri.EscapeDataString(erpInterviewId)))["data"] as JObject;
+                        if (interviewDocument != null)
+                            interviewId = UpsertInterviewFromErp(conn, interviewDocument);
+                    }
+                    if (!interviewId.HasValue) continue;
+                    int localId;
+                    using (var upsert = new SqlCommand(@"IF EXISTS (SELECT 1 FROM InterviewFeedbacks WHERE ErpNextId=@ErpNextId OR (ErpNextId IS NULL AND InterviewId=@InterviewId AND Interviewer=@Interviewer)) UPDATE InterviewFeedbacks SET ErpNextId=@ErpNextId, InterviewId=@InterviewId, Interviewer=@Interviewer, Result=@Result, FeedbackText=@Feedback WHERE ErpNextId=@ErpNextId OR (ErpNextId IS NULL AND InterviewId=@InterviewId AND Interviewer=@Interviewer); ELSE INSERT INTO InterviewFeedbacks (ErpNextId,InterviewId,Interviewer,Result,FeedbackText,CreatedDate) VALUES (@ErpNextId,@InterviewId,@Interviewer,@Result,@Feedback,GETDATE()); SELECT Id FROM InterviewFeedbacks WHERE ErpNextId=@ErpNextId;", conn))
+                    {
+                        upsert.Parameters.AddWithValue("@ErpNextId", erpId); upsert.Parameters.AddWithValue("@InterviewId", interviewId.Value); upsert.Parameters.AddWithValue("@Interviewer", ErpValue(full, "interviewer")); upsert.Parameters.AddWithValue("@Result", ErpValue(full, "result")); upsert.Parameters.AddWithValue("@Feedback", ErpValue(full, "feedback")); localId = Convert.ToInt32(upsert.ExecuteScalar());
+                    }
+                    using (var delete = new SqlCommand("DELETE FROM InterviewFeedbackSkills WHERE InterviewFeedbackId=@Id", conn)) { delete.Parameters.AddWithValue("@Id", localId); delete.ExecuteNonQuery(); }
+                    foreach (var skill in (full["skill_assessment"] as JArray ?? new JArray()).OfType<JObject>())
+                    {
+                        var name = ErpValue(skill, "skill"); if (string.IsNullOrWhiteSpace(name)) continue;
+                        using var insert = new SqlCommand("INSERT INTO InterviewFeedbackSkills (InterviewFeedbackId,Skill,Rating) VALUES (@Id,@Skill,@Rating)", conn);
+                        insert.Parameters.AddWithValue("@Id", localId); insert.Parameters.AddWithValue("@Skill", name); insert.Parameters.AddWithValue("@Rating", ErpInt(skill, "rating")); insert.ExecuteNonQuery();
+                    }
+                }
+                // Reads must never try to re-post older local rows. New feedback is posted by
+                // CreateInterviewFeedback, so this keeps the page load responsive.
+            }
+            catch { }
+        }
+
+        private int UpsertInterviewFromErp(SqlConnection conn, JObject document)
+        {
+            var erpId = ErpValue(document, "name");
+            var interviewerRows = (document["interview_details"] as JArray ?? document["interviewers"] as JArray ?? new JArray()).OfType<JObject>();
+            var interviewers = string.Join(", ", interviewerRows.Select(x => ErpValue(x, "interviewer")).Where(x => !string.IsNullOrWhiteSpace(x)));
+            using var command = new SqlCommand(@"IF EXISTS (SELECT 1 FROM Interviews WHERE ErpNextId=@ErpNextId)
+UPDATE Interviews SET InterviewRound=@InterviewRound, JobApplicant=@JobApplicant, JobOpening=@JobOpening, Designation=@Designation, Status=@Status, ScheduledOn=@ScheduledOn, ResumeLink=@ResumeLink, FromTime=@FromTime, ToTime=@ToTime, InterviewSummary=@InterviewSummary, Feedback=@Feedback, Interviewers=@Interviewers, ExpectedAverageRating=@ExpectedAverageRating, AverageRating=@AverageRating, Reminded=@Reminded, DocStatus=@DocStatus WHERE ErpNextId=@ErpNextId;
+ELSE INSERT INTO Interviews (ErpNextId,InterviewRound,JobApplicant,JobOpening,Designation,Status,ScheduledOn,ResumeLink,FromTime,ToTime,InterviewSummary,Feedback,Interviewers,ExpectedAverageRating,AverageRating,Reminded,DocStatus) VALUES (@ErpNextId,@InterviewRound,@JobApplicant,@JobOpening,@Designation,@Status,@ScheduledOn,@ResumeLink,@FromTime,@ToTime,@InterviewSummary,@Feedback,@Interviewers,@ExpectedAverageRating,@AverageRating,@Reminded,@DocStatus);
+SELECT TOP 1 Id FROM Interviews WHERE ErpNextId=@ErpNextId;", conn);
+            command.Parameters.AddWithValue("@ErpNextId", erpId);
+            command.Parameters.AddWithValue("@InterviewRound", ErpValue(document, "interview_round"));
+            command.Parameters.AddWithValue("@JobApplicant", ErpValue(document, "job_applicant"));
+            command.Parameters.AddWithValue("@JobOpening", ErpValue(document, "job_opening"));
+            command.Parameters.AddWithValue("@Designation", ErpValue(document, "designation"));
+            command.Parameters.AddWithValue("@Status", ErpValue(document, "status"));
+            command.Parameters.AddWithValue("@ScheduledOn", ErpDate(document, "scheduled_on"));
+            command.Parameters.AddWithValue("@ResumeLink", ErpValue(document, "resume_link"));
+            command.Parameters.AddWithValue("@FromTime", ErpTime(document, "from_time"));
+            command.Parameters.AddWithValue("@ToTime", ErpTime(document, "to_time"));
+            command.Parameters.AddWithValue("@InterviewSummary", ErpValue(document, "interview_summary"));
+            command.Parameters.AddWithValue("@Feedback", ErpValue(document, "feedback"));
+            command.Parameters.AddWithValue("@Interviewers", interviewers);
+            command.Parameters.AddWithValue("@ExpectedAverageRating", decimal.TryParse(ErpValue(document, "expected_average_rating"), out var expectedAverageRating) ? expectedAverageRating : 0);
+            command.Parameters.AddWithValue("@AverageRating", decimal.TryParse(ErpValue(document, "average_rating"), out var averageRating) ? averageRating : 0);
+            command.Parameters.AddWithValue("@Reminded", ErpValue(document, "reminded") == "1");
+            command.Parameters.AddWithValue("@DocStatus", int.TryParse(ErpValue(document, "docstatus"), out var docStatus) ? docStatus : 0);
+            return Convert.ToInt32(command.ExecuteScalar());
+        }
+
+        private async Task PushUnsyncedInterviewFeedbacksToErpAsync(SqlConnection conn)
+        {
+            var rows = _interviewFeedbackService.GetAll(null, null, null, null, null, null);
+            foreach (var row in rows)
+            {
+                var model = _interviewFeedbackService.GetById(row.Id);
+                if (model == null) continue;
+                using var hasId = new SqlCommand("SELECT ErpNextId FROM InterviewFeedbacks WHERE Id=@Id", conn);
+                hasId.Parameters.AddWithValue("@Id", model.Id);
+                if (hasId.ExecuteScalar()?.ToString() is string id && !string.IsNullOrWhiteSpace(id)) continue;
+                var interview = _interviewService.GetById(model.InterviewId);
+                if (interview == null || string.IsNullOrWhiteSpace(interview.ErpNextId)) continue;
+                try
+                {
+                    var response = await _erpNextService.PostAsync("/api/resource/Interview%20Feedback", new { interview = interview.ErpNextId, interviewer = model.Interviewer, result = model.Result, feedback = model.FeedbackText, skill_assessment = model.Skills.Select(x => new { skill = x.Skill, rating = x.Rating }) });
+                    var erpId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(erpId))
+                    {
+                        using var update = new SqlCommand("UPDATE InterviewFeedbacks SET ErpNextId=@ErpNextId WHERE Id=@Id", conn);
+                        update.Parameters.AddWithValue("@ErpNextId", erpId); update.Parameters.AddWithValue("@Id", model.Id); update.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex) { TempData["ErpNextError"] = "Interview Feedback " + model.Id + " could not sync: " + ShortErpNextError(ex.Message); }
+            }
         }
         //public ActionResult Interview(string status = null)
         //{
@@ -36356,20 +37267,29 @@ VALUES
         //    return RedirectToAction("InterviewDetails", new { id = model.Id });
         //}
 
-        public ActionResult InterviewRound(string id)
+        public async Task<ActionResult> InterviewRound(string id)
         {
+            await SyncInterviewMastersFromErpAsync();
             var list = _interviewRoundService.GetAll(id);
             ViewBag.IdFilter = id;
             return View(list);
         }
 
-        public ActionResult CreateInterviewRound()
+        public async Task<ActionResult> CreateInterviewRound(int? id)
         {
+            await LoadInterviewRoundDropdownsAsync();
+            if (id.HasValue)
+            {
+                var existing = _interviewRoundService.GetById(id.Value);
+                if (existing == null) return NotFound();
+                ViewBag.IsEdit = true;
+                return View(existing);
+            }
             return View(new InterviewRound());
         }
 
         [HttpPost]
-        public ActionResult CreateInterviewRound(InterviewRound model, string[] SkillNames, string[] SkillDescriptions)
+        public async Task<ActionResult> CreateInterviewRound(InterviewRound model, string[] SkillNames, string[] SkillDescriptions)
         {
             if (SkillNames != null)
             {
@@ -36386,41 +37306,135 @@ VALUES
                 }
             }
 
+            var response = await _erpNextService.PostAsync("/api/resource/Interview%20Round", new { round_name = model.RoundName, description = model.Description, expected_average_rating = model.ExpectedAverageRating, interview_type = model.InterviewType, designation = model.Designation, interviewers = (model.Interviewers ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(user => new { user = user.Trim() }), expected_skill_set = model.Skills.Select(skill => new { skill = skill.Skill, description = skill.Description }) });
+            model.ErpNextId = JObject.Parse(response)["data"]?["name"]?.ToString();
             int newId = _interviewRoundService.Insert(model);
             return RedirectToAction("InterviewRoundDetails", new { id = newId });
         }
 
         public ActionResult InterviewRoundDetails(int id)
         {
-            var round = _interviewRoundService.GetById(id);
-            if (round == null) return NotFound();
-            return View(round);
+            return RedirectToAction(nameof(CreateInterviewRound), new { id });
         }
 
-        public ActionResult InterviewType(string id)
+        [HttpPost]
+        public async Task<ActionResult> UpdateInterviewRound(InterviewRound model, string[] SkillNames, string[] SkillDescriptions)
         {
+            model.Skills = SkillNames?.Select((name, index) => new InterviewRoundSkill { Skill = name, Description = SkillDescriptions != null && index < SkillDescriptions.Length ? SkillDescriptions[index] : null }).Where(x => !string.IsNullOrWhiteSpace(x.Skill)).ToList() ?? new List<InterviewRoundSkill>();
+            var target = model.ErpNextId;
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                var searchUrl = "/api/resource/Interview%20Round?fields=[\"name\"]&filters=" + Uri.EscapeDataString("[[\"round_name\",\"=\",\"" + model.RoundName.Replace("\"", "\\\"") + "\"]]");
+                var rows = JObject.Parse(await _erpNextService.GetAsync(searchUrl))["data"] as JArray;
+                target = rows?.FirstOrDefault()?["name"]?.ToString();
+            }
+            if (string.IsNullOrWhiteSpace(target)) throw new InvalidOperationException("ERPNext Interview Round was not found.");
+            await _erpNextService.PutAsync("/api/resource/Interview%20Round/" + Uri.EscapeDataString(target), new { round_name = model.RoundName, description = model.Description, expected_average_rating = model.ExpectedAverageRating, interview_type = model.InterviewType, designation = model.Designation, interviewers = (model.Interviewers ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(user => new { user = user.Trim() }), expected_skill_set = model.Skills.Select(skill => new { skill = skill.Skill, description = skill.Description }) });
+            model.ErpNextId = target;
+            _interviewRoundService.Update(model);
+            return RedirectToAction(nameof(InterviewRound));
+        }
+
+        public async Task<ActionResult> InterviewType(string id)
+        {
+            await SyncInterviewMastersFromErpAsync();
             var list = _interviewTypeService.GetAll(id);
             ViewBag.IdFilter = id;
             return View(list);
         }
 
-        public ActionResult CreateInterviewType()
+        public ActionResult CreateInterviewType(int? id)
         {
+            if (id.HasValue)
+            {
+                var existing = _interviewTypeService.GetById(id.Value);
+                if (existing == null) return NotFound();
+                ViewBag.IsEdit = true;
+                return View(existing);
+            }
             return View(new InterviewType());
         }
 
         [HttpPost]
-        public ActionResult CreateInterviewType(InterviewType model)
+        public async Task<ActionResult> CreateInterviewType(InterviewType model)
         {
+            var response = await _erpNextService.PostAsync("/api/resource/Interview%20Type", new { name = model.Name, description = model.Description });
+            model.ErpNextId = JObject.Parse(response)["data"]?["name"]?.ToString();
             int newId = _interviewTypeService.Insert(model);
             return RedirectToAction("InterviewTypeDetails", new { id = newId });
         }
 
         public ActionResult InterviewTypeDetails(int id)
         {
-            var type = _interviewTypeService.GetById(id);
-            if (type == null) return NotFound();
-            return View(type);
+            return RedirectToAction(nameof(CreateInterviewType), new { id });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateInterviewType(InterviewType model)
+        {
+            await _erpNextService.PutAsync("/api/resource/Interview%20Type/" + Uri.EscapeDataString(model.Name), new { description = model.Description });
+            model.ErpNextId = model.Name;
+            _interviewTypeService.Update(model);
+            return RedirectToAction(nameof(InterviewType));
+        }
+
+        private async Task SyncInterviewMastersFromErpAsync()
+        {
+            try
+            {
+                var types = await FetchErpNextDropdownOptionsAsync("Interview Type", "[\"name\",\"description\"]", 1000);
+                var rounds = await FetchErpNextDropdownOptionsAsync("Interview Round", "[\"name\",\"round_name\",\"description\",\"interview_type\",\"expected_average_rating\",\"designation\"]", 1000);
+                var roundDocuments = new List<JObject>();
+                foreach (var round in rounds.OfType<JObject>())
+                {
+                    var id = ErpValue(round, "name");
+                    if (string.IsNullOrWhiteSpace(id)) continue;
+                    try
+                    {
+                        var response = await _erpNextService.GetAsync("/api/resource/Interview%20Round/" + Uri.EscapeDataString(id));
+                        if (JObject.Parse(response)["data"] is JObject document) roundDocuments.Add(document);
+                    }
+                    catch { roundDocuments.Add(round); }
+                }
+
+                using var conn = new SqlConnection(_connectionString);
+                conn.Open();
+                using (var ensure = new SqlCommand(@"IF COL_LENGTH('dbo.InterviewTypes','ErpNextId') IS NULL ALTER TABLE dbo.InterviewTypes ADD ErpNextId NVARCHAR(255) NULL; IF COL_LENGTH('dbo.InterviewRounds','ErpNextId') IS NULL ALTER TABLE dbo.InterviewRounds ADD ErpNextId NVARCHAR(255) NULL; IF COL_LENGTH('dbo.InterviewRounds','Description') IS NULL ALTER TABLE dbo.InterviewRounds ADD Description NVARCHAR(MAX) NULL;", conn)) ensure.ExecuteNonQuery();
+                foreach (var type in types.OfType<JObject>())
+                {
+                    using var cmd = new SqlCommand(@"IF EXISTS (SELECT 1 FROM InterviewTypes WHERE ErpNextId=@Id OR Name=@Id OR (ErpNextId IS NULL AND Name<>'' AND (@Id LIKE Name + '%' OR Name LIKE @Id + '%'))) UPDATE InterviewTypes SET ErpNextId=@Id, Name=@Id, Description=@Description WHERE ErpNextId=@Id OR Name=@Id OR (ErpNextId IS NULL AND Name<>'' AND (@Id LIKE Name + '%' OR Name LIKE @Id + '%')); ELSE INSERT INTO InterviewTypes (ErpNextId,Name,Description) VALUES (@Id,@Id,@Description);", conn);
+                    cmd.Parameters.AddWithValue("@Id", ErpValue(type, "name")); cmd.Parameters.AddWithValue("@Description", ErpValue(type, "description")); cmd.ExecuteNonQuery();
+                }
+                foreach (var round in roundDocuments)
+                {
+                    var erpId = ErpValue(round, "name");
+                    var roundName = ErpValue(round, "round_name");
+                    int? localId;
+                    using (var upsert = new SqlCommand(@"IF EXISTS (SELECT 1 FROM InterviewRounds WHERE ErpNextId=@Id OR RoundName=@RoundName OR (ErpNextId IS NULL AND RoundName<>'' AND (@RoundName LIKE RoundName + '%' OR RoundName LIKE @RoundName + '%'))) UPDATE InterviewRounds SET ErpNextId=@Id, RoundName=@RoundName, Description=@Description, ExpectedAverageRating=@Rating, InterviewType=@Type, Interviewers=@Interviewers, Designation=@Designation WHERE ErpNextId=@Id OR RoundName=@RoundName OR (ErpNextId IS NULL AND RoundName<>'' AND (@RoundName LIKE RoundName + '%' OR RoundName LIKE @RoundName + '%')); ELSE INSERT INTO InterviewRounds (ErpNextId,RoundName,Description,ExpectedAverageRating,InterviewType,Interviewers,Designation) VALUES (@Id,@RoundName,@Description,@Rating,@Type,@Interviewers,@Designation); SELECT Id FROM InterviewRounds WHERE ErpNextId=@Id;", conn))
+                    {
+                        var interviewerNames = string.Join(", ", (round["interviewers"] as JArray ?? new JArray()).OfType<JObject>().Select(x => ErpValue(x, "user")).Where(x => !string.IsNullOrWhiteSpace(x)));
+                        upsert.Parameters.AddWithValue("@Id", erpId); upsert.Parameters.AddWithValue("@RoundName", roundName); upsert.Parameters.AddWithValue("@Description", ErpValue(round, "description")); upsert.Parameters.AddWithValue("@Rating", ErpInt(round, "expected_average_rating")); upsert.Parameters.AddWithValue("@Type", ErpValue(round, "interview_type")); upsert.Parameters.AddWithValue("@Interviewers", interviewerNames); upsert.Parameters.AddWithValue("@Designation", ErpValue(round, "designation"));
+                        var value = upsert.ExecuteScalar(); localId = value == null || value == DBNull.Value ? null : Convert.ToInt32(value);
+                    }
+                    if (!localId.HasValue) continue;
+                    using (var delete = new SqlCommand("DELETE FROM InterviewRoundSkills WHERE InterviewRoundId=@Id", conn)) { delete.Parameters.AddWithValue("@Id", localId.Value); delete.ExecuteNonQuery(); }
+                    foreach (var skill in (round["expected_skill_set"] as JArray ?? new JArray()).OfType<JObject>())
+                    {
+                        var name = ErpValue(skill, "skill"); if (string.IsNullOrWhiteSpace(name)) continue;
+                        using var insert = new SqlCommand("INSERT INTO InterviewRoundSkills (InterviewRoundId,Skill,Description) VALUES (@Id,@Skill,@Description)", conn);
+                        insert.Parameters.AddWithValue("@Id", localId.Value); insert.Parameters.AddWithValue("@Skill", name); insert.Parameters.AddWithValue("@Description", ErpValue(skill, "description")); insert.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private async Task LoadInterviewRoundDropdownsAsync()
+        {
+            ViewBag.InterviewRoundTypes = await FetchErpNextDropdownOptionsAsync("Interview Type", "[\"name\"]", 1000);
+            ViewBag.InterviewRoundInterviewers = await FetchErpNextDropdownOptionsAsync("User", "[\"name\",\"full_name\"]", 1000);
+            ViewBag.InterviewRoundDesignations = await FetchErpNextDropdownOptionsAsync("Designation", "[\"name\"]", 1000);
+            ViewBag.InterviewRoundSkills = await FetchErpNextDropdownOptionsAsync("Skill", "[\"name\",\"description\"]", 1000);
         }
 
         public async Task<ActionResult> EmployeeReferral(string id, string fullName, DateTime? date, string status, string forDesignation, string contactNo, string referrer)
@@ -36657,9 +37671,13 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
             if (model == null) return NotFound();
             try
             {
-                if (status == 1 && model.DocStatus == 0) model.DocStatus = 1;
-                else if (status == 2 && model.DocStatus == 1) model.DocStatus = 2;
+                var document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Job%20Requisition/" + Uri.EscapeDataString(model.ErpNextId)))["data"] as JObject;
+                if (status == 1 && model.DocStatus == 0)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else if (status == 2 && model.DocStatus == 1)
+                    await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Job Requisition", name = model.ErpNextId });
                 else throw new InvalidOperationException("This document status has changed. Refresh and try again.");
+                model.DocStatus = status;
                 _jobRequisitionService.Update(model);
             }
             catch (Exception ex) { TempData["ErpNextError"] = "Job Requisition status failed: " + ShortErpNextError(ex.Message); }
@@ -36828,8 +37846,9 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
             })
         };
 
-        public ActionResult Interview(string id, string interviewRound, string jobApplicant, string designation, string status, DateTime? scheduledOn)
+        public async Task<ActionResult> Interview(string id, string interviewRound, string jobApplicant, string designation, string status, DateTime? scheduledOn)
         {
+            await SyncInterviewsFromErpAsync();
             var list = _interviewService.GetAllInterviews(id, interviewRound, jobApplicant, designation, status, scheduledOn);
             ViewBag.IdFilter = id;
             ViewBag.RoundFilter = interviewRound;
@@ -36840,26 +37859,290 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
             return View(list);
         }
 
-        public ActionResult CreateInterview()
+        public async Task<ActionResult> CreateInterview(string? selectedJobApplicant = null, int? id = null)
         {
-            return View(new Interview { Status = "Pending", ScheduledOn = DateTime.Now });
+            await LoadInterviewDropdownsAsync();
+            if (id.HasValue)
+            {
+                var existing = _interviewService.GetById(id.Value);
+                if (existing == null) return NotFound();
+                ViewBag.IsDetail = true;
+                return View(existing);
+            }
+            return View(new Interview { Status = "Pending", ScheduledOn = DateTime.Now, JobApplicant = selectedJobApplicant ?? string.Empty });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetInterviewApplicantDefaults(string jobApplicant)
+        {
+            if (string.IsNullOrWhiteSpace(jobApplicant))
+                return Json(new { jobOpening = "", designation = "", resumeLink = "", interviewers = Array.Empty<string>() });
+
+            try
+            {
+                var applicantResponse = await _erpNextService.GetAsync(
+                    "/api/resource/Job%20Applicant/" + Uri.EscapeDataString(jobApplicant));
+                var applicant = JObject.Parse(applicantResponse)["data"] as JObject ?? new JObject();
+
+                var filters = JsonConvert.SerializeObject(new[] { new[] { "job_applicant", "=", jobApplicant } });
+                var fields = "[\"name\",\"modified\"]";
+                var interviewResponse = await _erpNextService.GetAsync(
+                    "/api/resource/Interview?fields=" + Uri.EscapeDataString(fields) +
+                    "&filters=" + Uri.EscapeDataString(filters) +
+                    "&order_by=" + Uri.EscapeDataString("modified desc") + "&limit_page_length=1");
+                var latestInterview = (JObject.Parse(interviewResponse)["data"] as JArray)?.OfType<JObject>().FirstOrDefault();
+                var interviewerNames = new List<string>();
+
+                if (!string.IsNullOrWhiteSpace(ErpValue(latestInterview, "name")))
+                {
+                    var detailResponse = await _erpNextService.GetAsync(
+                        "/api/resource/Interview/" + Uri.EscapeDataString(ErpValue(latestInterview, "name")));
+                    var detail = JObject.Parse(detailResponse)["data"] as JObject;
+                    var rows = detail?["interview_details"] as JArray ?? detail?["interviewers"] as JArray;
+                    if (rows != null)
+                    {
+                        interviewerNames = rows.OfType<JObject>()
+                            .Select(x => ErpValue(x, "interviewer"))
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+                        if (interviewerNames.Count == 0)
+                            interviewerNames = rows.OfType<JObject>()
+                                .Select(x => ErpValue(x, "user"))
+                                .Where(x => !string.IsNullOrWhiteSpace(x))
+                                .Distinct(StringComparer.OrdinalIgnoreCase)
+                                .ToList();
+                    }
+                }
+
+                return Json(new
+                {
+                    jobOpening = ErpValue(applicant, "job_title"),
+                    designation = ErpValue(applicant, "designation"),
+                    resumeLink = ErpValue(applicant, "resume_link"),
+                    interviewers = interviewerNames
+                });
+            }
+            catch
+            {
+                return Json(new { jobOpening = "", designation = "", resumeLink = "", interviewers = Array.Empty<string>() });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetInterviewRoundDefaults(string interviewRound)
+        {
+            if (string.IsNullOrWhiteSpace(interviewRound))
+                return Json(new { designation = "", expectedAverageRating = "", interviewers = Array.Empty<string>() });
+
+            try
+            {
+                var response = await _erpNextService.GetAsync(
+                    "/api/resource/Interview%20Round/" + Uri.EscapeDataString(interviewRound));
+                var round = JObject.Parse(response)["data"] as JObject ?? new JObject();
+                var rows = round["interviewers"] as JArray
+                    ?? round["interview_details"] as JArray
+                    ?? round["interviewer_details"] as JArray
+                    ?? new JArray();
+
+                var interviewers = rows.OfType<JObject>()
+                    .Select(row => new[]
+                    {
+                        ErpValue(row, "interviewer"),
+                        ErpValue(row, "user"),
+                        ErpValue(row, "employee")
+                    }.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)))
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                return Json(new
+                {
+                    designation = ErpValue(round, "designation"),
+                    expectedAverageRating = ErpValue(round, "expected_average_rating"),
+                    interviewers
+                });
+            }
+            catch
+            {
+                return Json(new { designation = "", expectedAverageRating = "", interviewers = Array.Empty<string>() });
+            }
         }
 
         [HttpPost]
-        public ActionResult CreateInterview(Interview model)
+        public async Task<ActionResult> CreateInterview(Interview model)
         {
-            _interviewService.InsertInterview(model);
-            return RedirectToAction("Interview");
+            if (string.IsNullOrWhiteSpace(model.InterviewRound)) ModelState.AddModelError(nameof(model.InterviewRound), "Select an Interview Round.");
+            if (string.IsNullOrWhiteSpace(model.JobApplicant)) ModelState.AddModelError(nameof(model.JobApplicant), "Select a Job Applicant.");
+            if (!ModelState.IsValid)
+            {
+                await LoadInterviewDropdownsAsync();
+                return View(model);
+            }
+            try
+            {
+                var payload = BuildInterviewPayload(model);
+                if (model.Id > 0)
+                {
+                    var current = _interviewService.GetById(model.Id);
+                    if (current == null) return NotFound();
+                    if (current.DocStatus != 0) throw new InvalidOperationException("Submitted or cancelled interviews cannot be edited.");
+                    model.ErpNextId = current.ErpNextId;
+                    model.DocStatus = current.DocStatus;
+                    if (!string.IsNullOrWhiteSpace(model.ErpNextId)) await _erpNextService.PutAsync("/api/resource/Interview/" + Uri.EscapeDataString(model.ErpNextId), payload);
+                    _interviewService.UpdateInterview(model);
+                    return RedirectToAction(nameof(CreateInterview), new { id = model.Id });
+                }
+                var response = await _erpNextService.PostAsync("/api/resource/Interview", payload);
+                model.ErpNextId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                model.DocStatus = 0;
+        var localId = _interviewService.InsertInterview(model);
+        return RedirectToAction(nameof(CreateInterview), new { id = localId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "Interview save failed: " + ShortErpNextError(ex.Message));
+                await LoadInterviewDropdownsAsync();
+                return View(model);
+            }
         }
 
-        public ActionResult InterviewDetails(int id)
+        public async Task<ActionResult> InterviewDetails(int id)
         {
-            var interview = _interviewService.GetById(id);
-            if (interview == null)
+            return RedirectToAction(nameof(CreateInterview), new { id });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ChangeInterviewStatus(int id, int status)
+        {
+            var model = _interviewService.GetById(id);
+            if (model == null || string.IsNullOrWhiteSpace(model.ErpNextId)) return NotFound();
+            try
             {
-                return NotFound();
+                var response = await _erpNextService.GetAsync("/api/resource/Interview/" + Uri.EscapeDataString(model.ErpNextId));
+                var document = JObject.Parse(response)["data"] as JObject;
+                if (document == null) throw new InvalidOperationException("Interview was not found in ERPNext.");
+                if (status == 1 && model.DocStatus == 0) await _erpNextService.PostMethodAsync("/api/method/frappe.client.submit", new { doc = document });
+                else if (status == 2 && model.DocStatus == 1) await _erpNextService.PostMethodAsync("/api/method/frappe.client.cancel", new { doctype = "Interview", name = model.ErpNextId });
+                else throw new InvalidOperationException("This interview status has changed. Refresh and try again.");
+                model.DocStatus = status; _interviewService.UpdateInterview(model);
             }
-            return View(interview);
+            catch (Exception ex) { TempData["ErpNextError"] = "Interview status failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(CreateInterview), new { id });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> RescheduleInterview(int id, DateTime scheduledOn, TimeSpan fromTime, TimeSpan toTime)
+        {
+            var model = _interviewService.GetById(id);
+            if (model == null) return NotFound();
+            if (model.DocStatus != 0) { TempData["ErpNextError"] = "Only a draft interview can be rescheduled."; return RedirectToAction(nameof(CreateInterview), new { id }); }
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(model.ErpNextId)) await _erpNextService.PutAsync("/api/resource/Interview/" + Uri.EscapeDataString(model.ErpNextId), new { scheduled_on = scheduledOn.ToString("yyyy-MM-dd"), from_time = fromTime.ToString(@"hh\:mm\:ss"), to_time = toTime.ToString(@"hh\:mm\:ss") });
+                model.ScheduledOn = scheduledOn; model.FromTime = fromTime; model.ToTime = toTime; _interviewService.UpdateInterview(model);
+                TempData["Success"] = "Interview rescheduled.";
+            }
+            catch (Exception ex) { TempData["ErpNextError"] = "Reschedule failed: " + ShortErpNextError(ex.Message); }
+            return RedirectToAction(nameof(CreateInterview), new { id });
+        }
+
+        private static object BuildInterviewPayload(Interview model) => new
+        {
+            interview_round = model.InterviewRound, job_applicant = model.JobApplicant, job_opening = model.JobOpening,
+            designation = model.Designation, status = model.Status, scheduled_on = model.ScheduledOn.ToString("yyyy-MM-dd"),
+            from_time = model.FromTime.ToString(@"hh\:mm\:ss"), to_time = model.ToTime.ToString(@"hh\:mm\:ss"),
+            resume_link = model.ResumeLink, interview_summary = model.InterviewSummary, feedback = model.Feedback,
+            expected_average_rating = model.ExpectedAverageRating, average_rating = model.AverageRating, reminded = model.Reminded ? 1 : 0,
+            interview_details = (model.Interviewers ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => new { interviewer = x.Trim() })
+        };
+
+        private async Task SyncInterviewsFromErpAsync()
+        {
+            try
+            {
+                var interviews = new JArray();
+                for (var start = 0; ; start += 1000)
+                {
+                    // List only document names first.  ERPNext installations can have
+                    // different Interview field definitions; requesting a missing field
+                    // makes the whole import fail before any past records are processed.
+                    var pageResponse = await _erpNextService.GetAsync("/api/resource/Interview?fields=" + Uri.EscapeDataString("[\"name\"]") + "&limit_start=" + start + "&limit_page_length=1000");
+                    var page = JObject.Parse(pageResponse)["data"] as JArray ?? new JArray();
+                    foreach (var item in page) interviews.Add(item);
+                    if (page.Count < 1000) break;
+                }
+                using var conn = new SqlConnection(_connectionString);
+                conn.Open();
+                using (var ensure = new SqlCommand(@"IF COL_LENGTH('dbo.Interviews','ErpNextId') IS NULL ALTER TABLE dbo.Interviews ADD ErpNextId NVARCHAR(255) NULL; IF COL_LENGTH('dbo.Interviews','Interviewers') IS NULL ALTER TABLE dbo.Interviews ADD Interviewers NVARCHAR(MAX) NULL; IF COL_LENGTH('dbo.Interviews','JobOpening') IS NULL ALTER TABLE dbo.Interviews ADD JobOpening NVARCHAR(255) NULL; IF COL_LENGTH('dbo.Interviews','ExpectedAverageRating') IS NULL ALTER TABLE dbo.Interviews ADD ExpectedAverageRating DECIMAL(18,2) NULL; IF COL_LENGTH('dbo.Interviews','AverageRating') IS NULL ALTER TABLE dbo.Interviews ADD AverageRating DECIMAL(18,2) NULL; IF COL_LENGTH('dbo.Interviews','Reminded') IS NULL ALTER TABLE dbo.Interviews ADD Reminded BIT NOT NULL CONSTRAINT DF_Interviews_Reminded DEFAULT 0; IF COL_LENGTH('dbo.Interviews','DocStatus') IS NULL ALTER TABLE dbo.Interviews ADD DocStatus INT NOT NULL CONSTRAINT DF_Interviews_DocStatus DEFAULT 0;", conn)) ensure.ExecuteNonQuery();
+
+                foreach (var row in interviews.OfType<JObject>())
+                {
+                    var erpId = ErpValue(row, "name");
+                    if (string.IsNullOrWhiteSpace(erpId)) continue;
+                    JObject document;
+                    try
+                    {
+                        document = JObject.Parse(await _erpNextService.GetAsync("/api/resource/Interview/" + Uri.EscapeDataString(erpId)))["data"] as JObject;
+                        if (document == null) continue;
+                    }
+                    catch
+                    {
+                        // One inaccessible document must not stop the rest of the ERP history.
+                        continue;
+                    }
+
+                    var interviewerRows = (document["interview_details"] as JArray ?? document["interviewers"] as JArray ?? new JArray()).OfType<JObject>();
+                    var interviewerNames = string.Join(", ", interviewerRows.Select(x => ErpValue(x, "interviewer")).Where(x => !string.IsNullOrWhiteSpace(x)));
+                    if (string.IsNullOrWhiteSpace(interviewerNames)) interviewerNames = string.Join(", ", interviewerRows.Select(x => ErpValue(x, "user")).Where(x => !string.IsNullOrWhiteSpace(x)));
+                    var scheduledOn = ErpDate(document, "scheduled_on");
+                    var fromTime = ErpTime(document, "from_time");
+                    var toTime = ErpTime(document, "to_time");
+                    var round = ErpValue(document, "interview_round");
+                    var applicant = ErpValue(document, "job_applicant");
+
+                    using var cmd = new SqlCommand(@"IF EXISTS (SELECT 1 FROM Interviews WHERE ErpNextId=@ErpNextId OR (ErpNextId IS NULL AND InterviewRound=@InterviewRound AND JobApplicant=@JobApplicant AND ScheduledOn=@ScheduledOn AND FromTime=@FromTime))
+UPDATE Interviews SET ErpNextId=@ErpNextId, InterviewRound=@InterviewRound, JobApplicant=@JobApplicant, JobOpening=@JobOpening, Designation=@Designation, Status=@Status, ScheduledOn=@ScheduledOn, ResumeLink=@ResumeLink, FromTime=@FromTime, ToTime=@ToTime, InterviewSummary=@InterviewSummary, Feedback=@Feedback, Interviewers=@Interviewers, ExpectedAverageRating=@ExpectedAverageRating, AverageRating=@AverageRating, Reminded=@Reminded, DocStatus=@DocStatus WHERE ErpNextId=@ErpNextId OR (ErpNextId IS NULL AND InterviewRound=@InterviewRound AND JobApplicant=@JobApplicant AND ScheduledOn=@ScheduledOn AND FromTime=@FromTime);
+ELSE INSERT INTO Interviews (ErpNextId,InterviewRound,JobApplicant,JobOpening,Designation,Status,ScheduledOn,ResumeLink,FromTime,ToTime,InterviewSummary,Feedback,Interviewers,ExpectedAverageRating,AverageRating,Reminded,DocStatus) VALUES (@ErpNextId,@InterviewRound,@JobApplicant,@JobOpening,@Designation,@Status,@ScheduledOn,@ResumeLink,@FromTime,@ToTime,@InterviewSummary,@Feedback,@Interviewers,@ExpectedAverageRating,@AverageRating,@Reminded,@DocStatus);", conn);
+                    cmd.Parameters.AddWithValue("@ErpNextId", erpId); cmd.Parameters.AddWithValue("@InterviewRound", round); cmd.Parameters.AddWithValue("@JobApplicant", applicant); cmd.Parameters.AddWithValue("@JobOpening", ErpValue(document, "job_opening")); cmd.Parameters.AddWithValue("@Designation", ErpValue(document, "designation")); cmd.Parameters.AddWithValue("@Status", ErpValue(document, "status")); cmd.Parameters.AddWithValue("@ScheduledOn", scheduledOn); cmd.Parameters.AddWithValue("@ResumeLink", ErpValue(document, "resume_link")); cmd.Parameters.AddWithValue("@FromTime", fromTime); cmd.Parameters.AddWithValue("@ToTime", toTime); cmd.Parameters.AddWithValue("@InterviewSummary", ErpValue(document, "interview_summary")); cmd.Parameters.AddWithValue("@Feedback", ErpValue(document, "feedback")); cmd.Parameters.AddWithValue("@Interviewers", interviewerNames); cmd.Parameters.AddWithValue("@ExpectedAverageRating", decimal.TryParse(ErpValue(document, "expected_average_rating"), out var expectedRating) ? expectedRating : 0); cmd.Parameters.AddWithValue("@AverageRating", decimal.TryParse(ErpValue(document, "average_rating"), out var averageRating) ? averageRating : 0); cmd.Parameters.AddWithValue("@Reminded", ErpValue(document, "reminded") == "1"); cmd.Parameters.AddWithValue("@DocStatus", int.TryParse(ErpValue(document, "docstatus"), out var docStatus) ? docStatus : 0);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Send locally-created drafts only after the complete ERP import has run.
+                await PushUnsyncedInterviewsToErpAsync(conn);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErpNextError"] = "Interview refresh failed: " + ShortErpNextError(ex.Message);
+            }
+        }
+
+        private async Task PushUnsyncedInterviewsToErpAsync(SqlConnection conn)
+        {
+            var localInterviews = _interviewService.GetAllInterviews(null, null, null, null, null, null)
+                .Where(x => string.IsNullOrWhiteSpace(x.ErpNextId)).ToList();
+            foreach (var model in localInterviews)
+            {
+                try
+                {
+                    var response = await _erpNextService.PostAsync("/api/resource/Interview", BuildInterviewPayload(model));
+                    var erpId = JObject.Parse(response)["data"]?["name"]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(erpId))
+                    {
+                        using var update = new SqlCommand("UPDATE Interviews SET ErpNextId=@ErpNextId WHERE Id=@Id", conn);
+                        update.Parameters.AddWithValue("@ErpNextId", erpId); update.Parameters.AddWithValue("@Id", model.Id); update.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex) { TempData["ErpNextError"] = "Interview " + model.Id + " could not sync: " + ShortErpNextError(ex.Message); }
+            }
+        }
+
+        private async Task LoadInterviewDropdownsAsync()
+        {
+            ViewBag.InterviewFormRounds = await FetchErpNextDropdownOptionsAsync("Interview Round", "[\"name\",\"round_name\",\"designation\",\"expected_average_rating\"]", 1000);
+    ViewBag.InterviewFormApplicants = await FetchAllErpNextDropdownOptionsAsync("Job Applicant", "[\"name\",\"applicant_name\",\"designation\",\"job_title\",\"resume_link\"]");
+            ViewBag.InterviewFormUsers = await FetchErpNextDropdownOptionsAsync("User", "[\"name\",\"full_name\"]", 1000);
+            ViewBag.InterviewFormDesignations = await FetchErpNextDropdownOptionsAsync("Designation", "[\"name\"]", 1000);
         }
 
 
@@ -37248,14 +38531,15 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
             return View(list);
         }
 
-        public async Task<ActionResult> CreateJobApplicant()
+        public async Task<ActionResult> CreateJobApplicant(bool returnToInterview = false)
         {
             await LoadRecruitmentDropdownsAsync();
+            ViewBag.ReturnToInterview = returnToInterview;
             return View(new JobApplicant { Status = "Open", Country = "India", Currency = "INR" });
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateJobApplicant(JobApplicant model)
+        public async Task<ActionResult> CreateJobApplicant(JobApplicant model, bool returnToInterview = false)
         {
             try
             {
@@ -37280,11 +38564,14 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
                 });
                 model.ErpNextId = JObject.Parse(erpResponse)["data"]?["name"]?.ToString();
                 var newId = _jobApplicantService.InsertApplicant(model);
+                if (returnToInterview && !string.IsNullOrWhiteSpace(model.ErpNextId))
+                    return RedirectToAction(nameof(CreateInterview), new { selectedJobApplicant = model.ErpNextId });
                 return RedirectToAction("JobApplicantDetails", new { id = newId });
             }
             catch (Exception ex)
             {
                 await LoadRecruitmentDropdownsAsync();
+                ViewBag.ReturnToInterview = returnToInterview;
                 ModelState.AddModelError(string.Empty, "Job Applicant save failed: " + ShortErpNextError(ex.Message));
                 return View(model);
             }
@@ -39908,6 +41195,38 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
             }
         }
 
+        private async Task<JArray> FetchAllErpNextDropdownOptionsAsync(string doctype, string fieldsJson)
+        {
+            var allRows = new JArray();
+            const int pageSize = 1000;
+
+            try
+            {
+                for (var start = 0; ; start += pageSize)
+                {
+                    var url = "/api/resource/" + Uri.EscapeDataString(doctype)
+                        + "?fields=" + Uri.EscapeDataString(fieldsJson)
+                        + "&limit_start=" + start
+                        + "&limit_page_length=" + pageSize
+                        + "&order_by=" + Uri.EscapeDataString("modified desc");
+                    var response = await _erpNextService.GetAsync(url);
+                    var page = JObject.Parse(response)["data"] as JArray ?? new JArray();
+
+                    foreach (var row in page)
+                        allRows.Add(row);
+
+                    if (page.Count < pageSize)
+                        break;
+                }
+            }
+            catch
+            {
+                // Preserve successfully loaded pages if a later ERP page fails.
+            }
+
+            return allRows;
+        }
+
         private async Task<JArray> FetchErpLinkOptionsAsync(string doctype, int limit)
         {
             try
@@ -40017,8 +41336,9 @@ ELSE INSERT INTO EmployeeReferrals (ErpNextId, DocStatus, FirstName, LastName, R
             cmd.ExecuteNonQuery();
         }
 
-        private static string ErpValue(JObject row, string field) => row[field]?.ToString() ?? string.Empty;
+        private static string ErpValue(JObject? row, string field) => row?[field]?.ToString() ?? string.Empty;
         private static DateTime ErpDate(JObject row, string field) => DateTime.TryParse(ErpValue(row, field), out var date) ? date : DateTime.Now;
+        private static TimeSpan ErpTime(JObject row, string field) => TimeSpan.TryParse(ErpValue(row, field), out var time) ? time : TimeSpan.Zero;
         private static decimal ErpDecimal(JObject row, string field) => decimal.TryParse(ErpValue(row, field), out var value) ? value : 0m;
         private static int ErpInt(JObject row, string field) => int.TryParse(ErpValue(row, field), out var value) ? value : 0;
 
@@ -41424,9 +42744,18 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
 
         public ActionResult LeaveApplicationList(string status = null)
         {
-            var leaves = _leaveService.GetAllLeaves(status);
-            ViewBag.StatusFilter = status;
-            return View("LeaveApplicationList", leaves);
+            try
+            {
+                var leaves = _leaveService.GetAllLeaves(status);
+                ViewBag.StatusFilter = status;
+                return View("LeaveApplicationList", leaves);
+            }
+            catch (SqlException ex) when (ex.Number == -2 || ex.Number == 1222)
+            {
+                TempData["Error"] = "Leave applications are temporarily busy. Please refresh in a moment.";
+                ViewBag.StatusFilter = status;
+                return View("LeaveApplicationList", new List<LeaveApplication>());
+            }
         }
 
         // ---- Employee Information report action ----
@@ -43935,6 +45264,7 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
             try
             {
                 model.Id = id;
+                model.Country = ResolveHolidayCountryCode(model.Country, await GetHolidayCountryMapAsync());
                 model.TotalHolidays = model.Holidays?.Count ?? 0;
 
                 var holidaysPayload = new List<object>();
@@ -43959,13 +45289,27 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
                     color = model.Color,
                     country = model.Country,
                     subdivision = model.Subdivision,
+                    weekly_off = model.WeeklyOff,
                     holidays = holidaysPayload
                 };
 
-                await _erpNextService.PutAsync(
-                    "/api/resource/Holiday%20List/" + Uri.EscapeDataString(model.HolidayListName),
-                    payload
-                );
+                // ERPNext's document ID can differ from the visible Holiday List Name.
+                // Resolve it before updating so a valid HRMS record never sends a PUT to
+                // a non-existent ERPNext URL.
+                var erpDocumentName = await FindErpHolidayListDocumentNameAsync(model.HolidayListName);
+                if (string.IsNullOrWhiteSpace(erpDocumentName))
+                {
+                    // The list was created locally while ERPNext was unavailable. Create
+                    // its missing ERP document instead of failing the update.
+                    await _erpNextService.PostAsync("/api/resource/Holiday%20List", payload);
+                }
+                else
+                {
+                    await _erpNextService.PutAsync(
+                        "/api/resource/Holiday%20List/" + Uri.EscapeDataString(erpDocumentName),
+                        payload
+                    );
+                }
 
                 _holidayListService.Update(model);
 
@@ -43977,6 +45321,22 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
             }
 
             return RedirectToAction("HolidayListDetails", new { id });
+        }
+
+        private async Task<string> FindErpHolidayListDocumentNameAsync(string holidayListName)
+        {
+            if (string.IsNullOrWhiteSpace(holidayListName))
+                return null;
+
+            var response = await _erpNextService.GetAsync(
+                "/api/resource/Holiday%20List?fields=[\"name\",\"holiday_list_name\"]&limit_page_length=1000");
+            var rows = JObject.Parse(response)["data"] as JArray;
+
+            var match = rows?.FirstOrDefault(row =>
+                string.Equals(row["name"]?.ToString(), holidayListName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(row["holiday_list_name"]?.ToString(), holidayListName, StringComparison.OrdinalIgnoreCase));
+
+            return match?["name"]?.ToString();
         }
 
         [HttpPost]
@@ -44645,19 +46005,8 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
 
         [HttpGet]
         [Route("HR/Branches")]
-        public async Task<ActionResult> Branches()
+        public ActionResult Branches()
         {
-            try
-            {
-                await RefreshBranchesFromErpNextAsync();
-            }
-            catch (Exception ex)
-            {
-                ViewBag.SyncWarning =
-                    "Automatic ERPNext Branch refresh failed: " +
-                    ex.Message;
-            }
-
             var branches =
                 _branchService.GetAllBranches();
 
@@ -44760,19 +46109,8 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
 
         [HttpGet]
         [Route("HR/BranchDetails/{id:int}")]
-        public async Task<ActionResult> BranchDetails(int id)
+        public ActionResult BranchDetails(int id)
         {
-            try
-            {
-                await RefreshBranchesFromErpNextAsync();
-            }
-            catch (Exception ex)
-            {
-                ViewBag.SyncWarning =
-                    "ERPNext Branch refresh failed: " +
-                    ex.Message;
-            }
-
             Branch model =
                 _branchService.GetById(id);
 
@@ -45324,6 +46662,7 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
                         {
                             expense_date = e.ExpenseDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"),
                             expense_type = typeName,
+                            cost_center = string.IsNullOrWhiteSpace(e.CostCenter) ? targetCostCenter : e.CostCenter,
                             default_account = defaultExpenseAccount, // Explicitly pass resolved account
                             description = string.IsNullOrWhiteSpace(e.Description) ? typeName : e.Description,
                             amount = e.Amount,
@@ -47376,6 +48715,7 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
         public async Task<ActionResult> CreateShiftType(ShiftType model)
         {
             ViewBag.HolidayLists = await LoadHolidayListNamesAsync();
+            ApplyShiftTypeCheckboxes(model);
 
             var errors = new List<string>();
 
@@ -47418,7 +48758,20 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
                     end_time = model.EndTime,
                     holiday_list = model.HolidayList,
                     color = model.RosterColor,
-                    enable_auto_attendance = model.EnableAutoAttendance ? 1 : 0
+                    enable_auto_attendance = model.EnableAutoAttendance ? 1 : 0,
+                    determine_check_in_and_check_out = model.DetermineCheckInAndCheckOut,
+                    working_hours_calculation_based_on = model.WorkingHoursCalculationBasedOn,
+                    begin_check_in_before_shift_start_time = model.BeginCheckInBeforeShiftStartTime,
+                    allow_check_out_after_shift_end_time = model.AllowCheckOutAfterShiftEndTime,
+                    mark_auto_attendance_on_holidays = model.MarkAutoAttendanceOnHolidays ? 1 : 0,
+                    working_hours_threshold_for_half_day = model.WorkingHoursThresholdForHalfDay,
+                    working_hours_threshold_for_absent = model.WorkingHoursThresholdForAbsent,
+                    process_attendance_after = model.ProcessAttendanceAfter?.ToString("yyyy-MM-dd"),
+                    auto_update_last_sync = model.AutoUpdateLastSync ? 1 : 0,
+                    enable_late_entry_marking = model.EnableLateEntryMarking ? 1 : 0,
+                    late_entry_grace_period = model.LateEntryGracePeriod,
+                    enable_early_exit_marking = model.EnableEarlyExitMarking ? 1 : 0,
+                    early_exit_grace_period = model.EarlyExitGracePeriod
                 };
 
                 await _erpNextService.PostAsync("/api/resource/Shift%20Type", erpPayload);
@@ -47433,6 +48786,18 @@ ELSE INSERT INTO StaffingPlans (ErpNextId, Name, Company, FromDate, ToDate, Depa
                 TempData["ErpNextError"] = "ERPNext validation failed: " + ExtractErpNextErrorMessage(ex.Message);
                 return View("~/Views/HR/CreateShiftType.cshtml", model);
             }
+        }
+
+        private void ApplyShiftTypeCheckboxes(ShiftType model)
+        {
+            bool IsChecked(string name) => Request.Form[name].Any(value =>
+                string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1" || value == "on");
+
+            model.EnableAutoAttendance = IsChecked(nameof(model.EnableAutoAttendance));
+            model.MarkAutoAttendanceOnHolidays = IsChecked(nameof(model.MarkAutoAttendanceOnHolidays));
+            model.AutoUpdateLastSync = IsChecked(nameof(model.AutoUpdateLastSync));
+            model.EnableLateEntryMarking = IsChecked(nameof(model.EnableLateEntryMarking));
+            model.EnableEarlyExitMarking = IsChecked(nameof(model.EnableEarlyExitMarking));
         }
 
         [HttpGet]

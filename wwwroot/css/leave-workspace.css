@@ -1,0 +1,449 @@
+/* Shared presentation layer for Leave workspace screens. No workflow styles or scripts live here. */
+.leave-ui { display: none !important; }
+
+/* Frontend refinements for HRMS record forms using this workspace theme. */
+.main-content:has(.leave-ui) .ea-card,
+.main-content:has(.leave-ui) .promotion-detail-page,
+.main-content:has(.leave-ui) .performance-form-shell {
+    border-color: #c8e3eb !important;
+    border-radius: 18px !important;
+    box-shadow: 0 10px 26px rgba(11, 80, 101, .08);
+}
+
+.main-content:has(.leave-ui) .ea-header,
+.main-content:has(.leave-ui) .ea-form-header {
+    background: linear-gradient(110deg, #153f5e 0%, #176d7b 54%, #008f83 100%) !important;
+    border-color: transparent !important;
+    box-shadow: 0 12px 26px rgba(13, 71, 91, .16);
+}
+
+.main-content:has(.leave-ui) .ea-header h1,
+.main-content:has(.leave-ui) .ea-header h2,
+.main-content:has(.leave-ui) .ea-header h3,
+.main-content:has(.leave-ui) .ea-header h4,
+.main-content:has(.leave-ui) .ea-header h5,
+.main-content:has(.leave-ui) .ea-form-header h1,
+.main-content:has(.leave-ui) .ea-form-header h2,
+.main-content:has(.leave-ui) .ea-form-header h3,
+.main-content:has(.leave-ui) .ea-form-header h4,
+.main-content:has(.leave-ui) .ea-form-header h5 {
+    color: #fff !important;
+}
+
+.main-content:has(.leave-ui) .promotion-summary-item {
+    background: #f7fcfc !important;
+    border-color: #c8e3eb !important;
+}
+
+.main-content:has(.leave-ui) {
+    background: linear-gradient(145deg, #f2fbfc 0%, #eef7fb 48%, #f8fcfa 100%);
+}
+
+.main-content:has(.leave-ui) > .d-flex.justify-content-between,
+.main-content:has(.leave-ui) .leave-policy-shell > .d-flex.justify-content-between,
+.main-content:has(.leave-ui) .leave-allocation-form > .d-flex.justify-content-between,
+.main-content:has(.leave-ui) .leave-allocation-form .form-top {
+    background: linear-gradient(110deg, #153f5e 0%, #176d7b 54%, #008f83 100%);
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 12px 26px rgba(13, 71, 91, .16);
+    color: #fff;
+    margin: 1.4rem 0 1.2rem !important;
+    padding: 1.15rem 1.35rem;
+}
+
+.main-content:has(.leave-ui) > .d-flex.justify-content-between h4,
+.main-content:has(.leave-ui) .leave-policy-shell h4,
+.main-content:has(.leave-ui) .leave-allocation-form > .d-flex.justify-content-between h4,
+.main-content:has(.leave-ui) .leave-allocation-form .form-top h4,
+.main-content:has(.leave-ui) .leave-allocation-form .form-top h3,
+.main-content:has(.leave-ui) .leave-allocation-form .form-top h5 {
+    color: #fff;
+    font-weight: 750;
+    letter-spacing: -.02em;
+    margin-bottom: 0;
+}
+
+.main-content:has(.leave-ui) .leave-policy-shell,
+.main-content:has(.leave-ui) .leave-allocation-form {
+    max-width: 1420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.main-content:has(.leave-ui) .leave-policy-shell,
+.main-content:has(.leave-ui) .leave-allocation-form {
+    background: rgba(241, 251, 253, .76) !important;
+    border: 1px solid #c8e3eb !important;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 26px rgba(11, 80, 101, .07);
+    padding: 1.4rem !important;
+}
+
+.main-content:has(.leave-ui) .card,
+.main-content:has(.leave-ui) .border.rounded-3,
+.main-content:has(.leave-ui) .table-responsive {
+    background: #fff;
+    border: 1px solid #c8e3eb !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 20px rgba(11, 80, 101, .055);
+}
+
+.main-content:has(.leave-ui) .card { overflow: hidden; }
+
+.main-content:has(.leave-ui) h5,
+.main-content:has(.leave-ui) h6,
+.main-content:has(.leave-ui) .form-label,
+.main-content:has(.leave-ui) label {
+    color: #124761;
+    font-weight: 700;
+}
+
+.main-content:has(.leave-ui) .form-control,
+.main-content:has(.leave-ui) .form-select,
+.main-content:has(.leave-ui) textarea {
+    border-color: #b7d8e4;
+    border-radius: 9px;
+    box-shadow: none;
+}
+
+.main-content:has(.leave-ui) .form-control:focus,
+.main-content:has(.leave-ui) .form-select:focus,
+.main-content:has(.leave-ui) textarea:focus {
+    border-color: #008f83;
+    box-shadow: 0 0 0 .22rem rgba(0, 143, 131, .14);
+}
+
+.main-content:has(.leave-ui) .btn-dark,
+.main-content:has(.leave-ui) .btn-primary,
+.main-content:has(.leave-ui) .btn-success {
+    background: linear-gradient(110deg, #176d7b, #008f83);
+    border-color: #008f83;
+    color: #fff;
+    font-weight: 700;
+}
+
+.main-content:has(.leave-ui) .btn-dark:hover,
+.main-content:has(.leave-ui) .btn-primary:hover,
+.main-content:has(.leave-ui) .btn-success:hover {
+    background: #124761;
+    border-color: #124761;
+}
+
+.main-content:has(.leave-ui) .btn-outline-secondary,
+.main-content:has(.leave-ui) .btn-outline-dark {
+    background: #fff;
+    border-color: #79b7c5;
+    color: #155166;
+    font-weight: 650;
+}
+
+.main-content:has(.leave-ui) .btn-outline-secondary:hover,
+.main-content:has(.leave-ui) .btn-outline-dark:hover {
+    background: #e2f5f3;
+    border-color: #008f83;
+    color: #0d695f;
+}
+
+.main-content:has(.leave-ui) .table {
+    margin-bottom: 0;
+    overflow: hidden;
+}
+
+.main-content:has(.leave-ui) .table thead th {
+    background: #e1f2f6;
+    border-bottom: 1px solid #b9dce5;
+    color: #154b64;
+    font-size: .76rem;
+    font-weight: 800;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+
+.main-content:has(.leave-ui) .table tbody tr:hover { background: #f0fbfa; }
+
+.main-content:has(.leave-ui) .alert {
+    border-radius: 11px;
+    box-shadow: 0 6px 16px rgba(18, 71, 97, .07);
+}
+
+.main-content:has(.leave-ui) hr { border-color: #d6e8ed; opacity: 1; }
+
+/* Targeted screens: Leave Encashment, Employee Advance and Grievance */
+.main-content:has(.leave-ui) .leave-encashment-header,
+.main-content:has(.leave-ui) .grievance-list-header,
+.main-content:has(.leave-ui) .employee-advance-header,
+.main-content:has(.leave-ui) .grievance-create-header {
+    align-items: center;
+    padding: 1.05rem 1.25rem;
+    border-radius: 16px;
+    background: linear-gradient(110deg, #164869 0%, #0d8790 100%);
+    box-shadow: 0 12px 26px rgba(18, 86, 111, .18);
+    color: #fff;
+}
+
+.main-content:has(.leave-ui) .leave-encashment-header h4,
+.main-content:has(.leave-ui) .grievance-list-header h4,
+.main-content:has(.leave-ui) .employee-advance-header h4,
+.main-content:has(.leave-ui) .grievance-create-header h4 {
+    color: #fff !important;
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.main-content:has(.leave-ui) .leave-encashment-header .btn,
+.main-content:has(.leave-ui) .grievance-list-header .btn,
+.main-content:has(.leave-ui) .employee-advance-header .btn,
+.main-content:has(.leave-ui) .grievance-create-header .btn {
+    background: #fff;
+    color: #0d6170;
+    border: 1px solid rgba(255,255,255,.8);
+    font-weight: 700;
+}
+
+.main-content:has(.leave-ui) .leave-encashment-filters,
+.main-content:has(.leave-ui) .grievance-list-filters {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #cce5eb;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(20, 78, 101, .07);
+}
+
+.main-content:has(.leave-ui) .leave-encashment-table,
+.main-content:has(.leave-ui) .grievance-list-table {
+    overflow: hidden;
+    border: 1px solid #c8e0e7;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(20, 78, 101, .07);
+}
+
+.main-content:has(.leave-ui) .ea-card,
+.main-content:has(.leave-ui) .grievance-create-card {
+    border: 1px solid #cce4eb;
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(20, 78, 101, .08);
+    background: #fff;
+}
+
+.main-content:has(.leave-ui) .ea-card h6,
+.main-content:has(.leave-ui) .grievance-create-card h6 {
+    color: #124f69;
+    font-weight: 800;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid #dceef1;
+}
+
+.main-content:has(.leave-ui) .grievance-create-ui { max-width: 1180px; }
+
+.main-content:has(.leave-ui) .grievance-create-card .form-control:focus,
+.main-content:has(.leave-ui) .grievance-create-card .form-select:focus,
+.main-content:has(.leave-ui) .ea-card .form-control:focus,
+.main-content:has(.leave-ui) .ea-card .form-select:focus {
+    border-color: #0e9092;
+    box-shadow: 0 0 0 .2rem rgba(14,144,146,.14);
+}
+
+@media (max-width: 768px) {
+    .main-content:has(.leave-ui) > .d-flex.justify-content-between,
+    .main-content:has(.leave-ui) .leave-policy-shell > .d-flex.justify-content-between {
+        align-items: flex-start !important;
+        gap: .85rem;
+    }
+}
+/* Training and shift-assignment workspace: presentation only. */
+.main-content:has(.leave-ui) .training-list-header,
+.main-content:has(.leave-ui) .training-form-header,
+.main-content:has(.leave-ui) .training-detail-header,
+.main-content:has(.leave-ui) .shift-tool-header {
+    margin-bottom: 1.25rem;
+    padding: 1.05rem 1.3rem;
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(110deg, #153f5e 0%, #176d7b 54%, #008f83 100%);
+    box-shadow: 0 12px 26px rgba(13, 71, 91, .16);
+}
+
+.main-content:has(.leave-ui) .training-list-header h1,
+.main-content:has(.leave-ui) .training-list-header h2,
+.main-content:has(.leave-ui) .training-list-header h3,
+.main-content:has(.leave-ui) .training-list-header h4,
+.main-content:has(.leave-ui) .training-form-header h1,
+.main-content:has(.leave-ui) .training-form-header h2,
+.main-content:has(.leave-ui) .training-form-header h3,
+.main-content:has(.leave-ui) .training-form-header h4,
+.main-content:has(.leave-ui) .training-detail-header h1,
+.main-content:has(.leave-ui) .training-detail-header h2,
+.main-content:has(.leave-ui) .training-detail-header h3,
+.main-content:has(.leave-ui) .training-detail-header h4,
+.main-content:has(.leave-ui) .shift-tool-header h1,
+.main-content:has(.leave-ui) .shift-tool-header h2,
+.main-content:has(.leave-ui) .shift-tool-header h3,
+.main-content:has(.leave-ui) .shift-tool-header h4 { color: #fff; margin-bottom: 0; }
+
+.main-content:has(.leave-ui) .training-list-header .btn,
+.main-content:has(.leave-ui) .training-form-header .btn,
+.main-content:has(.leave-ui) .training-detail-header .btn,
+.main-content:has(.leave-ui) .shift-tool-header .btn {
+    background: #fff;
+    color: #105161;
+    border-color: rgba(255,255,255,.85);
+    font-weight: 700;
+}
+
+.main-content:has(.leave-ui) .training-list-filters,
+.main-content:has(.leave-ui) .shift-tool-filters {
+    padding: 1rem;
+    border: 1px solid #bfe0e4;
+    border-radius: 14px;
+    background: #f6fcfc;
+    margin-bottom: 1rem;
+}
+
+.main-content:has(.leave-ui) .training-form-card,
+.main-content:has(.leave-ui) .training-detail-card,
+.main-content:has(.leave-ui) .shift-tool-card {
+    border: 1px solid #c6e1e5;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(19, 88, 103, .06);
+}
+
+.main-content:has(.leave-ui) .training-list-table,
+.main-content:has(.leave-ui) .shift-tool-table {
+    overflow: hidden;
+    border: 1px solid #c8e2e5;
+    border-radius: 12px;
+}
+
+.main-content:has(.leave-ui) .training-list-table thead th,
+.main-content:has(.leave-ui) .shift-tool-table thead th {
+    color: #0c4d5c;
+    background: #e1f4f4;
+    border-color: #c8e2e5;
+}
+
+.main-content:has(.leave-ui) .training-form-shell .form-control:focus,
+.main-content:has(.leave-ui) .training-form-shell .form-select:focus,
+.main-content:has(.leave-ui) .training-detail-card .form-control:focus,
+.main-content:has(.leave-ui) .shift-tool-shell .form-control:focus,
+.main-content:has(.leave-ui) .shift-tool-shell .form-select:focus {
+    border-color: #14938e;
+    box-shadow: 0 0 0 .18rem rgba(20, 147, 142, .14);
+}
+
+/* Operations pages: visual treatment only; workflows and forms are unchanged. */
+.main-content:has(.operations-ui) {
+    background: linear-gradient(180deg, #f4fbfb 0%, #eef7f8 100%);
+}
+
+.main-content:has(.operations-ui) > .d-flex.justify-content-between.align-items-center.mb-3,
+.main-content:has(.operations-ui) .tr-page-header,
+.main-content:has(.operations-ui) .ea-form-header {
+    padding: 20px 24px;
+    border: 0;
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(110deg, #153f5e 0%, #176d7b 54%, #008f83 100%);
+    box-shadow: 0 14px 28px rgba(17, 73, 92, .18);
+}
+
+.main-content:has(.operations-ui) > .d-flex.justify-content-between.align-items-center.mb-3 h2,
+.main-content:has(.operations-ui) > .d-flex.justify-content-between.align-items-center.mb-3 h3,
+.main-content:has(.operations-ui) > .d-flex.justify-content-between.align-items-center.mb-3 h4,
+.main-content:has(.operations-ui) .tr-page-header h1,
+.main-content:has(.operations-ui) .tr-page-header h2,
+.main-content:has(.operations-ui) .ea-form-header h1,
+.main-content:has(.operations-ui) .ea-form-header h2,
+.main-content:has(.operations-ui) .ea-form-header h3,
+.main-content:has(.operations-ui) .ea-form-header h4 {
+    color: #fff;
+    margin-bottom: 0;
+}
+
+.main-content:has(.operations-ui) .card,
+.main-content:has(.operations-ui) .ea-section,
+.main-content:has(.operations-ui) .roster-wrapper,
+.main-content:has(.operations-ui) .table-card,
+.main-content:has(.operations-ui) .tr-list-wrapper {
+    background: #fff;
+    border: 1px solid #c4e2e3;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(18, 76, 95, .08);
+}
+
+.main-content:has(.operations-ui) .card-header,
+.main-content:has(.operations-ui) .ea-section-title {
+    color: #153f5e;
+    background: #e8f6f6;
+    border-color: #c4e2e3;
+}
+
+.main-content:has(.operations-ui) .form-control,
+.main-content:has(.operations-ui) .form-select {
+    border-color: #b8d9dd;
+    border-radius: 10px;
+}
+
+.main-content:has(.operations-ui) .form-control:focus,
+.main-content:has(.operations-ui) .form-select:focus {
+    border-color: #008f83;
+    box-shadow: 0 0 0 .2rem rgba(0, 143, 131, .13);
+}
+
+.main-content:has(.operations-ui) .table thead th,
+.main-content:has(.operations-ui) .roster-table th {
+    color: #12455d !important;
+    background: #e1f2f3 !important;
+    border-color: #bedde0 !important;
+}
+
+.main-content:has(.operations-ui) .table tbody tr:hover,
+.main-content:has(.operations-ui) .roster-table tbody tr:hover {
+    background: #f0fbfb !important;
+}
+
+.main-content:has(.operations-ui) .btn-primary,
+.main-content:has(.operations-ui) .btn-success,
+.main-content:has(.operations-ui) .btn-dark {
+    color: #fff;
+    border-color: #008f83;
+    background: #008f83;
+}
+
+.main-content:has(.operations-ui) .btn-primary:hover,
+.main-content:has(.operations-ui) .btn-success:hover,
+.main-content:has(.operations-ui) .btn-dark:hover {
+    color: #fff;
+    border-color: #08716b;
+    background: #08716b;
+}
+
+.main-content:has(.operations-ui) .btn-outline-primary,
+.main-content:has(.operations-ui) .btn-outline-secondary {
+    color: #15556a;
+    border-color: #73b8bd;
+}
+
+.main-content:has(.operations-ui) .btn-outline-primary:hover,
+.main-content:has(.operations-ui) .btn-outline-secondary:hover {
+    color: #fff;
+    border-color: #176d7b;
+    background: #176d7b;
+}
+
+.main-content:has(.operations-ui) .workforce-ui.checkin-list,
+.main-content:has(.operations-ui) .workforce-ui.checkin-details {
+    background: #f6ffff !important;
+    border: 1px solid #c4e2e3 !important;
+    border-radius: 18px !important;
+}
+
+.main-content:has(.operations-ui) .workforce-ui.checkin-list > .d-flex:first-child,
+.main-content:has(.operations-ui) .workforce-ui.checkin-details > .d-flex:first-child {
+    color: #fff !important;
+    border-radius: 15px !important;
+    background: linear-gradient(110deg, #153f5e 0%, #176d7b 54%, #008f83 100%) !important;
+}

@@ -250,6 +250,8 @@
 
 <script>
     const employees = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(employees));
+    const selectedSalaryStructure = '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(ViewBag.SelectedSalaryStructure?.ToString() ?? ""))';
+    if (selectedSalaryStructure) document.getElementById('salaryStructure').value = selectedSalaryStructure;
     const rows = document.getElementById('employeeRows');
     const esc = value => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const value = id => document.getElementById(id).value;

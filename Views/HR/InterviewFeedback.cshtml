@@ -3,6 +3,7 @@
     ViewBag.Title = "Interview Feedback";
 }
 
+<div class="recruitment-theme workflow-page interview-ui">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Interview Feedback</h4>
     <a href="@Url.Action("CreateInterviewFeedback", "HR")" class="btn btn-dark btn-sm">+ Add Interview Feedback</a>
@@ -68,3 +69,5 @@
 {
     <p class="text-muted text-center py-5">No interview feedback found with matching filters.</p>
 }
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

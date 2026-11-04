@@ -5,8 +5,10 @@ namespace Erp_Aits.Models
     public class Interview
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
         public string InterviewRound { get; set; }
         public string JobApplicant { get; set; }
+        public string JobOpening { get; set; }
         public string Designation { get; set; }
         public string Status { get; set; } = "Pending";
         public DateTime ScheduledOn { get; set; } = DateTime.Now;
@@ -15,5 +17,10 @@ namespace Erp_Aits.Models
         public TimeSpan ToTime { get; set; }
         public string InterviewSummary { get; set; }
         public string Feedback { get; set; }
+        public string Interviewers { get; set; } = string.Empty;
+        public decimal ExpectedAverageRating { get; set; }
+        public decimal AverageRating { get; set; }
+        public bool Reminded { get; set; }
+        public int DocStatus { get; set; }
     }
 }

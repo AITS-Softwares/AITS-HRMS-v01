@@ -4,8 +4,18 @@
 }
 
 <div class="container my-4">
+    <style>
+        .holiday-shell { background:#f1fbfd; border:1px solid #cbe5ed; border-radius:18px; padding:26px; }
+        .holiday-shell .card { border:1px solid #c9e1e9; border-radius:14px; box-shadow:none !important; }
+        .holiday-shell .card h6, .holiday-shell .form-label { color:#17486c; font-weight:700; }
+        .holiday-shell .table thead th { background:#e7f5f8; color:#17486c; border-color:#cbe5ed; }
+        .holiday-shell .form-control, .holiday-shell .form-select { border-color:#b9dbe5; }
+        .holiday-hero { background:linear-gradient(110deg,#17486c,#008d88); color:#fff; border-radius:14px; padding:20px 24px; }
+        .holiday-hero h4 { margin:0; font-weight:700; }
+    </style>
+<div class="holiday-shell">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">New Holiday List</h4>
+        <div class="holiday-hero flex-grow-1 me-3"><h4>New Holiday List</h4><small>Set dates, weekly offs, local holidays and holiday rows.</small></div>
         <a href="@Url.Action("HolidayList", "HR")" class="btn btn-outline-dark btn-sm">Back to List</a>
     </div>
 
@@ -22,7 +32,7 @@
     <form action="@Url.Action("CreateHolidayList", "HR")" method="post" id="holidayListForm">
         @Html.AntiForgeryToken()
 
-        <div class="card p-4 mb-3 shadow-sm">
+        <div class="card p-4 mb-3">
             <h6 class="mb-3 font-weight-bold">General Details</h6>
 
             <div class="row g-3">
@@ -65,26 +75,42 @@
             </div>
         </div>
 
-        <div class="card p-4 mb-3 shadow-sm">
+        <div class="card p-4 mb-3">
+            <h6 class="mb-3 font-weight-bold">Add Weekly Holidays</h6>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Weekly Off</label>
+                    <select name="WeeklyOff" id="weeklyOff" class="form-select">
+                        <option value="">Select weekly off</option>
+                        @foreach (var day in new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })
+                        {
+                            if (Model.WeeklyOff == day) { <option value="@day" selected>@day</option> }
+                            else { <option value="@day">@day</option> }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="addWeeklyOffDates()">Add to Holidays</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-3">
             <h6 class="mb-3 font-weight-bold">Add Local Holidays</h6>
 
             <div class="row g-3 align-items-end">
                 <div class="col-md-5">
                     <label class="form-label">Country</label>
-                    <input type="text"
-                           name="Country"
-                           class="form-control"
-                           value="@(string.IsNullOrWhiteSpace(Model.Country) ? "IN" : Model.Country)"
-                           placeholder="e.g. IN" />
+                    <input name="Country" id="country" class="form-control" list="countryOptions"
+                           value="@(string.IsNullOrWhiteSpace(Model.Country) ? "IN" : Model.Country)" placeholder="Select or type country" autocomplete="off" />
+                    <datalist id="countryOptions"></datalist>
                 </div>
 
                 <div class="col-md-5">
                     <label class="form-label">Subdivision</label>
-                    <input type="text"
-                           name="Subdivision"
-                           class="form-control"
-                           value="@Model.Subdivision"
-                           placeholder="Enter subdivision e.g. MH" />
+                    <input name="Subdivision" id="subdivision" class="form-control" list="subdivisionOptions" data-current="@Model.Subdivision"
+                           value="@Model.Subdivision" placeholder="Select or type subdivision" autocomplete="off" />
+                    <datalist id="subdivisionOptions"></datalist>
                 </div>
 
                 <div class="col-md-2">
@@ -98,7 +124,7 @@
             </div>
         </div>
 
-        <div class="card p-4 mb-3 shadow-sm">
+        <div class="card p-4 mb-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="mb-0 font-weight-bold">Holidays</h6>
 
@@ -165,7 +191,7 @@
             </table>
         </div>
 
-        <div class="card p-4 mb-3 shadow-sm">
+        <div class="card p-4 mb-3">
             <h6 class="mb-3 font-weight-bold">Appearance</h6>
 
             <div class="row g-3">
@@ -183,6 +209,7 @@
             Save Holiday List
         </button>
     </form>
+</div>
 </div>
 
 <script>
@@ -251,6 +278,23 @@
         updateHolidayIndexes();
     }
 
+    function addWeeklyOffDates() {
+        const weeklyOff = document.getElementById('weeklyOff').value;
+        const from = document.querySelector('[name="FromDate"]').value;
+        const to = document.querySelector('[name="ToDate"]').value;
+        if (!weeklyOff || !from || !to) return;
+        const wantedDay = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].indexOf(weeklyOff);
+        const start = new Date(from + 'T00:00:00');
+        const end = new Date(to + 'T00:00:00');
+        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+            if (date.getDay() !== wantedDay) continue;
+            const iso = date.toISOString().slice(0, 10);
+            const exists = Array.from(document.querySelectorAll('#holidaysBody input[type="date"]')).some(x => x.value === iso);
+            if (!exists) { addHolidayRow(); const rows = document.querySelectorAll('#holidaysBody tr:not(#emptyHolidayRow)'); rows[rows.length - 1].querySelector('input[type="date"]').value = iso; rows[rows.length - 1].querySelector('input[type="text"]').value = weeklyOff; }
+        }
+        updateHolidayIndexes();
+    }
+
     function removeHolidayRow(button) {
         button.closest("tr").remove();
 
@@ -272,5 +316,46 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         updateHolidayIndexes();
+        const countrySelect = document.getElementById('country');
+        const subdivisionSelect = document.getElementById('subdivision');
+        let holidayCountryOptions;
+
+        async function loadHolidayCountryOptions() {
+            if (holidayCountryOptions) return holidayCountryOptions;
+            const response = await fetch('@Url.Action("GetHolidayCountryOptions", "HR")');
+            if (!response.ok) return null;
+            holidayCountryOptions = await response.json();
+            const options = document.getElementById('countryOptions');
+            options.innerHTML = '';
+            (holidayCountryOptions.countries || []).forEach(country => {
+                const option = new Option(country.label + ' (' + country.value + ')', country.value);
+                options.appendChild(option);
+            });
+            return holidayCountryOptions;
+        }
+
+        async function loadSubdivisions() {
+            const current = subdivisionSelect.dataset.current || subdivisionSelect.value;
+            const options = document.getElementById('subdivisionOptions');
+            options.innerHTML = '';
+            const data = await loadHolidayCountryOptions();
+            if (!data) return;
+            const selected = (data.countries || []).find(country =>
+                country.value.toLowerCase() === countrySelect.value.toLowerCase() ||
+                country.label.toLowerCase() === countrySelect.value.toLowerCase());
+            const countryCode = selected ? selected.value : countrySelect.value.trim();
+            if (selected) countrySelect.value = countryCode;
+            ((data.subdivisionsByCountry || {})[countryCode] || [])
+                .forEach(name => options.appendChild(new Option(name, name)));
+            if (current) subdivisionSelect.value = current;
+        }
+        countrySelect.addEventListener('input', function () { subdivisionSelect.dataset.current = ''; loadSubdivisions(); });
+        countrySelect.addEventListener('change', function () { subdivisionSelect.dataset.current = ''; loadSubdivisions(); });
+        // Country choices must be ready before the user opens the field.
+        // Subdivisions are then loaded from the ERPNext standard country map
+        // whenever a country is selected.
+        loadHolidayCountryOptions().then(function () {
+            if (countrySelect.value) loadSubdivisions();
+        });
     });
 </script>

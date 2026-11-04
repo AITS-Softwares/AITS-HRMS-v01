@@ -1,115 +1,50 @@
-﻿@model Erp_Aits.Models.Interview
+@model Erp_Aits.Models.Interview
 @{
-    ViewBag.Title = "New Interview";
+    ViewBag.Title = Model.Id > 0 ? "Interview Details" : "New Interview";
+    var rounds = ViewBag.InterviewFormRounds as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var applicants = ViewBag.InterviewFormApplicants as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var users = ViewBag.InterviewFormUsers as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var designations = ViewBag.InterviewFormDesignations as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var saved = Model.Id > 0; var locked = saved && Model.DocStatus != 0;
 }
-
-<form asp-action="CreateInterview" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Interview</h4>
-        <button type="submit" class="btn btn-dark btn-sm">Save</button>
-    </div>
-
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li>
-    </ul>
-
-    <div class="tab-content">
-
-        <div class="tab-pane fade show active" id="detailsTab">
-            <h6 class="mb-3">Details</h6>
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label">Interview Round *</label>
-                    <input asp-for="InterviewRound" class="form-control" required autofocus />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Status *</label>
-                    <select asp-for="Status" class="form-select">
-                        <option>Pending</option>
-                        <option>Under Review</option>
-                        <option>Cleared</option>
-                        <option>Rejected</option>
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Job Applicant *</label>
-                    <input asp-for="JobApplicant" class="form-control" required />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Scheduled On *</label>
-                    <input asp-for="ScheduledOn" type="date" class="form-control" required value="@Model.ScheduledOn.ToString("yyyy-MM-dd")" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Resume link</label>
-                    <input asp-for="ResumeLink" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">From Time *</label>
-                    <input asp-for="FromTime" type="time" class="form-control" required />
-                </div>
-
-                <div class="col-md-6 offset-md-6">
-                    <label class="form-label">To Time *</label>
-                    <input asp-for="ToTime" type="time" class="form-control" required />
-                </div>
-            </div>
-
-            <hr />
-            <h6 class="mb-3">Interviewers</h6>
-            <table class="table table-bordered align-middle mb-1" id="interviewersTable">
-                <thead>
-                    <tr>
-                        <th style="width:40px"><input type="checkbox" disabled /></th>
-                        <th style="width:60px">No.</th>
-                        <th>Interviewer</th>
-                        <th style="width:50px"></th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addInterviewerRow()">+ Add Row</button>
-            <p class="text-muted mt-2"><em>Note: Interviewer rows are UI-only for now — needs a separate linked table to save.</em></p>
-
-            <hr class="my-4" />
-            <h6 class="mb-2">Interview Summary</h6>
-            <textarea asp-for="InterviewSummary" class="form-control" rows="6"></textarea>
-        </div>
-
-        <div class="tab-pane fade" id="feedbackTab">
-            <h6 class="mb-3">Feedback</h6>
-            <textarea asp-for="Feedback" class="form-control" rows="8"></textarea>
-        </div>
-
-    </div>
-</form>
-
+<style>
+.iv-page{max-width:1420px;margin:0 auto;padding:24px;background:#f1fafc;border:1px solid #c7e5ed;border-radius:14px}.iv-hero{background:linear-gradient(110deg,#133d61,#008f8b);color:#fff;padding:23px 27px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.iv-hero small{color:#9de8ec;font-weight:700;letter-spacing:.07em}.iv-card{background:#fff;border:1px solid #c7e1ea;border-radius:12px;margin-bottom:15px;overflow:hidden}.iv-card h5{margin:0;padding:17px 21px;color:#074a66;border-bottom:1px solid #d8edf1;font-weight:700}.iv-card .body{padding:21px}.iv-page label{font-weight:650;color:#174969}.iv-page .form-control,.iv-page .form-select{border-color:#b9d8e4;min-height:42px}.iv-page .nav-tabs{border-color:#b9d8e4}.iv-page .nav-link{color:#155a76}.iv-page .nav-link.active{font-weight:700;color:#063f58;border-color:#b9d8e4 #b9d8e4 #fff}.iv-actions .btn{margin-left:7px}.iv-badge{background:#def7f3;color:#08756f;padding:6px 10px;border-radius:999px;font-weight:700;font-size:.8rem}.interviewer-chip{display:inline-flex;align-items:center;margin:3px;padding:5px 9px;background:#e0f3fa;color:#075e79;border-radius:999px;font-size:.85rem}.btn-iv{background:#008e89;border-color:#008e89;color:#fff}.btn-iv:hover{background:#05736f;color:#fff}.btn-outline-iv{color:#0d6577;border-color:#8ccbd6}.btn-outline-iv:hover{background:#e2f7f7;color:#064e60}.iv-muted{color:#5c8191;font-size:.9rem}
+</style>
+<div class="recruitment-theme workflow-page interview-ui iv-page">
+ @if (TempData["ErpNextError"] != null) { <div class="alert alert-danger py-2">@TempData["ErpNextError"]</div> }
+ @if (TempData["Success"] != null) { <div class="alert alert-success py-2">@TempData["Success"]</div> }
+ <div class="iv-hero"><div><small>RECRUITMENT / INTERVIEWS</small><h3 class="mb-0 mt-1">@(saved ? "Interview Details" : "New Interview")</h3><div class="mt-2">@if(saved){<span class="iv-badge">@(Model.DocStatus == 0 ? "Draft" : Model.DocStatus == 1 ? "Submitted" : "Cancelled")</span>}</div></div><div class="iv-actions"><a asp-action="Interview" class="btn btn-light btn-sm">← Back to List</a>@if(saved && !locked){<button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#rescheduleModal">Reschedule Interview</button>}@if(!locked){<button type="submit" form="interviewForm" id="saveButton" class="btn btn-iv btn-sm" data-mode="@(saved ? "submit" : "save")">@(saved ? "Submit" : "Save")</button>}else{<form asp-action="ChangeInterviewStatus" method="post" class="d-inline"><input type="hidden" name="id" value="@Model.Id"/><input type="hidden" name="status" value="2"/><button class="btn btn-danger btn-sm">Cancel</button></form>}</div></div>
+ <form id="interviewForm" asp-action="CreateInterview" method="post" novalidate>
+  <input asp-for="Id" type="hidden"/><input asp-for="ErpNextId" type="hidden"/><input asp-for="DocStatus" type="hidden"/>
+  <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3"></div>
+  <div class="iv-card"><h5>Interview details</h5><div class="body"><div class="row g-3">
+   <div class="col-md-6"><label>Interview Round *</label><select asp-for="InterviewRound" id="roundSelect" class="form-select" disabled="@(locked ? "disabled" : null)"><option value="">Select Interview Round</option>@foreach(var row in rounds){var value=row["name"]?.ToString()??"";var label=row["round_name"]?.ToString()??value;<option value="@value" data-designation="@(row["designation"]?.ToString())" data-rating="@(row["expected_average_rating"]?.ToString())">@label</option>}</select></div>
+   <div class="col-md-6"><label>Status *</label><select asp-for="Status" class="form-select" disabled="@(locked ? "disabled" : null)"><option>Pending</option><option>Under Review</option><option>Cleared</option><option>Rejected</option></select></div>
+   <div class="col-md-6"><label>Job Applicant *</label><select asp-for="JobApplicant" id="applicantSelect" class="form-select" disabled="@(locked ? "disabled" : null)"><option value="">Select Job Applicant</option>@foreach(var row in applicants){var value=row["name"]?.ToString()??"";var applicantName=row["applicant_name"]?.ToString()??"";var label=string.IsNullOrWhiteSpace(applicantName)||string.Equals(applicantName,value,StringComparison.OrdinalIgnoreCase)?value:$"{applicantName} ({value})";<option value="@value" data-opening="@(row["job_title"]?.ToString())" data-designation="@(row["designation"]?.ToString())" data-resume="@(row["resume_link"]?.ToString())">@label</option>}<option value="__create__">+ Create New Job Applicant</option></select></div>
+   <div class="col-md-6"><label>Job Opening</label><input asp-for="JobOpening" id="jobOpeningInput" class="form-control" readonly /></div>
+   <div class="col-md-6"><label>Designation</label><select asp-for="Designation" id="designationSelect" class="form-select" disabled="@(locked ? "disabled" : null)"><option value="">Select Designation</option>@foreach(var row in designations){var value=row["name"]?.ToString()??"";<option value="@value">@value</option>}</select></div>
+   <div class="col-md-6"><label>Resume Link</label><input asp-for="ResumeLink" id="resumeInput" class="form-control" readonly /></div>
+   <div class="col-md-4"><label>Scheduled On *</label><input asp-for="ScheduledOn" type="date" class="form-control" disabled="@(locked ? "disabled" : null)"/></div><div class="col-md-4"><label>From Time *</label><input asp-for="FromTime" type="time" class="form-control" disabled="@(locked ? "disabled" : null)"/></div><div class="col-md-4"><label>To Time *</label><input asp-for="ToTime" type="time" class="form-control" disabled="@(locked ? "disabled" : null)"/></div>
+   <div class="col-md-4"><label>Expected Average Rating</label><input asp-for="ExpectedAverageRating" id="expectedRating" type="number" min="0" max="5" step=".1" class="form-control" readonly /></div><div class="col-md-4"><label>Average Rating</label><input asp-for="AverageRating" type="number" min="0" max="5" step=".1" class="form-control" readonly="@(locked ? "readonly" : null)"/></div><div class="col-md-4 d-flex align-items-end"><div class="form-check pb-2"><input asp-for="Reminded" class="form-check-input" disabled="@(locked ? "disabled" : null)"/><label class="form-check-label">Reminder sent</label></div></div>
+  </div></div></div>
+  <div class="iv-card"><h5>Interviewers</h5><div class="body"><div class="row g-2"><div class="col-md-10"><select id="interviewerSelect" class="form-select" disabled="@(locked ? "disabled" : null)"><option value="">Select Interviewer</option>@foreach(var row in users){var value=row["name"]?.ToString()??"";var label=row["full_name"]?.ToString()??value;<option value="@value">@label</option>}</select></div><div class="col-md-2"><button type="button" id="addInterviewer" class="btn btn-outline-iv w-100" disabled="@(locked ? "disabled" : null)">Add interviewer</button></div></div><input asp-for="Interviewers" id="interviewersValue" type="hidden"/><div id="interviewerChips" class="mt-2"></div><div class="iv-muted mt-2">Selected interviewers are sent to ERPNext in the Interview Details table.</div></div></div>
+  <div class="iv-card"><ul class="nav nav-tabs px-3 pt-2"><li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#summaryTab">Interview Summary</a></li><li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#feedbackTab">Feedback</a></li></ul><div class="body tab-content"><div class="tab-pane fade show active" id="summaryTab"><textarea asp-for="InterviewSummary" class="form-control" rows="6" placeholder="Add interview summary" readonly="@(locked ? "readonly" : null)"></textarea></div><div class="tab-pane fade" id="feedbackTab"><textarea asp-for="Feedback" class="form-control" rows="6" placeholder="Add feedback" readonly="@(locked ? "readonly" : null)"></textarea></div></div></div>
+ </form>
+</div>
+@if(saved && !locked){<form id="submitInterviewForm" asp-action="ChangeInterviewStatus" method="post"><input type="hidden" name="id" value="@Model.Id"/><input type="hidden" name="status" value="1"/></form>
+<div class="modal fade" id="rescheduleModal" tabindex="-1"><div class="modal-dialog"><form class="modal-content" asp-action="RescheduleInterview" method="post"><input type="hidden" name="id" value="@Model.Id"/><div class="modal-header"><h5>Reschedule Interview</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><label>Schedule On *</label><input name="scheduledOn" type="date" value="@Model.ScheduledOn.ToString("yyyy-MM-dd")" class="form-control mb-3" required/><label>From Time *</label><input name="fromTime" type="time" value="@Model.FromTime.ToString(@"hh\:mm")" class="form-control mb-3" required/><label>To Time *</label><input name="toTime" type="time" value="@Model.ToTime.ToString(@"hh\:mm")" class="form-control" required/></div><div class="modal-footer"><button class="btn btn-iv">Reschedule</button></div></form></div></div>}
 <script>
-    function addInterviewerRow() {
-        var tbody = document.getElementById('interviewersTable').querySelector('tbody');
-        var rowNum = tbody.rows.length + 1;
-
-        var row = document.createElement('tr');
-
-        var checkCell = document.createElement('td');
-        checkCell.innerHTML = '<input type="checkbox" />';
-
-        var numCell = document.createElement('td');
-        numCell.innerText = rowNum;
-
-        var nameCell = document.createElement('td');
-        nameCell.innerHTML = '<input class="form-control form-control-sm border-0" placeholder="Interviewer" />';
-
-        var editCell = document.createElement('td');
-        editCell.innerHTML = '<i class="fas fa-pen text-muted" style="cursor:pointer"></i>';
-
-        row.appendChild(checkCell);
-        row.appendChild(numCell);
-        row.appendChild(nameCell);
-        row.appendChild(editCell);
-
-        tbody.appendChild(row);
-    }
+(()=>{
+ const f=document.getElementById('interviewForm'),save=document.getElementById('saveButton'),saved=@saved.ToString().ToLowerInvariant(),locked=@locked.ToString().ToLowerInvariant();if(!f)return;
+ let dirty=false;function mark(){if(saved&&!locked){dirty=true;save.textContent='Save';save.dataset.mode='save';}}
+ f.addEventListener('input',mark);f.addEventListener('change',mark);f.addEventListener('submit',e=>{if(save&&save.dataset.mode==='submit'&&!dirty){e.preventDefault();document.getElementById('submitInterviewForm').submit();}});
+ const app=document.getElementById('applicantSelect'),round=document.getElementById('roundSelect'),des=document.getElementById('designationSelect'),opening=document.getElementById('jobOpeningInput'),resume=document.getElementById('resumeInput'),rating=document.getElementById('expectedRating'),raw=document.getElementById('interviewersValue'),pick=document.getElementById('interviewerSelect'),box=document.getElementById('interviewerChips');
+ let vals=(raw.value||'').split(',').map(x=>x.trim()).filter(Boolean);
+ function draw(){raw.value=vals.join(', ');box.innerHTML=vals.map(x=>'<span class="interviewer-chip">'+x+(locked?'':' <button type="button" class="btn-close ms-1" style="font-size:.55rem" data-user="'+x+'"></button>')+'</span>').join('');box.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>{vals=vals.filter(x=>x!==b.dataset.user);draw();mark();});}
+ function setApplicantBasics(o){opening.value=o?.dataset.opening||'';resume.value=o?.dataset.resume||'';if(o?.dataset.designation)des.value=o.dataset.designation;}
+ app?.addEventListener('change',async()=>{if(app.value==='__create__'){location.href='@Url.Action("CreateJobApplicant","HR",new { returnToInterview = true })';return;}setApplicantBasics(app.options[app.selectedIndex]);if(!app.value)return;try{const response=await fetch('@Url.Action("GetInterviewApplicantDefaults","HR")?jobApplicant='+encodeURIComponent(app.value));if(!response.ok)return;const data=await response.json();opening.value=data.jobOpening||opening.value;resume.value=data.resumeLink||resume.value;if(data.designation)des.value=data.designation;if(Array.isArray(data.interviewers)){vals=[...new Set(data.interviewers.filter(Boolean))];draw();}}catch{}});
+ round?.addEventListener('change',async()=>{let o=round.options[round.selectedIndex];if(o.dataset.designation)des.value=o.dataset.designation;rating.value=o.dataset.rating||0;if(!round.value){vals=[];draw();return;}try{const response=await fetch('@Url.Action("GetInterviewRoundDefaults","HR")?interviewRound='+encodeURIComponent(round.value));if(!response.ok)return;const data=await response.json();if(data.designation)des.value=data.designation;if(data.expectedAverageRating!==undefined&&data.expectedAverageRating!==null&&data.expectedAverageRating!=='')rating.value=data.expectedAverageRating;if(Array.isArray(data.interviewers)){vals=[...new Set(data.interviewers.filter(Boolean))];draw();}}catch{}});
+ draw();document.getElementById('addInterviewer')?.addEventListener('click',()=>{if(pick.value&&!vals.includes(pick.value)){vals.push(pick.value);draw();mark();}});
+})();
 </script>
+@await Html.PartialAsync("_RecruitmentTheme")

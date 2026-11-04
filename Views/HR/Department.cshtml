@@ -236,6 +236,33 @@
         color: #7fa8a2;
     }
 
+    .dept-pagination {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #e6f5f3;
+    }
+
+    .dept-page-size {
+        border: 1px solid #b9dbe4;
+        background: #fff;
+        color: #0f766e;
+        border-radius: 7px;
+        padding: 5px 11px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .dept-page-size.active, .dept-page-size:hover {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+    }
+
         .empty-state .empty-icon {
             font-size: 34px;
             color: #99f6e4;
@@ -318,7 +345,7 @@
 
             </thead>
 
-            <tbody>
+            <tbody id="departmentListBody">
 
                 @if (Model.Any())
                 {
@@ -714,12 +741,12 @@
                     <th>Leave Block List</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="departmentListBody">
                 @if (Model.Any())
                 {
                     foreach (var dep in Model)
                     {
-                        <tr style="cursor:pointer;" onclick="location.href='@Url.Action("DepartmentDetails", "HR", new { id = dep.Id })'">
+                        <tr data-department-id="@dep.Id" style="cursor:pointer;" onclick="location.href='@Url.Action("DepartmentDetails", "HR", new { id = dep.Id })'">
                             <td class="fw-semibold">
                                 @(string.IsNullOrEmpty(dep.DepartmentCode) ? dep.Id.ToString() : dep.DepartmentCode)
                             </td>
@@ -766,5 +793,47 @@
                 }
             </tbody>
         </table>
+
+        <div class="dept-pagination" aria-label="Department list page size">
+            <span class="small text-muted me-1">Show entries:</span>
+            <button type="button" class="dept-page-size active" data-dept-page-size="20">20</button>
+            <button type="button" class="dept-page-size" data-dept-page-size="100">100</button>
+            <button type="button" class="dept-page-size" data-dept-page-size="200">200</button>
+            <button type="button" class="dept-page-size" data-dept-page-size="250">250</button>
+            <button type="button" class="dept-page-size" data-dept-page-size="500">500</button>
+            <span id="departmentPageSummary" class="small text-muted ms-1"></span>
+        </div>
     </div>
 </div>
+
+<style>
+    .dept-pagination { display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-wrap:wrap; margin-top:18px; padding-top:16px; border-top:1px solid #e6f5f3; }
+    .dept-page-size { border:1px solid #b9dbe4; background:#fff; color:#0f766e; border-radius:7px; padding:5px 11px; font-weight:700; font-size:13px; }
+    .dept-page-size.active, .dept-page-size:hover { background:#0f766e; border-color:#0f766e; color:#fff; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const body = document.getElementById('departmentListBody');
+        const buttons = Array.from(document.querySelectorAll('[data-dept-page-size]'));
+        const summary = document.getElementById('departmentPageSummary');
+        if (!body || !buttons.length) return;
+
+        const rows = Array.from(body.querySelectorAll('tr[data-department-id]'));
+        let pageSize = Number(sessionStorage.getItem('departmentPageSize')) || 20;
+
+        function renderPage() {
+            rows.forEach((row, index) => row.hidden = index >= pageSize);
+            buttons.forEach(button => button.classList.toggle('active', Number(button.dataset.deptPageSize) === pageSize));
+            if (summary) summary.textContent = `${Math.min(pageSize, rows.length)} of ${rows.length}`;
+        }
+
+        buttons.forEach(button => button.addEventListener('click', function () {
+            pageSize = Number(this.dataset.deptPageSize);
+            sessionStorage.setItem('departmentPageSize', pageSize);
+            renderPage();
+        }));
+
+        renderPage();
+    });
+</script>

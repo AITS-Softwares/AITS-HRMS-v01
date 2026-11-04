@@ -36,6 +36,7 @@ namespace Erp_Aits.Models
         // Added fields matching ERPNext layout
         public string Country { get; set; }
         public string Subdivision { get; set; }
+        public string WeeklyOff { get; set; }
 
         public string ErpNextId { get; set; }
 

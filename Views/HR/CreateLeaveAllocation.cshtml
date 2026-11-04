@@ -80,7 +80,12 @@
     var leavePolicies = ViewBag.LeavePolicies as List<string> ?? new List<string>();
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 <form method="post" action="/HR/CreateLeaveAllocation" id="leaveAllocForm">
+<style>
+ body{background:#f1fbfd}.leave-allocation-form{max-width:1180px;margin:24px auto}.leave-allocation-form .form-top{background:linear-gradient(110deg,#17486c,#008d88);border-radius:14px;padding:22px 26px;color:#fff}.leave-allocation-form .card{border:1px solid #cbe5ed;border-radius:14px;box-shadow:0 8px 18px rgba(11,80,101,.06)}.leave-allocation-form .card h6,.leave-allocation-form label{color:#17486c;font-weight:700}.leave-allocation-form .form-control{border-color:#b9dce5}.leave-allocation-form .btn-dark{background:#fff;color:#0b5065;border:0;font-weight:700}
+</style><div class="leave-allocation-form">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0 d-inline-block me-2">New Leave Allocation</h4>
@@ -146,7 +151,7 @@
 
             <div class="col-md-6">
                 <label class="form-label">From Date *</label>
-                <input name="FromDate" type="date" value="@(Model.FromDate != default ? Model.FromDate.ToString("yyyy-MM-dd") : "")" class="form-control" required />
+                <input id="leaveAllocationFromDate" name="FromDate" type="date" value="@(Model.FromDate != default ? Model.FromDate.ToString("yyyy-MM-dd") : "")" class="form-control" required />
             </div>
 
             <div class="col-md-6">
@@ -156,7 +161,7 @@
 
             <div class="col-md-6">
                 <label class="form-label">To Date *</label>
-                <input name="ToDate" type="date" value="@(Model.ToDate != default ? Model.ToDate.ToString("yyyy-MM-dd") : "")" class="form-control" required />
+                <input id="leaveAllocationToDate" name="ToDate" type="date" value="@(Model.ToDate != default ? Model.ToDate.ToString("yyyy-MM-dd") : "")" class="form-control" required />
             </div>
 
             <div class="col-md-6">
@@ -200,7 +205,7 @@
         <label class="form-label">Description</label>
         <textarea name="Description" class="form-control" rows="5">@Model.Description</textarea>
     </div>
-</form>
+</div></form>
 
 <script>
     function updateEmployeeName(selectElement) {
@@ -208,4 +213,21 @@
         var empName = selectedOption.getAttribute("data-empname");
         document.getElementById("employeeNameInput").value = empName || "";
     }
+
+    (function () {
+        const from = document.getElementById('leaveAllocationFromDate');
+        const to = document.getElementById('leaveAllocationToDate');
+        if (!from || !to) return;
+        const nextDay = value => {
+            const date = new Date(value + 'T00:00:00');
+            date.setDate(date.getDate() + 1);
+            return date.toISOString().slice(0, 10);
+        };
+        const alignDates = () => {
+            if (from.value && (!to.value || to.value <= from.value)) to.value = nextDay(from.value);
+            if (from.value) to.min = nextDay(from.value);
+        };
+        from.addEventListener('change', alignDates);
+        alignDates();
+    })();
 </script>

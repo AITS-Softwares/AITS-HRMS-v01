@@ -1,4 +1,6 @@
 ﻿@* @model Erp_Aits.Models.EmployeeCheckin
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui operations-ui" aria-hidden="true"></span>
 @{
     ViewBag.Title = "New Employee Checkin";
 }
@@ -60,6 +62,8 @@
     ViewBag.Title = "New Employee Checkin";
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui operations-ui" aria-hidden="true"></span>
 <form asp-action="CreateEmployeeCheckin" method="post">
     <div class="ea-form-header">
         <div class="ea-detail-header-left">
@@ -93,8 +97,8 @@
             <div class="col-md-6">
                 <label class="form-label ea-form-label">Time <span class="ea-required">*</span></label>
                 <input asp-for="Time" type="datetime-local" class="form-control ea-input"
-                       value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" required />
-                <small class="text-muted ea-hint-text">🌐 Asia/Kolkata</small>
+                       value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" required readonly />
+                <small class="text-muted ea-hint-text">🌐 Set automatically — Asia/Kolkata</small>
             </div>
 
             <div class="col-md-6">

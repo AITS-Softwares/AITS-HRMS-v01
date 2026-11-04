@@ -7,6 +7,8 @@
     bool isCancelled = Model.DocStatus == 2;
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 @if (TempData["ErpNextError"] != null)
 {
     <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
@@ -24,6 +26,14 @@
     </div>
 }
 
+<div class="leave-policy-shell">
+<style>
+    .leave-policy-shell { background:#f1fbfd; border:1px solid #cbe5ed; border-radius:18px; padding:26px; }
+    .leave-policy-shell h4,.leave-policy-shell h6,.leave-policy-shell .form-label { color:#17486c; font-weight:700; }
+    .leave-policy-shell .table { background:#fff; border:1px solid #c9e1e9; }
+    .leave-policy-shell .table thead th { background:#e7f5f8; color:#17486c; }
+    .leave-policy-shell .btn-dark { background:linear-gradient(110deg,#17486c,#008d88); border:0; }
+</style>
 <form asp-controller="HR"
       asp-action="UpdateLeavePolicy"
       asp-route-id="@Model.Id"
@@ -152,7 +162,7 @@
                                 }
                                 @foreach (var leaveType in leaveTypes)
                                 {
-                                    <!option value="@leaveType.LeaveTypeName" @(leaveType.LeaveTypeName == Model.Details[i].LeaveType ? "selected" : "")>
+                                    <!option value="@leaveType.LeaveTypeName" data-annual="@leaveType.MaxLeavesAllowed" @(leaveType.LeaveTypeName == Model.Details[i].LeaveType ? "selected" : "")>
                                         @leaveType.LeaveTypeName
                                     </!option>
                                 }
@@ -192,7 +202,7 @@
                             <option value="">-- Select Leave Type --</option>
                             @foreach (var leaveType in leaveTypes)
                             {
-                                <option value="@leaveType.LeaveTypeName">@leaveType.LeaveTypeName</option>
+                                <option value="@leaveType.LeaveTypeName" data-annual="@leaveType.MaxLeavesAllowed">@leaveType.LeaveTypeName</option>
                             }
                         </select>
                     </td>
@@ -220,13 +230,14 @@
         </tbody>
     </table>
 </form>
+</div>
 
 @section Scripts
 {
     @if (isDraft)
     {
         <script>
-            const leaveTypes = @Html.Raw(Json.Serialize(leaveTypes.Select(lt => lt.LeaveTypeName)));
+            const leaveTypes = @Html.Raw(Json.Serialize(leaveTypes.Select(lt => new { name = lt.LeaveTypeName, annual = lt.MaxLeavesAllowed })));
             const form = document.getElementById("leavePolicyForm");
             const addRowBtn = document.getElementById("addRowBtn");
             const detailsBody = document.getElementById("detailsBody");
@@ -243,7 +254,7 @@
             function leaveTypeOptions() {
                 let options = '<option value="">-- Select Leave Type --</option>';
                 leaveTypes.forEach(function (leaveType) {
-                    options += `<option value="${escapeHtml(leaveType)}">${escapeHtml(leaveType)}</option>`;
+                    options += `<option value="${escapeHtml(leaveType.name)}" data-annual="${escapeHtml(leaveType.annual)}">${escapeHtml(leaveType.name)}</option>`;
                 });
                 return options;
             }
@@ -292,6 +303,14 @@
             }
 
             addRowBtn.addEventListener("click", addRow);
+
+            detailsBody.addEventListener("change", function (event) {
+                const select = event.target.closest("select.detail-input");
+                if (!select) return;
+                const allocation = select.closest("tr")?.querySelector("input.detail-input");
+                const annual = select.options[select.selectedIndex]?.dataset.annual;
+                if (allocation && annual) allocation.value = annual;
+            });
 
             form.addEventListener("submit", function (event) {
                 renumberRows();

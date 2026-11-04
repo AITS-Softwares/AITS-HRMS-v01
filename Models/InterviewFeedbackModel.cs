@@ -6,6 +6,7 @@ namespace Erp_Aits.Models
     public class InterviewFeedbackModel
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
         public int InterviewId { get; set; }
         public string Interviewer { get; set; }
         public string Result { get; set; } = "Cleared";

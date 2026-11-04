@@ -3,13 +3,16 @@
     ViewBag.Title = "New Training Event";
 }
 
-<form asp-action="CreateTrainingEvent" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
+
+<form asp-action="CreateTrainingEvent" method="post" class="training-form-shell">
+    <div class="d-flex justify-content-between align-items-center training-form-header">
         <h4 class="mb-0">New Training Event</h4>
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
-    <div class="card p-4 mb-3">
+    <div class="card p-4 mb-3 training-form-card">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Event Name *</label>
@@ -60,7 +63,7 @@
         </div>
     </div>
 
-    <div class="card p-4 mb-3">
+    <div class="card p-4 mb-3 training-form-card">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Trainer Name</label>
@@ -81,7 +84,7 @@
         </div>
     </div>
 
-    <div class="card p-4 mb-3">
+    <div class="card p-4 mb-3 training-form-card">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Course</label>
@@ -104,7 +107,7 @@
         </div>
     </div>
 
-    <div class="card p-4">
+    <div class="card p-4 training-form-card">
         <label class="form-label">Introduction *</label>
         <textarea asp-for="Introduction" class="form-control" rows="10" required></textarea>
     </div>

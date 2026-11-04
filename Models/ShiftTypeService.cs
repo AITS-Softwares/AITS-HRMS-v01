@@ -12,6 +12,37 @@ namespace Erp_Aits.Services
         public ShiftTypeService(string connectionString)
         {
             _connectionString = connectionString;
+            EnsureColumns();
+        }
+
+        private void EnsureColumns()
+        {
+            const string sql = @"
+IF COL_LENGTH('dbo.ShiftTypes', 'DetermineCheckInAndCheckOut') IS NULL ALTER TABLE dbo.ShiftTypes ADD DetermineCheckInAndCheckOut NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'WorkingHoursCalculationBasedOn') IS NULL ALTER TABLE dbo.ShiftTypes ADD WorkingHoursCalculationBasedOn NVARCHAR(255) NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'BeginCheckInBeforeShiftStartTime') IS NULL ALTER TABLE dbo.ShiftTypes ADD BeginCheckInBeforeShiftStartTime INT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'AllowCheckOutAfterShiftEndTime') IS NULL ALTER TABLE dbo.ShiftTypes ADD AllowCheckOutAfterShiftEndTime INT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'MarkAutoAttendanceOnHolidays') IS NULL ALTER TABLE dbo.ShiftTypes ADD MarkAutoAttendanceOnHolidays BIT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'WorkingHoursThresholdForHalfDay') IS NULL ALTER TABLE dbo.ShiftTypes ADD WorkingHoursThresholdForHalfDay DECIMAL(18,2) NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'WorkingHoursThresholdForAbsent') IS NULL ALTER TABLE dbo.ShiftTypes ADD WorkingHoursThresholdForAbsent DECIMAL(18,2) NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'ProcessAttendanceAfter') IS NULL ALTER TABLE dbo.ShiftTypes ADD ProcessAttendanceAfter DATETIME2 NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'LastSyncOfCheckin') IS NULL ALTER TABLE dbo.ShiftTypes ADD LastSyncOfCheckin DATETIME2 NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'AutoUpdateLastSync') IS NULL ALTER TABLE dbo.ShiftTypes ADD AutoUpdateLastSync BIT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'EnableLateEntryMarking') IS NULL ALTER TABLE dbo.ShiftTypes ADD EnableLateEntryMarking BIT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'LateEntryGracePeriod') IS NULL ALTER TABLE dbo.ShiftTypes ADD LateEntryGracePeriod INT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'EnableEarlyExitMarking') IS NULL ALTER TABLE dbo.ShiftTypes ADD EnableEarlyExitMarking BIT NULL;
+IF COL_LENGTH('dbo.ShiftTypes', 'EarlyExitGracePeriod') IS NULL ALTER TABLE dbo.ShiftTypes ADD EarlyExitGracePeriod INT NULL;";
+            try
+            {
+                using var conn = new SqlConnection(_connectionString);
+                using var cmd = new SqlCommand(sql, conn) { CommandTimeout = 30 };
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (SqlException)
+            {
+                // Existing Shift Type records remain usable if the schema is temporarily locked.
+            }
         }
 
         public List<ShiftType> GetAll(string idFilter = null)
@@ -21,7 +52,7 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 string query = @"
-            SELECT Id, ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance
+            SELECT *
             FROM ShiftTypes
             WHERE IsDeleted = 0";
 
@@ -71,7 +102,7 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 string query = @"
-                    SELECT Id, ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance
+                    SELECT *
                     FROM ShiftTypes
                     WHERE Id = @Id AND IsDeleted = 0";
 
@@ -98,7 +129,7 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 string query = @"
-                    SELECT Id, ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance
+                    SELECT *
                     FROM ShiftTypes
                     WHERE Name = @Name AND IsDeleted = 0";
 
@@ -125,7 +156,7 @@ namespace Erp_Aits.Services
             using (var conn = new SqlConnection(_connectionString))
             {
                 string query = @"
-                    SELECT Id, ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance
+                    SELECT *
                     FROM ShiftTypes
                     WHERE ShiftTypeCode = @Code AND IsDeleted = 0";
 
@@ -166,20 +197,22 @@ namespace Erp_Aits.Services
             {
                 string query = @"
                     INSERT INTO ShiftTypes
-                        (ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance)
+                        (ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance,
+                         DetermineCheckInAndCheckOut, WorkingHoursCalculationBasedOn, BeginCheckInBeforeShiftStartTime,
+                         AllowCheckOutAfterShiftEndTime, MarkAutoAttendanceOnHolidays, WorkingHoursThresholdForHalfDay,
+                         WorkingHoursThresholdForAbsent, ProcessAttendanceAfter, LastSyncOfCheckin, AutoUpdateLastSync,
+                         EnableLateEntryMarking, LateEntryGracePeriod, EnableEarlyExitMarking, EarlyExitGracePeriod)
                     OUTPUT INSERTED.Id
                     VALUES
-                        (@ShiftTypeCode, @Name, @StartTime, @EndTime, @HolidayList, @RosterColor, @EnableAutoAttendance)";
+                        (@ShiftTypeCode, @Name, @StartTime, @EndTime, @HolidayList, @RosterColor, @EnableAutoAttendance,
+                         @DetermineCheckInAndCheckOut, @WorkingHoursCalculationBasedOn, @BeginCheckInBeforeShiftStartTime,
+                         @AllowCheckOutAfterShiftEndTime, @MarkAutoAttendanceOnHolidays, @WorkingHoursThresholdForHalfDay,
+                         @WorkingHoursThresholdForAbsent, @ProcessAttendanceAfter, @LastSyncOfCheckin, @AutoUpdateLastSync,
+                         @EnableLateEntryMarking, @LateEntryGracePeriod, @EnableEarlyExitMarking, @EarlyExitGracePeriod)";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@ShiftTypeCode", model.ShiftTypeCode ?? "");
-                    cmd.Parameters.AddWithValue("@Name", model.Name ?? "");
-                    cmd.Parameters.AddWithValue("@StartTime", model.StartTime ?? "");
-                    cmd.Parameters.AddWithValue("@EndTime", model.EndTime ?? "");
-                    cmd.Parameters.AddWithValue("@HolidayList", model.HolidayList ?? "");
-                    cmd.Parameters.AddWithValue("@RosterColor", model.RosterColor ?? "Blue");
-                    cmd.Parameters.AddWithValue("@EnableAutoAttendance", model.EnableAutoAttendance);
+                    AddShiftTypeParameters(cmd, model);
 
                     conn.Open();
                     return Convert.ToInt32(cmd.ExecuteScalar());
@@ -199,19 +232,27 @@ namespace Erp_Aits.Services
                         EndTime = @EndTime,
                         HolidayList = @HolidayList,
                         RosterColor = @RosterColor,
-                        EnableAutoAttendance = @EnableAutoAttendance
+                        EnableAutoAttendance = @EnableAutoAttendance,
+                        DetermineCheckInAndCheckOut = @DetermineCheckInAndCheckOut,
+                        WorkingHoursCalculationBasedOn = @WorkingHoursCalculationBasedOn,
+                        BeginCheckInBeforeShiftStartTime = @BeginCheckInBeforeShiftStartTime,
+                        AllowCheckOutAfterShiftEndTime = @AllowCheckOutAfterShiftEndTime,
+                        MarkAutoAttendanceOnHolidays = @MarkAutoAttendanceOnHolidays,
+                        WorkingHoursThresholdForHalfDay = @WorkingHoursThresholdForHalfDay,
+                        WorkingHoursThresholdForAbsent = @WorkingHoursThresholdForAbsent,
+                        ProcessAttendanceAfter = @ProcessAttendanceAfter,
+                        LastSyncOfCheckin = @LastSyncOfCheckin,
+                        AutoUpdateLastSync = @AutoUpdateLastSync,
+                        EnableLateEntryMarking = @EnableLateEntryMarking,
+                        LateEntryGracePeriod = @LateEntryGracePeriod,
+                        EnableEarlyExitMarking = @EnableEarlyExitMarking,
+                        EarlyExitGracePeriod = @EarlyExitGracePeriod
                     WHERE Id = @Id";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Id", model.Id);
-                    cmd.Parameters.AddWithValue("@ShiftTypeCode", model.ShiftTypeCode ?? "");
-                    cmd.Parameters.AddWithValue("@Name", model.Name ?? "");
-                    cmd.Parameters.AddWithValue("@StartTime", model.StartTime ?? "");
-                    cmd.Parameters.AddWithValue("@EndTime", model.EndTime ?? "");
-                    cmd.Parameters.AddWithValue("@HolidayList", model.HolidayList ?? "");
-                    cmd.Parameters.AddWithValue("@RosterColor", model.RosterColor ?? "Blue");
-                    cmd.Parameters.AddWithValue("@EnableAutoAttendance", model.EnableAutoAttendance);
+                    AddShiftTypeParameters(cmd, model);
 
                     conn.Open();
                     cmd.ExecuteNonQuery();
@@ -281,9 +322,17 @@ namespace Erp_Aits.Services
                     {
                         using (var cmd = new SqlCommand(@"
                             INSERT INTO ShiftTypes
-                                (ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance, IsDeleted)
+                                (ShiftTypeCode, Name, StartTime, EndTime, HolidayList, RosterColor, EnableAutoAttendance,
+                                 DetermineCheckInAndCheckOut, WorkingHoursCalculationBasedOn, BeginCheckInBeforeShiftStartTime,
+                                 AllowCheckOutAfterShiftEndTime, MarkAutoAttendanceOnHolidays, WorkingHoursThresholdForHalfDay,
+                                 WorkingHoursThresholdForAbsent, ProcessAttendanceAfter, LastSyncOfCheckin, AutoUpdateLastSync,
+                                 EnableLateEntryMarking, LateEntryGracePeriod, EnableEarlyExitMarking, EarlyExitGracePeriod, IsDeleted)
                             VALUES
-                                (@ShiftTypeCode, @Name, @StartTime, @EndTime, @HolidayList, @RosterColor, @EnableAutoAttendance, 0)", conn))
+                                (@ShiftTypeCode, @Name, @StartTime, @EndTime, @HolidayList, @RosterColor, @EnableAutoAttendance,
+                                 @DetermineCheckInAndCheckOut, @WorkingHoursCalculationBasedOn, @BeginCheckInBeforeShiftStartTime,
+                                 @AllowCheckOutAfterShiftEndTime, @MarkAutoAttendanceOnHolidays, @WorkingHoursThresholdForHalfDay,
+                                 @WorkingHoursThresholdForAbsent, @ProcessAttendanceAfter, @LastSyncOfCheckin, @AutoUpdateLastSync,
+                                 @EnableLateEntryMarking, @LateEntryGracePeriod, @EnableEarlyExitMarking, @EarlyExitGracePeriod, 0)", conn))
                         {
                             cmd.CommandTimeout = 60;
                             AddShiftTypeParameters(cmd, model);
@@ -301,6 +350,20 @@ namespace Erp_Aits.Services
                                 HolidayList = @HolidayList,
                                 RosterColor = @RosterColor,
                                 EnableAutoAttendance = @EnableAutoAttendance,
+                                DetermineCheckInAndCheckOut = @DetermineCheckInAndCheckOut,
+                                WorkingHoursCalculationBasedOn = @WorkingHoursCalculationBasedOn,
+                                BeginCheckInBeforeShiftStartTime = @BeginCheckInBeforeShiftStartTime,
+                                AllowCheckOutAfterShiftEndTime = @AllowCheckOutAfterShiftEndTime,
+                                MarkAutoAttendanceOnHolidays = @MarkAutoAttendanceOnHolidays,
+                                WorkingHoursThresholdForHalfDay = @WorkingHoursThresholdForHalfDay,
+                                WorkingHoursThresholdForAbsent = @WorkingHoursThresholdForAbsent,
+                                ProcessAttendanceAfter = @ProcessAttendanceAfter,
+                                LastSyncOfCheckin = @LastSyncOfCheckin,
+                                AutoUpdateLastSync = @AutoUpdateLastSync,
+                                EnableLateEntryMarking = @EnableLateEntryMarking,
+                                LateEntryGracePeriod = @LateEntryGracePeriod,
+                                EnableEarlyExitMarking = @EnableEarlyExitMarking,
+                                EarlyExitGracePeriod = @EarlyExitGracePeriod,
                                 IsDeleted = 0
                             WHERE Id = @Id", conn))
                         {
@@ -365,7 +428,21 @@ namespace Erp_Aits.Services
                 HolidayList = reader["HolidayList"]?.ToString() ?? "",
                 RosterColor = reader["RosterColor"]?.ToString() ?? "Blue",
                 EnableAutoAttendance = reader["EnableAutoAttendance"] != DBNull.Value &&
-                                       Convert.ToBoolean(reader["EnableAutoAttendance"])
+                                       Convert.ToBoolean(reader["EnableAutoAttendance"]),
+                DetermineCheckInAndCheckOut = reader["DetermineCheckInAndCheckOut"]?.ToString() ?? "",
+                WorkingHoursCalculationBasedOn = reader["WorkingHoursCalculationBasedOn"]?.ToString() ?? "",
+                BeginCheckInBeforeShiftStartTime = reader["BeginCheckInBeforeShiftStartTime"] == DBNull.Value ? 60 : Convert.ToInt32(reader["BeginCheckInBeforeShiftStartTime"]),
+                AllowCheckOutAfterShiftEndTime = reader["AllowCheckOutAfterShiftEndTime"] == DBNull.Value ? 60 : Convert.ToInt32(reader["AllowCheckOutAfterShiftEndTime"]),
+                MarkAutoAttendanceOnHolidays = reader["MarkAutoAttendanceOnHolidays"] != DBNull.Value && Convert.ToBoolean(reader["MarkAutoAttendanceOnHolidays"]),
+                WorkingHoursThresholdForHalfDay = reader["WorkingHoursThresholdForHalfDay"] == DBNull.Value ? null : Convert.ToDecimal(reader["WorkingHoursThresholdForHalfDay"]),
+                WorkingHoursThresholdForAbsent = reader["WorkingHoursThresholdForAbsent"] == DBNull.Value ? null : Convert.ToDecimal(reader["WorkingHoursThresholdForAbsent"]),
+                ProcessAttendanceAfter = reader["ProcessAttendanceAfter"] == DBNull.Value ? null : Convert.ToDateTime(reader["ProcessAttendanceAfter"]),
+                LastSyncOfCheckin = reader["LastSyncOfCheckin"] == DBNull.Value ? null : Convert.ToDateTime(reader["LastSyncOfCheckin"]),
+                AutoUpdateLastSync = reader["AutoUpdateLastSync"] != DBNull.Value && Convert.ToBoolean(reader["AutoUpdateLastSync"]),
+                EnableLateEntryMarking = reader["EnableLateEntryMarking"] != DBNull.Value && Convert.ToBoolean(reader["EnableLateEntryMarking"]),
+                LateEntryGracePeriod = reader["LateEntryGracePeriod"] == DBNull.Value ? null : Convert.ToInt32(reader["LateEntryGracePeriod"]),
+                EnableEarlyExitMarking = reader["EnableEarlyExitMarking"] != DBNull.Value && Convert.ToBoolean(reader["EnableEarlyExitMarking"]),
+                EarlyExitGracePeriod = reader["EarlyExitGracePeriod"] == DBNull.Value ? null : Convert.ToInt32(reader["EarlyExitGracePeriod"])
             };
         }
 
@@ -378,6 +455,20 @@ namespace Erp_Aits.Services
             cmd.Parameters.AddWithValue("@HolidayList", model.HolidayList ?? "");
             cmd.Parameters.AddWithValue("@RosterColor", model.RosterColor ?? "Blue");
             cmd.Parameters.AddWithValue("@EnableAutoAttendance", model.EnableAutoAttendance);
+            cmd.Parameters.AddWithValue("@DetermineCheckInAndCheckOut", (object)model.DetermineCheckInAndCheckOut ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@WorkingHoursCalculationBasedOn", (object)model.WorkingHoursCalculationBasedOn ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@BeginCheckInBeforeShiftStartTime", model.BeginCheckInBeforeShiftStartTime);
+            cmd.Parameters.AddWithValue("@AllowCheckOutAfterShiftEndTime", model.AllowCheckOutAfterShiftEndTime);
+            cmd.Parameters.AddWithValue("@MarkAutoAttendanceOnHolidays", model.MarkAutoAttendanceOnHolidays);
+            cmd.Parameters.AddWithValue("@WorkingHoursThresholdForHalfDay", (object)model.WorkingHoursThresholdForHalfDay ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@WorkingHoursThresholdForAbsent", (object)model.WorkingHoursThresholdForAbsent ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@ProcessAttendanceAfter", (object)model.ProcessAttendanceAfter ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@LastSyncOfCheckin", (object)model.LastSyncOfCheckin ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AutoUpdateLastSync", model.AutoUpdateLastSync);
+            cmd.Parameters.AddWithValue("@EnableLateEntryMarking", model.EnableLateEntryMarking);
+            cmd.Parameters.AddWithValue("@LateEntryGracePeriod", (object)model.LateEntryGracePeriod ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@EnableEarlyExitMarking", model.EnableEarlyExitMarking);
+            cmd.Parameters.AddWithValue("@EarlyExitGracePeriod", (object)model.EarlyExitGracePeriod ?? DBNull.Value);
         }
     }
 }

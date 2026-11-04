@@ -3,7 +3,8 @@
     ViewBag.Title = "Employee Referral " + Model.Id;
 }
 
-<h4 class="mb-3">@Model.FirstName @Model.LastName</h4>
+<div class="recruitment-theme workflow-page">
+<h4 class="workflow-title mb-3">@Model.FirstName @Model.LastName</h4>
 
 <div class="card p-4 mb-3">
     <div class="row g-3">
@@ -63,3 +64,5 @@
     <h6 class="mb-3">Work References</h6>
     <div class="border rounded p-2">@Html.Raw(Model.WorkReferences)</div>
 </div>
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

@@ -362,6 +362,7 @@
         </div>
     </div>
 
+    <style>.leave-list-wrapper{max-width:1500px}.leave-list-wrapper .list-header{background:linear-gradient(110deg,#17486c,#008d88)!important}.leave-pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:16px}.leave-pagination button{border:1px solid #cbe5ed;background:#fff;color:#075d66;border-radius:7px;padding:5px 11px;font-weight:700}.leave-pagination button.active{background:#008d88;color:#fff}.leave-page-summary{margin-right:auto;color:#54717a;font-size:.85rem}</style>
     <div class="list-body bg-white p-4 border rounded-bottom shadow-sm">
         @if (TempData["ErpNextError"] != null)
         {
@@ -383,12 +384,12 @@
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="leaveApplicationRows">
                 @if (Model != null && Model.Any())
                 {
                     foreach (var lv in Model)
                     {
-                        <tr>
+                        <tr data-leave-id="@lv.Id" onclick="window.location='@Url.Action("LeaveApplicationDetails", "HR", new { id = lv.Id })'" style="cursor:pointer">
                             <td><strong>@lv.LeaveApplicationCode</strong></td>
                             <td>@lv.Employee</td>
                             <td>@lv.EmployeeName</td>
@@ -408,5 +409,12 @@
                 }
             </tbody>
         </table>
+        @if (Model != null && Model.Any())
+        {
+            <div class="leave-pagination"><span id="leavePageSummary" class="leave-page-summary"></span><span>Show:</span><button type="button" data-leave-size="20">20</button><button type="button" data-leave-size="50">50</button><button type="button" data-leave-size="100">100</button><button type="button" data-leave-size="200">200</button><button type="button" data-leave-size="500">500</button></div>
+        }
     </div>
 </div>
+<script>
+(()=>{const body=document.getElementById('leaveApplicationRows');if(!body)return;const rows=[...body.querySelectorAll('tr[data-leave-id]')].sort((a,b)=>+b.dataset.leaveId-+a.dataset.leaveId);rows.forEach(r=>body.appendChild(r));const buttons=[...document.querySelectorAll('[data-leave-size]')],summary=document.getElementById('leavePageSummary');let size=+(sessionStorage.getItem('leaveApplicationPageSize')||20);const paint=()=>{rows.forEach((r,i)=>r.hidden=i>=size);buttons.forEach(b=>b.classList.toggle('active',+b.dataset.leaveSize===size));summary.textContent=`Showing ${Math.min(size,rows.length)} of ${rows.length}`};buttons.forEach(b=>b.onclick=()=>{size=+b.dataset.leaveSize;sessionStorage.setItem('leaveApplicationPageSize',size);paint()});paint()})();
+</script>

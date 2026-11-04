@@ -5,6 +5,7 @@ namespace Erp_Aits.Models
     public class AppointmentLetterTemplate
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
         public string TemplateCode { get; set; }
 
         public string TemplateName { get; set; }

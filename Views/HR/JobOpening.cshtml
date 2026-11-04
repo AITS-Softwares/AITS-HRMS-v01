@@ -3,7 +3,7 @@
     ViewBag.Title = "Job Opening";
 }
 
-<div class="jo-wrap">
+<div class="recruitment-theme jo-wrap">
     <div class="jo-breadcrumb">
         <span>Recruitment</span> <span>&gt;</span> <span class="jo-current">Job Opening</span>
     </div>
@@ -62,6 +62,8 @@
         background: #fff;
         border-radius: 10px;
         padding: 20px 24px;
+        max-width: 1180px;
+        margin: 28px auto;
     }
 
     .jo-breadcrumb {
@@ -138,3 +140,5 @@
         max-width: 400px;
     }
 </style>
+
+@await Html.PartialAsync("_RecruitmentTheme")

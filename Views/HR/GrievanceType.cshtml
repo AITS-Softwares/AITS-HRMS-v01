@@ -2,15 +2,13 @@
 @{
     ViewBag.Title = "Grievance Type";
 }
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Grievance Type</h4>
 
     <div class="d-flex gap-2">
-        <form method="post" asp-action="SyncGrievanceTypesFromErpNext" asp-controller="HR">
-            <button type="submit" class="btn btn-outline-primary btn-sm">Sync From ERPNext</button>
-        </form>
-
         <a href="@Url.Action("CreateGrievanceType", "HR")" class="btn btn-dark btn-sm">+ Add Grievance Type</a>
     </div>
 </div>

@@ -2,12 +2,21 @@
 
 @{
     ViewBag.Title = "Shift Type";
+    var page = (int)(ViewBag.Page ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 20);
+    var totalRecords = (int)(ViewBag.TotalRecords ?? 0);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var search = ViewBag.IdFilter?.ToString() ?? "";
+    var pageSizes = new[] { 20, 100, 500, 2500 };
 }
 
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Shift Type</h4>
-        <a href="@Url.Action("CreateShiftType", "HR")" class="btn btn-dark btn-sm">+ Add Shift Type</a>
+        <div class="d-flex gap-2">
+            <div class="dropdown"><button class="btn btn-warning btn-sm dropdown-toggle text-dark fw-semibold" type="button" data-bs-toggle="dropdown">Shift Tool</button><ul class="dropdown-menu"><li><a class="dropdown-item" href="@Url.Action("ShiftAssignmentTool", "HR")">Shift Assignment Tool</a></li><li><a class="dropdown-item" href="@Url.Action("Roster", "HR")">Roster</a></li></ul></div>
+            <a href="@Url.Action("CreateShiftType", "HR")" class="btn btn-light text-primary border-0 btn-sm fw-semibold">+ Add Shift Type</a>
+        </div>
     </div>
 
     @if (TempData["ErpNextError"] != null)
@@ -24,12 +33,12 @@
         <div class="col-md-4">
             <input type="text"
                    name="id"
-                   value="@ViewBag.IdFilter"
+                   value="@search"
                    class="form-control form-control-sm"
                    placeholder="Filter by Shift Type / Holiday List..." />
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+            <button type="submit" class="btn btn-sm btn-primary">Search</button>
         </div>
     </form>
 
@@ -67,6 +76,26 @@
                 }
             </tbody>
         </table>
+        @if (totalRecords > 0)
+        {
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-3 border-top">
+                <small class="text-muted">Showing @(((page - 1) * pageSize) + 1)-@Math.Min(page * pageSize, totalRecords) of @totalRecords</small>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Rows per page">
+                    @foreach (var size in pageSizes)
+                    {
+                        <a class="btn @(pageSize == size ? "btn-primary" : "btn-outline-primary")" href="@Url.Action("ShiftType", "HR", new { id = search, page = 1, pageSize = size })">@size</a>
+                    }
+                </div>
+                @if (totalPages > 1)
+                {
+                    <div class="btn-group btn-group-sm">
+                        <a class="btn btn-outline-secondary @(page == 1 ? "disabled" : "")" href="@Url.Action("ShiftType", "HR", new { id = search, page = page - 1, pageSize })">Previous</a>
+                    <span class="btn btn-outline-secondary disabled">Page @(page) / @(totalPages)</span>
+                        <a class="btn btn-outline-secondary @(page == totalPages ? "disabled" : "")" href="@Url.Action("ShiftType", "HR", new { id = search, page = page + 1, pageSize })">Next</a>
+                    </div>
+                }
+            </div>
+        }
     </div>
 </div>
 <partial name="_ShiftModuleUi" />

@@ -195,14 +195,16 @@
     string selEmpType = Context.Request.Query["employmentType"].ToString();
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 <!-- Main form submits final shift assignments -->
-<form id="shiftAssignmentToolForm" method="post" action="/HR/ProcessShiftAssignmentTool">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<form id="shiftAssignmentToolForm" method="post" action="/HR/ProcessShiftAssignmentTool" class="shift-tool-shell">
+    <div class="d-flex justify-content-between align-items-center mb-3 shift-tool-header">
         <h4 class="mb-0">New Shift Assignment Tool</h4>
         <button type="submit" class="btn btn-dark btn-sm">Assign Shift Schedule</button>
     </div>
 
-    <div class="card p-4 mb-3">
+    <div class="card p-4 mb-3 shift-tool-card">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Action *</label>
@@ -219,7 +221,7 @@
         </div>
     </div>
 
-    <div class="card p-4 mb-3">
+    <div class="card p-4 mb-3 shift-tool-card">
         <h6 class="mb-3">Shift Assignment Details</h6>
         <div class="row g-3">
             <div class="col-md-6">
@@ -266,7 +268,7 @@
 </form>
 
 <!-- Filter Form via native GET reload -->
-<form method="get" action="/HR/ShiftAssignmentTool" class="card p-4 mb-3">
+<form method="get" action="/HR/ShiftAssignmentTool" class="card p-4 mb-3 shift-tool-card shift-tool-filters">
     <h6 class="mb-3">Quick Filters</h6>
     <input type="hidden" name="shiftType" value="@selShiftType" />
     <input type="hidden" name="startDate" value="@selStartDate" />
@@ -331,9 +333,9 @@
     <button type="submit" class="btn btn-sm btn-outline-secondary mt-3 w-auto">Apply Filters</button>
 </form>
 
-<div class="card p-4">
+<div class="card p-4 shift-tool-card">
     <h6 class="mb-3">Select Employees</h6>
-    <table class="table table-bordered align-middle mb-0">
+    <table class="table table-bordered align-middle mb-0 shift-tool-table">
         <thead>
             <tr>
                 <th style="width:40px"><input type="checkbox" disabled /></th>

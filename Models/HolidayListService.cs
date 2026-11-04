@@ -165,6 +165,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using Microsoft.Data.SqlClient;
 using Erp_Aits.Models;
 
@@ -188,13 +189,14 @@ namespace Erp_Aits.Services
                 conn.Open();
 
                 string query = @"
-            SELECT Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision
-            FROM HolidayLists
+            SELECT Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision, WeeklyOff
+            FROM HolidayLists WITH (READUNCOMMITTED)
             WHERE Id = @Id AND IsDeleted = 0";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.CommandTimeout = 15;
+                    cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -210,6 +212,7 @@ namespace Erp_Aits.Services
                                 Color = reader["Color"] == DBNull.Value ? "#3788d8" : reader["Color"].ToString(),
                                 Country = reader["Country"] == DBNull.Value ? "" : reader["Country"].ToString(),
                                 Subdivision = reader["Subdivision"] == DBNull.Value ? "" : reader["Subdivision"].ToString(),
+                                WeeklyOff = reader["WeeklyOff"] == DBNull.Value ? "" : reader["WeeklyOff"].ToString(),
                                 Holidays = new List<HolidayListDate>()
                             };
                         }
@@ -221,13 +224,14 @@ namespace Erp_Aits.Services
 
                 string datesQuery = @"
             SELECT Id, HolidayListId, HolidayDate, Description
-            FROM HolidayListDates
+            FROM HolidayListDates WITH (READUNCOMMITTED)
             WHERE HolidayListId = @Id
             ORDER BY HolidayDate";
 
                 using (var cmd = new SqlCommand(datesQuery, conn))
                 {
-                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.CommandTimeout = 15;
+                    cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -278,7 +282,7 @@ namespace Erp_Aits.Services
             {
                 //string query = @"SELECT Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision 
                 //                 FROM HolidayLists WHERE 1=1";
-                string query = @"SELECT Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision 
+                string query = @"SELECT Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision, WeeklyOff 
                  FROM HolidayLists WHERE IsDeleted = 0";
                 if (!string.IsNullOrEmpty(id))
                     query += " AND HolidayListName LIKE @Id";
@@ -304,7 +308,8 @@ namespace Erp_Aits.Services
                                 TotalHolidays = Convert.ToInt32(reader["TotalHolidays"]),
                                 Color = reader["Color"]?.ToString(),
                                 Country = reader["Country"]?.ToString(),
-                                Subdivision = reader["Subdivision"]?.ToString()
+                                Subdivision = reader["Subdivision"]?.ToString(),
+                                WeeklyOff = reader["WeeklyOff"]?.ToString()
                             });
                         }
                     }
@@ -332,7 +337,8 @@ namespace Erp_Aits.Services
                         TotalHolidays = @TotalHolidays,
                         Color = @Color,
                         Country = @Country,
-                        Subdivision = @Subdivision
+                        Subdivision = @Subdivision,
+                        WeeklyOff = @WeeklyOff
                     WHERE Id = @Id", conn, tx))
                         {
                             cmd.Parameters.AddWithValue("@Id", model.Id);
@@ -343,6 +349,7 @@ namespace Erp_Aits.Services
                             cmd.Parameters.AddWithValue("@Color", (object)model.Color ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@Country", (object)model.Country ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@Subdivision", (object)model.Subdivision ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@WeeklyOff", (object)model.WeeklyOff ?? DBNull.Value);
                             cmd.ExecuteNonQuery();
                         }
 
@@ -421,27 +428,8 @@ namespace Erp_Aits.Services
                     return;
                 }
 
-                using (var cmd = new SqlCommand(@"
-            UPDATE HolidayLists
-            SET 
-                FromDate = @FromDate,
-                ToDate = @ToDate,
-                TotalHolidays = @TotalHolidays,
-                Color = @Color,
-                Country = @Country,
-                Subdivision = @Subdivision
-            WHERE Id = @Id", con))
-                {
-                    cmd.Parameters.AddWithValue("@Id", existing.Id);
-                    cmd.Parameters.AddWithValue("@FromDate", model.FromDate);
-                    cmd.Parameters.AddWithValue("@ToDate", model.ToDate);
-                    cmd.Parameters.AddWithValue("@TotalHolidays", model.TotalHolidays);
-                    cmd.Parameters.AddWithValue("@Color", (object?)model.Color ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Country", (object?)model.Country ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Subdivision", (object?)model.Subdivision ?? DBNull.Value);
-
-                    cmd.ExecuteNonQuery();
-                }
+                model.Id = existing.Id;
+                Update(model);
             }
         }
 
@@ -450,7 +438,7 @@ namespace Erp_Aits.Services
         {
             using (var con = new SqlConnection(_connectionString))
             using (var cmd = new SqlCommand(@"
-        SELECT TOP 1 Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision
+        SELECT TOP 1 Id, HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision, WeeklyOff
         FROM HolidayLists
         WHERE HolidayListName = @HolidayListName", con))
             {
@@ -472,7 +460,8 @@ namespace Erp_Aits.Services
                         TotalHolidays = Convert.ToInt32(reader["TotalHolidays"]),
                         Color = reader["Color"]?.ToString() ?? "",
                         Country = reader["Country"]?.ToString() ?? "",
-                        Subdivision = reader["Subdivision"]?.ToString() ?? ""
+                        Subdivision = reader["Subdivision"]?.ToString() ?? "",
+                        WeeklyOff = reader["WeeklyOff"]?.ToString() ?? ""
                     };
                 }
             }
@@ -504,10 +493,10 @@ namespace Erp_Aits.Services
 
                         string query = @"
                     INSERT INTO HolidayLists
-                    (HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision)
+                    (HolidayListName, FromDate, ToDate, TotalHolidays, Color, Country, Subdivision, WeeklyOff)
                     OUTPUT INSERTED.Id
                     VALUES
-                    (@HolidayListName, @FromDate, @ToDate, @TotalHolidays, @Color, @Country, @Subdivision)";
+                    (@HolidayListName, @FromDate, @ToDate, @TotalHolidays, @Color, @Country, @Subdivision, @WeeklyOff)";
 
                         using (var cmd = new SqlCommand(query, conn, transaction))
                         {
@@ -518,6 +507,7 @@ namespace Erp_Aits.Services
                             cmd.Parameters.AddWithValue("@Color", (object)model.Color ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@Country", (object)model.Country ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@Subdivision", (object)model.Subdivision ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@WeeklyOff", (object)model.WeeklyOff ?? DBNull.Value);
 
                             newId = (int)cmd.ExecuteScalar();
                         }

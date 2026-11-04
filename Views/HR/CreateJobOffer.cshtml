@@ -158,7 +158,7 @@
     }
 }
 
-<form id="jobOfferForm" asp-action="@(isEdit ? "UpdateJobOffer" : "CreateJobOffer")" asp-controller="HR" method="post">
+<form id="jobOfferForm" asp-action="@(isEdit ? "UpdateJobOffer" : "CreateJobOffer")" asp-controller="HR" method="post" class="recruitment-theme recruitment-form">
     @Html.AntiForgeryToken()
 
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -176,7 +176,7 @@
                 <a href="@Url.Action("JobOffer", "HR")" class="btn btn-outline-secondary btn-sm px-4">Back to List</a>
                 @if (isDraft)
                 {
-                    <button type="submit" formaction="@Url.Action("ChangeJobOfferStatus", "HR", new { status = 1 })" class="btn btn-success btn-sm px-4">Submit</button>
+                    <button type="submit" id="jobOfferWorkflowButton" formaction="@Url.Action("ChangeJobOfferStatus", "HR", new { status = 1 })" class="btn btn-success btn-sm px-4">Submit</button>
                 }
                 else if (Model.DocStatus == 1)
                 {
@@ -467,4 +467,11 @@
             element.disabled = true;
         });
     }
+
+    const jobOfferWorkflowButton = document.getElementById('jobOfferWorkflowButton');
+    if (jobOfferWorkflowButton) document.querySelectorAll('#jobOfferForm input, #jobOfferForm select, #jobOfferForm textarea').forEach(function (input) {
+        input.addEventListener('change', function () { jobOfferWorkflowButton.textContent = 'Save'; jobOfferWorkflowButton.removeAttribute('formaction'); jobOfferWorkflowButton.className = 'btn btn-dark btn-sm px-4'; });
+    });
 </script>
+
+@await Html.PartialAsync("_RecruitmentTheme")

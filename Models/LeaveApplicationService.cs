@@ -2,6 +2,7 @@
 using Erp_Aits.Models;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Data;
 using System.Collections.Generic;
 
 namespace Erp_Aits.Services
@@ -21,9 +22,11 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
+                // This is the list screen only.  Read-uncommitted prevents a long-running
+                // save/sync transaction from blocking the whole Leave Application list.
                 string query = @"SELECT Id, LeaveApplicationCode, LeaveType, Employee, EmployeeName, Company, 
                          FromDate, ToDate, HalfDay, Reason, LeaveApprover, PostingDate, Status, ErpNextId 
-                         FROM LeaveApplications WHERE IsDeleted = 0";
+                         FROM LeaveApplications WITH (READUNCOMMITTED) WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(statusFilter))
                 {
@@ -34,9 +37,12 @@ namespace Erp_Aits.Services
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
+                    // Do not let a temporary SQL lock keep the web request loading forever.
+                    cmd.CommandTimeout = 15;
+
                     if (!string.IsNullOrEmpty(statusFilter))
                     {
-                        cmd.Parameters.AddWithValue("@Status", statusFilter);
+                        cmd.Parameters.Add("@Status", SqlDbType.NVarChar, 100).Value = statusFilter;
                     }
 
                     conn.Open();

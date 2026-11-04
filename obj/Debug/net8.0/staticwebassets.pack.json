@@ -5,6 +5,14 @@
       "PackagePath": "staticwebassets\\Erp_Aits.bundle.scp.css"
     },
     {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\hrms-dashboard.css",
+      "PackagePath": "staticwebassets\\css\\hrms-dashboard.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\leave-workspace.css",
+      "PackagePath": "staticwebassets\\css\\leave-workspace.css"
+    },
+    {
       "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },

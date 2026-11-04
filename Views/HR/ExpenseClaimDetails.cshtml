@@ -12,18 +12,12 @@
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="ec-notification ec-notification--success" role="status"><span>●</span> @TempData["Success"] <button type="button" onclick="this.parentElement.remove()">×</button></div>
 }
 
 @if (TempData["ErpNextError"] != null)
 {
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        @TempData["ErpNextError"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="ec-notification ec-notification--error" role="alert"><span>!</span> @TempData["ErpNextError"] <button type="button" onclick="this.parentElement.remove()">×</button></div>
 }
 
 <datalist id="employeeList">
@@ -142,6 +136,17 @@
     }
 </datalist>
 
+<template id="expenseCostCenterOptions">
+    <option value="">Select Cost Center</option>
+    @if (ViewBag.CostCenters != null)
+    {
+        foreach (var cc in ViewBag.CostCenters)
+        {
+            <option value="@cc.name">@cc.name</option>
+        }
+    }
+</template>
+
 <datalist id="dunningList">
     @if (ViewBag.Dunnings != null)
     {
@@ -206,9 +211,18 @@
 
         <div class="d-flex gap-2">
             <a href="@Url.Action("ExpenseClaimList", "HR")" class="btn ec-btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            @if (!isCancelled)
+            {
+                <div class="dropdown">
+                    <button class="btn ec-btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Create</button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="@Url.Action("CreatePaymentEntry", "HR", new { expenseClaimId = Model.Id })">Payment Entry</a></li>
+                    </ul>
+                </div>
+            }
             @if (isDraft)
             {
-                <button type="submit" class="btn ec-btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                <button type="submit" formaction="@Url.Action("SubmitExpenseClaim", "HR")" class="btn ec-btn-primary btn-sm"><i class="fa-solid fa-check"></i> Submit</button>
             }
         </div>
     </div>
@@ -254,16 +268,15 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Company GSTIN</label>
-                    <input asp-for="CompanyGstin" id="CompanyGstin" class="form-control" list="companyGstinList" />
+                    <select asp-for="CompanyGstin" id="CompanyGstin" class="form-select" onchange="syncCompanyFromGstin(this)">
+                        <option value="">Select Company GSTIN</option>
+                        @if (ViewBag.Companies != null) { foreach (var c in ViewBag.Companies) { <option value="@c.gstin" data-company="@c.name">@c.gstin — @c.name</option> } }
+                    </select>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Approval Status</label>
-                    <select asp-for="ApprovalStatus" class="form-select">
-                        <option value="Draft">Draft</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
+                    <label class="form-label">Current Approval Status</label>
+                    <input value="@Model.ApprovalStatus" class="form-control" readonly />
                 </div>
             </div>
         </div>
@@ -284,6 +297,7 @@
                             <th>Expense Date</th>
                             <th>Expense Type</th>
                             <th>Description</th>
+                            <th>Cost Center</th>
                             <th>Amount</th>
                             <th>Sanctioned Amount</th>
                             <th></th>
@@ -297,6 +311,18 @@
                                 <td><input type="date" name="Expenses[@i].ExpenseDate" value="@(Model.Expenses[i].ExpenseDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" /></td>
                                 <td><input name="Expenses[@i].ExpenseClaimType" value="@Model.Expenses[i].ExpenseClaimType" class="form-control form-control-sm" list="expenseTypeList" /></td>
                                 <td><input name="Expenses[@i].Description" value="@Model.Expenses[i].Description" class="form-control form-control-sm" /></td>
+                                <td>
+                                    <select name="Expenses[@i].CostCenter" class="form-select form-select-sm">
+                                        <option value="">Select Cost Center</option>
+                                        @if (ViewBag.CostCenters != null)
+                                        {
+                                            foreach (var cc in ViewBag.CostCenters)
+                                            {
+                                                <option value="@cc.name" selected="@(cc.name?.ToString() == Model.Expenses[i].CostCenter ? "selected" : null)">@cc.name</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
                                 <td><input type="number" step="0.01" name="Expenses[@i].Amount" value="@Model.Expenses[i].Amount" class="form-control form-control-sm" /></td>
                                 <td><input type="number" step="0.01" name="Expenses[@i].SanctionedAmount" value="@Model.Expenses[i].SanctionedAmount" class="form-control form-control-sm" /></td>
                                 <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); calculateExpenseClaimTotals();">x</button></td>
@@ -449,8 +475,12 @@
             <h6 class="mb-3">More Info</h6>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Status</label>
-                    <input asp-for="Status" class="form-control" readonly />
+                    <label class="form-label">Status <span class="text-danger">*</span></label>
+                    <select asp-for="ApprovalStatus" class="form-select">
+                        <option value="Draft">Draft</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
                 </div>
 
                 <div class="col-md-6">
@@ -475,14 +505,6 @@
 </div>
 
 <div class="expense-claim-detail__actions d-flex justify-content-end gap-2 mt-3">
-    @if (isDraft && !string.IsNullOrWhiteSpace(Model.ErpNextId))
-    {
-        <form asp-controller="HR" asp-action="SubmitExpenseClaim" method="post">
-            <input type="hidden" name="id" value="@Model.Id" />
-            <button type="submit" class="btn btn-dark btn-sm" onclick="return confirm('Submit this Expense Claim in ERPNext and HRMS?');">Submit</button>
-        </form>
-    }
-
     @if (canCancel)
     {
         <form asp-controller="HR" asp-action="CancelExpenseClaim" method="post">
@@ -494,6 +516,10 @@
 </div>
 
 <style>
+    .ec-notification { position: fixed; z-index: 1080; top: 78px; right: 24px; max-width: 430px; padding: 12px 14px; border-radius: 8px; box-shadow: 0 12px 30px rgba(15, 23, 42, .2); font-weight: 600; display: flex; gap: 9px; align-items: center; }
+    .ec-notification--success { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+    .ec-notification--error { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+    .ec-notification button { background: transparent; border: 0; color: inherit; font-size: 22px; line-height: 1; margin-left: auto; }
     .expense-claim-detail {
         --ec-navy: #15324b;
         --ec-teal: #0f877d;
@@ -584,6 +610,11 @@
         if (costCenter) document.getElementById('CostCenter').value = costCenter;
     }
 
+    function syncCompanyFromGstin(select) {
+        const company = select.options[select.selectedIndex]?.getAttribute('data-company') || '';
+        if (company) { document.getElementById('Company').value = company; autoFillCompanyData(company); }
+    }
+
     function addExpenseRow() {
         const i = expenseIdx++;
         document.getElementById('expensesBody').insertAdjacentHTML('beforeend', `
@@ -592,6 +623,7 @@
                 <td><input type="date" name="Expenses[${i}].ExpenseDate" value="${today()}" class="form-control form-control-sm" /></td>
                 <td><input name="Expenses[${i}].ExpenseClaimType" class="form-control form-control-sm" list="expenseTypeList" /></td>
                 <td><input name="Expenses[${i}].Description" class="form-control form-control-sm" /></td>
+                <td><select name="Expenses[${i}].CostCenter" class="form-select form-select-sm">${document.getElementById('expenseCostCenterOptions').innerHTML}</select></td>
                 <td><input type="number" step="0.01" name="Expenses[${i}].Amount" value="0.00" class="form-control form-control-sm" /></td>
                 <td><input type="number" step="0.01" name="Expenses[${i}].SanctionedAmount" value="0.00" class="form-control form-control-sm" /></td>
                 <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">x</button></td>

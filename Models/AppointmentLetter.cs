@@ -6,9 +6,11 @@ namespace Erp_Aits.Models
     public class AppointmentLetter
     {
         public int Id { get; set; }
+        public string? ErpNextId { get; set; }
         public string AppointmentLetterCode { get; set; }
 
         public string JobApplicant { get; set; }
+        public string ApplicantName { get; set; }
         public string Company { get; set; } = "AITS";
         public DateTime? AppointmentDate { get; set; }
         public string AppointmentLetterTemplate { get; set; }

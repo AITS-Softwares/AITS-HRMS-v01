@@ -3,6 +3,7 @@
     ViewBag.Title = "Job Requisition";
 }
 
+<div class="recruitment-theme workflow-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Job Requisition</h4>
     <a href="@Url.Action("CreateJobRequisition", "HR")" class="btn btn-dark btn-sm">+ Add Job Requisition</a>
@@ -43,3 +44,5 @@
 {
     <p class="text-muted text-center py-5">No job requisitions found.</p>
 }
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

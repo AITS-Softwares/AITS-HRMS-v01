@@ -176,7 +176,7 @@
                             {
                                 string empCode = emp.name?.ToString();
                                 string empName = emp.employee_name?.ToString();
-                                <option value="@empCode" data-empname="@empName">@empCode - @empName</option>
+                                <option value="@empCode" data-empname="@empName" data-department="@emp.department">@empCode - @empName</option>
                             }
                         }
                     </select>
@@ -203,6 +203,11 @@
                 <div class="col-md-6">
                     <label class="form-label">Employee Name</label>
                     <input name="EmployeeName" id="employeeNameInput" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Department</label>
+                    <input name="Department" id="departmentInput" class="form-control" readonly />
                 </div>
 
                 <div class="col-md-6">
@@ -289,6 +294,7 @@
 <script>
     const employeeSelect = document.getElementById("employeeSelect");
     const employeeNameInput = document.getElementById("employeeNameInput");
+    const departmentInput = document.getElementById("departmentInput");
     const statusSelect = document.getElementById("statusSelect");
     const leaveTypeWrapper = document.getElementById("leaveTypeWrapper");
     const otherHalfWrapper = document.getElementById("otherHalfWrapper");
@@ -299,6 +305,16 @@
         employeeSelect.addEventListener("change", function () {
             const selected = employeeSelect.options[employeeSelect.selectedIndex];
             employeeNameInput.value = selected.getAttribute("data-empname") || "";
+            departmentInput.value = selected.getAttribute("data-department") || "";
+
+            fetch('@Url.Action("GetEmployeeName", "HR")?employeeId=' + encodeURIComponent(employeeSelect.value))
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) return;
+                    employeeNameInput.value = data.employeeName || "";
+                    departmentInput.value = data.department || "";
+                })
+                .catch(() => { });
         });
     }
 

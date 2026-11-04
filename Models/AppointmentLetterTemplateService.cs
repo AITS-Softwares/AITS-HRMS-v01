@@ -22,7 +22,7 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
-                string query = @"SELECT Id, TemplateCode, TemplateName
+                string query = @"SELECT Id, ErpNextId, TemplateCode, TemplateName
                                   FROM AppointmentLetterTemplates WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(idFilter))
@@ -47,6 +47,7 @@ namespace Erp_Aits.Services
                             templates.Add(new AppointmentLetterTemplate
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                ErpNextId = reader["ErpNextId"]?.ToString(),
                                 TemplateCode = reader["TemplateCode"]?.ToString() ?? string.Empty,
                                 TemplateName = reader["TemplateName"]?.ToString() ?? string.Empty
                             });
@@ -92,6 +93,7 @@ namespace Erp_Aits.Services
                             template = new AppointmentLetterTemplate
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                ErpNextId = reader["ErpNextId"]?.ToString(),
                                 TemplateCode = reader["TemplateCode"]?.ToString() ?? string.Empty,
                                 TemplateName = reader["TemplateName"]?.ToString() ?? string.Empty,
                                 Introduction = reader["Introduction"]?.ToString() ?? string.Empty,
@@ -149,13 +151,14 @@ namespace Erp_Aits.Services
 
                         string headerQuery = @"
                             INSERT INTO AppointmentLetterTemplates
-                                (TemplateCode, TemplateName, Introduction, ClosingNotes)
+                                (ErpNextId, TemplateCode, TemplateName, Introduction, ClosingNotes)
                             OUTPUT INSERTED.Id
                             VALUES
-                                (@TemplateCode, @TemplateName, @Introduction, @ClosingNotes)";
+                                (@ErpNextId, @TemplateCode, @TemplateName, @Introduction, @ClosingNotes)";
 
                         using (var cmd = new SqlCommand(headerQuery, conn, transaction))
                         {
+                            cmd.Parameters.AddWithValue("@ErpNextId", template.ErpNextId ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@TemplateCode", template.TemplateCode ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@TemplateName", template.TemplateName ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Introduction", template.Introduction ?? (object)DBNull.Value);

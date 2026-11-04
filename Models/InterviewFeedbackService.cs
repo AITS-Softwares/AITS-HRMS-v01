@@ -148,14 +148,16 @@ namespace Erp_Aits.Services
                         int newId;
 
                         string query = @"
+                            IF COL_LENGTH('dbo.InterviewFeedbacks','ErpNextId') IS NULL ALTER TABLE dbo.InterviewFeedbacks ADD ErpNextId NVARCHAR(255) NULL;
                             INSERT INTO InterviewFeedbacks
-                                (InterviewId, Interviewer, Result, FeedbackText, CreatedDate)
+                                (ErpNextId, InterviewId, Interviewer, Result, FeedbackText, CreatedDate)
                             OUTPUT INSERTED.Id
                             VALUES
-                                (@InterviewId, @Interviewer, @Result, @FeedbackText, GETDATE())";
+                                (@ErpNextId, @InterviewId, @Interviewer, @Result, @FeedbackText, GETDATE())";
 
                         using (var cmd = new SqlCommand(query, conn, transaction))
                         {
+                            cmd.Parameters.AddWithValue("@ErpNextId", model.ErpNextId ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@InterviewId", model.InterviewId);
                             cmd.Parameters.AddWithValue("@Interviewer", model.Interviewer ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Result", model.Result ?? (object)DBNull.Value);

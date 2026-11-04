@@ -3,9 +3,13 @@
     ViewBag.Title = "Interview " + Model.Id;
 }
 
+<div class="recruitment-theme workflow-page interview-ui">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Interview - @Model.Id</h4>
 </div>
+
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")
 
 <ul class="nav nav-tabs mb-3">
     <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
@@ -34,6 +38,10 @@
             <div class="col-md-6">
                 <label class="form-label">Job Applicant</label>
                 <input class="form-control" value="@Model.JobApplicant" readonly />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Designation</label>
+                <input class="form-control" value="@Model.Designation" readonly />
             </div>
             <div class="col-md-6">
                 <label class="form-label">Scheduled On</label>
@@ -66,9 +74,18 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td colspan="3" class="text-muted text-center py-3">No interviewers recorded</td>
-                </tr>
+                @{ var interviewers = (Model.Interviewers ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList(); }
+                @if (interviewers.Any())
+                {
+                    for (var i = 0; i < interviewers.Count; i++)
+                    {
+                        <tr><td><input type="checkbox" disabled /></td><td>@(i + 1)</td><td>@interviewers[i]</td></tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="3" class="text-muted text-center py-3">No interviewers recorded</td></tr>
+                }
             </tbody>
         </table>
 

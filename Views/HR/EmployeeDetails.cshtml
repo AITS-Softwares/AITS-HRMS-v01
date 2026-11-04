@@ -6,7 +6,6 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Employee - @Model.FullName</h4>
     <div>
-        <a href="@Url.Action("EditEmployee", "HR", new { id = Model.Id })" class="btn btn-outline-dark btn-sm me-2">Edit</a>
         <form asp-action="DeleteEmployee" method="post" style="display:inline;" onsubmit="return confirm('Delete this employee? This also removes it from ERPNext.');">
             <input type="hidden" name="id" value="@Model.Id" />
             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
@@ -98,6 +97,9 @@
 @{
     ViewBag.Title = "Employee - " + Model.FullName;
     var unsubscribedText = Model.Unsubscribed ? "Yes" : "No";
+    var employeeAge = Model.DateOfBirth.HasValue
+        ? DateTime.Today.Year - Model.DateOfBirth.Value.Year - (DateTime.Today < Model.DateOfBirth.Value.AddYears(DateTime.Today.Year - Model.DateOfBirth.Value.Year) ? 1 : 0)
+        : (int?)null;
 }
 
 <style>
@@ -105,10 +107,10 @@
         max-width: 1320px;
         margin: 0 auto;
         padding: 22px;
-        background: #eaf1fb;
-        border: 1px solid #c4d5ed;
+        background: #f1fbfd;
+        border: 1px solid #cbe5ed;
         border-radius: 8px;
-        box-shadow: 0 14px 32px rgba(24, 54, 94, 0.08);
+        box-shadow: 0 14px 32px rgba(26, 85, 107, 0.08);
     }
 
     .employee-details-shell > .employee-details-header {
@@ -116,8 +118,8 @@
         margin-bottom: 20px !important;
         padding: 18px 22px;
         color: #ffffff;
-        background: #142c4d;
-        border: 1px solid #0e223d;
+        background: linear-gradient(110deg, #17486c, #008d88);
+        border: 1px solid #087d79;
         border-radius: 7px;
     }
 
@@ -128,9 +130,9 @@
     }
 
     .employee-details-shell .btn-outline-dark {
-        color: #0b6d74;
-        background: #eefaf8;
-        border-color: #86c7c1;
+        color: #075d66;
+        background: #dff3f2;
+        border-color: #a7d9d8;
         font-weight: 700;
     }
 
@@ -143,33 +145,33 @@
         margin: 0;
         padding: 20px;
         background: #fdfefe;
-        border: 1px solid #c5d6ec;
+        border: 1px solid #c9e1e9;
         border-radius: 7px;
     }
 
     .employee-details-shell .form-label {
         margin-bottom: 6px;
-        color: #294866;
+        color: #24546a;
         font-size: 13px;
         font-weight: 700;
     }
 
     .employee-details-shell .form-control {
         min-height: 38px;
-        color: #183b60;
-        background: #f3f8fe;
-        border: 1px solid #bdd0e7;
+        color: #17486c;
+        background: #fbfeff;
+        border: 1px solid #b8d6df;
         border-radius: 5px;
     }
 
     .employee-details-shell hr {
         margin: 8px 0 14px;
-        border-color: #d4e0ee;
+        border-color: #d8ebf0;
         opacity: 1;
     }
 
     .employee-details-shell h6.text-muted {
-        color: #0b6d74 !important;
+        color: #075d66 !important;
         font-size: 16px;
         font-weight: 700;
     }
@@ -193,7 +195,6 @@
 <div class="employee-details-header d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Employee - @Model.FullName</h4>
     <div>
-        <a href="@Url.Action("EditEmployee", "HR", new { id = Model.Id })" class="btn btn-outline-dark btn-sm me-2">Edit</a>
         <form asp-action="DeleteEmployee" method="post" style="display:inline;" onsubmit="return confirm('Delete this employee? This also removes it from ERPNext.');">
             <input type="hidden" name="id" value="@Model.Id" />
             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
@@ -231,6 +232,10 @@
     <div class="col-md-4">
         <label class="form-label">Date of Birth</label>
         <input class="form-control" value="@(Model.DateOfBirth?.ToString("dd-MM-yyyy"))" readonly />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Age</label>
+        <input class="form-control" value="@(employeeAge.HasValue ? employeeAge + " years" : "-")" readonly />
     </div>
     <div class="col-md-4">
         <label class="form-label">Date of Joining</label>

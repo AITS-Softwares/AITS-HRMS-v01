@@ -157,11 +157,16 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
-                string query = @"SELECT Id, EmployeeCheckinCode, Employee, EmployeeName, Time, LogType
-                                  FROM EmployeeCheckins WHERE IsDeleted = 0 ORDER BY Time DESC, Id DESC";
+                // The list screen only needs the most recent entries.  Reading the entire
+                // checkin history can block the request while ERP data is being refreshed.
+                string query = @"SELECT TOP (1000) Id, EmployeeCheckinCode, Employee, EmployeeName, Time, LogType
+                                  FROM EmployeeCheckins WITH (READPAST)
+                                  WHERE IsDeleted = 0
+                                  ORDER BY Time DESC, Id DESC";
 
                 using (var cmd = new SqlCommand(query, conn))
                 {
+                    cmd.CommandTimeout = 45;
                     conn.Open();
                     using (var reader = cmd.ExecuteReader())
                     {

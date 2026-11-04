@@ -3,7 +3,8 @@
     ViewBag.Title = "Job Requisition " + Model.Code;
 }
 
-<h4 class="mb-3">@Model.Code</h4>
+<div class="recruitment-theme workflow-page">
+<h4 class="workflow-title mb-3">@Model.Code</h4>
 
 <ul class="nav nav-tabs mb-3">
     <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#detailsTab">Details</a></li>
@@ -81,3 +82,5 @@
     </div>
 
 </div>
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

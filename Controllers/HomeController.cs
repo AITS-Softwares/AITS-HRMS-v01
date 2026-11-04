@@ -1,17 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using Erp_Aits.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 
 namespace Erp_Aits.Controllers
 {
     public class HomeController : Controller
     {
+        private static readonly object DashboardCacheLock = new();
+        private static HrmDashboardViewModel? _lastLiveDashboard;
         private readonly IConfiguration _configuration;
         private readonly ILogger<HomeController> _logger;
 
@@ -21,528 +20,131 @@ namespace Erp_Aits.Controllers
             _logger = logger;
         }
 
-        private string GetConnectionString()
-        {
-            return _configuration.GetConnectionString("DefaultConnection");
-        }
-
-        private int? GetCompanyId()
-        {
-            var companyId = HttpContext.Session.GetString("CompanyId");
-            if (!string.IsNullOrEmpty(companyId))
-            {
-                return Convert.ToInt32(companyId);
-            }
-            return 1;
-        }
-
         public IActionResult Index()
         {
+            ViewData["Title"] = "HRMS Dashboard";
+            ViewData["Module"] = "HRMS Overview";
+            ViewData["Icon"] = "chart-line";
             try
             {
-                ViewData["Title"] = "Dashboard";
-                ViewData["Module"] = "Overview";
-                ViewData["Icon"] = "house";
-
-                var companyId = GetCompanyId();
-                var stats = GetDashboardStats(companyId);
-                ViewBag.Stats = stats;
-
-                ViewBag.RecentActivities = GetRecentActivities(companyId);
-                ViewBag.UpcomingTasks = GetUpcomingTasks(companyId);
-
-                return View();
+                var dashboard = BuildDashboard();
+                dashboard.IsLive = true;
+                dashboard.LastUpdatedUtc = DateTime.UtcNow;
+                lock (DashboardCacheLock) _lastLiveDashboard = dashboard;
+                return View(dashboard);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in Dashboard: {ex.Message}");
-                ViewBag.Stats = new DashboardStats();
-                ViewBag.RecentActivities = new List<object>();
-                ViewBag.UpcomingTasks = new List<object>();
-                return View();
+                _logger.LogError(ex, "Unable to load HRMS dashboard.");
+                lock (DashboardCacheLock)
+                {
+                    if (_lastLiveDashboard != null)
+                    {
+                        _lastLiveDashboard.IsLive = false;
+                        _lastLiveDashboard.DataMessage = "Live SQL data is temporarily unavailable. Showing the last successfully synced HRMS snapshot.";
+                        return View(_lastLiveDashboard);
+                    }
+                }
+
+                return View(new HrmDashboardViewModel
+                {
+                    IsLive = false,
+                    DataMessage = "Live SQL data is temporarily unavailable. Retry after SQL Server responds."
+                });
             }
         }
 
-        private DashboardStats GetDashboardStats(int? companyId)
+        private HrmDashboardViewModel BuildDashboard()
         {
-            var stats = new DashboardStats();
+            var dashboard = new HrmDashboardViewModel();
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            connection.Open();
 
-            using (var conn = new SqlConnection(GetConnectionString()))
-            {
-                conn.Open();
-
-                // Total Leads
-                using (var cmd = new SqlCommand(@"
-                    SELECT COUNT(*) FROM Leads WHERE IsActive = 1 AND IsDeleted = 0 
-                    AND (CompanyId = @CompanyId OR CompanyId IS NULL)", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    stats.TotalLeads = Convert.ToInt32(cmd.ExecuteScalar());
-                }
-
-                // Total Customers (as Opportunities)
-                using (var cmd = new SqlCommand(@"
-                    SELECT COUNT(*) FROM Customers WHERE IsActive = 1 
-                    AND (CompanyId = @CompanyId OR CompanyId IS NULL)", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    stats.TotalOpportunities = Convert.ToInt32(cmd.ExecuteScalar());
-                }
-
-                // Active Campaigns
-                using (var cmd = new SqlCommand(@"
-                    SELECT COUNT(*) FROM Campaigns WHERE IsActive = 1 AND IsDeleted = 0 
-                    AND (Status = 'Scheduled' OR (Status = 'Sent' AND SentAt >= DATEADD(DAY, -30, GETDATE())))
-                    AND CompanyId = @CompanyId", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    stats.ActiveCampaigns = Convert.ToInt32(cmd.ExecuteScalar());
-                }
-
-                // Total Calls (from EmailLogs)
-                using (var cmd = new SqlCommand(@"
-                    SELECT COUNT(*) FROM EmailLogs 
-                    WHERE CampaignId IS NOT NULL 
-                    AND CompanyId = @CompanyId", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    stats.TotalCalls = Convert.ToInt32(cmd.ExecuteScalar());
-                }
-
-                // Lead Growth
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM Leads WHERE IsActive = 1 AND IsDeleted = 0 
-                         AND (CompanyId = @CompanyId OR CompanyId IS NULL)
-                         AND MONTH(CreatedDate) = MONTH(GETDATE()) 
-                         AND YEAR(CreatedDate) = YEAR(GETDATE())) as ThisMonth,
-                        (SELECT COUNT(*) FROM Leads WHERE IsActive = 1 AND IsDeleted = 0 
-                         AND (CompanyId = @CompanyId OR CompanyId IS NULL)
-                         AND MONTH(CreatedDate) = MONTH(DATEADD(MONTH, -1, GETDATE())) 
-                         AND YEAR(CreatedDate) = YEAR(DATEADD(MONTH, -1, GETDATE()))) as LastMonth", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int thisMonth = reader["ThisMonth"] != DBNull.Value ? Convert.ToInt32(reader["ThisMonth"]) : 0;
-                            int lastMonth = reader["LastMonth"] != DBNull.Value ? Convert.ToInt32(reader["LastMonth"]) : 1;
-                            stats.LeadGrowth = lastMonth > 0 ? (int)Math.Round((double)(thisMonth - lastMonth) / lastMonth * 100) : 0;
-                        }
-                    }
-                }
-
-                // Opportunity Growth
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM Customers WHERE IsActive = 1 
-                         AND (CompanyId = @CompanyId OR CompanyId IS NULL)
-                         AND MONTH(CreatedDate) = MONTH(GETDATE()) 
-                         AND YEAR(CreatedDate) = YEAR(GETDATE())) as ThisMonth,
-                        (SELECT COUNT(*) FROM Customers WHERE IsActive = 1 
-                         AND (CompanyId = @CompanyId OR CompanyId IS NULL)
-                         AND MONTH(CreatedDate) = MONTH(DATEADD(MONTH, -1, GETDATE())) 
-                         AND YEAR(CreatedDate) = YEAR(DATEADD(MONTH, -1, GETDATE()))) as LastMonth", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int thisMonth = reader["ThisMonth"] != DBNull.Value ? Convert.ToInt32(reader["ThisMonth"]) : 0;
-                            int lastMonth = reader["LastMonth"] != DBNull.Value ? Convert.ToInt32(reader["LastMonth"]) : 1;
-                            stats.OpportunityGrowth = lastMonth > 0 ? (int)Math.Round((double)(thisMonth - lastMonth) / lastMonth * 100) : 0;
-                        }
-                    }
-                }
-
-                // Call Growth
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM EmailLogs 
-                         WHERE CampaignId IS NOT NULL AND CompanyId = @CompanyId
-                         AND MONTH(CreatedDate) = MONTH(GETDATE()) 
-                         AND YEAR(CreatedDate) = YEAR(GETDATE())) as ThisMonth,
-                        (SELECT COUNT(*) FROM EmailLogs 
-                         WHERE CampaignId IS NOT NULL AND CompanyId = @CompanyId
-                         AND MONTH(CreatedDate) = MONTH(DATEADD(MONTH, -1, GETDATE())) 
-                         AND YEAR(CreatedDate) = YEAR(DATEADD(MONTH, -1, GETDATE()))) as LastMonth", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int thisMonth = reader["ThisMonth"] != DBNull.Value ? Convert.ToInt32(reader["ThisMonth"]) : 0;
-                            int lastMonth = reader["LastMonth"] != DBNull.Value ? Convert.ToInt32(reader["LastMonth"]) : 1;
-                            stats.CallGrowth = lastMonth > 0 ? (int)Math.Round((double)(thisMonth - lastMonth) / lastMonth * 100) : 0;
-                        }
-                    }
-                }
-
-                // Campaign Trend
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM Campaigns WHERE IsActive = 1 AND IsDeleted = 0 
-                         AND CompanyId = @CompanyId
-                         AND MONTH(CreatedDate) = MONTH(GETDATE()) 
-                         AND YEAR(CreatedDate) = YEAR(GETDATE())) as ThisMonth,
-                        (SELECT COUNT(*) FROM Campaigns WHERE IsActive = 1 AND IsDeleted = 0 
-                         AND CompanyId = @CompanyId
-                         AND MONTH(CreatedDate) = MONTH(DATEADD(MONTH, -1, GETDATE())) 
-                         AND YEAR(CreatedDate) = YEAR(DATEADD(MONTH, -1, GETDATE()))) as LastMonth", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int thisMonth = reader["ThisMonth"] != DBNull.Value ? Convert.ToInt32(reader["ThisMonth"]) : 0;
-                            int lastMonth = reader["LastMonth"] != DBNull.Value ? Convert.ToInt32(reader["LastMonth"]) : 1;
-                            stats.CampaignTrend = lastMonth > 0 ? (int)Math.Round((double)(thisMonth - lastMonth) / lastMonth * 100) : 0;
-                        }
-                    }
-                }
-
-                // Conversion Rate
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM Customers WHERE IsActive = 1 
-                         AND (CompanyId = @CompanyId OR CompanyId IS NULL)) as Customers,
-                        (SELECT COUNT(*) FROM Leads WHERE IsActive = 1 AND IsDeleted = 0 
-                         AND (CompanyId = @CompanyId OR CompanyId IS NULL)) as Leads", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int customers = reader["Customers"] != DBNull.Value ? Convert.ToInt32(reader["Customers"]) : 0;
-                            int leads = reader["Leads"] != DBNull.Value ? Convert.ToInt32(reader["Leads"]) : 1;
-                            stats.ConversionRate = leads > 0 ? (int)Math.Round((double)customers / leads * 100) : 0;
-                        }
-                    }
-                }
-
-                // Email Open Rate
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM EmailLogs WHERE Status = 'sent' OR Status = 'opened') as Sent,
-                        (SELECT COUNT(*) FROM EmailLogs WHERE IsOpened = 1) as Opened", conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int sent = reader["Sent"] != DBNull.Value ? Convert.ToInt32(reader["Sent"]) : 1;
-                            int opened = reader["Opened"] != DBNull.Value ? Convert.ToInt32(reader["Opened"]) : 0;
-                            stats.EmailOpenRate = sent > 0 ? (int)Math.Round((double)opened / sent * 100) : 0;
-                        }
-                    }
-                }
-
-                // Satisfaction Score
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        (SELECT COUNT(*) FROM EmailLogs WHERE IsOpened = 1) as Opened,
-                        (SELECT COUNT(*) FROM EmailLogs WHERE LinkClicked = 1) as Clicked,
-                        (SELECT COUNT(*) FROM EmailLogs WHERE Status = 'sent' OR Status = 'opened') as Total", conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int opened = reader["Opened"] != DBNull.Value ? Convert.ToInt32(reader["Opened"]) : 0;
-                            int clicked = reader["Clicked"] != DBNull.Value ? Convert.ToInt32(reader["Clicked"]) : 0;
-                            int total = reader["Total"] != DBNull.Value ? Convert.ToInt32(reader["Total"]) : 1;
-
-                            double openRate = total > 0 ? (double)opened / total : 0;
-                            double clickRate = total > 0 ? (double)clicked / total : 0;
-                            stats.SatisfactionScore = Math.Round(1 + (openRate * 2) + (clickRate * 2), 1);
-                            if (stats.SatisfactionScore > 5) stats.SatisfactionScore = 5;
-                        }
-                    }
-                }
-
-                // Avg Response Time
-                using (var cmd = new SqlCommand(@"
-                    SELECT 
-                        AVG(CAST(DATEDIFF(MINUTE, CreatedDate, SentAt) AS FLOAT)) as AvgMinutes
-                    FROM EmailLogs 
-                    WHERE SentAt IS NOT NULL AND CreatedDate IS NOT NULL
-                    AND DATEDIFF(MINUTE, CreatedDate, SentAt) > 0
-                    AND CompanyId = @CompanyId", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    var result = cmd.ExecuteScalar();
-                    if (result != DBNull.Value && result != null)
-                    {
-                        double avgMinutes = Convert.ToDouble(result);
-                        if (avgMinutes < 60)
-                            stats.AvgResponseTime = $"{(int)avgMinutes} min";
-                        else if (avgMinutes < 1440)
-                            stats.AvgResponseTime = $"{(int)(avgMinutes / 60)} hrs";
-                        else
-                            stats.AvgResponseTime = $"{(int)(avgMinutes / 1440)} days";
-
-                        stats.ResponseTimePercent = avgMinutes < 60 ? 80 : (avgMinutes < 240 ? 50 : 20);
-                    }
-                }
-            }
-
-            return stats;
+            dashboard.TotalEmployees = SafeCount(connection, "SELECT COUNT(*) FROM Employees WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0");
+            dashboard.ActiveEmployees = SafeCount(connection, "SELECT COUNT(*) FROM Employees WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(Status, '') = 'Active'");
+            dashboard.ActiveDepartments = SafeCount(connection, "SELECT COUNT(*) FROM Departments WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(Disabled, 0) = 0");
+            dashboard.ActiveShiftTypes = SafeCount(connection, "SELECT COUNT(*) FROM ShiftTypes WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0");
+            dashboard.PresentToday = SafeCount(connection, "SELECT COUNT(*) FROM Attendances WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND AttendanceDate = CAST(GETDATE() AS date) AND Status = 'Present'");
+            dashboard.AbsentToday = SafeCount(connection, "SELECT COUNT(*) FROM Attendances WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND AttendanceDate = CAST(GETDATE() AS date) AND Status = 'Absent'");
+            dashboard.LateToday = SafeCount(connection, "SELECT COUNT(*) FROM Attendances WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND AttendanceDate = CAST(GETDATE() AS date) AND ISNULL(LateEntry, 0) = 1");
+            dashboard.OpenJobOpenings = SafeCount(connection, "SELECT COUNT(*) FROM JobOpenings WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(Status, '') NOT IN ('Closed', 'Cancelled')");
+            dashboard.OpenApplicants = SafeCount(connection, "SELECT COUNT(*) FROM JobApplicants WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(Status, 'Open') IN ('Open', 'Pending')");
+            dashboard.AcceptedOffers = SafeCount(connection, "SELECT COUNT(*) FROM JobOffers WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND Status = 'Accepted'");
+            dashboard.PendingLeaves = SafeCount(connection, "SELECT COUNT(*) FROM LeaveApplications WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(Status, '') IN ('Open', 'Pending')");
+            dashboard.PendingExpenses = SafeCount(connection, "SELECT COUNT(*) FROM ExpenseClaims WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(ApprovalStatus, '') IN ('Draft', 'Open', 'Pending')");
+            dashboard.AttendanceRate = dashboard.ActiveEmployees > 0 ? Math.Min(100, (int)Math.Round(dashboard.PresentToday * 100.0 / dashboard.ActiveEmployees)) : 0;
+            try { dashboard.Departments = ReadDepartments(connection); } catch (Exception ex) { _logger.LogWarning(ex, "Department dashboard data could not load."); }
+            try { dashboard.UpcomingLeaves = ReadUpcomingLeaves(connection); } catch (Exception ex) { _logger.LogWarning(ex, "Leave dashboard data could not load."); }
+            try { dashboard.Activities = ReadRecentActivities(connection); } catch (Exception ex) { _logger.LogWarning(ex, "Activity dashboard data could not load."); }
+            return dashboard;
         }
 
-        private List<dynamic> GetRecentActivities(int? companyId)
+        private int SafeCount(SqlConnection connection, string sql)
         {
-            var activities = new List<dynamic>();
-
-            using (var conn = new SqlConnection(GetConnectionString()))
+            try
             {
-                conn.Open();
-
-                // Get recent Leads
-                using (var cmd = new SqlCommand(@"
-                    SELECT TOP 3 'Lead' as Type, 
-                           ISNULL(FirstName, '') + ' ' + ISNULL(LastName, '') as Name, 
-                           CreatedDate, 
-                           'New lead added' as Action,
-                           'user-plus' as Icon, 
-                           'blue' as IconClass,
-                           'System' as [User]
-                    FROM Leads 
-                    WHERE IsActive = 1 AND IsDeleted = 0 
-                    AND (CompanyId = @CompanyId OR CompanyId IS NULL)
-                    ORDER BY CreatedDate DESC", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            activities.Add(new
-                            {
-                                Title = "New lead added",
-                                Description = reader["Name"]?.ToString() ?? "Unknown",
-                                User = reader["User"]?.ToString() ?? "System",
-                                TimeAgo = GetTimeAgo(Convert.ToDateTime(reader["CreatedDate"])),
-                                Icon = "fa-user-plus",
-                                IconClass = "blue"
-                            });
-                        }
-                    }
-                }
-
-                // Get recent Campaigns
-                using (var cmd = new SqlCommand(@"
-                    SELECT TOP 2 CampaignName, CreatedDate, 
-                           'Campaign created' as Action,
-                           'bullhorn' as Icon, 
-                           'orange' as IconClass,
-                           'Marketing Team' as [User]
-                    FROM Campaigns 
-                    WHERE IsDeleted = 0 AND CompanyId = @CompanyId
-                    ORDER BY CreatedDate DESC", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            activities.Add(new
-                            {
-                                Title = "Campaign created",
-                                Description = reader["CampaignName"]?.ToString() ?? "Unknown",
-                                User = reader["User"]?.ToString() ?? "Marketing Team",
-                                TimeAgo = GetTimeAgo(Convert.ToDateTime(reader["CreatedDate"])),
-                                Icon = "fa-bullhorn",
-                                IconClass = "orange"
-                            });
-                        }
-                    }
-                }
-
-                // Get recent Email sends
-                using (var cmd = new SqlCommand(@"
-                    SELECT TOP 2 [To], SentAt, 
-                           CASE WHEN IsOpened = 1 THEN 'Email opened' ELSE 'Email sent' END as Action,
-                           'envelope' as Icon, 
-                           CASE WHEN IsOpened = 1 THEN 'green' ELSE 'blue' END as IconClass,
-                           'System' as [User]
-                    FROM EmailLogs 
-                    WHERE CompanyId = @CompanyId
-                    ORDER BY SentAt DESC", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            activities.Add(new
-                            {
-                                Title = reader["Action"]?.ToString() ?? "Email activity",
-                                Description = reader["To"]?.ToString() ?? "Unknown",
-                                User = reader["User"]?.ToString() ?? "System",
-                                TimeAgo = GetTimeAgo(Convert.ToDateTime(reader["SentAt"])),
-                                Icon = "fa-envelope",
-                                IconClass = reader["IconClass"]?.ToString() ?? "blue"
-                            });
-                        }
-                    }
-                }
+                using var command = new SqlCommand(sql, connection) { CommandTimeout = 12 };
+                var value = command.ExecuteScalar();
+                return value == null || value == DBNull.Value ? 0 : Convert.ToInt32(value);
             }
-
-            return activities.OrderByDescending(a => GetTimeAgoValue(a.TimeAgo)).Take(5).ToList();
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "A dashboard metric query could not load.");
+                return 0;
+            }
         }
 
-        private List<dynamic> GetUpcomingTasks(int? companyId)
+        private static List<HrmDepartmentSnapshot> ReadDepartments(SqlConnection connection)
         {
-            var tasks = new List<dynamic>();
-
-            using (var conn = new SqlConnection(GetConnectionString()))
-            {
-                conn.Open();
-
-                // Get upcoming Campaigns
-                using (var cmd = new SqlCommand(@"
-                    SELECT TOP 5 CampaignName, ScheduledTime,
-                           CASE 
-                               WHEN ScheduledTime <= DATEADD(DAY, 1, GETDATE()) THEN 'high'
-                               WHEN ScheduledTime <= DATEADD(DAY, 3, GETDATE()) THEN 'medium'
-                               ELSE 'low'
-                           END as Priority,
-                           'fa-bullhorn' as Icon,
-                           'primary' as IconColor
-                    FROM Campaigns 
-                    WHERE ScheduledTime >= GETDATE() 
-                    AND Status = 'Scheduled' 
-                    AND IsDeleted = 0 
-                    AND CompanyId = @CompanyId
-                    ORDER BY ScheduledTime ASC", conn))
-                {
-                    cmd.Parameters.AddWithValue("@CompanyId", companyId ?? 1);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var scheduledTime = Convert.ToDateTime(reader["ScheduledTime"]);
-                            tasks.Add(new
-                            {
-                                Title = reader["CampaignName"]?.ToString() ?? "Scheduled Campaign",
-                                PriorityClass = reader["Priority"]?.ToString() ?? "low",
-                                Icon = "fa-bullhorn",
-                                IconColor = "primary",
-                                DateTime = scheduledTime.ToString("MMM dd 'at' h:mm tt"),
-                                DaysLeft = GetDaysLeft(scheduledTime)
-                            });
-                        }
-                    }
-                }
-
-                // If no campaigns, show default tasks
-                if (!tasks.Any())
-                {
-                    tasks.Add(new
-                    {
-                        Title = "No upcoming campaigns",
-                        PriorityClass = "low",
-                        Icon = "fa-check-circle",
-                        IconColor = "success",
-                        DateTime = "All caught up!",
-                        DaysLeft = ""
-                    });
-                }
-            }
-
-            return tasks;
+            var results = new List<HrmDepartmentSnapshot>();
+            const string sql = @"SELECT TOP (6) ISNULL(NULLIF(Department, ''), 'Unassigned') Department, COUNT(*) EmployeeCount
+                                 FROM Employees WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0
+                                 GROUP BY ISNULL(NULLIF(Department, ''), 'Unassigned') ORDER BY COUNT(*) DESC, Department";
+            using var command = new SqlCommand(sql, connection) { CommandTimeout = 12 };
+            using var reader = command.ExecuteReader();
+            while (reader.Read()) results.Add(new HrmDepartmentSnapshot { Name = reader["Department"].ToString() ?? "Unassigned", Count = Convert.ToInt32(reader["EmployeeCount"]) });
+            return results;
         }
 
-        private string GetDaysLeft(DateTime date)
+        private static List<HrmUpcomingLeave> ReadUpcomingLeaves(SqlConnection connection)
         {
-            var days = (date - DateTime.Now).Days;
-            if (days < 0) return "Overdue";
-            if (days == 0) return "Today";
-            if (days == 1) return "Tomorrow";
-            return $"{days} days left";
+            var results = new List<HrmUpcomingLeave>();
+            const string sql = @"SELECT TOP (5) EmployeeName, LeaveType, FromDate, ToDate, Status FROM LeaveApplications WITH (NOLOCK)
+                                 WHERE ISNULL(IsDeleted, 0) = 0 AND FromDate >= CAST(GETDATE() AS date)
+                                 AND ISNULL(Status, '') NOT IN ('Cancelled', 'Rejected') ORDER BY FromDate";
+            using var command = new SqlCommand(sql, connection) { CommandTimeout = 12 };
+            using var reader = command.ExecuteReader();
+            while (reader.Read()) results.Add(new HrmUpcomingLeave { EmployeeName = reader["EmployeeName"].ToString() ?? "Employee", LeaveType = reader["LeaveType"].ToString() ?? "Leave", FromDate = reader["FromDate"] == DBNull.Value ? null : Convert.ToDateTime(reader["FromDate"]), ToDate = reader["ToDate"] == DBNull.Value ? null : Convert.ToDateTime(reader["ToDate"]), Status = reader["Status"].ToString() ?? "Open" });
+            return results;
         }
 
-        private int GetTimeAgoValue(string timeAgo)
+        private static List<HrmActivity> ReadRecentActivities(SqlConnection connection)
         {
-            if (timeAgo.Contains("Just now")) return 0;
-            if (timeAgo.Contains("minutes"))
-            {
-                var parts = timeAgo.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int minutes))
-                    return minutes;
-            }
-            if (timeAgo.Contains("hours"))
-            {
-                var parts = timeAgo.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int hours))
-                    return hours * 60;
-            }
-            if (timeAgo.Contains("days"))
-            {
-                var parts = timeAgo.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int days))
-                    return days * 1440;
-            }
-            if (timeAgo.Contains("weeks"))
-            {
-                var parts = timeAgo.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int weeks))
-                    return weeks * 10080;
-            }
-            if (timeAgo.Contains("months"))
-            {
-                var parts = timeAgo.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int months))
-                    return months * 43200;
-            }
-            if (timeAgo.Contains("years"))
-            {
-                var parts = timeAgo.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int years))
-                    return years * 525600;
-            }
-            return 999999;
-        }
-
-        private string GetTimeAgo(DateTime date)
-        {
-            var diff = DateTime.Now - date;
-
-            if (diff.TotalMinutes < 1)
-                return "Just now";
-            if (diff.TotalMinutes < 60)
-                return $"{(int)diff.TotalMinutes} minutes ago";
-            if (diff.TotalHours < 24)
-                return $"{(int)diff.TotalHours} hours ago";
-            if (diff.TotalDays < 7)
-                return $"{(int)diff.TotalDays} days ago";
-            if (diff.TotalDays < 30)
-                return $"{(int)(diff.TotalDays / 7)} weeks ago";
-            if (diff.TotalDays < 365)
-                return $"{(int)(diff.TotalDays / 30)} months ago";
-            return $"{(int)(diff.TotalDays / 365)} years ago";
+            var results = new List<HrmActivity>();
+            const string sql = @"SELECT TOP (8) ActivityType, ActivityTitle, ActivityDetail, ActivityDate, Icon, Theme FROM (
+                                    SELECT 'Employee' ActivityType, 'Employee added' ActivityTitle, FullName ActivityDetail, ISNULL(CreatedOn, GETDATE()) ActivityDate, 'fa-user-plus' Icon, 'teal' Theme FROM Employees WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0
+                                    UNION ALL SELECT 'Recruitment', 'Application received', ApplicantName, ISNULL(CreatedOn, GETDATE()), 'fa-user-check', 'violet' FROM JobApplicants WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0
+                                    UNION ALL SELECT 'Leave', 'Leave request created', ISNULL(EmployeeName, Employee), ISNULL(CreatedOn, GETDATE()), 'fa-calendar-check', 'amber' FROM LeaveApplications WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0
+                                    UNION ALL SELECT 'Expense', 'Expense claim created', ISNULL(EmployeeName, ExpenseClaimCode), ISNULL(CreatedOn, GETDATE()), 'fa-receipt', 'blue' FROM ExpenseClaims WITH (NOLOCK) WHERE ISNULL(IsDeleted, 0) = 0
+                                 ) Activities ORDER BY ActivityDate DESC";
+            using var command = new SqlCommand(sql, connection) { CommandTimeout = 12 };
+            using var reader = command.ExecuteReader();
+            while (reader.Read()) results.Add(new HrmActivity { Type = reader["ActivityType"].ToString() ?? "HRMS", Title = reader["ActivityTitle"].ToString() ?? "Updated", Detail = reader["ActivityDetail"].ToString() ?? "HRMS record", Date = reader["ActivityDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["ActivityDate"]), Icon = reader["Icon"].ToString() ?? "fa-circle-info", Theme = reader["Theme"].ToString() ?? "teal" });
+            return results;
         }
     }
 
-    public class DashboardStats
+    public class HrmDashboardViewModel
     {
-        public int TotalLeads { get; set; }
-        public int TotalOpportunities { get; set; }
-        public int ActiveCampaigns { get; set; }
-        public int TotalCalls { get; set; }
-        public int LeadGrowth { get; set; }
-        public int OpportunityGrowth { get; set; }
-        public int CampaignTrend { get; set; }
-        public int CallGrowth { get; set; }
-        public int ConversionRate { get; set; }
-        public int EmailOpenRate { get; set; }
-        public double SatisfactionScore { get; set; }
-        public string AvgResponseTime { get; set; } = "N/A";
-        public int ResponseTimePercent { get; set; }
+        public bool IsLive { get; set; }
+        public DateTime? LastUpdatedUtc { get; set; }
+        public string? DataMessage { get; set; }
+        public int TotalEmployees { get; set; } public int ActiveEmployees { get; set; } public int ActiveDepartments { get; set; } public int ActiveShiftTypes { get; set; }
+        public int PresentToday { get; set; } public int AbsentToday { get; set; } public int LateToday { get; set; } public int OpenJobOpenings { get; set; }
+        public int OpenApplicants { get; set; } public int AcceptedOffers { get; set; } public int PendingLeaves { get; set; } public int PendingExpenses { get; set; } public int AttendanceRate { get; set; }
+        public List<HrmDepartmentSnapshot> Departments { get; set; } = new(); public List<HrmUpcomingLeave> UpcomingLeaves { get; set; } = new(); public List<HrmActivity> Activities { get; set; } = new();
     }
+    public class HrmDepartmentSnapshot { public string Name { get; set; } = ""; public int Count { get; set; } }
+    public class HrmUpcomingLeave { public string EmployeeName { get; set; } = ""; public string LeaveType { get; set; } = ""; public DateTime? FromDate { get; set; } public DateTime? ToDate { get; set; } public string Status { get; set; } = ""; }
+    public class HrmActivity { public string Type { get; set; } = ""; public string Title { get; set; } = ""; public string Detail { get; set; } = ""; public DateTime Date { get; set; } public string Icon { get; set; } = ""; public string Theme { get; set; } = ""; }
 }

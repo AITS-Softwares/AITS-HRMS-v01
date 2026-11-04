@@ -231,6 +231,7 @@ namespace Erp_Aits.Services
     public class ExpenseClaimService
     {
         private readonly string _connectionString;
+        private static bool _accountingDimensionSchemaReady;
 
         public ExpenseClaimService(string connectionString)
         {
@@ -239,6 +240,30 @@ namespace Erp_Aits.Services
 
         private bool EnsureAccountingDimensionColumns()
         {
+            if (_accountingDimensionSchemaReady) return true;
+
+            // A read-only metadata check avoids taking a schema lock on every save.
+            const string checkSql = @"SELECT CASE WHEN COL_LENGTH('dbo.ExpenseClaims','Dunning') IS NOT NULL
+                AND COL_LENGTH('dbo.ExpenseClaims','AiAuditLog') IS NOT NULL
+                AND COL_LENGTH('dbo.ExpenseClaims','AllowedToTransactWith') IS NOT NULL
+                AND COL_LENGTH('dbo.ExpenseClaims','AppraisalTemplate') IS NOT NULL
+                AND COL_LENGTH('dbo.ExpenseClaimDetails','CostCenter') IS NOT NULL THEN 1 ELSE 0 END";
+            using (var checkConn = new SqlConnection(_connectionString))
+            using (var check = new SqlCommand(checkSql, checkConn))
+            {
+                try
+                {
+                    check.CommandTimeout = 5;
+                    checkConn.Open();
+                    if (Convert.ToInt32(check.ExecuteScalar()) == 1)
+                    {
+                        _accountingDimensionSchemaReady = true;
+                        return true;
+                    }
+                }
+                catch (SqlException ex) when (ex.Number == -2) { return false; }
+            }
+
             const string sql = @"
                 IF COL_LENGTH('dbo.ExpenseClaims', 'Dunning') IS NULL
                     ALTER TABLE dbo.ExpenseClaims ADD Dunning NVARCHAR(255) NULL;
@@ -247,7 +272,9 @@ namespace Erp_Aits.Services
                 IF COL_LENGTH('dbo.ExpenseClaims', 'AllowedToTransactWith') IS NULL
                     ALTER TABLE dbo.ExpenseClaims ADD AllowedToTransactWith NVARCHAR(255) NULL;
                 IF COL_LENGTH('dbo.ExpenseClaims', 'AppraisalTemplate') IS NULL
-                    ALTER TABLE dbo.ExpenseClaims ADD AppraisalTemplate NVARCHAR(255) NULL;";
+                    ALTER TABLE dbo.ExpenseClaims ADD AppraisalTemplate NVARCHAR(255) NULL;
+                IF COL_LENGTH('dbo.ExpenseClaimDetails', 'CostCenter') IS NULL
+                    ALTER TABLE dbo.ExpenseClaimDetails ADD CostCenter NVARCHAR(255) NULL;";
 
             using (var conn = new SqlConnection(_connectionString))
             using (var cmd = new SqlCommand(sql, conn))
@@ -258,6 +285,7 @@ namespace Erp_Aits.Services
                     cmd.CommandTimeout = 5;
                     conn.Open();
                     cmd.ExecuteNonQuery();
+                    _accountingDimensionSchemaReady = true;
                     return true;
                 }
                 catch (SqlException ex) when (ex.Number == -2)
@@ -374,14 +402,15 @@ namespace Erp_Aits.Services
                                 if (string.IsNullOrEmpty(e.ExpenseClaimType)) continue;
 
                                 string q = @"INSERT INTO ExpenseClaimDetails
-                                             (ExpenseClaimId, ExpenseDate, ExpenseClaimType, Description, Amount, SanctionedAmount)
-                                             VALUES (@ExpenseClaimId, @ExpenseDate, @ExpenseClaimType, @Description, @Amount, @SanctionedAmount)";
+                                             (ExpenseClaimId, ExpenseDate, ExpenseClaimType, Description, CostCenter, Amount, SanctionedAmount)
+                                             VALUES (@ExpenseClaimId, @ExpenseDate, @ExpenseClaimType, @Description, @CostCenter, @Amount, @SanctionedAmount)";
                                 using (var cmd = new SqlCommand(q, conn, transaction))
                                 {
                                     cmd.Parameters.AddWithValue("@ExpenseClaimId", newId);
                                     cmd.Parameters.AddWithValue("@ExpenseDate", (object)e.ExpenseDate ?? DBNull.Value);
                                     cmd.Parameters.AddWithValue("@ExpenseClaimType", e.ExpenseClaimType ?? (object)DBNull.Value);
                                     cmd.Parameters.AddWithValue("@Description", e.Description ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@CostCenter", e.CostCenter ?? (object)DBNull.Value);
                                     cmd.Parameters.AddWithValue("@Amount", e.Amount);
                                     cmd.Parameters.AddWithValue("@SanctionedAmount", e.SanctionedAmount);
                                     cmd.ExecuteNonQuery();
@@ -638,9 +667,9 @@ namespace Erp_Aits.Services
 
                     using (var cmd = new SqlCommand(@"
                         INSERT INTO ExpenseClaimDetails
-                            (ExpenseClaimId, ExpenseDate, ExpenseClaimType, Description, Amount, SanctionedAmount)
+                            (ExpenseClaimId, ExpenseDate, ExpenseClaimType, Description, CostCenter, Amount, SanctionedAmount)
                         VALUES
-                            (@ExpenseClaimId, @ExpenseDate, @ExpenseClaimType, @Description, @Amount, @SanctionedAmount)",
+                            (@ExpenseClaimId, @ExpenseDate, @ExpenseClaimType, @Description, @CostCenter, @Amount, @SanctionedAmount)",
                         conn,
                         transaction))
                     {
@@ -648,6 +677,7 @@ namespace Erp_Aits.Services
                         cmd.Parameters.AddWithValue("@ExpenseDate", (object)e.ExpenseDate ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@ExpenseClaimType", e.ExpenseClaimType ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@Description", e.Description ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@CostCenter", e.CostCenter ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@Amount", e.Amount);
                         cmd.Parameters.AddWithValue("@SanctionedAmount", e.SanctionedAmount);
                         cmd.ExecuteNonQuery();
@@ -749,6 +779,7 @@ namespace Erp_Aits.Services
 
         public ExpenseClaim GetExpenseClaimById(int id)
         {
+            RequireAccountingDimensionColumns();
             ExpenseClaim claim = null;
 
             using (var conn = new SqlConnection(_connectionString))
@@ -818,6 +849,7 @@ namespace Erp_Aits.Services
                                 ExpenseDate = reader["ExpenseDate"] == DBNull.Value ? null : Convert.ToDateTime(reader["ExpenseDate"]),
                                 ExpenseClaimType = reader["ExpenseClaimType"]?.ToString(),
                                 Description = reader["Description"]?.ToString(),
+                                CostCenter = reader["CostCenter"] == DBNull.Value ? null : reader["CostCenter"]?.ToString(),
                                 Amount = reader["Amount"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Amount"]),
                                 SanctionedAmount = reader["SanctionedAmount"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SanctionedAmount"])
                             });

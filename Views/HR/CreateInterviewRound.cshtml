@@ -1,15 +1,23 @@
 ﻿@model Erp_Aits.Models.InterviewRound
 @{
-    ViewBag.Title = "New Interview Round";
+    var isEdit = ViewBag.IsEdit == true;
+    var interviewTypes = ViewBag.InterviewRoundTypes as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var interviewers = ViewBag.InterviewRoundInterviewers as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var designations = ViewBag.InterviewRoundDesignations as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var skills = ViewBag.InterviewRoundSkills as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var selectedInterviewers = (Model.Interviewers ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+    ViewBag.Title = isEdit ? "Interview Round Details" : "New Interview Round";
 }
 
-<form asp-action="CreateInterviewRound" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Interview Round</h4>
-        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+<form asp-action="@(isEdit ? "UpdateInterviewRound" : "CreateInterviewRound")" method="post" class="interview-round-form recruitment-theme workflow-page interview-ui">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ErpNextId" />
+    <div class="round-page-header mb-3">
+        <div><span class="round-kicker">RECRUITMENT / INTERVIEW</span><h4 class="mb-0">@(isEdit ? "Interview Round Details" : "New Interview Round")</h4></div>
+        <button type="submit" class="btn round-save-btn"><i class="fas fa-check me-1"></i> Save</button>
     </div>
 
-    <div class="card p-4 mb-3">
+    <div class="card round-card p-4 mb-3">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Round Name *</label>
@@ -17,23 +25,63 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Expected Average Rating</label>
-                <div id="starRating">
+                <div id="starRating" class="rating-stars">
                     @for (int i = 1; i <= 5; i++)
                     {
-                        <i class="fa-star star-icon far text-secondary" data-value="@i" style="cursor:pointer; font-size:20px; margin-right:4px;"></i>
+                        <i class="fa-star star-icon @(i <= Model.ExpectedAverageRating ? "fas text-warning" : "far text-secondary")" data-value="@i" style="cursor:pointer; font-size:20px; margin-right:4px;"></i>
                     }
                 </div>
-                <input asp-for="ExpectedAverageRating" type="hidden" id="ratingValue" value="0" />
+                <input asp-for="ExpectedAverageRating" type="hidden" id="ratingValue" value="@Model.ExpectedAverageRating" />
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Interview Type</label>
-                <input asp-for="InterviewType" class="form-control" />
+                <select asp-for="InterviewType" class="form-select">
+                    <option value="">Select Interview Type</option>
+                    @foreach (var item in interviewTypes)
+                    {
+                        var value = item["name"]?.ToString() ?? string.Empty;
+                        <option value="@value">@value</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="2" placeholder="Describe this interview round"></textarea>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Interviewers</label>
-                <input asp-for="Interviewers" class="form-control" />
+                <input asp-for="Interviewers" type="hidden" id="interviewersValue" />
+                <div class="interviewer-picker" id="interviewerPicker">
+                    <button type="button" class="form-select interviewer-toggle" id="interviewerToggle">
+                        <span id="interviewerSummary">Select interviewers</span><i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="interviewer-menu" id="interviewerMenu">
+                        <input type="search" class="form-control form-control-sm interviewer-search" id="interviewerSearch" placeholder="Search interviewer..." />
+                        <div class="interviewer-options" id="interviewerOptions">
+                    @foreach (var item in interviewers)
+                    {
+                        var value = item["name"]?.ToString() ?? string.Empty;
+                        var label = item["full_name"]?.ToString();
+                        var text = string.IsNullOrWhiteSpace(label) ? value : label + " (" + value + ")";
+                        <label class="interviewer-option" data-search="@text.ToLowerInvariant()">
+                            @if (selectedInterviewers.Contains(value))
+                            {
+                                <input type="checkbox" value="@value" checked />
+                            }
+                            else
+                            {
+                                <input type="checkbox" value="@value" />
+                            }
+                            <span>@text</span>
+                        </label>
+                    }
+                        </div>
+                    </div>
+                    <div class="interviewer-chips" id="interviewerChips"></div>
+                </div>
             </div>
         </div>
 
@@ -41,14 +89,21 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Designation</label>
-                <input asp-for="Designation" class="form-control" />
+                <select asp-for="Designation" class="form-select">
+                    <option value="">Select Designation</option>
+                    @foreach (var item in designations)
+                    {
+                        var value = item["name"]?.ToString() ?? string.Empty;
+                        <option value="@value">@value</option>
+                    }
+                </select>
             </div>
         </div>
     </div>
 
-    <div class="card p-4">
-        <h6 class="mb-3">Expected Skillset</h6>
-        <table class="table table-bordered align-middle mb-1" id="skillTable">
+    <div class="card round-card skillset-card p-4">
+        <div class="skillset-heading"><div><span class="round-kicker">ASSESSMENT</span><h6 class="mb-0">Expected Skillset</h6></div><button type="button" class="btn btn-sm skill-add-btn" onclick="addSkillRow()"><i class="fas fa-plus me-1"></i> Add Skill</button></div>
+        <table class="table align-middle mb-1" id="skillTable">
             <thead>
                 <tr>
                     <th style="width:40px"><input type="checkbox" disabled /></th>
@@ -58,9 +113,29 @@
                     <th style="width:50px"></th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                @foreach (var skill in Model.Skills)
+                {
+                    <tr>
+                        <td><input type="checkbox" /></td><td></td>
+                        <td>
+                            <select name="SkillNames" class="form-select form-select-sm border-0">
+                                <option value="@skill.Skill">@skill.Skill</option>
+                                @foreach (var item in skills)
+                                {
+                                    var value = item["name"]?.ToString() ?? string.Empty;
+                                    if (!string.Equals(value, skill.Skill, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <option value="@value">@value</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td><input name="SkillDescriptions" class="form-control form-control-sm border-0" value="@skill.Description" /></td><td></td>
+                    </tr>
+                }
+            </tbody>
         </table>
-        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSkillRow()">+ Add Row</button>
     </div>
 </form>
 
@@ -92,10 +167,89 @@
         row.innerHTML = `
             <td><input type="checkbox" /></td>
             <td>${rowNum}</td>
-            <td><input name="SkillNames" class="form-control form-control-sm border-0" /></td>
+            <td><select name="SkillNames" class="form-select form-select-sm border-0"><option value="">Select Skill</option></select></td>
             <td><input name="SkillDescriptions" class="form-control form-control-sm border-0" /></td>
             <td><i class="fas fa-pen text-muted" style="cursor:pointer"></i></td>
         `;
+        var skillSelect = row.querySelector('select[name="SkillNames"]');
+        @foreach (var item in skills)
+        {
+            var value = item["name"]?.ToString() ?? string.Empty;
+            <text>skillSelect.add(new Option('@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(value))', '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(value))'));</text>
+        }
         tbody.appendChild(row);
     }
+
+    (function () {
+        var picker = document.getElementById('interviewerPicker');
+        var toggle = document.getElementById('interviewerToggle');
+        var menu = document.getElementById('interviewerMenu');
+        var search = document.getElementById('interviewerSearch');
+        var value = document.getElementById('interviewersValue');
+        var summary = document.getElementById('interviewerSummary');
+        var chips = document.getElementById('interviewerChips');
+        var options = Array.from(document.querySelectorAll('.interviewer-option'));
+
+        function refreshInterviewers() {
+            var selected = options.filter(function (option) { return option.querySelector('input').checked; });
+            value.value = selected.map(function (option) { return option.querySelector('input').value; }).join(', ');
+            summary.textContent = selected.length ? selected.length + ' interviewer' + (selected.length > 1 ? 's selected' : ' selected') : 'Select interviewers';
+            chips.innerHTML = '';
+            selected.forEach(function (option) {
+                var chip = document.createElement('span');
+                chip.textContent = option.querySelector('span').textContent;
+                chips.appendChild(chip);
+            });
+        }
+
+        toggle.addEventListener('click', function () { picker.classList.toggle('open'); });
+        options.forEach(function (option) { option.querySelector('input').addEventListener('change', refreshInterviewers); });
+        search.addEventListener('input', function () {
+            var term = search.value.toLowerCase();
+            options.forEach(function (option) { option.hidden = option.dataset.search.indexOf(term) === -1; });
+        });
+        document.addEventListener('click', function (event) { if (!picker.contains(event.target)) picker.classList.remove('open'); });
+        refreshInterviewers();
+    })();
 </script>
+
+<style>
+    .interview-round-form { max-width: 1120px; margin: 0 auto; color: #18334c; }
+    .round-page-header { display:flex; justify-content:space-between; align-items:center; padding:22px 26px; border-radius:16px; color:#fff; background:linear-gradient(112deg,#0b3954,#107b79); box-shadow:0 12px 25px rgba(13,73,88,.18); }
+    .round-page-header h4 { font-weight:700; letter-spacing:-.2px; }
+    .round-kicker { display:block; font-size:.7rem; font-weight:800; letter-spacing:.1em; color:#76dfdb; margin-bottom:4px; }
+    .round-save-btn { border:0; background:#fff; color:#0a5b64; font-weight:700; padding:9px 18px; border-radius:9px; }
+    .round-save-btn:hover { background:#dff9f5; color:#074d56; }
+    .round-card { border:1px solid #d5e5ec; border-radius:15px; box-shadow:0 8px 24px rgba(26,65,86,.06); }
+    .round-card .form-label { color:#33536c; font-weight:700; font-size:.84rem; margin-bottom:.45rem; }
+    .round-card .form-control, .round-card .form-select { border-color:#cddde5; min-height:45px; border-radius:9px; }
+    .round-card .form-control:focus, .round-card .form-select:focus { border-color:#20a39e; box-shadow:0 0 0 .2rem rgba(32,163,158,.13); }
+    .round-card hr { border-color:#dce8ed; opacity:1; }
+    .rating-stars { min-height:45px; display:flex; align-items:center; gap:8px; padding-left:5px; }
+    .rating-stars .star-icon { margin-right:0 !important; transition:transform .15s ease; }
+    .rating-stars .star-icon:hover { transform:scale(1.15); }
+    .interviewer-picker { position:relative; }
+    .interviewer-toggle { display:flex; align-items:center; justify-content:space-between; text-align:left; background:#fff; color:#36546b; }
+    .interviewer-toggle i { color:#138c88; font-size:.75rem; }
+    .interviewer-menu { display:none; position:absolute; top:calc(100% + 7px); left:0; right:0; z-index:20; padding:10px; background:#fff; border:1px solid #b8d6db; border-radius:11px; box-shadow:0 14px 30px rgba(17,64,79,.18); }
+    .interviewer-picker.open .interviewer-menu { display:block; }
+    .interviewer-search { min-height:36px !important; margin-bottom:8px; }
+    .interviewer-options { max-height:205px; overflow:auto; padding-right:3px; }
+    .interviewer-option { display:flex; align-items:center; gap:9px; padding:8px 7px; margin:0; border-radius:7px; cursor:pointer; font-size:.88rem; color:#28465c; }
+    .interviewer-option:hover { background:#e9f8f6; }
+    .interviewer-option input { accent-color:#119c92; }
+    .interviewer-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+    .interviewer-chips span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#0b706e; background:#e3f6f3; border:1px solid #bfebe4; border-radius:999px; padding:3px 9px; font-size:.72rem; }
+    .skillset-card { overflow:hidden; }
+    .skillset-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+    .skillset-heading h6 { color:#183e58; font-weight:800; font-size:1.05rem; }
+    .skill-add-btn { color:#fff; background:#107b79; border:0; border-radius:8px; padding:7px 12px; font-weight:700; }
+    .skill-add-btn:hover { background:#0b5e63; color:#fff; }
+    #skillTable { border:1px solid #d5e5ec; border-radius:10px; overflow:hidden; }
+    #skillTable thead { background:#e9f5f5; color:#244c62; }
+    #skillTable th { font-size:.8rem; font-weight:800; border-bottom:1px solid #d1e5e7; padding:12px; }
+    #skillTable td { padding:9px; border-color:#e1ecef; }
+    #skillTable .form-control, #skillTable .form-select { background:#f9fcfc; min-height:38px; }
+    @@media (max-width:767px) { .round-page-header { padding:18px; } .round-page-header h4 { font-size:1.1rem; } .skillset-heading { align-items:flex-start; gap:12px; } }
+</style>
+@await Html.PartialAsync("_RecruitmentTheme")

@@ -20,7 +20,7 @@ namespace Erp_Aits.Services
 
             using (var conn = new SqlConnection(_connectionString))
             {
-                string query = @"SELECT Id, AppointmentLetterCode, JobApplicant
+                string query = @"SELECT Id, ErpNextId, AppointmentLetterCode, JobApplicant
                                   FROM AppointmentLetters WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(idFilter))
@@ -45,6 +45,7 @@ namespace Erp_Aits.Services
                             letters.Add(new AppointmentLetter
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                ErpNextId = reader["ErpNextId"]?.ToString(),
                                 AppointmentLetterCode = reader["AppointmentLetterCode"]?.ToString() ?? string.Empty,
                                 JobApplicant = reader["JobApplicant"]?.ToString() ?? string.Empty
                             });
@@ -76,8 +77,10 @@ namespace Erp_Aits.Services
                             letter = new AppointmentLetter
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                ErpNextId = reader["ErpNextId"]?.ToString(),
                                 AppointmentLetterCode = reader["AppointmentLetterCode"]?.ToString() ?? string.Empty,
                                 JobApplicant = reader["JobApplicant"]?.ToString() ?? string.Empty,
+                                ApplicantName = reader["ApplicantName"]?.ToString() ?? string.Empty,
                                 Company = reader["Company"]?.ToString() ?? string.Empty,
                                 AppointmentDate = reader["AppointmentDate"] as DateTime?,
                                 AppointmentLetterTemplate = reader["AppointmentLetterTemplate"]?.ToString() ?? string.Empty,
@@ -150,17 +153,19 @@ namespace Erp_Aits.Services
 
                         string headerQuery = @"
                             INSERT INTO AppointmentLetters
-                                (AppointmentLetterCode, JobApplicant, Company, AppointmentDate, AppointmentLetterTemplate,
+                                (ErpNextId, AppointmentLetterCode, JobApplicant, ApplicantName, Company, AppointmentDate, AppointmentLetterTemplate,
                                  Introduction, ClosingNotes)
                             OUTPUT INSERTED.Id
                             VALUES
-                                (@AppointmentLetterCode, @JobApplicant, @Company, @AppointmentDate, @AppointmentLetterTemplate,
+                                (@ErpNextId, @AppointmentLetterCode, @JobApplicant, @ApplicantName, @Company, @AppointmentDate, @AppointmentLetterTemplate,
                                  @Introduction, @ClosingNotes)";
 
                         using (var cmd = new SqlCommand(headerQuery, conn, transaction))
                         {
+                            cmd.Parameters.AddWithValue("@ErpNextId", letter.ErpNextId ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@AppointmentLetterCode", letter.AppointmentLetterCode ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@JobApplicant", letter.JobApplicant ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@ApplicantName", letter.ApplicantName ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@Company", letter.Company ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@AppointmentDate", (object)letter.AppointmentDate ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@AppointmentLetterTemplate", letter.AppointmentLetterTemplate ?? (object)DBNull.Value);

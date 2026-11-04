@@ -5,6 +5,14 @@
       "PackagePath": "staticwebassets\\Erp_Aits.bundle.scp.css"
     },
     {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\hrms-dashboard.css",
+      "PackagePath": "staticwebassets\\css\\hrms-dashboard.css"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\leave-workspace.css",
+      "PackagePath": "staticwebassets\\css\\leave-workspace.css"
+    },
+    {
       "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },
@@ -267,6 +275,10 @@
     {
       "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\employee-referral\\3c10e0ae-8fd6-436f-9337-34c67bc63b79.sql",
       "PackagePath": "staticwebassets\\uploads\\employee-referral\\3c10e0ae-8fd6-436f-9337-34c67bc63b79.sql"
+    },
+    {
+      "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\employee-referral\\e4655f43-b905-4bf4-b623-26fe75963564.pdf",
+      "PackagePath": "staticwebassets\\uploads\\employee-referral\\e4655f43-b905-4bf4-b623-26fe75963564.pdf"
     },
     {
       "Id": "C:\\Users\\komal himmat patil\\Desktop\\hrms\\Erp_Aits\\Erp_Aits\\wwwroot\\uploads\\events\\cbd5f906-797b-455c-bb63-c65227bc35f9_aits_save.png",

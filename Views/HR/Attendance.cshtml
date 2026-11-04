@@ -6,6 +6,11 @@
     int draft = Model?.Count(x => x.DocStatus == 0) ?? 0;
     int submitted = Model?.Count(x => x.DocStatus == 1) ?? 0;
     int cancelled = Model?.Count(x => x.DocStatus == 2) ?? 0;
+    var page = (int)(ViewBag.Page ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 20);
+    var totalRecords = (int)(ViewBag.TotalRecords ?? 0);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var pageSizes = new[] { 20, 50, 100, 200, 500 };
 }
 
 <style>
@@ -213,6 +218,7 @@
 
     <div class="att-toolbar">
         <form method="get" class="row g-2 align-items-center">
+            <input type="hidden" name="pageSize" value="@pageSize" />
             <div class="col-md-4">
                 <input type="text"
                        name="employee"
@@ -319,4 +325,26 @@
             </tbody>
         </table>
     </div>
+
+    @if (totalRecords > 0)
+    {
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+            <small class="text-muted">Showing @(((page - 1) * pageSize) + 1)-@Math.Min(page * pageSize, totalRecords) of @totalRecords</small>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Attendance page size">
+                @foreach (var size in pageSizes)
+                {
+                    <a class="btn @(size == pageSize ? "btn-primary" : "btn-outline-primary")"
+                       href="@Url.Action("Attendance", "HR", new { employee = ViewBag.EmployeeFilter, status = ViewBag.StatusFilter, page = 1, pageSize = size })">@size</a>
+                }
+            </div>
+            @if (totalPages > 1)
+            {
+                <div class="btn-group btn-group-sm">
+                    <a class="btn btn-outline-secondary @(page <= 1 ? "disabled" : "")" href="@Url.Action("Attendance", "HR", new { employee = ViewBag.EmployeeFilter, status = ViewBag.StatusFilter, page = page - 1, pageSize })">Previous</a>
+                    <span class="btn btn-outline-secondary disabled">Page @(page) / @(totalPages)</span>
+                    <a class="btn btn-outline-secondary @(page >= totalPages ? "disabled" : "")" href="@Url.Action("Attendance", "HR", new { employee = ViewBag.EmployeeFilter, status = ViewBag.StatusFilter, page = page + 1, pageSize })">Next</a>
+                </div>
+            }
+        </div>
+    }
 </div>

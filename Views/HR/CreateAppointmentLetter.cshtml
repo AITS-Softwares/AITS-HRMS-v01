@@ -1,11 +1,17 @@
 ﻿@model Erp_Aits.Models.AppointmentLetter
 @{
     ViewBag.Title = "New Appointment Letter";
+    var applicants = ViewBag.AppointmentApplicants as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var companies = ViewBag.AppointmentCompanies as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var templates = ViewBag.AppointmentTemplates as Newtonsoft.Json.Linq.JArray ?? new Newtonsoft.Json.Linq.JArray();
+    var formAction = Model.Id > 0 ? "UpdateAppointmentLetter" : "CreateAppointmentLetter";
 }
 
-<form asp-action="CreateAppointmentLetter" method="post">
+<form asp-action="@formAction" method="post">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ErpNextId" type="hidden" />
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Appointment Letter</h4>
+        <h4 class="mb-0">@(Model.Id > 0 ? "Edit Appointment Letter" : "New Appointment Letter")</h4>
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
@@ -13,13 +19,16 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Job Applicant *</label>
-                <input asp-for="JobApplicant" class="form-control" required />
+                <select asp-for="JobApplicant" class="form-select" id="appointmentApplicant" required>
+                    <option value="">Select Job Applicant</option>
+                    @foreach (var item in applicants) { var name = item["name"]?.ToString() ?? ""; var label = item["applicant_name"]?.ToString() ?? name; <option value="@name" data-name="@label">@label (@name)</option> }
+                </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Company *</label>
-                <input asp-for="Company" class="form-control" value="AITS" required />
+                <select asp-for="Company" class="form-select" required><option value="">Select Company</option>@foreach (var item in companies) { var name = item["name"]?.ToString() ?? ""; <option value="@name">@name</option> }</select>
             </div>
-            <div class="col-md-6"></div>
+            <div class="col-md-6"><label class="form-label">Applicant Name</label><input asp-for="ApplicantName" id="appointmentApplicantName" class="form-control" readonly /></div>
             <div class="col-md-6">
                 <label class="form-label">Appointment Date *</label>
                 <input asp-for="AppointmentDate" type="date" class="form-control" required />
@@ -27,7 +36,7 @@
             <div class="col-md-6"></div>
             <div class="col-md-6">
                 <label class="form-label">Appointment Letter Template *</label>
-                <input asp-for="AppointmentLetterTemplate" class="form-control" required />
+                <select asp-for="AppointmentLetterTemplate" class="form-select" required><option value="">Select Appointment Letter Template</option>@foreach (var item in templates) { var name = item["name"]?.ToString() ?? ""; var label = item["template_name"]?.ToString() ?? name; <option value="@name">@label</option> }</select>
             </div>
         </div>
     </div>
@@ -51,7 +60,9 @@
                             <th style="width:50px;"></th>
                         </tr>
                     </thead>
-                    <tbody id="termsBody"></tbody>
+                    <tbody id="termsBody">
+                        @for (var i = 0; i < Model.Terms.Count; i++) { <tr><td>@(i + 1)</td><td><input name="Terms[@i].Title" class="form-control form-control-sm" value="@Model.Terms[i].Title" required /></td><td><input name="Terms[@i].Description" class="form-control form-control-sm" value="@Model.Terms[i].Description" required /></td><td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">&times;</button></td></tr> }
+                    </tbody>
                 </table>
                 <button type="button" class="btn btn-sm btn-outline-dark mb-3" onclick="addTermRow()">Add Row</button>
             </div>
@@ -66,7 +77,7 @@
 
 @section Scripts {
     <script>
-        let termIdx = 0;
+        let termIdx = @Model.Terms.Count;
 
         function addTermRow() {
             const i = termIdx++;
@@ -79,6 +90,9 @@
             document.getElementById('termsBody').insertAdjacentHTML('beforeend', row);
         }
 
-        addTermRow();
+        if (!document.querySelector('#termsBody tr')) addTermRow();
+        document.getElementById('appointmentApplicant').addEventListener('change', function () {
+            document.getElementById('appointmentApplicantName').value = this.options[this.selectedIndex]?.dataset.name || '';
+        });
     </script>
 }

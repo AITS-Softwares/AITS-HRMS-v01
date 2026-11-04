@@ -3,6 +3,7 @@
     ViewBag.Title = "Staffing Plan";
 }
 
+<div class="recruitment-theme workflow-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Staffing Plan</h4>
     <a href="@Url.Action("CreateStaffingPlan", "HR")" class="btn btn-dark btn-sm">+ Add Staffing Plan</a>
@@ -43,3 +44,5 @@
 {
     <p class="text-muted text-center py-5">No staffing plans found.</p>
 }
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

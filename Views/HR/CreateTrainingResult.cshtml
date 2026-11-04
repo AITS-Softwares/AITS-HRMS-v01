@@ -2,9 +2,11 @@
 @{
     ViewBag.Title = "New Training Result";
 }
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 
-<form asp-action="CreateTrainingResult" method="post">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<form asp-action="CreateTrainingResult" method="post" class="training-form-shell">
+    <div class="d-flex justify-content-between align-items-center mb-3 training-form-header">
         <div>
             <h4 class="mb-0 d-inline">New Training Result</h4>
             <span class="badge bg-danger-subtle text-danger ms-2">Not Saved</span>
@@ -12,13 +14,13 @@
         <button type="submit" class="btn btn-dark btn-sm">Save</button>
     </div>
 
-    <div class="mb-4">
+    <div class="mb-4 training-form-card">
         <label class="form-label">Training Event <span class="text-danger">*</span></label>
         <input asp-for="TrainingEvent" class="form-control" required autofocus />
     </div>
 
     <label class="form-label">Employees</label>
-    <table class="table table-bordered align-middle mb-1" id="employeesTable">
+    <table class="table table-bordered align-middle mb-1 training-list-table" id="employeesTable">
         <thead>
             <tr>
                 <th style="width:40px"><input type="checkbox" disabled /></th>

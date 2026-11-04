@@ -334,12 +334,19 @@ namespace Erp_Aits.Services
             _connectionString = connectionString;
         }
 
+        private static void EnsureDepartmentColumn(SqlConnection conn)
+        {
+            using var cmd = new SqlCommand(@"IF COL_LENGTH('dbo.Attendances', 'Department') IS NULL
+ALTER TABLE dbo.Attendances ADD Department NVARCHAR(255) NULL;", conn) { CommandTimeout = 30 };
+            cmd.ExecuteNonQuery();
+        }
+
         public List<Attendance> GetAllAttendance(string employeeFilter = null, string statusFilter = null)
         {
             var records = new List<Attendance>();
             using (var conn = new SqlConnection(_connectionString))
             {
-                string query = "SELECT Id, ErpNextId, DocStatus, AttendanceCode, Employee, EmployeeName, Company, AttendanceDate, Status, Shift, LateEntry, EarlyExit FROM Attendances WHERE IsDeleted = 0";
+                string query = "SET LOCK_TIMEOUT 5000; SELECT Id, ErpNextId, DocStatus, AttendanceCode, Employee, EmployeeName, Department, Company, AttendanceDate, Status, Shift, LateEntry, EarlyExit FROM Attendances WITH (READPAST) WHERE IsDeleted = 0";
 
                 if (!string.IsNullOrEmpty(employeeFilter))
                     query += " AND (Employee LIKE @Employee OR EmployeeName LIKE @Employee)";
@@ -347,9 +354,9 @@ namespace Erp_Aits.Services
                 if (!string.IsNullOrEmpty(statusFilter))
                     query += " AND Status = @Status";
 
-                query += " ORDER BY AttendanceDate DESC";
+                query += " ORDER BY AttendanceDate DESC, Id DESC";
 
-                using (var cmd = new SqlCommand(query, conn))
+                using (var cmd = new SqlCommand(query, conn) { CommandTimeout = 60 })
                 {
                     if (!string.IsNullOrEmpty(employeeFilter))
                         cmd.Parameters.AddWithValue("@Employee", $"%{employeeFilter}%");
@@ -358,6 +365,7 @@ namespace Erp_Aits.Services
                         cmd.Parameters.AddWithValue("@Status", statusFilter);
 
                     conn.Open();
+                    EnsureDepartmentColumn(conn);
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -370,6 +378,7 @@ namespace Erp_Aits.Services
                                 AttendanceCode = reader["AttendanceCode"]?.ToString() ?? string.Empty,
                                 Employee = reader["Employee"]?.ToString() ?? string.Empty,
                                 EmployeeName = reader["EmployeeName"]?.ToString() ?? string.Empty,
+                                Department = reader["Department"]?.ToString() ?? string.Empty,
                                 Company = reader["Company"]?.ToString() ?? string.Empty,
                                 AttendanceDate = Convert.ToDateTime(reader["AttendanceDate"]),
                                 Status = reader["Status"]?.ToString() ?? "Present",
@@ -398,6 +407,7 @@ namespace Erp_Aits.Services
                 {
                     cmd.Parameters.AddWithValue("@ErpNextId", erpNextId);
                     conn.Open();
+                    EnsureDepartmentColumn(conn);
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -411,6 +421,7 @@ namespace Erp_Aits.Services
                                 AttendanceCode = reader["AttendanceCode"]?.ToString() ?? string.Empty,
                                 Employee = reader["Employee"]?.ToString() ?? string.Empty,
                                 EmployeeName = reader["EmployeeName"]?.ToString() ?? string.Empty,
+                                Department = reader["Department"]?.ToString() ?? string.Empty,
                                 Company = reader["Company"]?.ToString() ?? string.Empty,
                                 AttendanceDate = Convert.ToDateTime(reader["AttendanceDate"]),
                                 Status = reader["Status"]?.ToString() ?? "Present",
@@ -490,6 +501,7 @@ namespace Erp_Aits.Services
                 {
                     cmd.Parameters.AddWithValue("@Id", id);
                     conn.Open();
+                    EnsureDepartmentColumn(conn);
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -502,6 +514,7 @@ namespace Erp_Aits.Services
                                 AttendanceCode = reader["AttendanceCode"]?.ToString() ?? string.Empty,
                                 Employee = reader["Employee"]?.ToString() ?? string.Empty,
                                 EmployeeName = reader["EmployeeName"]?.ToString() ?? string.Empty,
+                                Department = reader["Department"]?.ToString() ?? string.Empty,
                                 Company = reader["Company"]?.ToString() ?? string.Empty,
                                 AttendanceDate = Convert.ToDateTime(reader["AttendanceDate"]),
                                 Status = reader["Status"]?.ToString() ?? "Present",
@@ -522,9 +535,9 @@ namespace Erp_Aits.Services
             {
                 string query = @"
                     INSERT INTO Attendances
-                        (AttendanceCode, Employee, EmployeeName, Company, AttendanceDate, Status, Shift, LateEntry, EarlyExit, DocStatus, ErpNextId, IsDeleted)
+                        (AttendanceCode, Employee, EmployeeName, Department, Company, AttendanceDate, Status, Shift, LateEntry, EarlyExit, DocStatus, ErpNextId, IsDeleted)
                     VALUES
-                        (@AttendanceCode, @Employee, @EmployeeName, @Company, @AttendanceDate, @Status, @Shift, @LateEntry, @EarlyExit, @DocStatus, @ErpNextId, 0);
+                        (@AttendanceCode, @Employee, @EmployeeName, @Department, @Company, @AttendanceDate, @Status, @Shift, @LateEntry, @EarlyExit, @DocStatus, @ErpNextId, 0);
                     SELECT SCOPE_IDENTITY();";
 
                 using (var cmd = new SqlCommand(query, conn))
@@ -532,6 +545,7 @@ namespace Erp_Aits.Services
                     cmd.Parameters.AddWithValue("@AttendanceCode", a.AttendanceCode ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Employee", a.Employee ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@EmployeeName", a.EmployeeName ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Department", a.Department ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Company", a.Company ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@AttendanceDate", a.AttendanceDate);
                     cmd.Parameters.AddWithValue("@Status", a.Status ?? "Present");
@@ -542,6 +556,7 @@ namespace Erp_Aits.Services
                     cmd.Parameters.AddWithValue("@ErpNextId", string.IsNullOrEmpty(a.ErpNextId) ? (object)DBNull.Value : a.ErpNextId);
 
                     conn.Open();
+                    EnsureDepartmentColumn(conn);
                     return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
@@ -555,6 +570,7 @@ namespace Erp_Aits.Services
             UPDATE Attendances SET 
                 Employee = @Employee,
                 EmployeeName = @EmployeeName,
+                Department = @Department,
                 Company = @Company,
                 AttendanceCode = @AttendanceCode,
                 ErpNextId = @ErpNextId,
@@ -572,6 +588,7 @@ namespace Erp_Aits.Services
                     cmd.Parameters.AddWithValue("@Id", a.Id);
                     cmd.Parameters.AddWithValue("@Employee", string.IsNullOrWhiteSpace(a.Employee) ? (object)DBNull.Value : a.Employee);
                     cmd.Parameters.AddWithValue("@EmployeeName", string.IsNullOrWhiteSpace(a.EmployeeName) ? (object)DBNull.Value : a.EmployeeName);
+                    cmd.Parameters.AddWithValue("@Department", string.IsNullOrWhiteSpace(a.Department) ? (object)DBNull.Value : a.Department);
                     cmd.Parameters.AddWithValue("@Company", string.IsNullOrWhiteSpace(a.Company) ? (object)DBNull.Value : a.Company);
                     cmd.Parameters.AddWithValue("@AttendanceCode", string.IsNullOrWhiteSpace(a.AttendanceCode) ? (object)DBNull.Value : a.AttendanceCode);
                     cmd.Parameters.AddWithValue("@ErpNextId", string.IsNullOrWhiteSpace(a.ErpNextId) ? (object)DBNull.Value : a.ErpNextId);
@@ -583,6 +600,7 @@ namespace Erp_Aits.Services
                     cmd.Parameters.AddWithValue("@DocStatus", a.DocStatus);
 
                     conn.Open();
+                    EnsureDepartmentColumn(conn);
                     cmd.ExecuteNonQuery();
                 }
             }

@@ -3,7 +3,8 @@
     ViewBag.Title = "Interview Type " + Model.Id;
 }
 
-<h4 class="mb-3">@Model.Name</h4>
+<div class="recruitment-theme workflow-page interview-ui">
+<h4 class="workflow-title">@Model.Name</h4>
 
 <div class="card p-4">
     <div class="mb-3">
@@ -15,3 +16,5 @@
         <textarea class="form-control" rows="6" readonly>@Model.Description</textarea>
     </div>
 </div>
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

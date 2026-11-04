@@ -106,10 +106,10 @@
         max-width: 1320px;
         margin: 0 auto;
         padding: 22px;
-        background: #eaf1fb;
-        border: 1px solid #c4d5ed;
+        background: #f1fbfd;
+        border: 1px solid #cbe5ed;
         border-radius: 8px;
-        box-shadow: 0 14px 32px rgba(24, 54, 94, 0.08);
+        box-shadow: 0 14px 32px rgba(26, 85, 107, 0.08);
     }
 
     .employee-workflow-header {
@@ -117,8 +117,8 @@
         margin-bottom: 18px !important;
         padding: 18px 22px;
         color: #ffffff;
-        background: #142c4d;
-        border: 1px solid #0e223d;
+        background: linear-gradient(110deg, #17486c, #008d88);
+        border: 1px solid #087d79;
         border-radius: 7px;
     }
 
@@ -137,21 +137,22 @@
         min-width: 92px;
         min-height: 38px;
         color: #ffffff !important;
-        background: #0b8d83 !important;
-        border-color: #0b8d83 !important;
+        background: #ffffff !important;
+        color: #0b5065 !important;
+        border-color: #ffffff !important;
         font-weight: 700;
     }
 
     .employee-primary-action:hover {
-        background: #087268 !important;
-        border-color: #087268 !important;
+        background: #e9fbfa !important;
+        border-color: #e9fbfa !important;
     }
 
     .employee-form-card {
         max-width: 1260px;
         margin: 0 auto;
         background: #fdfefe;
-        border: 1px solid #c5d6ec;
+        border: 1px solid #c9e1e9;
         border-radius: 7px;
         overflow: hidden;
     }
@@ -161,7 +162,7 @@
         gap: 22px;
         padding: 0 20px;
         border-bottom: 1px solid #c5d6ec;
-        background: #dce8f7;
+        background: #e7f5f8;
         white-space: nowrap;
     }
 
@@ -170,15 +171,15 @@
             background: transparent;
             padding: 14px 0 12px;
             font-size: 14px;
-            color: #284666;
+        color: #35677a;
             font-weight: 600;
             cursor: pointer;
         }
 
             .employee-tabs button.active {
-                color: #0b6d74;
+                color: #008d88;
                 font-weight: 600;
-                border-bottom: 3px solid #0b8d83;
+                border-bottom: 3px solid #008d88;
             }
 
     .employee-pane {
@@ -203,7 +204,7 @@
         } */
 
     .employee-section {
-        border-top: 1px solid #d7e2f0;
+        border-top: 1px solid #d8ebf0;
         padding-top: 18px;
         margin-top: 18px;
     }
@@ -218,7 +219,7 @@
         font-size: 18px;
         font-weight: 600;
         margin: 0 0 16px;
-        color: #193b61;
+        color: #17486c;
     }
 
     .employee-grid {
@@ -239,7 +240,7 @@
         display: block;
         font-size: 13px;
         margin-bottom: 6px;
-        color: #294866;
+        color: #24546a;
         font-weight: 500;
     }
 
@@ -248,11 +249,11 @@
     .employee-field textarea {
         width: 100%;
         min-height: 34px;
-        border: 1px solid #b9cce3;
+        border: 1px solid #b8d6df;
         border-radius: 5px;
         padding: 6px 10px;
-        background: #f7faff;
-        color: #172e4d;
+        background: #fbfeff;
+        color: #17486c;
     }
 
     .employee-field textarea {
@@ -274,14 +275,14 @@
 
         .employee-table th,
         .employee-table td {
-            border: 1px solid #d1d5db;
+            border: 1px solid #d8ebf0;
             padding: 6px;
             vertical-align: middle;
         }
 
         .employee-table th {
-            background: #dbe8f8;
-            color: #1e456e;
+            background: #e7f5f8;
+            color: #17486c;
             font-weight: 700;
         }
 
@@ -289,7 +290,7 @@
         .employee-table select {
             width: 100%;
             min-height: 30px;
-            border: 1px solid #b9cce3;
+            border: 1px solid #b8d6df;
             border-radius: 4px;
             padding: 4px 8px;
             background: #fbfdff;
@@ -297,9 +298,9 @@
 
     .employee-small-btn {
         margin-top: 8px;
-        border: 1px solid #92b9d7;
-        background: #e8f4f1;
-        color: #0b675f;
+        border: 1px solid #a7d9d8;
+        background: #dff3f2;
+        color: #075d66;
         border-radius: 5px;
         padding: 5px 10px;
         font-size: 13px;
@@ -318,8 +319,8 @@
     .employee-workflow-shell select:focus,
     .employee-workflow-shell textarea:focus {
         outline: none;
-        border-color: #0b8d83;
-        box-shadow: 0 0 0 3px rgba(11, 141, 131, 0.14);
+        border-color: #008d88;
+        box-shadow: 0 0 0 3px rgba(0, 141, 136, 0.14);
     }
 
     @@media (max-width: 900px) {
@@ -384,7 +385,12 @@
 
                 <div class="employee-field">
                     <label asp-for="DateOfBirth">Date of Birth *</label>
-                    <input asp-for="DateOfBirth" type="date" />
+                    <input asp-for="DateOfBirth" id="DateOfBirth" type="date" />
+                </div>
+
+                <div class="employee-field">
+                    <label for="EmployeeAge">Age</label>
+                    <input id="EmployeeAge" type="text" readonly aria-live="polite" />
                 </div>
 
                 <div class="employee-field">
@@ -545,7 +551,7 @@
 
                 <div class="employee-field">
                     <label asp-for="DateOfRetirement">Date Of Retirement</label>
-                    <input asp-for="DateOfRetirement" type="date" />
+                    <input asp-for="DateOfRetirement" id="DateOfRetirement" type="date" readonly />
                 </div>
             </div>
         </div>
@@ -1122,6 +1128,44 @@
     }
 
     toggleBankDetails();
+
+    // ERPNext retirement date is based on the employee's date of birth and the
+    // standard retirement age (60). Recalculate whenever either relevant date changes.
+    var dateOfBirth = document.getElementById('DateOfBirth');
+    var dateOfJoining = document.getElementById('DateOfJoining');
+    var retirementDate = document.getElementById('DateOfRetirement');
+    var employeeAge = document.getElementById('EmployeeAge');
+
+    function formatLocalDate(date) {
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var day = String(date.getDate()).padStart(2, '0');
+        return date.getFullYear() + '-' + month + '-' + day;
+    }
+
+    function refreshEmployeeAgeAndRetirement() {
+        if (!dateOfBirth || !retirementDate || !employeeAge) return;
+
+        if (!dateOfBirth.value) {
+            employeeAge.value = '';
+            retirementDate.value = '';
+            return;
+        }
+
+        var birthDate = new Date(dateOfBirth.value + 'T00:00:00');
+        var today = new Date();
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var birthdayThisYear = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+        if (today < birthdayThisYear) age--;
+        employeeAge.value = age >= 0 ? age + ' years' : '';
+
+        var calculatedRetirement = new Date(birthDate.getFullYear() + 60, birthDate.getMonth(), birthDate.getDate());
+        retirementDate.value = formatLocalDate(calculatedRetirement);
+    }
+
+    [dateOfBirth, dateOfJoining].forEach(function (field) {
+        if (field) field.addEventListener('change', refreshEmployeeAgeAndRetirement);
+    });
+    refreshEmployeeAgeAndRetirement();
     });
 
     function renumberRows(bodyId) {

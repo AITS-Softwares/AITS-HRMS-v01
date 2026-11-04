@@ -25,7 +25,7 @@ namespace Erp_Aits.Services
             {
                 string query = "SELECT Id, Name, ShiftType, Frequency, Status FROM HRShiftSchedules WHERE IsDeleted = 0";
 
-                if (!string.IsNullOrEmpty(idFilter)) query += " AND CAST(Id AS VARCHAR) LIKE @IdFilter";
+                if (!string.IsNullOrEmpty(idFilter)) query += " AND (CAST(Id AS VARCHAR) LIKE @IdFilter OR Name LIKE @IdFilter OR ShiftType LIKE @IdFilter)";
                 if (!string.IsNullOrEmpty(shiftType)) query += " AND ShiftType LIKE @ShiftType";
 
                 query += " ORDER BY Id DESC";

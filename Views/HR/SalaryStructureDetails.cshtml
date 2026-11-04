@@ -1,10 +1,69 @@
 @using Newtonsoft.Json.Linq
-@{ ViewBag.Title="Salary Structure Details"; var doc=ViewBag.Document as JObject; string Value(string key)=>doc?[key]?.ToString()??""; bool Checked(string key)=>doc?[key]?.ToString()=="1"||doc?[key]?.ToString().Equals("Yes",StringComparison.OrdinalIgnoreCase)==true; var earnings=doc?["earnings"] as JArray??new JArray();var deductions=doc?["deductions"] as JArray??new JArray(); }
+@{
+    ViewBag.Title = "Salary Structure Details";
+    var doc = ViewBag.Document as JObject;
+    string V(string key) => doc?[key]?.ToString() ?? "";
+    var draft = doc?["docstatus"]?.Value<int>() == 0;
+    var submitted = doc?["docstatus"]?.Value<int>() == 1;
+    var earnings = doc?["earnings"] as JArray ?? new JArray();
+    var deductions = doc?["deductions"] as JArray ?? new JArray();
+    var companies = ViewBag.StructureCompanies as List<string> ?? new List<string>();
+    var currencies = ViewBag.StructureCurrencies as List<string> ?? new List<string>();
+    var earningOptions = ViewBag.StructureEarnings as List<string> ?? new List<string>();
+    var deductionOptions = ViewBag.StructureDeductions as List<string> ?? new List<string>();
+}
 <style>
-.payroll-form{max-width:1210px;margin:0 auto;padding:26px;background:#eaf0f6;border:1px solid #d4e0eb;border-radius:8px}.payroll-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#14253d;border-radius:7px;color:#fff}.payroll-head h1{font-size:22px;margin:0}.payroll-head a{color:#fff;text-decoration:none}.payroll-card{margin-top:18px;background:#fff;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden}.tabs{display:flex;gap:28px;padding:0 20px;background:#f4f8fc;border-bottom:1px solid #dbe3ec}.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:13px 0;color:#374151}.tabs button.active{font-weight:700;color:#111827;border-color:#0f766e}.pane{display:none;padding:20px}.pane.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px}.field label{display:block;font-size:13px;color:#374151;margin-bottom:7px}.value{min-height:34px;padding:8px 10px;border:1px solid #b8c7d7;border-radius:8px;background:#fbfdff;color:#172033}.check{display:flex;align-items:center;gap:8px;font-size:14px;margin:12px 0}.check input{accent-color:#0f766e}.tables{display:grid;grid-template-columns:1fr 1fr;gap:22px}.table{width:100%;border-collapse:collapse;border:1px solid #d7e0e9;border-radius:8px;overflow:hidden}.table th,.table td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}.table th{background:#f4f8fc;color:#526375}.table .empty{text-align:center;color:#64748b;height:54px}@@media(max-width:800px){.grid,.tables{grid-template-columns:1fr}.payroll-form{padding:12px}}
+.salary-page{max-width:1210px;margin:auto;padding:28px;background:#f1fbfd;border:1px solid #cbe5ed;border-radius:10px}.salary-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:23px 27px;background:linear-gradient(110deg,#17486c,#008d88);color:#fff;border-radius:9px;box-shadow:0 14px 26px rgba(13,83,104,.16)}.actions{display:flex;gap:8px}.btn{border:0;border-radius:7px;padding:10px 15px;font-weight:700;text-decoration:none;cursor:pointer}.save,.submit{background:#fff;color:#0b5065}.cancel{background:#dc3545;color:#fff}.light{background:#dff3f2;color:#075d66}.card{margin-top:20px;background:#fff;border:1px solid #c9e1e9;border-radius:9px;overflow:hidden;box-shadow:0 8px 22px rgba(26,85,107,.06)}.tabs{display:flex;gap:28px;padding:0 20px;background:#e7f5f8;border-bottom:1px solid #d8ebf0}.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:14px 0;color:#24546a}.tabs button.active{font-weight:700;color:#17486c;border-color:#008d88}.pane{display:none;padding:21px 22px}.pane.active{display:block}.pane h3{font-size:17px;color:#17486c;margin:0 0 14px;font-weight:750}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px}.field label{display:block;font-size:13px;color:#24546a;font-weight:650;margin-bottom:7px}.input,.select{box-sizing:border-box;width:100%;height:38px;border:1px solid #b8d6df;border-radius:7px;padding:8px 10px;background:#fbfeff}.input:read-only,.select:disabled{background:#f1f7f8}.input:focus,.select:focus{outline:0;border-color:#008d88;box-shadow:0 0 0 3px rgba(0,141,136,.12)}.table-wrap{overflow:auto;border:1px solid #cfe4ea;border-radius:8px}.table{width:100%;min-width:700px;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid #e2eff2;font-size:13px;text-align:left}.table th{background:#e7f5f8;color:#17486c;font-weight:700}.create-menu{position:relative}.menu-items{position:absolute;right:0;top:44px;width:210px;background:#fff;border:1px solid #c9e1e9;border-radius:8px;box-shadow:0 10px 24px rgba(15,23,42,.18);z-index:3}.menu-items a{display:block;padding:10px 13px;color:#17486c;text-decoration:none}.menu-items a:hover{background:#e8f7f7;color:#008d88}
 </style>
-<div class="payroll-form"><header class="payroll-head"><h1>@(Value("name")==""?"Salary Structure":Value("name"))</h1><a asp-action="SalaryStructure">Back to Salary Structures</a></header>@if(TempData["ErpNextError"]!=null){<div class="alert alert-danger mt-3">@TempData["ErpNextError"]</div>}@if(doc!=null){<main class="payroll-card"><nav class="tabs"><button type="button" class="active" data-tab="details">Details</button><button type="button" data-tab="components">Earnings &amp; Deductions</button><button type="button" data-tab="account">Account</button></nav>
-<section id="details" class="pane active"><div class="grid"><div class="field"><label>Name</label><div class="value">@Value("name")</div></div><div class="field"><label>Company</label><div class="value">@Value("company")</div></div><div class="field"><label>Letter Head</label><div class="value">@Value("letter_head")</div></div><div class="field"><label>Is Active</label><div class="value">@Value("is_active")</div></div><div class="field"><label>Currency</label><div class="value">@Value("currency")</div></div><div class="field"><label>Is Default</label><div class="value">@Value("is_default")</div></div><div class="field"><label>Leave Encashment Amount Per Day</label><div class="value">@Value("leave_encashment_amount_per_day")</div></div><div class="field"><label>Max Benefits Amount</label><div class="value">@Value("max_benefits")</div></div><div class="field"><label>Payroll Frequency</label><div class="value">@Value("payroll_frequency")</div></div><div class="field"><label>Salary Component</label><div class="value">@Value("salary_component")</div></div><div class="field"><label>Hour Rate</label><div class="value">@Value("hour_rate")</div></div><div class="field"><label>Amended From</label><div class="value">@Value("amended_from")</div></div></div><label class="check"><input type="checkbox" disabled checked="@Checked("salary_slip_based_on_timesheet")"/>Salary Slip Based on Timesheet</label></section>
-<section id="components" class="pane"><div class="tables"><div><h3 style="font-size:16px">Earnings</h3><table class="table"><thead><tr><th>Component</th><th>Amount</th></tr></thead><tbody>@if(earnings.Any()){foreach(var row in earnings){<tr><td>@row["salary_component"]</td><td>@row["amount"]</td></tr>}}else{<tr><td colspan="2" class="empty">No earnings added</td></tr>}</tbody></table></div><div><h3 style="font-size:16px">Deductions</h3><table class="table"><thead><tr><th>Component</th><th>Amount</th></tr></thead><tbody>@if(deductions.Any()){foreach(var row in deductions){<tr><td>@row["salary_component"]</td><td>@row["amount"]</td></tr>}}else{<tr><td colspan="2" class="empty">No deductions added</td></tr>}</tbody></table></div></div><div class="grid" style="margin-top:22px"><div class="field"><label>Total Earning</label><div class="value">@Value("total_earning")</div></div><div class="field"><label>Total Deduction</label><div class="value">@Value("total_deduction")</div></div><div class="field"><label>Net Pay</label><div class="value">@Value("net_pay")</div></div></div></section>
-<section id="account" class="pane"><div class="grid"><div class="field"><label>Mode of Payment</label><div class="value">@Value("mode_of_payment")</div></div><div class="field"><label>Payment Account</label><div class="value">@Value("payment_account")</div></div></div></section></main>}</div>
-<script>document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tabs button,.pane').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')}));</script>
+<div class="salary-page">
+@if (TempData["ErpNextError"] != null) { <div class="alert alert-danger">@TempData["ErpNextError"]</div> }
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (doc != null) {
+<form method="post" action="/HR/SalaryStructureDetails/@V("name")">
+@Html.AntiForgeryToken()
+<header class="salary-head">
+    <h1 style="margin:0;font-size:22px">@V("name") — @(submitted ? "Submitted" : V("docstatus") == "2" ? "Cancelled" : "Draft")</h1>
+    <div class="actions">
+        <a class="btn light" asp-action="SalaryStructure">Back</a>
+        @if (draft) {
+            <button class="btn save" type="submit">Save</button>
+            <button class="btn submit" type="submit" formaction="/HR/SalaryStructureStatus/@V("name")/1">Submit</button>
+        } else if (submitted) {
+            <details class="create-menu">
+                <summary class="btn light">Create ▾</summary>
+                <div class="menu-items">
+                    <a href="/HR/CreateSalaryStructureAssignment?selectedSalaryStructure=@Uri.EscapeDataString(V("name"))">Single Assignment</a>
+                    <a href="/HR/BulkSalaryStructureAssignment?selectedSalaryStructure=@Uri.EscapeDataString(V("name"))">Bulk Assignments</a>
+                    <a href="/HR/CreateIncomeTaxSlab?returnUrl=@Uri.EscapeDataString("/HR/CreateSalaryStructureAssignment?selectedSalaryStructure=" + V("name"))">Income Tax Slab</a>
+                </div>
+            </details>
+            <button class="btn cancel" type="submit" formaction="/HR/SalaryStructureStatus/@V("name")/2">Cancel</button>
+        }
+    </div>
+</header>
+<main class="card">
+<nav class="tabs"><button type="button" class="active" data-tab="details">Details</button><button type="button" data-tab="components">Earnings &amp; Deductions</button></nav>
+<section id="details" class="pane active">
+<div class="grid">
+<div class="field"><label>Name</label><input class="input" name="Name" value="@V("name")" readonly /></div>
+<div class="field"><label>Company *</label><select class="select" name="Company" disabled="@(!draft)">@foreach (var x in companies) { <option value="@x" selected="@(x == V("company"))">@x</option> }</select></div>
+<div class="field"><label>Currency *</label><select class="select" name="Currency" disabled="@(!draft)">@foreach (var x in currencies) { <option value="@x" selected="@(x == V("currency"))">@x</option> }</select></div>
+<div class="field"><label>Is Active</label><select class="select" name="IsActive" disabled="@(!draft)"><option selected="@(V("is_active") == "Yes")">Yes</option><option selected="@(V("is_active") == "No")">No</option></select></div>
+<div class="field"><label>Is Default</label><input class="input" name="IsDefault" value="@V("is_default")" readonly="@(!draft)" /></div>
+<div class="field"><label>Payroll Frequency</label><input class="input" name="PayrollFrequency" value="@V("payroll_frequency")" readonly="@(!draft)" /></div>
+<div class="field"><label>Leave Encashment Amount Per Day</label><input class="input" name="LeaveEncashmentAmountPerDay" value="@V("leave_encashment_amount_per_day")" readonly="@(!draft)" /></div>
+<div class="field"><label>Max Benefits</label><input class="input" name="MaxBenefitsAmount" value="@V("max_benefits")" readonly="@(!draft)" /></div>
+<div class="field"><label>Salary Component</label><select class="select" name="SalaryComponent" disabled="@(!draft)"><option></option>@foreach (var x in earningOptions) { <option value="@x" selected="@(x == V("salary_component"))">@x</option> }</select></div>
+<div class="field"><label>Hour Rate</label><input class="input" name="HourRate" value="@V("hour_rate")" readonly="@(!draft)" /></div>
+</div>
+</section>
+<section id="components" class="pane">
+<h3>Earnings</h3><div class="table-wrap"><table class="table"><thead><tr><th>No.</th><th>Component</th><th>Abbr</th><th>Amount (INR)</th><th>Depends on Payment Days</th><th>Is Tax Applicable</th></tr></thead><tbody>
+@{ var e = 0; } @foreach (var row in earnings) { e++; <tr><td>@e</td><td><select class="select" name="EarningsComponents" disabled="@(!draft)">@foreach (var x in earningOptions) { <option value="@x" selected="@(x == row["salary_component"]?.ToString())">@x</option> }</select></td><td>@row["abbr"]</td><td><input class="input" name="EarningsAmounts" value="@row["amount"]" readonly="@(!draft)" /></td><td>@row["depends_on_payment_days"]</td><td>@row["is_tax_applicable"]</td></tr> }
+</tbody></table></div>
+<h3 style="margin-top:24px">Deductions</h3><div class="table-wrap"><table class="table"><thead><tr><th>No.</th><th>Component</th><th>Abbr</th><th>Amount (INR)</th><th>Depends on Payment Days</th><th>Is Tax Applicable</th></tr></thead><tbody>
+@{ var d = 0; } @foreach (var row in deductions) { d++; <tr><td>@d</td><td><select class="select" name="DeductionsComponents" disabled="@(!draft)">@foreach (var x in deductionOptions) { <option value="@x" selected="@(x == row["salary_component"]?.ToString())">@x</option> }</select></td><td>@row["abbr"]</td><td><input class="input" name="DeductionsAmounts" value="@row["amount"]" readonly="@(!draft)" /></td><td>@row["depends_on_payment_days"]</td><td>@row["is_tax_applicable"]</td></tr> }
+</tbody></table></div>
+</section>
+</main></form>}</div>
+<script>document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.pane').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')});</script>

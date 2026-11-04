@@ -1,9 +1,9 @@
 ﻿@model Erp_Aits.Models.LeaveApplication
 @{
     ViewBag.Title = "Leave Application Details";
-    bool isEdit = ViewBag.IsEdit == true;
     bool isSubmitted = string.Equals(Model.Status, "Submitted", StringComparison.OrdinalIgnoreCase);
     bool isCancelled = string.Equals(Model.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+    bool isEdit = !isSubmitted && !isCancelled;
 }
 
 <datalist id="employeeList">
@@ -123,23 +123,14 @@
             <h4 class="mb-0">Leave Application (@Model.LeaveApplicationCode)</h4>
             <div class="d-flex gap-2 align-items-center">
                 <a href="@Url.Action("LeaveApplications", "HR")" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;">Back</a>
-                @if (isEdit)
+                @if (!isSubmitted && !isCancelled)
                 {
-                    <a href="@Url.Action("LeaveApplicationDetails", "HR", new { id = Model.Id })" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;">Cancel</a>
-                    <button type="submit" name="actionCommand" value="Save" class="btn btn-dark btn-sm">Save</button>
+                    <button id="leaveApplicationAction" type="submit" name="actionCommand" value="Submit" class="btn btn-dark btn-sm">Submit</button>
+                    <button type="submit" form="deleteLeaveApplicationForm" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;" onclick="return confirm('Delete this Leave Application from ERPNext and HRMS?');">Delete</button>
                 }
-                else
+                else if (isSubmitted)
                 {
-                    @if (!isSubmitted && !isCancelled)
-                    {
-                        <a href="@Url.Action("LeaveApplicationDetails", "HR", new { id = Model.Id, edit = true })" class="btn btn-dark btn-sm">Edit</a>
-                        <button type="submit" name="actionCommand" value="Submit" class="btn btn-dark btn-sm">Submit</button>
-                        <button type="submit" form="deleteLeaveApplicationForm" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;" onclick="return confirm('Delete this Leave Application from ERPNext and HRMS?');">Delete</button>
-                    }
-                    @if (isSubmitted)
-                    {
-                        <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;" onclick="return confirm('Cancel this Leave Application and any linked submitted Attendance in ERPNext and HRMS?');">Cancel All</button>
-                    }
+                    <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-light btn-sm" style="border:1.5px solid rgba(255,255,255,0.7); color:#fff; font-weight:600;" onclick="return confirm('Cancel this Leave Application and any linked submitted Attendance in ERPNext and HRMS?');">Cancel</button>
                 }
             </div>
         </div>
@@ -245,6 +236,10 @@
 
 @section Scripts {
     <script>
+        const leaveForm = document.querySelector('.leave-form-wrapper form');
+        const leaveAction = document.getElementById('leaveApplicationAction');
+        if (leaveForm && leaveAction) leaveForm.addEventListener('input', function () { leaveAction.value = 'Save'; leaveAction.textContent = 'Save'; });
+        if (leaveForm && leaveAction) leaveForm.addEventListener('change', function () { leaveAction.value = 'Save'; leaveAction.textContent = 'Save'; });
         document.getElementById('employeeInput').addEventListener('input', function() {
             let val = this.value;
             let options = document.querySelectorAll('#employeeList option');

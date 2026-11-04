@@ -1,18 +1,31 @@
 ﻿@model Erp_Aits.Models.InterviewType
 @{
-    ViewBag.Title = "New Interview Type";
+    var isEdit = ViewBag.IsEdit == true;
+    ViewBag.Title = isEdit ? "Interview Type Details" : "New Interview Type";
 }
 
-<form asp-action="CreateInterviewType" method="post">
+<form asp-action="@(isEdit ? "UpdateInterviewType" : "CreateInterviewType")" method="post" class="recruitment-theme workflow-page interview-ui">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ErpNextId" />
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">New Interview Type</h4>
-        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        <h4 class="mb-0">@(isEdit ? "Interview Type Details" : "New Interview Type")</h4>
+        <div class="d-flex gap-2">
+            @if (isEdit) { <a class="btn btn-outline-primary btn-sm" href="@Url.Action("CreateInterview", "HR")">Create Interview</a> }
+            <button type="submit" class="btn btn-dark btn-sm">Save</button>
+        </div>
     </div>
 
     <div class="card p-4">
         <div class="mb-3">
             <label class="form-label">Name *</label>
-            <input asp-for="Name" class="form-control" required autofocus />
+            @if (isEdit)
+            {
+                <input asp-for="Name" class="form-control" required autofocus readonly />
+            }
+            else
+            {
+                <input asp-for="Name" class="form-control" required autofocus />
+            }
         </div>
         <div>
             <label class="form-label">Description</label>
@@ -20,3 +33,4 @@
         </div>
     </div>
 </form>
+@await Html.PartialAsync("_RecruitmentTheme")

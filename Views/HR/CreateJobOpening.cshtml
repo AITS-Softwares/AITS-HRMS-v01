@@ -7,7 +7,7 @@
 <datalist id="companies">@foreach (var item in ViewBag.Companies) { <option value="@item.name"></option> }</datalist>
 <datalist id="currencies">@foreach (var item in ViewBag.Currencies) { <option value="@item.name"></option> }</datalist>
 
-<div class="jo-form-wrap">
+<div class="recruitment-theme jo-form-wrap">
     <div class="jo-breadcrumb">
         <span>HR</span> <span>&gt;</span> <span>Job Opening</span> <span>&gt;</span> <span class="jo-current">New Job Opening</span>
     </div>
@@ -150,7 +150,8 @@
         background: #fff;
         border-radius: 10px;
         padding: 20px 24px;
-        max-width: 950px;
+        max-width: 1180px;
+        margin: 28px auto;
     }
 
     .jo-breadcrumb {
@@ -289,3 +290,5 @@
         }
     }
 </style>
+
+@await Html.PartialAsync("_RecruitmentTheme")

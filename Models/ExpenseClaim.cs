@@ -79,6 +79,9 @@ namespace Erp_Aits.Models
 
         public string Description { get; set; }
 
+        // ERPNext child-table field: cost_center
+        public string CostCenter { get; set; }
+
         public decimal Amount { get; set; }
 
         public decimal SanctionedAmount { get; set; }

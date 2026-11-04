@@ -2,18 +2,20 @@
 @{
     ViewBag.Title = "Training Result " + Model.Id;
 }
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 training-detail-header">
     <h4 class="mb-0">Training Result - @Model.Id</h4>
 </div>
 
-<div class="mb-4">
+<div class="mb-4 training-detail-card">
     <label class="form-label">Training Event</label>
     <input class="form-control" value="@Model.TrainingEvent" readonly />
 </div>
 
 <label class="form-label">Employees</label>
-<table class="table table-bordered align-middle">
+<table class="table table-bordered align-middle training-list-table">
     <thead>
         <tr>
             <th>No.</th>

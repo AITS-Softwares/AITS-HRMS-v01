@@ -195,33 +195,60 @@
     </div>
 }
 
-@if (ViewBag.SyncWarning != null)
-{
-    <div class="alert alert-warning">
-        @ViewBag.SyncWarning
-    </div>
-}
+<style>
+    .branch-page { background: #f1fbfd; border: 1px solid #cbe5ed; border-radius: 18px; padding: 26px; }
+    .branch-hero { background: linear-gradient(110deg,#17486c,#008d88); border-radius: 14px; color: #fff; padding: 22px 24px; box-shadow: 0 12px 24px rgba(23,72,108,.17); }
+    .branch-hero h4 { margin: 0; font-weight: 750; }
+    .branch-hero p { margin: 4px 0 0; color: #c9f4f2; font-size: .92rem; }
+    .branch-add, .branch-save { background: #fff; color: #0b5065; border: 0; border-radius: 9px; font-weight: 700; padding: 9px 15px; }
+    .branch-card { overflow: hidden; margin-top: 20px; background: #fff; border: 1px solid #c9e1e9; border-radius: 13px; }
+    .branch-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:16px 18px; border-bottom:1px solid #dcedf1; }
+    .branch-toolbar strong { color:#17486c; }
+    .branch-size { border:1px solid #b9dbe4; background:#fff; color:#075d66; border-radius:7px; padding:5px 11px; font-weight:700; }
+    .branch-size.active, .branch-size:hover { background:#075d66; color:#fff; }
+    .branch-table thead th { background:#e7f5f8; color:#17486c; border:0; font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; padding:14px 18px; }
+    .branch-table tbody td { padding:15px 18px; border-color:#e2eff2; color:#164f64; }
+    .branch-table tbody tr { cursor:pointer; transition:.15s ease; }
+    .branch-table tbody tr:hover { background:#f0fbfc; transform:translateX(2px); }
+    .branch-id { display:inline-block; border-radius:999px; background:#e5f6f5; color:#08746e; padding:3px 9px; font-size:.8rem; font-weight:700; }
+    .branch-modal .modal-content { border:0; border-radius:15px; overflow:hidden; }
+    .branch-modal .modal-header { background:linear-gradient(110deg,#17486c,#008d88); color:#fff; border:0; }
+    .branch-modal .btn-close { filter:invert(1); }
+    .branch-modal .form-control { border-color:#b9dbe4; min-height:43px; }
+    @@media (max-width:576px) { .branch-page { padding:15px; } .branch-hero { padding:18px; } }
+</style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-
-    <h4 class="mb-0">
-        Branches
-    </h4>
-
-    <button type="button"
-            class="btn btn-dark btn-sm"
+<div class="branch-page">
+    <div class="branch-hero d-flex justify-content-between align-items-center gap-3">
+        <div>
+            <div class="small text-uppercase fw-bold" style="color:#9de2e7">Organization setup</div>
+            <h4>Branches</h4>
+            <p>Manage branch records and ERPNext-linked identities.</p>
+        </div>
+        <button type="button"
+            class="branch-add"
             data-bs-toggle="modal"
             data-bs-target="#newBranchModal">
+            + Add Branch
+        </button>
+    </div>
 
-        + Add Branch
-
-    </button>
-
-</div>
-
-<div class="card p-0">
-
-    <table class="table table-hover align-middle mb-0">
+    <div class="branch-card">
+        <div class="branch-toolbar">
+            <strong>Branch directory</strong>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="small text-muted">Show entries:</span>
+                <div class="btn-group" role="group" aria-label="Rows per page">
+                    <button type="button" class="branch-size active" data-page-size="20">20</button>
+                    <button type="button" class="branch-size" data-page-size="100">100</button>
+                    <button type="button" class="branch-size" data-page-size="200">200</button>
+                    <button type="button" class="branch-size" data-page-size="500">500</button>
+                    <button type="button" class="branch-size" data-page-size="2500">2500</button>
+                </div>
+                <span id="branchPageSummary" class="small text-muted"></span>
+            </div>
+        </div>
+        <table class="table branch-table align-middle mb-0">
 
         <thead>
             <tr>
@@ -230,24 +257,24 @@
             </tr>
         </thead>
 
-        <tbody>
+        <tbody id="branchListBody">
 
             @if (Model != null && Model.Any())
             {
                 foreach (var b in Model)
                 {
-                    <tr style="cursor:pointer;"
+                    <tr data-branch-id="@b.Id"
                         onclick="window.location='@Url.Action(
                                                     "BranchDetails",
                                                     "HR",
                                                     new { id = b.Id })'">
 
-                        <td>
+                        <td class="fw-semibold">
                             @b.BranchName
                         </td>
 
                         <td>
-                            <span class="text-muted">
+                            <span class="branch-id">
                                 @(string.IsNullOrWhiteSpace(b.ErpName)
                                                         ? "-"
                                                         : b.ErpName)
@@ -271,13 +298,13 @@
 
         </tbody>
 
-    </table>
-
+        </table>
+    </div>
 </div>
 
 
 <!-- CREATE BRANCH MODAL -->
-<div class="modal fade"
+<div class="modal fade branch-modal"
      id="newBranchModal"
      tabindex="-1">
 
@@ -321,8 +348,7 @@
 
                 <div class="modal-footer">
 
-                    <button type="submit"
-                            class="btn btn-dark btn-sm">
+                    <button type="submit" class="branch-save">
                         Save
                     </button>
 
@@ -335,3 +361,29 @@
     </div>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const body = document.getElementById('branchListBody');
+        const summary = document.getElementById('branchPageSummary');
+        const buttons = Array.from(document.querySelectorAll('[data-page-size]'));
+        if (!body || !buttons.length) return;
+
+        const rows = Array.from(body.querySelectorAll('tr[data-branch-id]'));
+        rows.sort((a, b) => Number(b.dataset.branchId) - Number(a.dataset.branchId))
+            .forEach(row => body.appendChild(row));
+
+        let pageSize = Number(sessionStorage.getItem('branchPageSize')) || 20;
+        function render() {
+            rows.forEach((row, index) => row.hidden = index >= pageSize);
+            buttons.forEach(button => button.classList.toggle('active', Number(button.dataset.pageSize) === pageSize));
+            if (summary) summary.textContent = `${Math.min(pageSize, rows.length)} of ${rows.length}`;
+        }
+        buttons.forEach(button => button.addEventListener('click', function () {
+            pageSize = Number(this.dataset.pageSize);
+            sessionStorage.setItem('branchPageSize', pageSize);
+            render();
+        }));
+        render();
+    });
+</script>

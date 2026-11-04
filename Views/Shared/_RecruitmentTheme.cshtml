@@ -1,0 +1,253 @@
+<style>
+    .recruitment-theme {
+        --recruitment-navy: #174863;
+        --recruitment-teal: #008d88;
+        --recruitment-teal-dark: #00736f;
+        --recruitment-line: #c6e3e2;
+        color: #123d52;
+    }
+
+    .recruitment-theme.jo-wrap,
+    .recruitment-theme.jo-form-wrap,
+    .recruitment-theme.recruitment-list,
+    .recruitment-theme.recruitment-form {
+        max-width: 1220px;
+        margin: 28px auto;
+        padding: 26px;
+        border: 1px solid var(--recruitment-line);
+        border-radius: 18px;
+        background: linear-gradient(180deg, #eefafa 0%, #ffffff 42%);
+        box-shadow: 0 16px 38px rgba(15, 74, 87, .10);
+    }
+
+    .recruitment-theme .jo-breadcrumb { color: #527489; margin-bottom: 14px; }
+    .recruitment-theme .jo-current { color: var(--recruitment-teal-dark); }
+
+    .recruitment-theme .jo-header,
+    .recruitment-theme .jo-form-header,
+    .recruitment-theme.recruitment-list > .d-flex:first-child,
+    .recruitment-theme.recruitment-form > .d-flex.justify-content-between {
+        margin-bottom: 22px !important;
+        padding: 20px 24px;
+        border-radius: 14px;
+        color: #fff;
+        background: linear-gradient(110deg, var(--recruitment-navy) 0%, #176b7b 50%, var(--recruitment-teal) 100%);
+        box-shadow: 0 12px 24px rgba(9, 78, 91, .18);
+    }
+
+    .recruitment-theme .jo-header h4,
+    .recruitment-theme .jo-form-header h4,
+    .recruitment-theme.recruitment-list > .d-flex:first-child h4,
+    .recruitment-theme.recruitment-form > .d-flex.justify-content-between h4 {
+        color: #fff !important;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .recruitment-theme .jo-header p,
+    .recruitment-theme .jo-form-header p { color: rgba(255, 255, 255, .82); }
+
+    .recruitment-theme .card,
+    .recruitment-theme .jo-section,
+    .recruitment-theme .jo-filter-card {
+        border: 1px solid var(--recruitment-line) !important;
+        border-radius: 14px !important;
+        background: rgba(255, 255, 255, .95) !important;
+        box-shadow: none !important;
+    }
+
+    .recruitment-theme .card h6,
+    .recruitment-theme .jo-section-title {
+        color: #084a61;
+        font-weight: 800;
+        border-bottom-color: #d7ebea !important;
+    }
+
+    .recruitment-theme label,
+    .recruitment-theme .form-label,
+    .recruitment-theme .jo-label { color: #155067; font-weight: 700; }
+
+    .recruitment-theme .form-control,
+    .recruitment-theme .form-select,
+    .recruitment-theme .jo-input,
+    .recruitment-theme .jo-textarea {
+        min-height: 42px;
+        border: 1px solid #b8d7dc;
+        border-radius: 9px;
+        color: #153c50;
+        background: #fcffff;
+    }
+
+    .recruitment-theme textarea.form-control,
+    .recruitment-theme .jo-textarea { min-height: 92px; }
+
+    .recruitment-theme .form-control:focus,
+    .recruitment-theme .form-select:focus,
+    .recruitment-theme .jo-input:focus,
+    .recruitment-theme .jo-textarea:focus {
+        border-color: var(--recruitment-teal);
+        box-shadow: 0 0 0 .2rem rgba(0, 141, 136, .14);
+    }
+
+    .recruitment-theme .btn-dark,
+    .recruitment-theme .jo-btn-primary,
+    .recruitment-theme .btn-primary {
+        border-color: var(--recruitment-teal);
+        background: var(--recruitment-teal);
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .recruitment-theme .btn-dark:hover,
+    .recruitment-theme .jo-btn-primary:hover,
+    .recruitment-theme .btn-primary:hover {
+        border-color: var(--recruitment-teal-dark);
+        background: var(--recruitment-teal-dark);
+        color: #fff;
+    }
+
+    .recruitment-theme .btn-outline-primary,
+    .recruitment-theme .btn-outline-secondary,
+    .recruitment-theme .jo-btn-secondary {
+        border-color: #86c6c4;
+        color: #08736f;
+        background: #f4fbfb;
+        font-weight: 700;
+    }
+
+    .recruitment-theme .btn-outline-primary:hover,
+    .recruitment-theme .btn-outline-secondary:hover,
+    .recruitment-theme .jo-btn-secondary:hover {
+        border-color: var(--recruitment-teal);
+        color: #fff;
+        background: var(--recruitment-teal);
+    }
+
+    .recruitment-theme table {
+        overflow: hidden;
+        border: 1px solid var(--recruitment-line);
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .recruitment-theme table thead th,
+    .recruitment-theme .jo-table thead th {
+        border-bottom-color: #b9dcda;
+        color: #084a61;
+        background: #daf0ef;
+        font-weight: 800;
+    }
+
+    .recruitment-theme table tbody td,
+    .recruitment-theme .jo-table tbody td {
+        border-color: #d9ebea;
+        color: #204c60;
+    }
+
+    .recruitment-theme table tbody tr:hover,
+    .recruitment-theme .jo-table tbody tr:hover { background: #effafa; }
+    .recruitment-theme a:not(.btn):not(.jo-btn) { color: #087b78; }
+    .recruitment-theme .badge { font-weight: 700; }
+
+    /* Reusable frontend-only shell for the remaining recruitment workflows. */
+    .recruitment-theme.workflow-page {
+        --workflow-navy: #123b5c;
+        --workflow-teal: #008d88;
+        max-width: 1220px;
+        margin: 28px auto;
+        padding: 26px;
+        border: 1px solid #c8e4e2;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #f2fbfb 0%, #f7fbff 100%);
+        box-shadow: 0 14px 34px rgba(15, 61, 84, .10);
+    }
+
+    .recruitment-theme.workflow-page > .d-flex.justify-content-between,
+    .recruitment-theme.workflow-page > .workflow-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px !important;
+        padding: 20px 24px;
+        border-radius: 14px;
+        color: #fff;
+        background: linear-gradient(110deg, var(--workflow-navy), #17677d 58%, var(--workflow-teal));
+        box-shadow: 0 12px 25px rgba(8, 91, 107, .20);
+    }
+
+    .recruitment-theme.workflow-page > .d-flex.justify-content-between h4,
+    .recruitment-theme.workflow-page > .workflow-title { color: #fff; font-weight: 800; }
+
+    .recruitment-theme.workflow-page .card,
+    .recruitment-theme.workflow-page .tab-content {
+        border: 1px solid #cbe4e5;
+        border-radius: 13px;
+        background: rgba(255, 255, 255, .96);
+        box-shadow: 0 7px 18px rgba(17, 81, 94, .06);
+    }
+
+    .recruitment-theme.workflow-page .nav-tabs { border-bottom-color: #b9dcda; }
+    .recruitment-theme.workflow-page .nav-tabs .nav-link { color: #155a68; font-weight: 700; }
+    .recruitment-theme.workflow-page .nav-tabs .nav-link.active {
+        color: #087b78;
+        border-color: #b9dcda #b9dcda #fff;
+        background: #fff;
+    }
+
+    /* Interview workflows: presentation only. */
+    .recruitment-theme.interview-ui .round-page-header,
+    .recruitment-theme.interview-ui .iv-hero,
+    .recruitment-theme.interview-ui .interview-list__hero {
+        margin-bottom: 22px;
+        padding: 20px 24px;
+        border: 0;
+        border-radius: 14px;
+        color: #fff;
+        background: linear-gradient(110deg, #123b5c, #17677d 58%, #008d88);
+        box-shadow: 0 12px 25px rgba(8, 91, 107, .20);
+    }
+
+    .recruitment-theme.interview-ui .round-page-header h4,
+    .recruitment-theme.interview-ui .iv-hero h3,
+    .recruitment-theme.interview-ui .interview-list__hero h3,
+    .recruitment-theme.interview-ui .interview-list__hero small { color: #fff !important; }
+
+    .recruitment-theme.interview-ui .interview-list__filters,
+    .recruitment-theme.interview-ui .iv-card,
+    .recruitment-theme.interview-ui .round-card,
+    .recruitment-theme.interview-ui .skillset-card {
+        border: 1px solid #cbe4e5;
+        border-radius: 13px;
+        background: rgba(255,255,255,.96);
+        box-shadow: 0 7px 18px rgba(17,81,94,.06);
+    }
+
+    .recruitment-theme.interview-ui .btn-dark,
+    .recruitment-theme.interview-ui .btn-filter,
+    .recruitment-theme.interview-ui .round-save-btn,
+    .recruitment-theme.interview-ui .iv-save-btn {
+        border-color: #087b78;
+        background: #087b78;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .recruitment-theme.interview-ui .btn-dark:hover,
+    .recruitment-theme.interview-ui .btn-filter:hover,
+    .recruitment-theme.interview-ui .round-save-btn:hover,
+    .recruitment-theme.interview-ui .iv-save-btn:hover { background: #075f69; color: #fff; }
+
+    @@media (max-width: 767.98px) {
+        .recruitment-theme.jo-wrap,
+        .recruitment-theme.jo-form-wrap,
+        .recruitment-theme.recruitment-list,
+        .recruitment-theme.recruitment-form,
+        .recruitment-theme.workflow-page { margin: 16px 12px; padding: 16px; }
+
+        .recruitment-theme .jo-header,
+        .recruitment-theme .jo-form-header,
+        .recruitment-theme.recruitment-list > .d-flex:first-child,
+        .recruitment-theme.recruitment-form > .d-flex.justify-content-between { padding: 16px; }
+    }
+</style>

@@ -25,17 +25,29 @@ namespace Erp_Aits.Services
                 using (var conn = new SqlConnection(_connectionString))
                 {
                     string query = @"
-                        SELECT CASE 
-                            WHEN EXISTS (
-                                SELECT 1 FROM UserPermissions up
-                                INNER JOIN Permissions p ON up.PermissionId = p.Id
-                                WHERE up.UserId = @UserId 
-                                AND p.ControllerName = @Controller
-                                AND p.ActionName = @Action
-                                AND up.CanView = 1
-                            ) THEN 1
-                            ELSE 0
-                        END AS HasAccess";
+                        SELECT CASE WHEN EXISTS (
+                            SELECT 1
+                            FROM Permissions p
+                            WHERE p.ControllerName = @Controller
+                              AND p.ActionName = @Action
+                              AND p.IsActive = 1
+                              AND (
+                                  EXISTS (
+                                      SELECT 1 FROM UserPermissions up
+                                      WHERE up.UserId = @UserId
+                                        AND up.PermissionId = p.Id
+                                        AND up.CanView = 1
+                                  )
+                                  OR EXISTS (
+                                      SELECT 1
+                                      FROM RolePermissions rp
+                                      INNER JOIN Users u ON u.[Role] = rp.RoleName
+                                      WHERE u.Id = @UserId
+                                        AND rp.PermissionId = p.Id
+                                        AND rp.CanView = 1
+                                  )
+                              )
+                        ) THEN 1 ELSE 0 END AS HasAccess";
 
                     using (var cmd = new SqlCommand(query, conn))
                     {
@@ -69,12 +81,25 @@ namespace Erp_Aits.Services
                 using (var conn = new SqlConnection(_connectionString))
                 {
                     string query = @"
-                        SELECT p.* 
+                        SELECT p.*
                         FROM Permissions p
-                        INNER JOIN UserPermissions up ON p.Id = up.PermissionId
-                        WHERE up.UserId = @UserId 
-                        AND up.CanView = 1
-                        AND p.IsActive = 1
+                        WHERE p.IsActive = 1
+                          AND (
+                              EXISTS (
+                                  SELECT 1 FROM UserPermissions up
+                                  WHERE up.UserId = @UserId
+                                    AND up.PermissionId = p.Id
+                                    AND up.CanView = 1
+                              )
+                              OR EXISTS (
+                                  SELECT 1
+                                  FROM RolePermissions rp
+                                  INNER JOIN Users u ON u.[Role] = rp.RoleName
+                                  WHERE u.Id = @UserId
+                                    AND rp.PermissionId = p.Id
+                                    AND rp.CanView = 1
+                              )
+                          )
                         ORDER BY p.MenuOrder";
 
                     using (var cmd = new SqlCommand(query, conn))
@@ -260,7 +285,28 @@ namespace Erp_Aits.Services
         {
             using (var conn = new SqlConnection(_connectionString))
             {
-                string query = "SELECT COUNT(*) FROM UserPermissions WHERE UserId = @UserId AND PermissionId = @PermissionId AND CanView = 1";
+                string query = @"
+                    SELECT CASE WHEN EXISTS (
+                        SELECT 1
+                        FROM Permissions p
+                        WHERE p.Id = @PermissionId
+                          AND (
+                              EXISTS (
+                                  SELECT 1 FROM UserPermissions up
+                                  WHERE up.UserId = @UserId
+                                    AND up.PermissionId = p.Id
+                                    AND up.CanView = 1
+                              )
+                              OR EXISTS (
+                                  SELECT 1
+                                  FROM RolePermissions rp
+                                  INNER JOIN Users u ON u.[Role] = rp.RoleName
+                                  WHERE u.Id = @UserId
+                                    AND rp.PermissionId = p.Id
+                                    AND rp.CanView = 1
+                              )
+                          )
+                    ) THEN 1 ELSE 0 END";
                 using (var cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@UserId", userId);
@@ -414,7 +460,7 @@ namespace Erp_Aits.Services
                     using (var conn = new SqlConnection(_connectionString))
                     {
                         string query = @"
-                            SELECT 
+                            SELECT
                                 p.Id,
                                 p.ControllerName,
                                 p.ActionName,
@@ -423,16 +469,37 @@ namespace Erp_Aits.Services
                                 p.MenuOrder,
                                 p.ParentMenu
                             FROM Permissions p
-                            INNER JOIN UserPermissions up ON p.Id = up.PermissionId
-                            WHERE up.UserId = @UserId 
-                            AND up.CanView = 1
-                            AND p.IsActive = 1
-                            AND p.MenuOrder IS NOT NULL
+                            WHERE p.IsActive = 1
+                              AND p.MenuOrder IS NOT NULL
+                              AND (
+                (@HasHrmsAccess = 1 AND p.ControllerName = 'HR')
+                OR (
+                    p.ControllerName <> 'HR'
+                    AND (
+                        EXISTS (
+                            SELECT 1 FROM UserPermissions up
+                            WHERE up.UserId = @UserId
+                              AND up.PermissionId = p.Id
+                              AND up.CanView = 1
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM RolePermissions rp
+                            INNER JOIN Users u ON u.[Role] = rp.RoleName
+                            WHERE u.Id = @UserId
+                              AND rp.PermissionId = p.Id
+                              AND rp.CanView = 1
+                        )
+                    )
+                )
+                              )
                             ORDER BY p.MenuOrder";
 
                         using (var cmd = new SqlCommand(query, conn))
                         {
-                            cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@HasHrmsAccess",
+                        loginType == "Company" || userRole == "Employee" || userRole == "Admin" || userRole == "Company Admin" ? 1 : 0);
                             await conn.OpenAsync();
 
                             using (var reader = await cmd.ExecuteReaderAsync())
@@ -522,7 +589,7 @@ namespace Erp_Aits.Services
                     using (var conn = new SqlConnection(_connectionString))
                     {
                         string query = @"
-                            SELECT 
+                            SELECT
                                 p.Id,
                                 p.ControllerName,
                                 p.ActionName,
@@ -531,15 +598,36 @@ namespace Erp_Aits.Services
                                 p.MenuOrder,
                                 p.ParentMenu
                             FROM Permissions p
-                            INNER JOIN UserPermissions up ON p.Id = up.PermissionId
-                            WHERE up.UserId = @UserId 
-                            AND up.CanView = 1
-                            AND p.IsActive = 1
+                            WHERE p.IsActive = 1
+                              AND (
+                (@HasHrmsAccess = 1 AND p.ControllerName = 'HR')
+                OR (
+                    p.ControllerName <> 'HR'
+                    AND (
+                        EXISTS (
+                            SELECT 1 FROM UserPermissions up
+                            WHERE up.UserId = @UserId
+                              AND up.PermissionId = p.Id
+                              AND up.CanView = 1
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM RolePermissions rp
+                            INNER JOIN Users u ON u.[Role] = rp.RoleName
+                            WHERE u.Id = @UserId
+                              AND rp.PermissionId = p.Id
+                              AND rp.CanView = 1
+                        )
+                    )
+                )
+                              )
                             ORDER BY p.MenuOrder";
 
                         using (var cmd = new SqlCommand(query, conn))
                         {
-                            cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@HasHrmsAccess",
+                        loginType == "Company" || userRole == "Employee" || userRole == "Admin" || userRole == "Company Admin" ? 1 : 0);
                             await conn.OpenAsync();
 
                             using (var reader = await cmd.ExecuteReaderAsync())

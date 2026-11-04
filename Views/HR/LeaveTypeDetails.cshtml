@@ -4,6 +4,8 @@
     var earningComponents = ViewBag.EarningComponents as List<string> ?? new List<string>();
 }
 
+<link rel="stylesheet" href="~/css/leave-workspace.css" asp-append-version="true" />
+<span class="leave-ui" aria-hidden="true"></span>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Leave Type - @Model.LeaveTypeName</h4>
     <div class="d-flex gap-2">

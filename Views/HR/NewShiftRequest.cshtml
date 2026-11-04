@@ -414,6 +414,11 @@
                         );
                     }
 
+                    // Prefer the employee's configured approver whenever ERPNext provides one.
+                    if (data.shiftRequestApprover) {
+                        approver.value = data.shiftRequestApprover;
+                    }
+
 
                     approver.disabled =
                         false;

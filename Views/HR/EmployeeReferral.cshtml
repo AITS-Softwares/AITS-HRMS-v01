@@ -3,6 +3,7 @@
     ViewBag.Title = "Employee Referral";
 }
 
+<div class="recruitment-theme workflow-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Employee Referral</h4>
     <a href="@Url.Action("CreateEmployeeReferral", "HR")" class="btn btn-dark btn-sm">+ Add Employee Referral</a>
@@ -70,3 +71,5 @@
 {
     <p class="text-muted text-center py-5">No employee referrals found.</p>
 }
+</div>
+@await Html.PartialAsync("_RecruitmentTheme")

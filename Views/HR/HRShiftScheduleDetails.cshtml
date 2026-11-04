@@ -9,22 +9,35 @@
     var rows = Model.Days.Any() ? Model.Days : new List<Erp_Aits.Models.HRShiftScheduleDay> { new Erp_Aits.Models.HRShiftScheduleDay() };
 }
 <partial name="_ShiftModuleUi" />
+<style>
+    .schedule-back-button{background:#eef7ff;border-color:#a9cde9;color:#164b75}.schedule-back-button:hover{background:#d7edff;color:#103a5c}
+    .schedule-submit-button{background:#167a63;border-color:#167a63;color:#fff}.schedule-submit-button:hover{background:#0f624f;border-color:#0f624f;color:#fff}
+    .schedule-delete-button{background:#fff0f1;border-color:#f0a9b0;color:#ae2635}.schedule-delete-button:hover{background:#dc3545;border-color:#dc3545;color:#fff}
+    .schedule-tool-button{background:#e8f2ff;border-color:#a5c8eb;color:#174b75}.schedule-tool-button:hover{background:#d5e9ff;color:#103b60}
+</style>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">@Model.Name</h4>
     <div class="d-flex gap-2">
-        <a href="@Url.Action("HRShiftScheduleList", "HR")" class="btn btn-outline-secondary btn-sm">Back</a>
+        <a href="@Url.Action("HRShiftScheduleList", "HR")" class="btn schedule-back-button btn-sm">Back</a>
+        <div class="dropdown">
+            <button class="btn schedule-tool-button btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">Shift Tool</button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="@Url.Action("ShiftAssignmentTool", "HR")">Shift Assignment Tool</a></li>
+                <li><a class="dropdown-item" href="@Url.Action("Roster", "HR")">Roster</a></li>
+            </ul>
+        </div>
         @if (canEdit)
         {
-            <button type="submit" form="shiftScheduleForm" name="actionCommand" value="Submit" class="btn btn-success btn-sm">Submit</button>
+            <button type="submit" form="shiftScheduleForm" name="actionCommand" value="Submit" class="btn schedule-submit-button btn-sm">Submit</button>
             <form method="post" action="@Url.Action("DeleteShiftSchedule", "HR", new { id = Model.Id })" onsubmit="return confirm('Delete this Shift Schedule from ERPNext and HRMS?');">
-                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                <button type="submit" class="btn schedule-delete-button btn-sm">Delete</button>
             </form>
         }
         @if (isSubmitted)
         {
             <form method="post" action="@Url.Action("UpdateShiftSchedule", "HR", new { id = Model.Id })" onsubmit="return confirm('Cancel this submitted Shift Schedule in ERPNext and HRMS?');">
-                <button type="submit" name="actionCommand" value="Cancel" class="btn btn-outline-danger btn-sm">Cancel</button>
+                <button type="submit" name="actionCommand" value="Cancel" class="btn schedule-back-button btn-sm">Cancel</button>
             </form>
         }
     </div>
